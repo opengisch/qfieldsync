@@ -27,8 +27,17 @@ import os
 from PyQt4 import QtGui, uic
 from qgis.core import QgsMapLayerRegistry, QgsProject
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
-from .utils.usb import detect_devices, connect_device, push_file, \
-    disconnect_device
+try:
+    from .utils.usb import detect_devices, connect_device, push_file, \
+        disconnect_device
+except:
+    from mock import MagicMock
+    push_file = MagicMock()
+    connect_device = MagicMock()
+    disconnect_device = MagicMock()
+    push_file = MagicMock()
+    detect_devices = MagicMock(return_value=iter([]))
+
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'push_dialog_base.ui'))

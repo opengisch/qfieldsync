@@ -30,8 +30,10 @@ from PyQt4.QtGui import QAction, QIcon
 from . import resources_rc
 # Import the code for the dialog
 from .push_dialog import PushDialog
-from .utils.utils import warn_project_is_dirty
-
+try:
+    from .utils.utils import warn_project_is_dirty
+except:
+    warn_project_is_dirty = lambda: True
 
 class QFieldSync(object):
     """QGIS Plugin Implementation."""
