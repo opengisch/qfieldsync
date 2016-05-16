@@ -7,7 +7,6 @@
 from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
-from builtins import input
 
 import sys
 import getpass
@@ -100,6 +99,9 @@ if __name__ == "__main__":
         # interactive mode
         username = getpass.getuser()
         print("Please enter user name [%s] :" % username, end=' ')
+        # this may not be present in the QGIS python, so since this module is not used for the plugin
+        # import dynamically so as to not break the plugin in QGIS
+        from builtins import input
         res = input()
         if res != "":
             options.username = res

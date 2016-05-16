@@ -21,7 +21,10 @@
  ***************************************************************************/
 """
 from __future__ import absolute_import
-from builtins import object
+try:
+    from builtins import object
+except:
+    pass
 
 import os.path
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
