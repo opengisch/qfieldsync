@@ -38,6 +38,8 @@ except:
     push_file = MagicMock()
     detect_devices = MagicMock(return_value=[("Fake Device", MagicMock())])
 
+from .remote_options import RemoteOptionsDialog
+
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'push_dialog_base.ui'))
@@ -51,12 +53,19 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.project = QgsProject.instance()
         self.project_lbl.setText(self.project.title())
         self.push_btn = QPushButton('Push')
-        self.push_btn.clicked.connect(self.push_project)
+        if self.project_has_remote_layers():
+            self.push_btn.clicked.connect(self.show_remote_options)
+        else:
+            self.push_btn.clicked.connect(self.push_project)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
 
         self.devices = None
         self.refresh_devices()
-        self.suggest_offline_wdg.setEnabled(self.detect_online_layers())
+        self.suggest_offline_wdg.setEnabled(self.project_has_online_layers())
+
+    def show_remote_options(self):
+        dlg = RemoteOptionsDialog(self)
+        dlg.exec_()
 
     def refresh_devices(self):
         self.devices = detect_devices()
@@ -90,14 +99,23 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.refresh_devices()
 
     @staticmethod
-    def detect_online_layers():
-        """ Online layers are layers of W*S types """
+    def project_has_layers_of_given_types(types):
         # can see all types via
         # QgsProviderRegistry.instance().providerList()
-        online_types = ["WFS", "wcs", "wms"]
         map_layers = QgsMapLayerRegistry.instance().mapLayers(
         )
         for name, layer in map_layers.items():
-            if layer.providerType() in online_types:
+            if layer.providerType() in types:
                 return True
         return False
+
+    @staticmethod
+    def project_has_online_layers():
+        """ Online layers are layers of W*S types """
+        online_types = ["WFS", "wcs", "wms"]
+        return PushDialog.project_has_layers_of_given_types(online_types)
+
+    @staticmethod
+    def project_has_remote_layers():
+        """ Remote layers are PG types """
+        return PushDialog.project_has_layers_of_given_types(types=["postgres"])
