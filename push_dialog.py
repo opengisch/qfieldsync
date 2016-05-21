@@ -36,7 +36,7 @@ except:
     connect_device = MagicMock()
     disconnect_device = MagicMock()
     push_file = MagicMock()
-    detect_devices = MagicMock(return_value=iter([]))
+    detect_devices = MagicMock(return_value=[("Fake Device", MagicMock())])
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
