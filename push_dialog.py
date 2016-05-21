@@ -56,7 +56,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         self.devices = None
         self.refresh_devices()
-        # self.suggest_offline_wdg.setEnabled(self.detect_online_layers())
+        self.suggest_offline_wdg.setEnabled(self.detect_online_layers())
 
     def refresh_devices(self):
         self.devices = detect_devices()
@@ -91,10 +91,13 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
     @staticmethod
     def detect_online_layers():
-        # unused nd not implemented
+        """ Online layers are layers of W*S types """
+        # can see all types via
+        # QgsProviderRegistry.instance().providerList()
+        online_types = ["WFS", "wcs", "wms"]
         map_layers = QgsMapLayerRegistry.instance().mapLayers(
         )
         for name, layer in map_layers.items():
-            print(layer.providerType())
-            print(layer.publicSource())
-        return True
+            if layer.providerType() in online_types:
+                return True
+        return False
