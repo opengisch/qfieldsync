@@ -139,8 +139,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning','Layers {} require a real time connection'.format(layers_list))
 
     def set_hybrid_flag(self):
-        #TODO
-        pass
+        QgsProject.instance().writeEntry(QgsOfflineEditing.PROJECT_ENTRY_SCOPE_OFFLINE,"REMOTE_LAYER_MODE",RemoteOptions.HYBRID)
 
     def on_reload_devices_btn_clicked(self):
         self.refresh_devices()
