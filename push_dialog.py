@@ -25,7 +25,7 @@ from __future__ import absolute_import
 
 import os
 from PyQt4 import QtGui, QtCore, uic
-from qgis.core import QgsMapLayerRegistry, QgsProject
+from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 try:
     from .utils.usb import detect_devices, connect_device, push_file, \
@@ -100,6 +100,17 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
             layer_ids.append(layer.id())
         return layer_ids
 
+    def offline_convert(self, vector_layer_ids):
+        dataPath = os.path.join(BASE_SAVE_LOCATION, self.project.title())
+        if not os.path.exists(dataPath):
+            os.mkdir(dataPath)
+        dbPath = os.path.join(dataPath, "data.sqlite")
+        QgsOfflineEditing().convertToOfflineProject(dataPath, dbPath, vector_layer_ids)
+        # TODO Need to investigate some details about how the plugin works ie,
+        # - what happens here when those already exist with the offline plugin?
+        # - what about rasters w/ relative paths
+        # - shouldn't the qgs file be saved in the dataPath directory with all relative paths?
+
 
     def push_project(self, remote_layers=None, remote_save_mode=None):
 
@@ -107,9 +118,8 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         if can_only_be_online_layers:
             self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
 
-        layer_ids = self.get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
-        # TODO: offline convert
-        # with rasters too?
+        vector_layer_ids = self.get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
+        self.offline_convert(vector_layer_ids)
 
         if remote_save_mode == RemoteOptionsDialog.HYBRID:
             self.set_hybrid_flag()
