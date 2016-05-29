@@ -24,7 +24,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-from PyQt4 import QtGui, uic
+from PyQt4 import QtGui, QtCore, uic
 from qgis.core import QgsMapLayerRegistry, QgsProject
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 try:
@@ -45,15 +45,18 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'push_dialog_base.ui'))
 
 
+BASE_SAVE_LOCATION="/tmp/" #FIXME subject to change
+
 class PushDialog(QtGui.QDialog, FORM_CLASS):
-    def __init__(self, parent=None):
+    def __init__(self, iface, parent=None):
         """Constructor."""
         super(PushDialog, self).__init__(parent)
         self.setupUi(self)
+        self.iface = iface
         self.project = QgsProject.instance()
         self.project_lbl.setText(self.project.title())
         self.push_btn = QPushButton('Push')
-        if self.project_has_remote_layers():
+        if self.project_get_remote_layers():
             self.push_btn.clicked.connect(self.show_remote_options)
         else:
             self.push_btn.clicked.connect(self.push_project)
@@ -61,10 +64,10 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         self.devices = None
         self.refresh_devices()
-        self.suggest_offline_wdg.setEnabled(self.project_has_online_layers())
+        self.suggest_offline_wdg.setEnabled(len(self.project_get_always_online_layers())>0)
 
     def show_remote_options(self):
-        dlg = RemoteOptionsDialog(self)
+        dlg = RemoteOptionsDialog(self, remote_layers=self.project_get_remote_layers())
         dlg.exec_()
 
     def refresh_devices(self):
@@ -87,7 +90,33 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         progress = float(sent) / total * 100
         self.progress_bar.setValue(progress)
 
-    def push_project(self):
+    def get_layer_ids_to_offline_convert(self, remote_layers, remote_save_mode):
+        layer_ids = []
+        if remote_save_mode == RemoteOptionsDialog.OFFLINE: 
+            for layer in remote_layers:
+                layer_ids.append(layer.id())
+
+        for layer in self.project_get_always_offline_layers():
+            layer_ids.append(layer.id())
+        return layer_ids
+
+
+    def push_project(self, remote_layers=None, remote_save_mode=None):
+
+        can_only_be_online_layers = self.project_get_always_online_layers()
+        if can_only_be_online_layers:
+            self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
+
+        layer_ids = self.get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
+        # TODO: offline convert
+        # with rasters too?
+
+        if remote_save_mode == RemoteOptionsDialog.HYBRID:
+            self.set_hybrid_flag()
+        # TODO: show actual, more informative dialog with button
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(BASE_SAVE_LOCATION))
+
+        # this here doesn't do anything for now
         device_index = self.devices_cbx.currentIndex()
         device = self.devices[device_index][1]
         mtp = connect_device(device)
@@ -95,27 +124,42 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         push_file(mtp, self.project.fileName(), dest, self.update_progress)
         disconnect_device(mtp)
 
+    def show_warning_about_layers_that_cant_work_offline(self, layers):
+        layers_list = ','.join([ layer.name() for layer in layers])
+        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning','Layers {} require a real time connection'.format(layers_list))
+
+    def set_hybrid_flag(self):
+        #TODO
+        pass
+
     def on_reload_devices_btn_clicked(self):
         self.refresh_devices()
 
     @staticmethod
-    def project_has_layers_of_given_types(types):
+    def project_get_layers_of_given_types(types):
         # can see all types via
         # QgsProviderRegistry.instance().providerList()
         map_layers = QgsMapLayerRegistry.instance().mapLayers(
         )
+        result = []
         for name, layer in map_layers.items():
             if layer.providerType() in types:
-                return True
-        return False
+                result.append(layer)
+        return result
 
     @staticmethod
-    def project_has_online_layers():
-        """ Online layers are layers of W*S types """
-        online_types = ["WFS", "wcs", "wms"]
-        return PushDialog.project_has_layers_of_given_types(online_types)
+    def project_get_always_online_layers():
+        """ Layers that can't be made offline by the offline plugin """
+        online_types = ["WFS", "wcs", "wms", "mssql", "ows"]
+        return PushDialog.project_get_layers_of_given_types(online_types)
 
     @staticmethod
-    def project_has_remote_layers():
-        """ Remote layers are PG types """
-        return PushDialog.project_has_layers_of_given_types(types=["postgres"])
+    def project_get_remote_layers():
+        """ Remote layers are layers that can either be converted to offline or kept in a realtime or hybrid mode"""
+        return PushDialog.project_get_layers_of_given_types(types=["postgres"])
+
+    @staticmethod
+    def project_get_always_offline_layers():
+        """ Layers that are file based and hence can always be handled by the offline plugin"""
+        types = ['delimitedtext', u'gdal', u'gpx', u'memory', u'ogr', u'spatialite']
+        return PushDialog.project_get_layers_of_given_types(types=types)

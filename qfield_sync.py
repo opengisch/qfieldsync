@@ -186,6 +186,6 @@ class QFieldSync(object):
         """Run method that performs all the real work"""
         if warn_project_is_dirty():
             # show the dialog
-            dlg = PushDialog()
+            dlg = PushDialog(self.iface)
             # Run the dialog event loop
             dlg.exec_()

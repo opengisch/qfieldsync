@@ -33,26 +33,29 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
-    def __init__(self, parent):
+    OFFLINE="offline"
+    HYBRID="hybrid"
+    ONLINE="online"
+    def __init__(self, parent, remote_layers):
         """Constructor."""
         super(RemoteOptionsDialog, self).__init__(parent)
         self.setupUi(self)
         self.push_btn = QPushButton('Push')
         self.parent = parent
+        self.remote_layers = remote_layers
         self.push_btn.clicked.connect(self.save_options)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
 
     def get_selected_mode(self):
         if self.radioButton_offline.isChecked():
-            return "offline"
+            return self.OFFLINE
         if self.radioButton_online.isChecked():
-            return "online"
+            return self.ONLINE
         if self.radioButton_hybrid.isChecked():
-            return "hybrid"
+            return self.HYBRID
 
     def save_options(self):
         mode = self.get_selected_mode()
-        # TODO: actually push those options
-        self.parent.push_project()
+        self.parent.push_project(remote_layers = self.remote_layers, remote_save_mode = mode)
         self.close()
 
