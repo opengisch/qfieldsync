@@ -168,7 +168,7 @@ class QFieldSync(object):
         icon_path = ':/plugins/QFieldSync/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'QField Sync'),
+            text=self.tr(u'Qgis to QField Sync'),
             callback=self.push_project,
             parent=self.iface.mainWindow())
 
