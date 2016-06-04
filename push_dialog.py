@@ -25,10 +25,14 @@ from __future__ import absolute_import
 
 from datetime import datetime
 import os
+import shutil
 
 from PyQt4 import QtGui, QtCore, uic
-from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing
+from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing, QgsRasterLayer
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
+
+from . import data_source_utils as ds
+
 try:
     from .utils.usb import detect_devices, connect_device, push_file, \
         disconnect_device
@@ -102,7 +106,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
             layer_ids.append(layer.id())
         return layer_ids
 
-    def offline_convert(self, vector_layer_ids):
+    def offline_convert(self, vector_layer_ids, raster_layers):
         dt_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
         existing_filepath = QgsProject.instance().fileName()
         existing_fn, ext = os.path.splitext(os.path.basename(existing_filepath)) 
@@ -114,8 +118,16 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         if not success:
             raise Exception("Converting to offline project did not succeed")
         # Now we have a project state which can be saved as offline project
+        # TODO file-based vectors, shp?
+
+        for raster_layer in raster_layers:
+            file_path = raster_layer.source()
+            new_file_path = os.path.join(dataPath, os.path.basename(file_path))
+            shutil.copy(file_path, new_file_path)
+            ds.change_layer_data_source(raster_layer, new_file_path) 
+
+        # Now we have a project state which can be saved as offline project
         QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn+"_offline"+ext)))
-        # TODO rasters also
 
 
     def push_project(self, remote_layers=None, remote_save_mode=None):
@@ -125,7 +137,8 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
             self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
 
         vector_layer_ids = self.get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
-        self.offline_convert(vector_layer_ids)
+        raster_layers = self.project_get_raster_layers()
+        self.offline_convert(vector_layer_ids, raster_layers)
 
         if remote_save_mode == RemoteOptionsDialog.HYBRID:
             self.set_hybrid_flag()
@@ -151,6 +164,16 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.refresh_devices()
 
     @staticmethod
+    def project_get_raster_layers():
+        map_layers = QgsMapLayerRegistry.instance().mapLayers(
+        )
+        result = []
+        for name, layer in map_layers.items():
+            if isinstance(layer, QgsRasterLayer):
+                result.append(layer)
+        return result
+
+    @staticmethod
     def project_get_layers_of_given_types(types):
         # can see all types via
         # QgsProviderRegistry.instance().providerList()
@@ -158,7 +181,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         )
         result = []
         for name, layer in map_layers.items():
-            if layer.providerType() in types:
+            if layer.providerType() in types and not isinstance(layer, QgsRasterLayer):
                 result.append(layer)
         return result
 
