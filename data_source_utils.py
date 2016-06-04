@@ -1,6 +1,16 @@
 from PyQt4.QtXml import *
 
 
+SHP_EXTENSIONS = ['.shp','.shx','.dbf','.sbx','.sbn', '.shp.xml']
+
+def is_shapefile_layer(layer):
+    source = layer.source()
+    for ext in SHP_EXTENSIONS:
+        if source.endswith(ext): #.shp.xml is not handled correctly as an extension by
+        # os.path.splitext
+            return True
+    return False
+
 def change_layer_data_source(layer, new_data_source):
 
     # read layer DOM definition

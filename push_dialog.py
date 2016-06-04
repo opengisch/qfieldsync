@@ -32,6 +32,7 @@ from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing, QgsRas
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
 from . import data_source_utils as ds
+from .file_utils import fileparts
 
 try:
     from .utils.usb import detect_devices, connect_device, push_file, \
@@ -106,7 +107,27 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
             layer_ids.append(layer.id())
         return layer_ids
 
-    def offline_convert(self, vector_layer_ids, raster_layers):
+    def handle_shpfiles(self, dataPath, shpfile_layers):
+        for shpfile_layer in shpfile_layers:
+            shpfile = shpfile_layer.source()
+            parent, fn, ext = fileparts(shpfile)
+            new_file_path = os.path.join(dataPath, fn + ext)
+            # copy surrounding files as well
+            for ext in ds.SHP_EXTENSIONS:
+                file_path = os.path.join(parent, fn + ext)
+                if os.path.exists(file_path):
+                    shutil.copy(file_path, dataPath)
+            ds.change_layer_data_source(shpfile_layer, new_file_path)
+
+
+    def handle_rasters(self, dataPath, raster_layers):
+        for raster_layer in raster_layers:
+            file_path = raster_layer.source()
+            new_file_path = os.path.join(dataPath, os.path.basename(file_path))
+            shutil.copy(file_path, new_file_path)
+            ds.change_layer_data_source(raster_layer, new_file_path)
+
+    def offline_convert(self, vector_layer_ids, raster_layers, shpfile_layers):
         dt_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
         existing_filepath = QgsProject.instance().fileName()
         existing_fn, ext = os.path.splitext(os.path.basename(existing_filepath)) 
@@ -118,13 +139,9 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         if not success:
             raise Exception("Converting to offline project did not succeed")
         # Now we have a project state which can be saved as offline project
-        # TODO file-based vectors, shp?
-        for raster_layer in raster_layers:
-            file_path = raster_layer.source()
-            new_file_path = os.path.join(dataPath, os.path.basename(file_path))
-            shutil.copy(file_path, new_file_path)
-            ds.change_layer_data_source(raster_layer, new_file_path) 
-
+        # TODO more file-based vectors ??
+        self.handle_rasters(dataPath, raster_layers)
+        self.handle_shpfiles(dataPath, shpfile_layers)
         # Now we have a project state which can be saved as offline project
         QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn+"_offline"+ext)))
         return dataPath
@@ -137,8 +154,9 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
             self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
 
         vector_layer_ids = self.get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
+        shpfile_layers = self.project_get_shp_layers()
         raster_layers = self.project_get_raster_layers()
-        project_directory = self.offline_convert(vector_layer_ids, raster_layers)
+        project_directory = self.offline_convert(vector_layer_ids, raster_layers, shpfile_layers)
 
         if remote_save_mode == RemoteOptionsDialog.HYBRID:
             self.set_hybrid_flag()
@@ -164,26 +182,27 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.refresh_devices()
 
     @staticmethod
+    def project_filter_layers(filter_func):
+        map_layers = QgsMapLayerRegistry.instance().mapLayers()
+        return [layer for name, layer in map_layers.items() if filter_func(layer)]
+
+
+    @staticmethod
     def project_get_raster_layers():
-        map_layers = QgsMapLayerRegistry.instance().mapLayers(
-        )
-        result = []
-        for name, layer in map_layers.items():
-            if isinstance(layer, QgsRasterLayer):
-                result.append(layer)
-        return result
+        return PushDialog.project_filter_layers(lambda layer: isinstance(layer, QgsRasterLayer))
+
+    @staticmethod
+    def project_get_shp_layers():
+        return PushDialog.project_filter_layers(ds.is_shapefile_layer)
 
     @staticmethod
     def project_get_layers_of_given_types(types):
         # can see all types via
         # QgsProviderRegistry.instance().providerList()
-        map_layers = QgsMapLayerRegistry.instance().mapLayers(
-        )
-        result = []
-        for name, layer in map_layers.items():
-            if layer.providerType() in types and not isinstance(layer, QgsRasterLayer):
-                result.append(layer)
-        return result
+        map_layers = QgsMapLayerRegistry.instance().mapLayers()
+        return [layer for name, layer in map_layers.items() if layer.providerType() in\
+                types and not isinstance(layer, QgsRasterLayer)]
+
 
     @staticmethod
     def project_get_always_online_layers():
