@@ -51,7 +51,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'push_dialog_base.ui'))
 
 
-BASE_SAVE_LOCATION="/tmp/" #FIXME subject to change
+BASE_SAVE_LOCATION= os.path.expanduser("~")
 
 class PushDialog(QtGui.QDialog, FORM_CLASS):
     def __init__(self, iface, parent=None):
@@ -119,7 +119,6 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
             raise Exception("Converting to offline project did not succeed")
         # Now we have a project state which can be saved as offline project
         # TODO file-based vectors, shp?
-
         for raster_layer in raster_layers:
             file_path = raster_layer.source()
             new_file_path = os.path.join(dataPath, os.path.basename(file_path))
@@ -128,6 +127,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         # Now we have a project state which can be saved as offline project
         QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn+"_offline"+ext)))
+        return dataPath
 
 
     def push_project(self, remote_layers=None, remote_save_mode=None):
@@ -138,11 +138,11 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         vector_layer_ids = self.get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
         raster_layers = self.project_get_raster_layers()
-        self.offline_convert(vector_layer_ids, raster_layers)
+        project_directory = self.offline_convert(vector_layer_ids, raster_layers)
 
         if remote_save_mode == RemoteOptionsDialog.HYBRID:
             self.set_hybrid_flag()
-        # TODO: show actual, more informative dialog with button and warning not to keep working on this file
+        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Info','Please copy {} to your device'.format(project_directory))
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(BASE_SAVE_LOCATION))
 
         # this here doesn't do anything for now
