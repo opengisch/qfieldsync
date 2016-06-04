@@ -23,7 +23,9 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
+from datetime import datetime
 import os
+
 from PyQt4 import QtGui, QtCore, uic
 from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
@@ -101,15 +103,19 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         return layer_ids
 
     def offline_convert(self, vector_layer_ids):
-        dataPath = os.path.join(BASE_SAVE_LOCATION, self.project.title())
+        dt_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
+        existing_filepath = QgsProject.instance().fileName()
+        existing_fn, ext = os.path.splitext(os.path.basename(existing_filepath)) 
+        dataPath = os.path.join(BASE_SAVE_LOCATION, existing_fn+"_"+dt_tag)
         if not os.path.exists(dataPath):
             os.mkdir(dataPath)
-        dbPath = os.path.join(dataPath, "data.sqlite")
-        QgsOfflineEditing().convertToOfflineProject(dataPath, dbPath, vector_layer_ids)
-        # TODO Need to investigate some details about how the plugin works ie,
-        # - what happens here when those already exist with the offline plugin?
-        # - what about rasters w/ relative paths
-        # - shouldn't the qgs file be saved in the dataPath directory with all relative paths?
+        dbPath = "data.sqlite"
+        success = QgsOfflineEditing().convertToOfflineProject(dataPath, dbPath, vector_layer_ids)
+        if not success:
+            raise Exception("Converting to offline project did not succeed")
+        # Now we have a project state which can be saved as offline project
+        QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn+"_offline"+ext)))
+        # TODO rasters also
 
 
     def push_project(self, remote_layers=None, remote_save_mode=None):
@@ -123,7 +129,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         if remote_save_mode == RemoteOptionsDialog.HYBRID:
             self.set_hybrid_flag()
-        # TODO: show actual, more informative dialog with button
+        # TODO: show actual, more informative dialog with button and warning not to keep working on this file
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(BASE_SAVE_LOCATION))
 
         # this here doesn't do anything for now
