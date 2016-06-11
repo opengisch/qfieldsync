@@ -25,17 +25,15 @@ from __future__ import absolute_import
 
 import os
 from PyQt4 import QtGui, uic
-from qgis.core import QgsMapLayerRegistry, QgsProject
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
+from .config import ONLINE, OFFLINE, HYBRID
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'remote_options_base.ui'))
 
 
 class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
-    OFFLINE="offline"
-    HYBRID="hybrid"
-    ONLINE="online"
+
     def __init__(self, parent, remote_layers):
         """Constructor."""
         super(RemoteOptionsDialog, self).__init__(parent)
@@ -48,11 +46,11 @@ class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
 
     def get_selected_mode(self):
         if self.radioButton_offline.isChecked():
-            return self.OFFLINE
+            return OFFLINE
         if self.radioButton_online.isChecked():
-            return self.ONLINE
+            return ONLINE
         if self.radioButton_hybrid.isChecked():
-            return self.HYBRID
+            return HYBRID
 
     def save_options(self):
         mode = self.get_selected_mode()
