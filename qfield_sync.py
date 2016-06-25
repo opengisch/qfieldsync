@@ -33,6 +33,8 @@ from PyQt4.QtGui import QAction, QIcon
 from . import resources_rc
 # Import the code for the dialog
 from .push_dialog import PushDialog
+from .settings_dialog import SettingsDialog
+from .config import MANUAL
 try:
     from .utils.utils import warn_project_is_dirty
 except:
@@ -40,6 +42,7 @@ except:
 
 class QFieldSync(object):
     """QGIS Plugin Implementation."""
+    QFIELD_SCOPE = "QFieldSync"
 
     def __init__(self, iface):
         """Constructor.
@@ -73,6 +76,11 @@ class QFieldSync(object):
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'QFieldSync')
         self.toolbar.setObjectName(u'QFieldSync')
+
+        # initialize settings
+        self.export_folder = os.path.expanduser("~")
+        self.import_folder = os.path.expanduser("~") #FIXME should be something to do with filesystem
+        self.copy_mode = MANUAL
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -168,7 +176,12 @@ class QFieldSync(object):
         icon_path = ':/plugins/QFieldSync/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Qgis to QField Sync'),
+            text=self.tr(u'Settings'),
+            callback=self.show_settings,
+            parent=self.iface.mainWindow())
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Sync to QField'),
             callback=self.push_project,
             parent=self.iface.mainWindow())
 
@@ -182,10 +195,26 @@ class QFieldSync(object):
         # remove the toolbar
         del self.toolbar
 
+    def show_settings(self):
+        dlg = SettingsDialog(self)
+        dlg.exec_()
+
+    def get_settings(self):
+        return self.import_folder, self.export_folder, self.copy_mode
+
+    def get_export_folder(self):
+        return self.get_settings()[1]
+
+    def update_settings(self, import_folder, export_folder, copy_mode):
+        self.import_folder = import_folder
+        self.export_folder = export_folder
+        self.copy_mode = copy_mode
+
+
     def push_project(self):
         """Run method that performs all the real work"""
         if warn_project_is_dirty():
             # show the dialog
-            dlg = PushDialog(self.iface)
+            dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
             dlg.exec_()

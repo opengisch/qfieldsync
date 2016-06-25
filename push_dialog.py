@@ -26,10 +26,9 @@ from __future__ import absolute_import
 import os
 
 from PyQt4 import QtGui, QtCore, uic
-from qgis.core import  QgsProject, QgsOfflineEditing
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
-from .export_offline import BASE_SAVE_LOCATION, offline_convert, get_layer_ids_to_offline_convert
+from .export_offline import offline_convert, get_layer_ids_to_offline_convert
 from .data_source_utils import *
 from .config import HYBRID
 
@@ -53,14 +52,15 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class PushDialog(QtGui.QDialog, FORM_CLASS):
-    def __init__(self, iface, parent=None):
+    def __init__(self, iface, plugin_instance):
         """Constructor."""
-        super(PushDialog, self).__init__(parent)
+        super(PushDialog, self).__init__(parent=None)
         self.setupUi(self)
         self.iface = iface
+        self.plugin_instance = plugin_instance
         self.project = QgsProject.instance()
         self.project_lbl.setText(self.project.title())
-        self.push_btn = QPushButton('Push')
+        self.push_btn = QPushButton(plugin_instance.tr('Push'))
         if project_get_remote_layers():
             self.push_btn.clicked.connect(self.show_remote_options)
         else:
@@ -72,7 +72,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.suggest_offline_wdg.setEnabled(len(project_get_always_online_layers())>0)
 
     def show_remote_options(self):
-        dlg = RemoteOptionsDialog(self, remote_layers=project_get_remote_layers())
+        dlg = RemoteOptionsDialog(self, self.plugin_instance, remote_layers=project_get_remote_layers())
         dlg.exec_()
 
     def refresh_devices(self):
@@ -105,28 +105,31 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
         shpfile_layers = project_get_shp_layers()
         raster_layers = project_get_raster_layers()
-        project_directory = offline_convert(vector_layer_ids, raster_layers, shpfile_layers)
+        project_directory = offline_convert(vector_layer_ids, raster_layers, shpfile_layers,
+                                            base_out_dir=self.plugin_instance.get_export_folder())
 
         if remote_save_mode == HYBRID:
             self.set_hybrid_flag()
-        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Info','Please copy {} to your device'.format(project_directory))
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(BASE_SAVE_LOCATION))
+        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Info',
+                self.plugin_instance.tr('Please copy {} to your device').format(project_directory))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(self.plugin_instance.get_export_folder()))
+        self.close()
 
         # this here doesn't do anything for now
-        device_index = self.devices_cbx.currentIndex()
-        device = self.devices[device_index][1]
-        mtp = connect_device(device)
-        dest = 'testFILE.qgs'
-        push_file(mtp, self.project.fileName(), dest, self.update_progress)
-        disconnect_device(mtp)
+        #device_index = self.devices_cbx.currentIndex()
+        #device = self.devices[device_index][1]
+        #mtp = connect_device(device)
+        #dest = 'testFILE.qgs'
+        #push_file(mtp, self.project.fileName(), dest, self.update_progress)
+        #disconnect_device(mtp)
 
     def show_warning_about_layers_that_cant_work_offline(self, layers):
         layers_list = ','.join([ layer.name() for layer in layers])
-        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning','Layers {} require a real time connection'.format(layers_list))
+        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
+                self.plugin_instance.tr('Layers {} require a real time connection').format(layers_list))
 
     def set_hybrid_flag(self):
-        QgsProject.instance().writeEntry(QgsOfflineEditing.PROJECT_ENTRY_SCOPE_OFFLINE,
-                                         "REMOTE_LAYER_MODE",RemoteOptionsDialog.HYBRID)
+        QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE,"REMOTE_LAYER_MODE", HYBRID)
 
     def on_reload_devices_btn_clicked(self):
         self.refresh_devices()

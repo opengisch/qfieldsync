@@ -5,8 +5,6 @@ import shutil
 from PyQt4 import QtCore
 from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing, QgsRasterLayer
 
-BASE_SAVE_LOCATION= os.path.expanduser("~")
-
 from .file_utils import fileparts
 from .config import OFFLINE
 from .data_source_utils import  SHP_EXTENSIONS,change_layer_data_source, \
@@ -43,11 +41,11 @@ def handle_rasters( dataPath, raster_layers):
         shutil.copy(file_path, new_file_path)
         change_layer_data_source(raster_layer, new_file_path)
 
-def offline_convert( vector_layer_ids, raster_layers, shpfile_layers):
+def offline_convert( vector_layer_ids, raster_layers, shpfile_layers, base_out_dir):
     dt_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
     existing_filepath = QgsProject.instance().fileName()
     existing_fn, ext = os.path.splitext(os.path.basename(existing_filepath))
-    dataPath = os.path.join(BASE_SAVE_LOCATION, existing_fn+"_"+dt_tag)
+    dataPath = os.path.join(base_out_dir, existing_fn+"_"+dt_tag)
     if not os.path.exists(dataPath):
         os.mkdir(dataPath)
     dbPath = "data.sqlite"

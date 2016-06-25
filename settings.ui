@@ -19,14 +19,14 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Connection mode</string>
+        <string>Copy files using:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="radioButton_offline">
+      <widget class="QRadioButton" name="radioButton_manual">
        <property name="text">
-        <string>Offline mode: data dump (works without data connection)</string>
+        <string>Manual</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -34,16 +34,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="radioButton_hybrid">
+      <widget class="QRadioButton" name="radioButton_adb">
        <property name="text">
-        <string>Hybrid mode: cache and use connection when available</string>
+        <string>ADB</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="radioButton_online">
+      <widget class="QRadioButton" name="radioButton_network">
        <property name="text">
-        <string>Online mode (requires an active data connection on the device)</string>
+        <string>Network</string>
        </property>
        <property name="checked">
         <bool>false</bool>

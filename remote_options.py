@@ -34,11 +34,11 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
 
-    def __init__(self, parent, remote_layers):
+    def __init__(self, parent, plugin_instance, remote_layers):
         """Constructor."""
         super(RemoteOptionsDialog, self).__init__(parent)
         self.setupUi(self)
-        self.push_btn = QPushButton('Push')
+        self.push_btn = QPushButton(plugin_instance.tr('Push'))
         self.parent = parent
         self.remote_layers = remote_layers
         self.push_btn.clicked.connect(self.save_options)
