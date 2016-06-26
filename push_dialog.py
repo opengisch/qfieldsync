@@ -69,13 +69,14 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         self.devices = None
         self.refresh_devices()
-        self.suggest_offline_wdg.setEnabled(len(project_get_always_online_layers())>0)
+        #self.suggest_offline_wdg.setEnabled(len(project_get_always_online_layers())>0)
 
     def show_remote_options(self):
         dlg = RemoteOptionsDialog(self, self.plugin_instance, remote_layers=project_get_remote_layers())
         dlg.exec_()
 
     def refresh_devices(self):
+        return
         self.devices = detect_devices()
         device_names = []
         for d in self.devices:
@@ -100,7 +101,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         can_only_be_online_layers = project_get_always_online_layers()
         if can_only_be_online_layers:
-            self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
+            self.how_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
 
         vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
         shpfile_layers = project_get_shp_layers()
