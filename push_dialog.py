@@ -31,6 +31,7 @@ from PyQt4.QtGui import QDialogButtonBox, QPushButton
 from .export_offline import offline_convert, get_layer_ids_to_offline_convert
 from .data_source_utils import *
 from .config import HYBRID
+from .file_utils import fileparts
 
 try:
     from .utils.usb import detect_devices, connect_device, push_file, \
@@ -69,7 +70,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         self.devices = None
         self.refresh_devices()
-        #self.suggest_offline_wdg.setEnabled(len(project_get_always_online_layers())>0)
+        self.setup_tabs()
 
     def show_remote_options(self):
         dlg = RemoteOptionsDialog(self, self.plugin_instance, remote_layers=project_get_remote_layers())
@@ -97,8 +98,36 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.progress_bar.setValue(progress)
 
 
+    def setup_tabs(self):
+        """Populate tabs and connect signals for the tabs of the push dialog"""
+        base_folder = self.plugin_instance.get_export_folder()
+        project_fn = QgsProject.instance().fileName()
+        export_folder_name = fileparts(project_fn)[1]
+        export_folder_path = os.path.join(base_folder, export_folder_name)
+        self.manualDir.setText(export_folder_path)
+        self.cloudDir.setText(export_folder_path)
+
+
+    def get_export_folder_from_dialog(self):
+        """Get the export folder according to the inputs in the tab selected"""
+        # manual
+        if self.tabWidget.currentIndex() == 0:
+            return self.manualDir.text()
+        # cloud
+        if self.tabWidget.currentIndex() == 1:
+            return self.cloudDir.text()
+
+        # ftp (yet to be implemented)
+        if self.tabWidget.currentIndex() == 2:
+            raise Exception("FTP not implemented yet")
+
+        if self.tabWidget.currentIndex() == 3:
+            raise Exception("ADB mode not implemented yet")
+
+
     def push_project(self, remote_layers=None, remote_save_mode=None):
 
+        export_folder = self.get_export_folder_from_dialog()
         can_only_be_online_layers = project_get_always_online_layers()
         if can_only_be_online_layers:
             self.how_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
@@ -107,7 +136,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         shpfile_layers = project_get_shp_layers()
         raster_layers = project_get_raster_layers()
         project_directory = offline_convert(vector_layer_ids, raster_layers, shpfile_layers,
-                                            base_out_dir=self.plugin_instance.get_export_folder())
+                                            export_folder=export_folder)
 
         if remote_save_mode == HYBRID:
             self.set_hybrid_flag()

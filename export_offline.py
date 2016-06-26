@@ -41,11 +41,10 @@ def handle_rasters( dataPath, raster_layers):
         shutil.copy(file_path, new_file_path)
         change_layer_data_source(raster_layer, new_file_path)
 
-def offline_convert( vector_layer_ids, raster_layers, shpfile_layers, base_out_dir):
-    dt_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
+def offline_convert( vector_layer_ids, raster_layers, shpfile_layers, export_folder):
     existing_filepath = QgsProject.instance().fileName()
     existing_fn, ext = os.path.splitext(os.path.basename(existing_filepath))
-    dataPath = os.path.join(base_out_dir, existing_fn+"_"+dt_tag)
+    dataPath = export_folder
     if not os.path.exists(dataPath):
         os.mkdir(dataPath)
     dbPath = "data.sqlite"
