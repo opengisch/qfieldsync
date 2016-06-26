@@ -31,6 +31,7 @@ from .config import MANUAL, ADB, NETWORK
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'settings.ui'))
 
+from .qt_utils import make_folder_selector
 
 class SettingsDialog(QtGui.QDialog, FORM_CLASS):
 
@@ -46,8 +47,8 @@ class SettingsDialog(QtGui.QDialog, FORM_CLASS):
         self.importDir.setText(import_folder)
         self.exportDir.setText(export_folder)
         self.set_selected_copy_mode(copy_mode)
-        self.importDir_btn.clicked.connect(self.selectImportFolder)
-        self.exportDir_btn.clicked.connect(self.selectExportFolder)
+        self.importDir_btn.clicked.connect(make_folder_selector(self.importDir))
+        self.exportDir_btn.clicked.connect(make_folder_selector(self.exportDir))
 
     def get_selected_copy_mode(self):
         if self.radioButton_adb.isChecked():
@@ -56,14 +57,6 @@ class SettingsDialog(QtGui.QDialog, FORM_CLASS):
             return NETWORK
         if self.radioButton_manual.isChecked():
             return MANUAL
-
-
-    def selectImportFolder(self):
-        self.importDir.setText(QtGui.QFileDialog.getExistingDirectory(directory=self.importDir.text()))
-
-    def selectExportFolder(self):
-        self.exportDir.setText(QtGui.QFileDialog.getExistingDirectory(directory=self.exportDir.text()))
-
 
     def set_selected_copy_mode(self, mode):
         if mode==ADB:

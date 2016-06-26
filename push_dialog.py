@@ -32,6 +32,7 @@ from .export_offline import offline_convert, get_layer_ids_to_offline_convert
 from .data_source_utils import *
 from .config import HYBRID
 from .file_utils import fileparts
+from .qt_utils import make_folder_selector
 
 try:
     from .utils.usb import detect_devices, connect_device, push_file, \
@@ -106,6 +107,8 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         export_folder_path = os.path.join(base_folder, export_folder_name)
         self.manualDir.setText(export_folder_path)
         self.cloudDir.setText(export_folder_path)
+        self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
+        self.cloudDir_btn.clicked.connect(make_folder_selector(self.cloudDir))
 
 
     def get_export_folder_from_dialog(self):
