@@ -9,6 +9,24 @@
     </message>
 </context>
 <context>
+    <name>PushDialog</name>
+    <message>
+        <location filename="push_dialog.py" line="65"/>
+        <source>Push</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="push_dialog.py" line="146"/>
+        <source>Please copy {} to your device</source>
+        <translation type="unfinished">Bitte kopieren {} zu Ihrem Geraet</translation>
+    </message>
+    <message>
+        <location filename="push_dialog.py" line="161"/>
+        <source>Layers {} require a real time connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>QFieldPushDialogBase</name>
     <message>
         <location filename="push_dialog_base.ui" line="14"/>
@@ -33,7 +51,7 @@
     <message>
         <location filename="push_dialog_base.ui" line="48"/>
         <source>Manual</source>
-        <translation type="finished">Manuell</translation>
+        <translation>Manuell</translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="97"/>
@@ -116,7 +134,7 @@
     <message>
         <location filename="settings.ui" line="29"/>
         <source>Manual</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Manuell</translation>
     </message>
     <message>
         <location filename="settings.ui" line="39"/>
@@ -172,45 +190,35 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="193"/>
+        <location filename="qfield_sync.py" line="191"/>
         <source>&amp;QFieldSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="179"/>
+        <location filename="qfield_sync.py" line="177"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Einrichten</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="184"/>
+        <location filename="qfield_sync.py" line="182"/>
         <source>Sync to QField</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>plugin_instance</name>
+    <name>RemoteOptionsDialog</name>
     <message>
         <location filename="remote_options.py" line="41"/>
         <source>Push</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>SettingsDialog</name>
     <message>
         <location filename="settings_dialog.py" line="42"/>
         <source>Save</source>
         <translation type="finished">Speichern</translation>
-    </message>
-</context>
-<context>
-    <name>self.plugin_instance</name>
-    <message>
-        <location filename="push_dialog.py" line="146"/>
-        <source>Please copy {} to your device</source>
-        <translation type="finished">Bitte kopieren {} zu Ihrem Geraet</translation>
-    </message>
-    <message>
-        <location filename="push_dialog.py" line="161"/>
-        <source>Layers {} require a real time connection</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

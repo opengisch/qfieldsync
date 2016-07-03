@@ -62,7 +62,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.plugin_instance = plugin_instance
         self.project = QgsProject.instance()
         self.project_lbl.setText(self.project.title())
-        self.push_btn = QPushButton(plugin_instance.tr('Push'))
+        self.push_btn = QPushButton(self.tr('Push'))
         if project_get_remote_layers():
             self.push_btn.clicked.connect(self.show_remote_options)
         else:
@@ -144,7 +144,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         if remote_save_mode == HYBRID:
             self.set_hybrid_flag()
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Info',
-                self.plugin_instance.tr('Please copy {} to your device').format(project_directory))
+                self.tr('Please copy {} to your device').format(project_directory))
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(self.plugin_instance.get_export_folder()))
         self.close()
 
@@ -159,7 +159,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
     def show_warning_about_layers_that_cant_work_offline(self, layers):
         layers_list = ','.join([ layer.name() for layer in layers])
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                self.plugin_instance.tr('Layers {} require a real time connection').format(layers_list))
+                self.tr('Layers {} require a real time connection').format(layers_list))
 
     def set_hybrid_flag(self):
         QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE,"REMOTE_LAYER_MODE", HYBRID)

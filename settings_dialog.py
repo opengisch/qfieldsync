@@ -39,7 +39,7 @@ class SettingsDialog(QtGui.QDialog, FORM_CLASS):
         """Constructor."""
         super(SettingsDialog, self).__init__(parent=None)
         self.setupUi(self)
-        self.push_btn = QPushButton(plugin_instance.tr('Save'))
+        self.push_btn = QPushButton(self.tr('Save'))
         self.plugin_instance = plugin_instance
         self.push_btn.clicked.connect(self.save_settings)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
