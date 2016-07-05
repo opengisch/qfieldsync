@@ -16,12 +16,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="146"/>
+        <location filename="push_dialog.py" line="160"/>
         <source>Please copy {} to your device</source>
         <translation type="unfinished">Bitte kopieren {} zu Ihrem Geraet</translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="161"/>
+        <location filename="push_dialog.py" line="175"/>
         <source>Layers {} require a real time connection</source>
         <translation type="unfinished"></translation>
     </message>
@@ -190,17 +190,17 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="191"/>
+        <location filename="qfield_sync.py" line="190"/>
         <source>&amp;QFieldSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="177"/>
+        <location filename="qfield_sync.py" line="176"/>
         <source>Settings</source>
         <translation type="unfinished">Einrichten</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="182"/>
+        <location filename="qfield_sync.py" line="181"/>
         <source>Sync to QField</source>
         <translation type="unfinished"></translation>
     </message>
@@ -218,7 +218,7 @@
     <message>
         <location filename="settings_dialog.py" line="42"/>
         <source>Save</source>
-        <translation type="finished">Speichern</translation>
+        <translation>Speichern</translation>
     </message>
 </context>
 </TS>

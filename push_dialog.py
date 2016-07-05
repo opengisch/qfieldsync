@@ -30,7 +30,7 @@ from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
 from .export_offline import offline_convert, get_layer_ids_to_offline_convert
 from .data_source_utils import *
-from .config import HYBRID
+from .config import *
 from .file_utils import fileparts
 from .qt_utils import make_folder_selector
 
@@ -109,6 +109,20 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.cloudDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.cloudDir_btn.clicked.connect(make_folder_selector(self.cloudDir))
+        self.tabWidget.currentChanged.connect(self.change_description_text)
+        self.change_description_text()
+
+    def change_description_text(self):
+        """ Change description text according to tab selected"""
+        if self.tabWidget.currentIndex() == 0:
+            self.label.setText(MANUAL_TEXT)
+        if self.tabWidget.currentIndex() == 1:
+            self.label.setText(CLOUD_TEXT)
+        if self.tabWidget.currentIndex() == 2:
+            self.label.setText(FTP_TEXT)
+        if self.tabWidget.currentIndex() == 3:
+            self.label.setText(ADB_TEXT)
+
 
 
     def get_export_folder_from_dialog(self):
