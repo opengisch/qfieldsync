@@ -34,7 +34,6 @@ from . import resources_rc
 # Import the code for the dialog
 from .push_dialog import PushDialog
 from .settings_dialog import SettingsDialog
-from .config import MANUAL
 try:
     from .utils.utils import warn_project_is_dirty
 except:
@@ -79,7 +78,6 @@ class QFieldSync(object):
         # initialize settings
         self.export_folder = os.path.expanduser("~")
         self.import_folder = os.path.expanduser("~") #FIXME should be something to do with filesystem
-        self.copy_mode = MANUAL
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -199,15 +197,14 @@ class QFieldSync(object):
         dlg.exec_()
 
     def get_settings(self):
-        return self.import_folder, self.export_folder, self.copy_mode
+        return self.import_folder, self.export_folder
 
     def get_export_folder(self):
         return self.get_settings()[1]
 
-    def update_settings(self, import_folder, export_folder, copy_mode):
+    def update_settings(self, import_folder, export_folder):
         self.import_folder = import_folder
         self.export_folder = export_folder
-        self.copy_mode = copy_mode
 
 
     def push_project(self):

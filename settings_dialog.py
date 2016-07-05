@@ -27,7 +27,6 @@ import os
 from PyQt4 import QtGui, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
-from .config import MANUAL, ADB, NETWORK
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'settings.ui'))
 
@@ -43,32 +42,15 @@ class SettingsDialog(QtGui.QDialog, FORM_CLASS):
         self.plugin_instance = plugin_instance
         self.push_btn.clicked.connect(self.save_settings)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
-        import_folder, export_folder, copy_mode = self.plugin_instance.get_settings()
+        import_folder, export_folder = self.plugin_instance.get_settings()
         self.importDir.setText(import_folder)
         self.exportDir.setText(export_folder)
-        self.set_selected_copy_mode(copy_mode)
         self.importDir_btn.clicked.connect(make_folder_selector(self.importDir))
         self.exportDir_btn.clicked.connect(make_folder_selector(self.exportDir))
 
-    def get_selected_copy_mode(self):
-        if self.radioButton_adb.isChecked():
-            return ADB
-        if self.radioButton_network.isChecked():
-            return NETWORK
-        if self.radioButton_manual.isChecked():
-            return MANUAL
-
-    def set_selected_copy_mode(self, mode):
-        if mode==ADB:
-            self.radioButton_adb.setChecked(True)
-        if mode==MANUAL:
-            self.radioButton_manual.setChecked(True)
-        if mode==NETWORK:
-            self.radioButton_network.setChecked(True)
 
     def save_settings(self):
         import_folder = self.importDir.text() 
         export_folder = self.exportDir.text()
-        copy_mode = self.get_selected_copy_mode()
-        self.plugin_instance.update_settings(import_folder, export_folder, copy_mode)
+        self.plugin_instance.update_settings(import_folder, export_folder)
         self.close()
