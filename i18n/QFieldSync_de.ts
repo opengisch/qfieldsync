@@ -16,13 +16,35 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="160"/>
+        <location filename="push_dialog.py" line="162"/>
         <source>Please copy {} to your device</source>
         <translation type="unfinished">Bitte kopieren {} zu Ihrem Geraet</translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="175"/>
+        <location filename="push_dialog.py" line="177"/>
         <source>Layers {} require a real time connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="push_dialog.py" line="118"/>
+        <source>A folder containing all the needed files is created for you in the filesystem.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="push_dialog.py" line="120"/>
+        <source>A folder containing all the needed files is created for you into your chosen destination.
+You can use any cloud sync service you want (Dropbox etc)
+to sync this destination to your device using a third party app.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="push_dialog.py" line="124"/>
+        <source>FTP description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="push_dialog.py" line="126"/>
+        <source>ADB description</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -128,36 +150,16 @@
     </message>
     <message>
         <location filename="settings.ui" line="22"/>
-        <source>Copy files using:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="29"/>
-        <source>Manual</source>
-        <translation type="unfinished">Manuell</translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="39"/>
-        <source>ADB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="46"/>
-        <source>Network</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="56"/>
         <source>Default Import Directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="settings.ui" line="89"/>
+        <location filename="settings.ui" line="55"/>
         <source>Browse</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="settings.ui" line="77"/>
+        <location filename="settings.ui" line="43"/>
         <source>Default Export Directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -190,17 +192,17 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="190"/>
+        <location filename="qfield_sync.py" line="188"/>
         <source>&amp;QFieldSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="176"/>
+        <location filename="qfield_sync.py" line="174"/>
         <source>Settings</source>
         <translation type="unfinished">Einrichten</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="181"/>
+        <location filename="qfield_sync.py" line="179"/>
         <source>Sync to QField</source>
         <translation type="unfinished"></translation>
     </message>
@@ -216,7 +218,7 @@
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="settings_dialog.py" line="42"/>
+        <location filename="settings_dialog.py" line="41"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
