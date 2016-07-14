@@ -43,6 +43,7 @@ class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
         self.remote_layers = remote_layers
         self.push_btn.clicked.connect(self.save_options)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
+        self.radioButton_hybrid.setEnabled(False)
 
     def get_selected_mode(self):
         if self.radioButton_offline.isChecked():

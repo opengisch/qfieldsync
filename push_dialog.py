@@ -74,6 +74,9 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.devices = None
         self.refresh_devices()
         self.setup_tabs()
+        self.cloud_tab.setEnabled(False)
+        self.adb_tab.setEnabled(False)
+        self.ftp_tab.setEnabled(False)
 
     def show_remote_options(self):
         dlg = RemoteOptionsDialog(self, self.plugin_instance, remote_layers=project_get_remote_layers())
