@@ -27,11 +27,11 @@ except:
     pass
 
 import os.path
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QSettings
 from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
 from . import resources_rc
-# Import the code for the dialog
+from . import config
 from .push_dialog import PushDialog
 from .settings_dialog import SettingsDialog
 try:
@@ -76,8 +76,15 @@ class QFieldSync(object):
         self.toolbar.setObjectName(u'QFieldSync')
 
         # initialize settings
-        self.export_folder = os.path.expanduser("~")
-        self.import_folder = os.path.expanduser("~") #FIXME should be something to do with filesystem
+        self.export_folder = QSettings().value(config.EXPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
+        self.import_folder = QSettings().value(config.IMPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
+        self.update_qgis_settings()
+
+    def update_qgis_settings(self):
+        s = QSettings()
+        s.setValue(config.EXPORT_DIRECTORY_SETTING, self.export_folder)
+        s.setValue(config.IMPORT_DIRECTORY_SETTING, self.import_folder)
+        s.sync()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -205,6 +212,7 @@ class QFieldSync(object):
     def update_settings(self, import_folder, export_folder):
         self.import_folder = import_folder
         self.export_folder = export_folder
+        self.update_qgis_settings()
 
 
     def push_project(self):
