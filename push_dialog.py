@@ -27,6 +27,7 @@ import os
 
 from PyQt4 import QtGui, QtCore, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
+from qgis.gui import QgsMessageBar
 
 from .export_offline import offline_convert, get_layer_ids_to_offline_convert
 from .data_source_utils import *
@@ -160,9 +161,8 @@ to sync this destination to your device using a third party app.""")
 
         if remote_save_mode == HYBRID:
             self.set_hybrid_flag()
-        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Info',
-                self.tr('Please copy {} to your device').format(project_directory))
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(self.plugin_instance.get_export_folder()))
+
+        self.do_post_offline_convert_action()
         self.close()
 
         # this here doesn't do anything for now
@@ -172,6 +172,18 @@ to sync this destination to your device using a third party app.""")
         #dest = 'testFILE.qgs'
         #push_file(mtp, self.project.fileName(), dest, self.update_progress)
         #disconnect_device(mtp)
+
+    def do_post_offline_convert_action(self):
+        if self.tabWidget.currentIndex() == 0:
+            export_base_folder = self.plugin_instance.get_export_folder()
+            export_folder = self.get_export_folder_from_dialog()
+            text = "Your project has been exported sucessfully to {}, please copy the entire folder to the device".format(export_folder)
+            self.iface.messageBar().pushMessage(u'Message from {}'.format(LOG_TAG), text, QgsMessageBar.INFO, MSG_DURATION_SECS)
+            if self.checkBox_open.isChecked():
+                QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(export_base_folder))
+        else:
+            raise Exception("FTP, ADB, Cloud not fully supported yet")
+
 
     def show_warning_about_layers_that_cant_work_offline(self, layers):
         layers_list = ','.join([ layer.name() for layer in layers])
