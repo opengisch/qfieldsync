@@ -32,7 +32,7 @@ from qgis.gui import QgsMessageBar
 from .export_offline import offline_convert, get_layer_ids_to_offline_convert
 from .data_source_utils import *
 from .config import *
-from .file_utils import fileparts
+from .file_utils import fileparts, get_full_parent_path
 from .qt_utils import make_folder_selector
 from .qgis_utils import get_project_title
 
@@ -175,8 +175,8 @@ to sync this destination to your device using a third party app.""")
 
     def do_post_offline_convert_action(self):
         if self.tabWidget.currentIndex() == 0:
-            export_base_folder = self.plugin_instance.get_export_folder()
             export_folder = self.get_export_folder_from_dialog()
+            export_base_folder = get_full_parent_path(export_folder)
             text = "Your project has been exported sucessfully to {}, please copy the entire folder to the device".format(export_folder)
             self.iface.messageBar().pushMessage(u'Message from {}'.format(LOG_TAG), text, QgsMessageBar.INFO, MSG_DURATION_SECS)
             if self.checkBox_open.isChecked():

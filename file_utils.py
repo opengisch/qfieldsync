@@ -10,3 +10,8 @@ def fileparts(fn, extension_dot = True):
         ext = ext[1:]
     return (path,name,ext)
 
+def get_full_parent_path(fn):
+    return os.path.dirname(os.path.normpath(fn))
+
+
+
