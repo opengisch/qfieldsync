@@ -11,39 +11,39 @@
 <context>
     <name>PushDialog</name>
     <message>
-        <location filename="push_dialog.py" line="65"/>
+        <location filename="push_dialog.py" line="66"/>
         <source>Push</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="162"/>
+        <location filename="push_dialog.py" line="163"/>
         <source>Please copy {} to your device</source>
         <translation type="unfinished">Bitte kopieren {} zu Ihrem Geraet</translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="177"/>
+        <location filename="push_dialog.py" line="178"/>
         <source>Layers {} require a real time connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="118"/>
+        <location filename="push_dialog.py" line="119"/>
         <source>A folder containing all the needed files is created for you in the filesystem.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="120"/>
+        <location filename="push_dialog.py" line="121"/>
         <source>A folder containing all the needed files is created for you into your chosen destination.
 You can use any cloud sync service you want (Dropbox etc)
 to sync this destination to your device using a third party app.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="124"/>
+        <location filename="push_dialog.py" line="125"/>
         <source>FTP description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="126"/>
+        <location filename="push_dialog.py" line="127"/>
         <source>ADB description</source>
         <translation type="unfinished"></translation>
     </message>
@@ -56,88 +56,93 @@ to sync this destination to your device using a third party app.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="20"/>
+        <location filename="push_dialog_base.ui" line="30"/>
         <source>TextLabel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="27"/>
+        <location filename="push_dialog_base.ui" line="37"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Sync type Information:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="34"/>
+        <location filename="push_dialog_base.ui" line="44"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;one line&lt;/p&gt;&lt;p&gt;two lines&lt;/p&gt;&lt;p&gt;description help text, changes via tab selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="48"/>
+        <location filename="push_dialog_base.ui" line="58"/>
         <source>Manual</source>
         <translation>Manuell</translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="97"/>
+        <location filename="push_dialog_base.ui" line="107"/>
         <source>Export directory:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="107"/>
+        <location filename="push_dialog_base.ui" line="117"/>
         <source>Browse</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="82"/>
+        <location filename="push_dialog_base.ui" line="92"/>
         <source>Cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="116"/>
+        <location filename="push_dialog_base.ui" line="126"/>
         <source>FTP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="136"/>
+        <location filename="push_dialog_base.ui" line="146"/>
         <source>host:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="153"/>
+        <location filename="push_dialog_base.ui" line="163"/>
         <source>port:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="166"/>
+        <location filename="push_dialog_base.ui" line="176"/>
         <source>22</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="173"/>
+        <location filename="push_dialog_base.ui" line="183"/>
         <source>username:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="190"/>
+        <location filename="push_dialog_base.ui" line="200"/>
         <source>password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="210"/>
+        <location filename="push_dialog_base.ui" line="220"/>
         <source>remote path:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="227"/>
+        <location filename="push_dialog_base.ui" line="237"/>
         <source>Override existing files: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="245"/>
+        <location filename="push_dialog_base.ui" line="255"/>
         <source>ADB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="260"/>
+        <location filename="push_dialog_base.ui" line="270"/>
         <source>Not yet implemented.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="push_dialog_base.ui" line="20"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Project:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

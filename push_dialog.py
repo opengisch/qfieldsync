@@ -33,6 +33,7 @@ from .data_source_utils import *
 from .config import *
 from .file_utils import fileparts
 from .qt_utils import make_folder_selector
+from .qgis_utils import get_project_title
 
 try:
     from .utils.usb import detect_devices, connect_device, push_file, \
@@ -61,7 +62,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.iface = iface
         self.plugin_instance = plugin_instance
         self.project = QgsProject.instance()
-        self.project_lbl.setText(self.project.title())
+        self.project_lbl.setText(get_project_title(self.project))
         self.push_btn = QPushButton(self.tr('Push'))
         if project_get_remote_layers():
             self.push_btn.clicked.connect(self.show_remote_options)
