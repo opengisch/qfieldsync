@@ -28,12 +28,12 @@ from PyQt4 import QtGui, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
 from .config import ONLINE, OFFLINE, HYBRID
+
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ui', 'remote_options_base.ui'))
 
 
 class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
-
     def __init__(self, parent, plugin_instance, remote_layers):
         """Constructor."""
         super(RemoteOptionsDialog, self).__init__(parent)
@@ -55,6 +55,6 @@ class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
 
     def save_options(self):
         mode = self.get_selected_mode()
-        self.parent.push_project(remote_layers = self.remote_layers, remote_save_mode = mode)
+        self.parent.push_project(remote_layers=self.remote_layers, remote_save_mode=mode)
         self.close()
 

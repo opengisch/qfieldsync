@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 from __future__ import absolute_import
+
 try:
     from builtins import object
 except:
@@ -34,10 +35,12 @@ from . import resources_rc
 from . import config
 from .push_dialog import PushDialog
 from .settings_dialog import SettingsDialog
+
 try:
     from .utils.utils import warn_project_is_dirty
 except:
     warn_project_is_dirty = lambda: True
+
 
 class QFieldSync(object):
     """QGIS Plugin Implementation."""
@@ -61,7 +64,7 @@ class QFieldSync(object):
             self.plugin_dir,
             'i18n',
             'QFieldSync_{}.qm'.format(locale))
-        if os.path.exists(locale_path) :
+        if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
 
@@ -102,16 +105,16 @@ class QFieldSync(object):
         return QCoreApplication.translate('QFieldSync', message)
 
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource

@@ -32,8 +32,8 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 from .qt_utils import make_folder_selector
 
-class SettingsDialog(QtGui.QDialog, FORM_CLASS):
 
+class SettingsDialog(QtGui.QDialog, FORM_CLASS):
     def __init__(self, plugin_instance):
         """Constructor."""
         super(SettingsDialog, self).__init__(parent=None)
@@ -51,7 +51,7 @@ class SettingsDialog(QtGui.QDialog, FORM_CLASS):
 
 
     def save_settings(self):
-        import_folder = self.importDir.text() 
+        import_folder = self.importDir.text()
         export_folder = self.exportDir.text()
         self.plugin_instance.update_settings(import_folder, export_folder)
         self.close()

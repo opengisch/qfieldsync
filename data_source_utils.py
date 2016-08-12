@@ -2,7 +2,8 @@ from PyQt4.QtXml import *
 from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing, QgsRasterLayer
 
 
-SHP_EXTENSIONS = ['.shp','.shx','.dbf','.sbx','.sbn', '.shp.xml']
+SHP_EXTENSIONS = ['.shp', '.shx', '.dbf', '.sbx', '.sbn', '.shp.xml']
+
 
 def is_shapefile_layer(layer):
     source = layer.source()
@@ -12,15 +13,15 @@ def is_shapefile_layer(layer):
             return True
     return False
 
-def change_layer_data_source(layer, new_data_source):
 
+def change_layer_data_source(layer, new_data_source):
     # read layer DOM definition
     XMLDocument = QDomDocument("style")
     XMLMapLayers = QDomElement()
     XMLMapLayers = XMLDocument.createElement("maplayers")
     XMLMapLayer = QDomElement()
     XMLMapLayer = XMLDocument.createElement("maplayer")
-    layer.writeLayerXML(XMLMapLayer,XMLDocument)
+    layer.writeLayerXML(XMLMapLayer, XMLDocument)
 
     # modify DOM element with new layer reference
     XMLMapLayer.firstChildElement("datasource").firstChild().setNodeValue(new_data_source)
@@ -31,7 +32,6 @@ def change_layer_data_source(layer, new_data_source):
     # reload layer definition
     layer.readLayerXML(XMLMapLayer)
     layer.reload()
-
 
 
 def project_get_raster_layers():
@@ -47,17 +47,21 @@ def project_get_layers_of_given_types(types):
     # QgsProviderRegistry.instance().providerList()
     map_layers = QgsMapLayerRegistry.instance().mapLayers()
     return [layer for name, layer in map_layers.items() if layer.providerType() in \
-                types and not isinstance(layer, QgsRasterLayer)]
+                                                           types and not isinstance(layer, QgsRasterLayer)]
+
 
 def layer_is_jpeg2000(layer):
     # those have providerType() gdal, so we can't detect them by looking at the providerType
-    return layer.source().endswith(('jp2','jpx'))
+    return layer.source().endswith(('jp2', 'jpx'))
+
 
 def layer_is_ecw_raster(layer):
     return layer.source().endswith('ecw')
 
-def  project_get_qfield_unsupported_layers():
+
+def project_get_qfield_unsupported_layers():
     return project_filter_layers(layer_is_jpeg2000) + project_filter_layers(layer_is_ecw_raster)
+
 
 def project_get_always_online_layers():
     """ Layers that can't be made offline by the offline plugin """

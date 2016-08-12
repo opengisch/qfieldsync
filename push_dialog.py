@@ -46,8 +46,7 @@ from .remote_options import RemoteOptionsDialog
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__),'ui', 'push_dialog_base.ui'))
-
+    os.path.dirname(__file__), 'ui', 'push_dialog_base.ui'))
 
 
 class PushDialog(QtGui.QDialog, FORM_CLASS):
@@ -115,7 +114,8 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
     def change_description_text(self):
         """ Change description text according to tab selected"""
         if self.tabWidget.currentIndex() == 0:
-            text = self.tr("A folder containing all the needed files is created for you in the filesystem so that you can copy it manually to your device.")
+            text = self.tr(
+                "A folder containing all the needed files is created for you in the filesystem so that you can copy it manually to your device.")
         if self.tabWidget.currentIndex() == 1:
             text = self.tr("""A folder containing all the needed files is created for you into your chosen destination.
 You can use any cloud sync service you want (Dropbox etc)
@@ -132,7 +132,7 @@ to sync this destination to your device using a third party app.""")
         # manual
         if self.tabWidget.currentIndex() == 0:
             return self.manualDir.text()
-        # cloud
+            # cloud
         if self.tabWidget.currentIndex() == 1:
             return self.cloudDir.text()
 
@@ -178,8 +178,10 @@ to sync this destination to your device using a third party app.""")
         if self.tabWidget.currentIndex() == 0:
             export_folder = self.get_export_folder_from_dialog()
             export_base_folder = get_full_parent_path(export_folder)
-            text = "Your project has been exported sucessfully to {}, please copy the entire folder to the device".format(export_folder)
-            self.iface.messageBar().pushMessage(u'Message from {}'.format(LOG_TAG), text, QgsMessageBar.INFO, MSG_DURATION_SECS)
+            text = "Your project has been exported sucessfully to {}, please copy the entire folder to the device".format(
+                export_folder)
+            self.iface.messageBar().pushMessage(u'Message from {}'.format(LOG_TAG), text, QgsMessageBar.INFO,
+                                                MSG_DURATION_SECS)
             if self.checkBox_open.isChecked():
                 QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(export_base_folder))
         else:
@@ -187,17 +189,17 @@ to sync this destination to your device using a third party app.""")
 
 
     def show_warning_about_layers_that_cant_work_offline(self, layers):
-        layers_list = ','.join([ layer.name() for layer in layers])
+        layers_list = ','.join([layer.name() for layer in layers])
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                self.tr('Layers {} require a real time connection').format(layers_list))
+                                      self.tr('Layers {} require a real time connection').format(layers_list))
 
     def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
-        layers_list = ','.join([ layer.name() for layer in layers])
+        layers_list = ','.join([layer.name() for layer in layers])
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                self.tr('Layers {} are not supported by QField').format(layers_list))
+                                      self.tr('Layers {} are not supported by QField').format(layers_list))
 
     def set_hybrid_flag(self):
-        QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE,"REMOTE_LAYER_MODE", HYBRID)
+        QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE, "REMOTE_LAYER_MODE", HYBRID)
 
     def on_reload_devices_btn_clicked(self):
         self.refresh_devices()
