@@ -108,23 +108,6 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.cloudDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.cloudDir_btn.clicked.connect(make_folder_selector(self.cloudDir))
-        self.tabWidget.currentChanged.connect(self.change_description_text)
-        self.change_description_text()
-
-    def change_description_text(self):
-        """ Change description text according to tab selected"""
-        if self.tabWidget.currentIndex() == 0:
-            text = self.tr(
-                "A folder containing all the needed files is created for you in the filesystem so that you can copy it manually to your device.")
-        if self.tabWidget.currentIndex() == 1:
-            text = self.tr("""A folder containing all the needed files is created for you into your chosen destination.
-You can use any cloud sync service you want (Dropbox etc)
-to sync this destination to your device using a third party app.""")
-        if self.tabWidget.currentIndex() == 2:
-            text = self.tr("FTP description")
-        if self.tabWidget.currentIndex() == 3:
-            text = self.tr("ADB description")
-        self.label.setText(text)
 
 
     def get_export_folder_from_dialog(self):
