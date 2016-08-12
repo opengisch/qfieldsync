@@ -40,12 +40,7 @@ try:
     from .utils.usb import detect_devices, connect_device, push_file, \
         disconnect_device
 except:
-    from mock import MagicMock
-    push_file = MagicMock()
-    connect_device = MagicMock()
-    disconnect_device = MagicMock()
-    push_file = MagicMock()
-    detect_devices = MagicMock(return_value=[("Fake Device", MagicMock())])
+    pass
 
 from .remote_options import RemoteOptionsDialog
 
