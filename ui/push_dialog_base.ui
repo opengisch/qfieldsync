@@ -67,24 +67,24 @@
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout">
-        <item row="2" column="0">
+        <item row="0" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
            <string>Export directory:</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="0" column="1">
          <widget class="QLineEdit" name="manualDir"/>
         </item>
-        <item row="3" column="1">
+        <item row="1" column="1">
          <widget class="QPushButton" name="manualDir_btn">
           <property name="text">
            <string>Browse</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
+        <item row="2" column="1">
          <widget class="QCheckBox" name="checkBox_open">
           <property name="text">
            <string>Automatically open export folder for manual copying</string>
@@ -111,17 +111,17 @@
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_2">
-        <item row="2" column="0">
+        <item row="0" column="0">
          <widget class="QLabel" name="label_4">
           <property name="text">
            <string>Export directory:</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="0" column="1">
          <widget class="QLineEdit" name="cloudDir"/>
         </item>
-        <item row="3" column="1">
+        <item row="1" column="1">
          <widget class="QPushButton" name="cloudDir_btn">
           <property name="text">
            <string>Browse</string>
@@ -148,14 +148,14 @@
         <property name="fieldGrowthPolicy">
          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
         </property>
-        <item row="3" column="0">
+        <item row="0" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>host:</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
+        <item row="0" column="1">
          <widget class="QLineEdit" name="lineEdit_2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -165,14 +165,14 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
+        <item row="1" column="0">
          <widget class="QLabel" name="label_7">
           <property name="text">
            <string>port:</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
+        <item row="1" column="1">
          <widget class="QLineEdit" name="lineEdit_5">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -185,14 +185,14 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="0">
+        <item row="2" column="0">
          <widget class="QLabel" name="label_6">
           <property name="text">
            <string>username:</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
+        <item row="2" column="1">
          <widget class="QLineEdit" name="lineEdit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -202,14 +202,14 @@
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
+        <item row="3" column="0">
          <widget class="QLabel" name="label_8">
           <property name="text">
            <string>password:</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="1">
+        <item row="3" column="1">
          <widget class="QLineEdit" name="lineEdit_4">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -222,14 +222,14 @@
           </property>
          </widget>
         </item>
-        <item row="9" column="0">
+        <item row="4" column="0">
          <widget class="QLabel" name="label_9">
           <property name="text">
            <string>remote path:</string>
           </property>
          </widget>
         </item>
-        <item row="9" column="1">
+        <item row="4" column="1">
          <widget class="QLineEdit" name="lineEdit_3">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -239,14 +239,14 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="0">
+        <item row="5" column="0">
          <widget class="QLabel" name="label_10">
           <property name="text">
            <string>Override existing files: </string>
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
+        <item row="5" column="1">
          <widget class="QCheckBox" name="checkBox">
           <property name="text">
            <string/>
