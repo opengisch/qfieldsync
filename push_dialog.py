@@ -155,6 +155,9 @@ to sync this destination to your device using a third party app.""")
         can_only_be_online_layers = project_get_always_online_layers()
         if can_only_be_online_layers:
             self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
+        non_qfield_layers = project_get_qfield_unsupported_layers()
+        if non_qfield_layers:
+            self.show_warning_about_layers_that_cant_work_with_qfield(non_qfield_layers)
 
         vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
         shpfile_layers = project_get_shp_layers()
@@ -192,6 +195,11 @@ to sync this destination to your device using a third party app.""")
         layers_list = ','.join([ layer.name() for layer in layers])
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
                 self.tr('Layers {} require a real time connection').format(layers_list))
+
+    def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
+        layers_list = ','.join([ layer.name() for layer in layers])
+        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
+                self.tr('Layers {} are not supported by QField').format(layers_list))
 
     def set_hybrid_flag(self):
         QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE,"REMOTE_LAYER_MODE", HYBRID)

@@ -56,10 +56,13 @@ def layer_is_jpeg2000(layer):
 def layer_is_ecw_raster(layer):
     return layer.source().endswith('ecw')
 
+def  project_get_unsupported_qfield_layers():
+    return project_filter_layers(layer_is_jpeg2000) + project_filter_layers(layer_is_ecw_raster)
+
 def project_get_always_online_layers():
     """ Layers that can't be made offline by the offline plugin """
     online_types = ["WFS", "wcs", "wms", "mssql", "ows"]
-    return project_get_layers_of_given_types(online_types) + project_filter_layers(layer_is_jpeg2000) + project_filter_layers(layer_is_ecw_raster)
+    return project_get_layers_of_given_types(online_types)
 
 
 def project_get_remote_layers():
