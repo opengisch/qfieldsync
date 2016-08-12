@@ -47,10 +47,13 @@
        <item>
         <widget class="QLabel" name="label_14">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A folder containing all the needed files&lt;/p&gt;&lt;p&gt; is created for you in the filesystem so that&lt;/p&gt;&lt;p&gt; you can copy it manually to your device.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A folder containing all the needed files is created for you in the filesystem so that you can copy it manually to your device.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textFormat">
           <enum>Qt::RichText</enum>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -98,10 +101,13 @@
           <enum>QFrame::Plain</enum>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A folder containing all the needed files is created for you &lt;/p&gt;&lt;p&gt;into your chosen destination.&lt;/p&gt;&lt;p&gt;You can use any cloud sync service you want (Dropbox etc)&lt;/p&gt;&lt;p&gt;to sync this destination to your device using a third party app.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A folder containing all the needed files is created for you into your chosen destination. You can use any cloud sync service you want (Dropbox etc) to sync this destination to your device using a third party app.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textFormat">
           <enum>Qt::RichText</enum>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -136,7 +142,13 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>FTP description</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FTP description&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::RichText</enum>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -275,6 +287,12 @@
          <widget class="QLabel" name="label_12">
           <property name="text">
            <string>ADB Description</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
