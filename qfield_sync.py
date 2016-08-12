@@ -177,14 +177,14 @@ class QFieldSync(object):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/QFieldSync/icon.png'
+        refresh_icon_path = ':/plugins/QFieldSync/refresh.png'
         self.add_action(
-            icon_path,
+            None,
             text=self.tr(u'Settings'),
             callback=self.show_settings,
             parent=self.iface.mainWindow())
         self.add_action(
-            icon_path,
+            refresh_icon_path,
             text=self.tr(u'Sync to QField'),
             callback=self.push_project,
             parent=self.iface.mainWindow())
