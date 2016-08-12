@@ -56,7 +56,7 @@ def layer_is_jpeg2000(layer):
 def layer_is_ecw_raster(layer):
     return layer.source().endswith('ecw')
 
-def  project_get_unsupported_qfield_layers():
+def  project_get_qfield_unsupported_layers():
     return project_filter_layers(layer_is_jpeg2000) + project_filter_layers(layer_is_ecw_raster)
 
 def project_get_always_online_layers():
