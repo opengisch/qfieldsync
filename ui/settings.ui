@@ -14,8 +14,6 @@
    <string>Push project to QField</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -58,8 +56,6 @@
        </item>
       </layout>
      </item>
-    </layout>
-   </item>
    <item>
     <widget class="QDialogButtonBox" name="button_box">
      <property name="orientation">
