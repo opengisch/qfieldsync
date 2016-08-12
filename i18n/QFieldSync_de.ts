@@ -11,35 +11,40 @@
 <context>
     <name>PushDialog</name>
     <message>
-        <location filename="push_dialog.py" line="67"/>
+        <location filename="push_dialog.py" line="62"/>
         <source>Push</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="123"/>
+        <location filename="push_dialog.py" line="118"/>
         <source>A folder containing all the needed files is created for you in the filesystem so that you can copy it manually to your device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="125"/>
+        <location filename="push_dialog.py" line="120"/>
         <source>A folder containing all the needed files is created for you into your chosen destination.
 You can use any cloud sync service you want (Dropbox etc)
 to sync this destination to your device using a third party app.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="129"/>
+        <location filename="push_dialog.py" line="124"/>
         <source>FTP description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="131"/>
+        <location filename="push_dialog.py" line="126"/>
         <source>ADB description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="193"/>
+        <location filename="push_dialog.py" line="191"/>
         <source>Layers {} require a real time connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="push_dialog.py" line="196"/>
+        <source>Layers {} are not supported by QField</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -225,7 +230,7 @@ to sync this destination to your device using a third party app.</source>
     <message>
         <location filename="settings_dialog.py" line="41"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Speichern</translation>
     </message>
 </context>
 </TS>
