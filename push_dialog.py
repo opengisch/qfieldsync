@@ -51,7 +51,7 @@ from .remote_options import RemoteOptionsDialog
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'push_dialog_base.ui'))
+    os.path.dirname(__file__),'ui', 'push_dialog_base.ui'))
 
 
 
@@ -74,7 +74,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.devices = None
         self.refresh_devices()
         self.setup_tabs()
-        self.cloud_tab.setEnabled(False)
+        self.cloud_tab.setEnabled(True)
         self.adb_tab.setEnabled(False)
         self.ftp_tab.setEnabled(False)
 
@@ -120,7 +120,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
     def change_description_text(self):
         """ Change description text according to tab selected"""
         if self.tabWidget.currentIndex() == 0:
-            text = self.tr("A folder containing all the needed files is created for you in the filesystem.")
+            text = self.tr("A folder containing all the needed files is created for you in the filesystem so that you can copy it manually to your device.")
         if self.tabWidget.currentIndex() == 1:
             text = self.tr("""A folder containing all the needed files is created for you into your chosen destination.
 You can use any cloud sync service you want (Dropbox etc)
@@ -154,7 +154,7 @@ to sync this destination to your device using a third party app.""")
         export_folder = self.get_export_folder_from_dialog()
         can_only_be_online_layers = project_get_always_online_layers()
         if can_only_be_online_layers:
-            self.how_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
+            self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
 
         vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
         shpfile_layers = project_get_shp_layers()
@@ -185,7 +185,7 @@ to sync this destination to your device using a third party app.""")
             if self.checkBox_open.isChecked():
                 QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(export_base_folder))
         else:
-            raise Exception("FTP, ADB, Cloud not fully supported yet")
+            raise Exception("FTP and ADB not fully supported yet")
 
 
     def show_warning_about_layers_that_cant_work_offline(self, layers):

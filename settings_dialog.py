@@ -28,7 +28,7 @@ from PyQt4 import QtGui, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'settings.ui'))
+    os.path.dirname(__file__), 'ui', 'settings.ui'))
 
 from .qt_utils import make_folder_selector
 
@@ -42,7 +42,8 @@ class SettingsDialog(QtGui.QDialog, FORM_CLASS):
         self.plugin_instance = plugin_instance
         self.push_btn.clicked.connect(self.save_settings)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
-        import_folder, export_folder = self.plugin_instance.get_settings()
+        import_folder = self.plugin_instance.get_import_folder()
+        export_folder = self.plugin_instance.get_export_folder()
         self.importDir.setText(import_folder)
         self.exportDir.setText(export_folder)
         self.importDir_btn.clicked.connect(make_folder_selector(self.importDir))

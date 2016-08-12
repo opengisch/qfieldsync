@@ -204,10 +204,13 @@ class QFieldSync(object):
         dlg.exec_()
 
     def get_settings(self):
-        return self.import_folder, self.export_folder
+        return {"import_folder": self.import_folder, "export_folder": self.export_folder}
 
     def get_export_folder(self):
-        return self.get_settings()[1]
+        return self.get_settings()["export_folder"]
+
+    def get_import_folder(self):
+        return self.get_settings()["import_folder"]
 
     def update_settings(self, import_folder, export_folder):
         self.import_folder = import_folder

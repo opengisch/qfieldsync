@@ -29,7 +29,7 @@ from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
 from .config import ONLINE, OFFLINE, HYBRID
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'remote_options_base.ui'))
+    os.path.dirname(__file__), 'ui', 'remote_options_base.ui'))
 
 
 class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):

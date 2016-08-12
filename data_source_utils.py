@@ -49,11 +49,17 @@ def project_get_layers_of_given_types(types):
     return [layer for name, layer in map_layers.items() if layer.providerType() in \
                 types and not isinstance(layer, QgsRasterLayer)]
 
+def layer_is_jpeg2000(layer):
+    # those have providerType() gdal, so we can't detect them by looking at the providerType
+    return layer.source().endswith(('jp2','jpx'))
+
+def layer_is_ecw_raster(layer):
+    return layer.source().endswith('ecw')
 
 def project_get_always_online_layers():
     """ Layers that can't be made offline by the offline plugin """
     online_types = ["WFS", "wcs", "wms", "mssql", "ows"]
-    return project_get_layers_of_given_types(online_types)
+    return project_get_layers_of_given_types(online_types) + project_filter_layers(layer_is_jpeg2000) + project_filter_layers(layer_is_ecw_raster)
 
 
 def project_get_remote_layers():
