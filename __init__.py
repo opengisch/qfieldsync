@@ -32,4 +32,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from .qfield_sync import QFieldSync
+
     return QFieldSync(iface)

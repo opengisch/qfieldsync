@@ -21,20 +21,30 @@
  ***************************************************************************/
 """
 from __future__ import absolute_import
-from builtins import object
+
+try:
+    from builtins import object
+except:
+    pass
 
 import os.path
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QSettings
 from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
 from . import resources_rc
-# Import the code for the dialog
+from . import config
 from .push_dialog import PushDialog
-from .utils.utils import warn_project_is_dirty
+from .settings_dialog import SettingsDialog
+
+try:
+    from .utils.utils import warn_project_is_dirty
+except:
+    warn_project_is_dirty = lambda: True
 
 
 class QFieldSync(object):
     """QGIS Plugin Implementation."""
+    QFIELD_SCOPE = "QFieldSync"
 
     def __init__(self, iface):
         """Constructor.
@@ -54,7 +64,6 @@ class QFieldSync(object):
             self.plugin_dir,
             'i18n',
             'QFieldSync_{}.qm'.format(locale))
-
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
@@ -68,6 +77,17 @@ class QFieldSync(object):
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'QFieldSync')
         self.toolbar.setObjectName(u'QFieldSync')
+
+        # initialize settings
+        self.export_folder = QSettings().value(config.EXPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
+        self.import_folder = QSettings().value(config.IMPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
+        self.update_qgis_settings()
+
+    def update_qgis_settings(self):
+        s = QSettings()
+        s.setValue(config.EXPORT_DIRECTORY_SETTING, self.export_folder)
+        s.setValue(config.IMPORT_DIRECTORY_SETTING, self.import_folder)
+        s.sync()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -85,16 +105,16 @@ class QFieldSync(object):
         return QCoreApplication.translate('QFieldSync', message)
 
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -160,10 +180,15 @@ class QFieldSync(object):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/QFieldSync/icon.png'
+        refresh_icon_path = ':/plugins/QFieldSync/refresh.png'
         self.add_action(
-            icon_path,
-            text=self.tr(u'QField Sync'),
+            None,
+            text=self.tr(u'Settings'),
+            callback=self.show_settings,
+            parent=self.iface.mainWindow())
+        self.add_action(
+            refresh_icon_path,
+            text=self.tr(u'Sync to QField'),
             callback=self.push_project,
             parent=self.iface.mainWindow())
 
@@ -177,10 +202,29 @@ class QFieldSync(object):
         # remove the toolbar
         del self.toolbar
 
+    def show_settings(self):
+        dlg = SettingsDialog(self)
+        dlg.exec_()
+
+    def get_settings(self):
+        return {"import_folder": self.import_folder, "export_folder": self.export_folder}
+
+    def get_export_folder(self):
+        return self.get_settings()["export_folder"]
+
+    def get_import_folder(self):
+        return self.get_settings()["import_folder"]
+
+    def update_settings(self, import_folder, export_folder):
+        self.import_folder = import_folder
+        self.export_folder = export_folder
+        self.update_qgis_settings()
+
+
     def push_project(self):
         """Run method that performs all the real work"""
         if warn_project_is_dirty():
             # show the dialog
-            dlg = PushDialog()
+            dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
             dlg.exec_()
