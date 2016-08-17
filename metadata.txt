@@ -35,3 +35,4 @@ experimental=True
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
 
+about= This plugin allows syncing from QGIS to QField. It analyses the current project and suggests (and performs) actions needed to make the project working on QField.
