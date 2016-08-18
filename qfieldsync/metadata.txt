@@ -9,8 +9,8 @@
 [general]
 name=QField Sync
 qgisMinimumVersion=2.0
-description=Sync your projects to QField on android
-version=0.1
+description=Sync your projects to QField
+version=0.2
 author=OPENGIS.ch
 email=info@opengis.ch
 
@@ -24,7 +24,7 @@ changelog= Allow syncing from QGIS to QField
 # Tags are comma separated with spaces allowed
 tags=QField, Android, Syncronization, Offline
 
-homepage=https://github.com/opengisch/QFieldSync/wiki
+homepage=http://qfield.org/sync/
 tracker=https://github.com/opengisch/QFieldSync/issues
 repository=https://github.com/opengisch/QFieldSync
 category=Plugins
