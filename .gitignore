@@ -116,6 +116,7 @@ ENV/
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/dictionaries
+/QFieldSync.zip
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
 

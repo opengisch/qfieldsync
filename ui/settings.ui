@@ -11,51 +11,51 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Push project to QField</string>
+   <string>QFieldSync settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Default Import Directory</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLineEdit" name="importDir"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="importDir_btn">
        <property name="text">
-        <string>Default Import Directory</string>
+        <string>Browse</string>
        </property>
       </widget>
      </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Default Export Directory</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QLineEdit" name="importDir"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="importDir_btn">
-         <property name="text">
-          <string>Browse</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLineEdit" name="exportDir"/>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QPushButton" name="exportDir_btn">
        <property name="text">
-        <string>Default Export Directory</string>
+        <string>Browse</string>
        </property>
       </widget>
      </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLineEdit" name="exportDir"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="exportDir_btn">
-         <property name="text">
-          <string>Browse</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
+    </layout>
+   </item>
    <item>
     <widget class="QDialogButtonBox" name="button_box">
      <property name="orientation">

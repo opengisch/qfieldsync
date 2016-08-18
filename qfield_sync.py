@@ -185,7 +185,8 @@ class QFieldSync(object):
             None,
             text=self.tr(u'Settings'),
             callback=self.show_settings,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False)
         self.add_action(
             refresh_icon_path,
             text=self.tr(u'Sync to QField'),
