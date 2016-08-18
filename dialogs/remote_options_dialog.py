@@ -27,31 +27,35 @@ import os
 from PyQt4 import QtGui, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'ui', 'settings.ui'))
+from QFieldSync.config import ONLINE, OFFLINE, HYBRID
 
-from .qt_utils import make_folder_selector
+from QFieldSync.utils.qt_utils import get_ui_class
+
+FORM_CLASS = get_ui_class('remote_options_base.ui')
 
 
-class SettingsDialog(QtGui.QDialog, FORM_CLASS):
-    def __init__(self, plugin_instance):
+class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
+    def __init__(self, parent, plugin_instance, remote_layers):
         """Constructor."""
-        super(SettingsDialog, self).__init__(parent=None)
+        super(RemoteOptionsDialog, self).__init__(parent)
         self.setupUi(self)
-        self.push_btn = QPushButton(self.tr('Save'))
-        self.plugin_instance = plugin_instance
-        self.push_btn.clicked.connect(self.save_settings)
+        self.push_btn = QPushButton(self.tr('Push'))
+        self.parent = parent
+        self.remote_layers = remote_layers
+        self.push_btn.clicked.connect(self.save_options)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
-        import_folder = self.plugin_instance.get_import_folder()
-        export_folder = self.plugin_instance.get_export_folder()
-        self.importDir.setText(import_folder)
-        self.exportDir.setText(export_folder)
-        self.importDir_btn.clicked.connect(make_folder_selector(self.importDir))
-        self.exportDir_btn.clicked.connect(make_folder_selector(self.exportDir))
+        self.radioButton_hybrid.setEnabled(False)
 
+    def get_selected_mode(self):
+        if self.radioButton_offline.isChecked():
+            return OFFLINE
+        if self.radioButton_online.isChecked():
+            return ONLINE
+        if self.radioButton_hybrid.isChecked():
+            return HYBRID
 
-    def save_settings(self):
-        import_folder = self.importDir.text()
-        export_folder = self.exportDir.text()
-        self.plugin_instance.update_settings(import_folder, export_folder)
+    def save_options(self):
+        mode = self.get_selected_mode()
+        self.parent.push_project(remote_layers=self.remote_layers, remote_save_mode=mode)
         self.close()
+

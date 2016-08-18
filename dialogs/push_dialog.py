@@ -20,8 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 """
-from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import print_function
 
 import os
 
@@ -29,24 +29,25 @@ from PyQt4 import QtGui, QtCore, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 from qgis.gui import QgsMessageBar
 
-from .export_offline import offline_convert, get_layer_ids_to_offline_convert
-from .data_source_utils import *
-from .config import *
-from .file_utils import fileparts, get_full_parent_path
-from .qt_utils import make_folder_selector
-from .qgis_utils import get_project_title
+from QFieldSync.config import *
+from QFieldSync.utils.data_source_utils import *
+from QFieldSync.utils.export_offline_utils import offline_convert, get_layer_ids_to_offline_convert
+from QFieldSync.utils.file_utils import fileparts, get_full_parent_path
+from QFieldSync.utils.qgis_utils import get_project_title
+from QFieldSync.utils.qt_utils import make_folder_selector
+
+from QFieldSync.utils.qt_utils import get_ui_class
 
 try:
-    from .utils.usb import detect_devices, connect_device, push_file, \
+    from QFieldSync.utils.usb import detect_devices, connect_device, push_file, \
         disconnect_device
 except:
     pass
 
-from .remote_options import RemoteOptionsDialog
+from QFieldSync.dialogs.remote_options_dialog import RemoteOptionsDialog
 
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'ui', 'push_dialog_base.ui'))
+FORM_CLASS = get_ui_class('push_dialog_base.ui')
 
 
 class PushDialog(QtGui.QDialog, FORM_CLASS):

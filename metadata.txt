@@ -22,13 +22,13 @@ email=info@opengis.ch
 changelog= Allow syncing from QGIS to QField
 
 # Tags are comma separated with spaces allowed
-tags=Android, syncronization, QField
+tags=QField, Android, Syncronization, Offline
 
 homepage=https://github.com/opengisch/QFieldSync/wiki
 tracker=https://github.com/opengisch/QFieldSync/issues
 repository=https://github.com/opengisch/QFieldSync
 category=Plugins
-icon=icon.png
+icon=resources/icon.png
 # experimental flag
 experimental=True
 

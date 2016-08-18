@@ -3,7 +3,7 @@
 /***************************************************************************
  QFieldSync
                                  A QGIS plugin
- Sync your projects to QField on android
+ Sync your projects to QField
                               -------------------
         begin                : 2015-05-20
         git sha              : $Format:%H$
@@ -28,16 +28,15 @@ except:
     pass
 
 import os.path
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QSettings
+from PyQt4.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
 from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
-from . import resources_rc
-from . import config
-from .push_dialog import PushDialog
-from .settings_dialog import SettingsDialog
+from QFieldSync import config
+from QFieldSync.dialogs.push_dialog import PushDialog
+from QFieldSync.dialogs.settings_dialog import SettingsDialog
 
 try:
-    from .utils.utils import warn_project_is_dirty
+    from QFieldSync.utils.utils import warn_project_is_dirty
 except:
     warn_project_is_dirty = lambda: True
 

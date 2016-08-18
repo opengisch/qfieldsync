@@ -1,4 +1,4 @@
-from .file_utils import fileparts
+from QFieldSync.utils.file_utils import fileparts
 
 
 def get_project_title(proj):

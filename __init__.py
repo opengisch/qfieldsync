@@ -22,6 +22,8 @@
  This script initializes the plugin, making it known to QGIS.
 """
 
+from __future__ import absolute_import
+
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
@@ -31,6 +33,6 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     #
-    from .qfield_sync import QFieldSync
+    from QFieldSync.qfield_sync import QFieldSync
 
     return QFieldSync(iface)
