@@ -1,6 +1,6 @@
 <RCC>
-  <qresource prefix="/plugins/QFieldSync">
+  <qresource prefix="/plugins/qfieldsync">
     <file alias="refresh.png">resources/icon-refresh-128.png</file>
-    <file>icon.png</file>
+    <file alias="icon.png">resources/icon.png</file>
   </qresource>
 </RCC>

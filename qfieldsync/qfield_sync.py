@@ -30,15 +30,19 @@ except:
 import os.path
 from PyQt4.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
 from PyQt4.QtGui import QAction, QIcon
-# Initialize Qt resources from file resources.py
+
 from qfieldsync import config
 from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
 
 try:
-    from qfieldsync.utils.utils import warn_project_is_dirty
-except:
+    # TODO implement this
+    from qfieldsync.utils.qgis_utils import warn_project_is_dirty
+except ImportError:
     warn_project_is_dirty = lambda: True
+
+# noinspection PyUnresolvedReferences
+import qfieldsync.resources_rc  # pylint: disable=unused-import  # NOQA
 
 
 class QFieldSync(object):
@@ -179,15 +183,14 @@ class QFieldSync(object):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        refresh_icon_path = ':/plugins/QFieldSync/refresh.png'
         self.add_action(
-            None,
+            ':/plugins/qfieldsync/icon.png',
             text=self.tr(u'Settings'),
             callback=self.show_settings,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
         self.add_action(
-            refresh_icon_path,
+            ':/plugins/qfieldsync/refresh.png',
             text=self.tr(u'Sync to QField'),
             callback=self.push_project,
             parent=self.iface.mainWindow())

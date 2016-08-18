@@ -31,7 +31,7 @@ class QFieldSyncDialogTest(unittest.TestCase):
 
     def test_icon_png(self):
         """Test we can click OK."""
-        path = ':/plugins/QFieldSync/icon.png'
+        path = ':icon.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
 
