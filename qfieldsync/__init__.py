@@ -33,6 +33,6 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     #
-    from QFieldSync.qfield_sync import QFieldSync
+    from qfieldsync.qfield_sync import QFieldSync
 
     return QFieldSync(iface)

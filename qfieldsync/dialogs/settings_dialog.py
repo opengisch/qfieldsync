@@ -28,11 +28,11 @@ import os
 from PyQt4 import QtGui, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
-from QFieldSync.utils.qt_utils import get_ui_class
+from qfieldsync.utils.qt_utils import get_ui_class
 
 FORM_CLASS = get_ui_class('settings.ui')
 
-from QFieldSync.utils.qt_utils import make_folder_selector
+from qfieldsync.utils.qt_utils import make_folder_selector
 
 
 class SettingsDialog(QtGui.QDialog, FORM_CLASS):

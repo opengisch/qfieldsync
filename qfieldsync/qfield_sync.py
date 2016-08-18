@@ -31,12 +31,12 @@ import os.path
 from PyQt4.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
 from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
-from QFieldSync import config
-from QFieldSync.dialogs.push_dialog import PushDialog
-from QFieldSync.dialogs.settings_dialog import SettingsDialog
+from qfieldsync import config
+from qfieldsync.dialogs.push_dialog import PushDialog
+from qfieldsync.dialogs.settings_dialog import SettingsDialog
 
 try:
-    from QFieldSync.utils.utils import warn_project_is_dirty
+    from qfieldsync.utils.utils import warn_project_is_dirty
 except:
     warn_project_is_dirty = lambda: True
 

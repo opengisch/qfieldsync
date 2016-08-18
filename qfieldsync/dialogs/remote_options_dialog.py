@@ -23,13 +23,12 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-import os
 from PyQt4 import QtGui, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 
-from QFieldSync.config import ONLINE, OFFLINE, HYBRID
+from qfieldsync.config import ONLINE, OFFLINE, HYBRID
 
-from QFieldSync.utils.qt_utils import get_ui_class
+from qfieldsync.utils.qt_utils import get_ui_class
 
 FORM_CLASS = get_ui_class('remote_options_base.ui')
 

@@ -4,10 +4,10 @@ import shutil
 from PyQt4 import QtCore
 from qgis.core import QgsProject, QgsOfflineEditing
 
-from QFieldSync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source, \
+from qfieldsync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source, \
     project_get_always_offline_layers
-from QFieldSync.utils.file_utils import fileparts
-from QFieldSync.config import OFFLINE
+from qfieldsync.utils.file_utils import fileparts
+from qfieldsync.config import OFFLINE
 
 
 def get_layer_ids_to_offline_convert(remote_layers, remote_save_mode):

@@ -29,22 +29,22 @@ from PyQt4 import QtGui, QtCore, uic
 from PyQt4.QtGui import QDialogButtonBox, QPushButton
 from qgis.gui import QgsMessageBar
 
-from QFieldSync.config import *
-from QFieldSync.utils.data_source_utils import *
-from QFieldSync.utils.export_offline_utils import offline_convert, get_layer_ids_to_offline_convert
-from QFieldSync.utils.file_utils import fileparts, get_full_parent_path
-from QFieldSync.utils.qgis_utils import get_project_title
-from QFieldSync.utils.qt_utils import make_folder_selector
+from qfieldsync.config import *
+from qfieldsync.utils.data_source_utils import *
+from qfieldsync.utils.export_offline_utils import offline_convert, get_layer_ids_to_offline_convert
+from qfieldsync.utils.file_utils import fileparts, get_full_parent_path
+from qfieldsync.utils.qgis_utils import get_project_title
+from qfieldsync.utils.qt_utils import make_folder_selector
 
-from QFieldSync.utils.qt_utils import get_ui_class
+from qfieldsync.utils.qt_utils import get_ui_class
 
 try:
-    from QFieldSync.utils.usb import detect_devices, connect_device, push_file, \
+    from qfieldsync.utils.usb import detect_devices, connect_device, push_file, \
         disconnect_device
 except:
     pass
 
-from QFieldSync.dialogs.remote_options_dialog import RemoteOptionsDialog
+from qfieldsync.dialogs.remote_options_dialog import RemoteOptionsDialog
 
 
 FORM_CLASS = get_ui_class('push_dialog_base.ui')
