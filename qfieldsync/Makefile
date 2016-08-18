@@ -41,14 +41,14 @@ SOURCES = \
 	qfield_sync.py \
 	qfield_sync_dialog.py
 
-PLUGINNAME = QFieldSync
+PLUGINNAME = qfieldsync
 
 PY_FILES = \
 	qfield_sync.py \
 	qfield_sync_dialog.py \
 	__init__.py
 
-UI_FILES = qfield_sync_dialog_base.ui
+UI_FILES = we_use_dynamic_loading_of_ui_classes
 
 EXTRAS = icon.png metadata.txt
 
@@ -63,7 +63,7 @@ PEP8EXCLUDE=pydev,resources_rc.py,conf.py,third_party,ui
 
 HELP = help/build/html
 
-PLUGIN_UPLOAD = $(c)/plugin_upload.py
+PLUGIN_UPLOAD = $(c)/../scripts/plugin_upload.py
 
 RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | sed 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
 
@@ -152,10 +152,10 @@ package: compile
 	@echo "Exporting plugin to zip package.	"
 	@echo "------------------------------------"
 	rm -f $(PLUGINNAME).zip
-	git archive --prefix=$(PLUGINNAME)/ -o $(PLUGINNAME).zip $(VERSION)
+	git archive -o $(PLUGINNAME).zip $(VERSION)
 	echo "Created package: $(PLUGINNAME).zip"
 
-upload: zip
+upload: package
 	@echo
 	@echo "-------------------------------------"
 	@echo "Uploading plugin to QGIS Plugin repo."
