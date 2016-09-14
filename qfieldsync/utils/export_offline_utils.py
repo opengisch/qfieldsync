@@ -48,14 +48,17 @@ def offline_convert(vector_layer_ids, raster_layers, shpfile_layers, export_fold
     dataPath = export_folder
     if not os.path.exists(dataPath):
         os.mkdir(dataPath)
+    # TODO more file-based vectors ??
+    # copy file data and modify layer sources
+    handle_rasters(dataPath, raster_layers)
+    handle_shpfiles(dataPath, shpfile_layers)
+    # Run the offline plugin
     dbPath = "data.sqlite"
+    # save the offline project twice so that the offline plugin can "know" that it's a relative path 
+    QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
     success = QgsOfflineEditing().convertToOfflineProject(dataPath, dbPath, vector_layer_ids)
     if not success:
         raise Exception("Converting to offline project did not succeed")
-        # Now we have a project state which can be saved as offline project
-    # TODO more file-based vectors ??
-    handle_rasters(dataPath, raster_layers)
-    handle_shpfiles(dataPath, shpfile_layers)
     # Now we have a project state which can be saved as offline project
     QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
     return dataPath
