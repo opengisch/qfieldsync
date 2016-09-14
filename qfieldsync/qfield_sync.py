@@ -32,6 +32,7 @@ from PyQt4.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
 from PyQt4.QtGui import QAction, QIcon
 
 from qfieldsync import config
+from qfieldsync.utils import qgis2compat
 from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
 

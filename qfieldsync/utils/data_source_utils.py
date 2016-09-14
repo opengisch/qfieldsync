@@ -21,7 +21,7 @@ def change_layer_data_source(layer, new_data_source):
     XMLMapLayers = XMLDocument.createElement("maplayers")
     XMLMapLayer = QDomElement()
     XMLMapLayer = XMLDocument.createElement("maplayer")
-    layer.writeLayerXML(XMLMapLayer, XMLDocument)
+    layer.writeLayerXml(XMLMapLayer, XMLDocument)
 
     # modify DOM element with new layer reference
     XMLMapLayer.firstChildElement("datasource").firstChild().setNodeValue(new_data_source)
@@ -30,7 +30,7 @@ def change_layer_data_source(layer, new_data_source):
     XMLDocument.appendChild(XMLMapLayers)
 
     # reload layer definition
-    layer.readLayerXML(XMLMapLayer)
+    layer.readLayerXml(XMLMapLayer)
     layer.reload()
 
 
