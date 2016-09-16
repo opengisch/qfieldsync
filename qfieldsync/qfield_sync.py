@@ -233,7 +233,7 @@ class QFieldSync(object):
     def synchronize_qfield(self):
         """Synchronize from QField"""
         if warn_project_is_dirty():
-            dlg = SynchronizeDialog(self)
+            dlg = SynchronizeDialog(self.iface, self)
             dlg.exec_()
 
     def push_project(self):
