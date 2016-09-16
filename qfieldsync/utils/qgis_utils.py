@@ -1,3 +1,5 @@
+from qgis.core import QgsProject
+
 from qfieldsync.utils.file_utils import fileparts
 
 
@@ -8,3 +10,8 @@ def get_project_title(proj):
         fn = proj.fileName()
         _, title, _ = fileparts(fn)
     return title
+
+def open_project(fn):
+    QgsProject.instance().clear()
+    QgsProject.instance().setFileName(fn)
+    QgsProject.instance().read()

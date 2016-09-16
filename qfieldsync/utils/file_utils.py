@@ -11,6 +11,19 @@ def fileparts(fn, extension_dot=True):
         ext = ext[1:]
     return (path, name, ext)
 
+def get_children_with_extension(parent, specified_ext, count=1):
+    res = []
+    extension_dot = specified_ext.startswith(".")
+    for fn in os.listdir(parent):
+        _, _, ext = fileparts(fn, extension_dot=extension_dot)
+        if ext == specified_ext:
+            res.append(os.path.join(parent, fn))
+    if len(res)!=count:
+        raise Exception("Expected {} children with extension {} under {}, got {}".format(
+            count, specified_ext, parent, len(res)))
+
+    return res
+
 
 def get_full_parent_path(fn):
     return os.path.dirname(os.path.normpath(fn))

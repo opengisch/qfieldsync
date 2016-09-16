@@ -5,7 +5,7 @@ from PyQt4 import QtCore
 from qgis.core import QgsProject, QgsOfflineEditing
 
 from qfieldsync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source, \
-    project_get_always_offline_layers
+    project_get_always_offline_layers, is_shapefile_layer
 from qfieldsync.utils.file_utils import fileparts
 from qfieldsync.config import OFFLINE
 
@@ -17,7 +17,10 @@ def get_layer_ids_to_offline_convert(remote_layers, remote_save_mode):
             layer_ids.append(layer.id())
 
     for layer in project_get_always_offline_layers():
-        layer_ids.append(layer.id())
+        if not is_shapefile_layer(layer):
+            # Ignore shapefiles because they should be copied over as files rather
+            # than getting converted to spatialite
+            layer_ids.append(layer.id())
     return layer_ids
 
 
