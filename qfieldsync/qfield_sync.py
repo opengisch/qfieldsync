@@ -35,6 +35,7 @@ from qfieldsync import config
 from qfieldsync.utils import qgis2compat
 from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
+from qfieldsync.dialogs.synchronize_dialog import SynchronizeDialog
 
 try:
     # TODO implement this
@@ -196,6 +197,12 @@ class QFieldSync(object):
             callback=self.push_project,
             parent=self.iface.mainWindow())
 
+        self.add_action(
+            ':/plugins/qfieldsync/refresh-reverse.png',
+            text=self.tr(u'Sync from QField'),
+            callback=self.synchronize_qfield,
+            parent=self.iface.mainWindow())
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -224,6 +231,11 @@ class QFieldSync(object):
         self.export_folder = export_folder
         self.update_qgis_settings()
 
+    def synchronize_qfield(self):
+        """Synchronize from QField"""
+        if warn_project_is_dirty():
+            dlg = SynchronizeDialog(self.iface, self)
+            dlg.exec_()
 
     def push_project(self):
         """Run method that performs all the real work"""
