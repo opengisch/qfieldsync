@@ -23,7 +23,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, pyqtSlot
 from qgis.PyQt.QtGui import QDialog, QDialogButtonBox, QPushButton, QMessageBox
 from qgis.PyQt.QtWidgets import QApplication, QMessageBox
 
@@ -49,16 +49,42 @@ class PullDialog(QDialog, FORM_CLASS):
         self.qfieldDir.setText(plugin_instance.get_import_folder())
         self.qfieldDir_btn.clicked.connect(make_folder_selector(self.qfieldDir))
 
+        self.offline_editing_done = False
+
     def start_synchronization(self):
         self.plugin_instance.action_start()
         qfield_folder = self.qfieldDir.text()
         try:
+            self.progress_group.setEnabled(True)
             qgs_file = get_project_in_folder(qfield_folder)
             open_project(qgs_file)
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            self.offline_editing.synchronize()  # no way to know exactly if it
-            QApplication.restoreOverrideCursor()
+            self.offline_editing.progressStopped.connect(self.update_done)
+            self.offline_editing.layerProgressUpdated.connect(self.update_total)
+            self.offline_editing.progressModeSet.connect(self.update_mode)
+            self.offline_editing.progressUpdated.connect(self.update_value)
+            self.offline_editing.synchronize()
             self.plugin_instance.action_end(self.tr('Synchronize from QField'))
-            self.close()
+            if self.offline_editing_done:
+                self.close()
+            else:
+                message = self.tr("The project you imported doesn't seem to be "
+                                  "an offline project")
+                raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
             self.iface.messageBar().pushWarning('Sync dialog', str(e))
+        finally:
+            self.progress_group.setEnabled(False)
+
+    def update_total(self, current, layer_count):
+        self.totalProgressBar.setMaximum(layer_count)
+        self.totalProgressBar.setValue(current)
+
+    def update_mode(self, _, mode_count):
+        self.layerProgressBar.setMaximum(mode_count)
+        self.layerProgressBar.setValue(0)
+
+    def update_value(self, progress):
+        self.layerProgressBar.setValue(progress)
+
+    def update_done(self):
+        self.offline_editing_done = True

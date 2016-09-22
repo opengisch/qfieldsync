@@ -22,13 +22,15 @@
 """
 from __future__ import absolute_import
 
+
 try:
     from builtins import object
 except:
     pass
 
 import os.path
-from qgis.PyQt.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
+from qgis.PyQt.QtCore import (QObject,QTranslator, qVersion,
+                              QCoreApplication, QSettings)
 from qgis.PyQt.QtGui import QAction, QIcon
 from qgis.core import QgsOfflineEditing
 
