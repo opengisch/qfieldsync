@@ -14,7 +14,7 @@ __copyright__ = 'Copyright 2015, OPENGIS.ch'
 
 import unittest
 
-from PyQt4.QtGui import QDialogButtonBox, QDialog
+from qgis.PyQt.QtGui import QDialogButtonBox, QDialog
 from utilities import get_qgis_app
 
 from qfieldsync.dialogs.push_dialog import PushDialog

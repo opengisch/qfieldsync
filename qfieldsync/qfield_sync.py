@@ -22,25 +22,24 @@
 """
 from __future__ import absolute_import
 
+
 try:
     from builtins import object
 except:
     pass
 
 import os.path
-from PyQt4.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
-from PyQt4.QtGui import QAction, QIcon
+from qgis.PyQt.QtCore import (QObject,QTranslator, qVersion,
+                              QCoreApplication, QSettings)
+from qgis.PyQt.QtGui import QAction, QIcon
+from qgis.core import QgsOfflineEditing
 
 from qfieldsync import config
-from qfieldsync.utils import qgis2compat
 from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
+from qfieldsync.dialogs.pull_dialog import PullDialog
 
-try:
-    # TODO implement this
-    from qfieldsync.utils.qgis_utils import warn_project_is_dirty
-except ImportError:
-    warn_project_is_dirty = lambda: True
+from qfieldsync.utils.qgis_utils import warn_project_is_dirty, tr
 
 # noinspection PyUnresolvedReferences
 import qfieldsync.resources_rc  # pylint: disable=unused-import  # NOQA
@@ -87,6 +86,13 @@ class QFieldSync(object):
         self.import_folder = QSettings().value(config.IMPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
         self.update_qgis_settings()
 
+        # instance of the QgsOfflineEditing
+        self.offline_editing = QgsOfflineEditing()
+        self.offline_editing.warning.connect(self.show_warning)
+
+        # store warnings from last run
+        self.last_action_warnings = []
+
     def update_qgis_settings(self):
         s = QSettings()
         s.setValue(config.EXPORT_DIRECTORY_SETTING, self.export_folder)
@@ -106,7 +112,7 @@ class QFieldSync(object):
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('QFieldSync', message)
+        return tr(message)
 
     def add_action(
             self,
@@ -196,6 +202,12 @@ class QFieldSync(object):
             callback=self.push_project,
             parent=self.iface.mainWindow())
 
+        self.add_action(
+            ':/plugins/qfieldsync/refresh-reverse.png',
+            text=self.tr(u'Sync from QField'),
+            callback=self.synchronize_qfield,
+            parent=self.iface.mainWindow())
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -224,11 +236,36 @@ class QFieldSync(object):
         self.export_folder = export_folder
         self.update_qgis_settings()
 
+    def synchronize_qfield(self):
+        """Synchronize from QField"""
+        if warn_project_is_dirty():
+            dlg = PullDialog(self.iface, self)
+            dlg.exec_()
 
     def push_project(self):
-        """Run method that performs all the real work"""
+        """Push to QField"""
         if warn_project_is_dirty():
             # show the dialog
             dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
             dlg.exec_()
+
+    def show_warning(self, title, message):
+        self.last_action_warnings.append((title, message))
+        self.iface.messageBar().pushWarning(title, message)
+
+    def action_start(self):
+        self.clear_last_action_warnings()
+
+    def action_end(self, title):
+        count = len(self.last_action_warnings)
+        if count:
+            message = self.tr('not succesful, see the {} warnings for '
+                              'details'.format(count))
+            self.iface.messageBar().pushWarning(title, message)
+        else:
+            message = self.tr('successful')
+            self.iface.messageBar().pushInfo(title, message)
+
+    def clear_last_action_warnings(self):
+        self.last_action_warnings = []

@@ -1,11 +1,13 @@
 import os
 import shutil
 
-from PyQt4 import QtCore
+from qgis.PyQt import Qt
+from qgis.PyQt.QtCore import QFileInfo
+from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsProject, QgsOfflineEditing
 
 from qfieldsync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source, \
-    project_get_always_offline_layers
+    project_get_always_offline_layers, is_shapefile_layer
 from qfieldsync.utils.file_utils import fileparts
 from qfieldsync.config import OFFLINE
 
@@ -17,7 +19,10 @@ def get_layer_ids_to_offline_convert(remote_layers, remote_save_mode):
             layer_ids.append(layer.id())
 
     for layer in project_get_always_offline_layers():
-        layer_ids.append(layer.id())
+        if not is_shapefile_layer(layer):
+            # Ignore shapefiles because they should be copied over as files rather
+            # than getting converted to spatialite
+            layer_ids.append(layer.id())
     return layer_ids
 
 
@@ -42,7 +47,8 @@ def handle_rasters(dataPath, raster_layers):
         change_layer_data_source(raster_layer, new_file_path)
 
 
-def offline_convert(vector_layer_ids, raster_layers, shpfile_layers, export_folder):
+def offline_convert(offline_editing, vector_layer_ids, raster_layers,
+                    shpfile_layers, export_folder):
     existing_filepath = QgsProject.instance().fileName()
     existing_fn, ext = os.path.splitext(os.path.basename(existing_filepath))
     dataPath = export_folder
@@ -55,10 +61,14 @@ def offline_convert(vector_layer_ids, raster_layers, shpfile_layers, export_fold
     # Run the offline plugin
     dbPath = "data.sqlite"
     # save the offline project twice so that the offline plugin can "know" that it's a relative path 
-    QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
-    success = QgsOfflineEditing().convertToOfflineProject(dataPath, dbPath, vector_layer_ids)
+    QgsProject.instance().write(QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
+
+    QApplication.setOverrideCursor(Qt.WaitCursor)
+    success = offline_editing.convertToOfflineProject(
+            dataPath, dbPath, vector_layer_ids)
+    QApplication.restoreOverrideCursor()
     if not success:
         raise Exception("Converting to offline project did not succeed")
     # Now we have a project state which can be saved as offline project
-    QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
+    QgsProject.instance().write(QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
     return dataPath
