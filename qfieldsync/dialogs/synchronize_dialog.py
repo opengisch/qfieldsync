@@ -54,7 +54,10 @@ class PullDialog(QtGui.QDialog, FORM_CLASS):
             title = self.tr('Continue synchronization?')
             text = self.tr('The currently open project is not saved. '
                            'QFieldSync will overwrite it. Continue?')
-            if not QMessageBox.question(self, title, text):
+            answer= QMessageBox.question(self, title, text,
+                                        QtGui.QMessageBox.Yes,
+                                        QtGui.QMessageBox.No)
+            if answer == QtGui.QMessageBox.No:
                 return
 
         qfield_folder = self.qfieldDir.text()
@@ -62,6 +65,8 @@ class PullDialog(QtGui.QDialog, FORM_CLASS):
         open_project(qgs_file)
         QgsOfflineEditing().synchronize()  # no way to know exactly if it
         # succeeded?
+
+    def report_sync_status(self):
         text = "Remote layers from {} synchronized.".format(qgs_file)
         self.iface.messageBar().pushMessage(u'Message from {}'.format(LOG_TAG),
                                             text, QgsMessageBar.INFO,
