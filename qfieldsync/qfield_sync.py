@@ -86,7 +86,10 @@ class QFieldSync(object):
 
         # instance of the QgsOfflineEditing
         self.offline_editing = QgsOfflineEditing()
-        self.offline_editing.warning.connect(self.show_sync_warning)
+        self.offline_editing.warning.connect(self.show_warning)
+
+        # store warnings from last run
+        self.last_action_warnings = []
 
     def update_qgis_settings(self):
         s = QSettings()
@@ -238,13 +241,29 @@ class QFieldSync(object):
             dlg.exec_()
 
     def push_project(self):
-        """Run method that performs all the real work"""
+        """Push to QField"""
         if warn_project_is_dirty():
             # show the dialog
             dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
             dlg.exec_()
 
-    def show_sync_warning(self, title, message):
+    def show_warning(self, title, message):
+        self.last_action_warnings.append((title, message))
         self.iface.messageBar().pushWarning(title, message)
 
+    def action_start(self):
+        self.clear_last_action_warnings()
+
+    def action_end(self, title):
+        count = len(self.last_action_warnings)
+        if count:
+            message = self.tr('not succesful, see the {} warnings for '
+                              'details'.format(count))
+            self.iface.messageBar().pushWarning(title, message)
+        else:
+            message = self.tr('successful')
+            self.iface.messageBar().pushInfo(title, message)
+
+    def clear_last_action_warnings(self):
+        self.last_action_warnings = []

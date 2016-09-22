@@ -44,6 +44,7 @@ class PullDialog(QDialog, FORM_CLASS):
         super(PullDialog, self).__init__(parent=None)
         self.setupUi(self)
         self.iface = iface
+        self.plugin_instance = plugin_instance
         self.offline_editing = plugin_instance.offline_editing
         self.push_btn = QPushButton(self.tr('Synchronize'))
         self.push_btn.clicked.connect(self.start_synchronization)
@@ -52,6 +53,7 @@ class PullDialog(QDialog, FORM_CLASS):
         self.qfieldDir_btn.clicked.connect(make_folder_selector(self.qfieldDir))
 
     def start_synchronization(self):
+        self.plugin_instance.action_start()
         qfield_folder = self.qfieldDir.text()
         try:
             qgs_file = get_project_in_folder(qfield_folder)
@@ -59,6 +61,7 @@ class PullDialog(QDialog, FORM_CLASS):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.offline_editing.synchronize()  # no way to know exactly if it
             QApplication.setOverrideCursor()
+            self.plugin_instance.action_end(self.tr('Synchronize from QField'))
             self.close()
         except NoProjectFoundError as e:
             self.iface.messageBar().pushWarning('Sync dialog', str(e))

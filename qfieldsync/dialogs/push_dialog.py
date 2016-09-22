@@ -31,7 +31,8 @@ from qgis.gui import QgsMessageBar
 
 from qfieldsync.config import *
 from qfieldsync.utils.data_source_utils import *
-from qfieldsync.utils.export_offline_utils import offline_convert, get_layer_ids_to_offline_convert
+from qfieldsync.utils.export_offline_utils import offline_convert, \
+    get_layer_ids_to_offline_convert
 from qfieldsync.utils.file_utils import fileparts, get_full_parent_path
 from qfieldsync.utils.qgis_utils import get_project_title
 from qfieldsync.utils.qt_utils import make_folder_selector
@@ -39,13 +40,13 @@ from qfieldsync.utils.qt_utils import make_folder_selector
 from qfieldsync.utils.qt_utils import get_ui_class
 
 try:
-    from qfieldsync.utils.usb import detect_devices, connect_device, push_file, \
+    from qfieldsync.utils.usb import detect_devices, connect_device, \
+        push_file, \
         disconnect_device
 except:
     pass
 
 from qfieldsync.dialogs.remote_options_dialog import RemoteOptionsDialog
-
 
 FORM_CLASS = get_ui_class('push_dialog_base.ui')
 
@@ -75,7 +76,8 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.ftp_tab.setEnabled(False)
 
     def show_remote_options(self):
-        dlg = RemoteOptionsDialog(self, self.plugin_instance, remote_layers=project_get_remote_layers())
+        dlg = RemoteOptionsDialog(self, self.plugin_instance,
+                                  remote_layers=project_get_remote_layers())
         dlg.exec_()
 
     def refresh_devices(self):
@@ -99,7 +101,6 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         progress = float(sent) / total * 100
         self.progress_bar.setValue(progress)
 
-
     def setup_tabs(self):
         """Populate tabs and connect signals for the tabs of the push dialog"""
         base_folder = self.plugin_instance.get_export_folder()
@@ -110,7 +111,6 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.cloudDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.cloudDir_btn.clicked.connect(make_folder_selector(self.cloudDir))
-
 
     def get_export_folder_from_dialog(self):
         """Get the export folder according to the inputs in the tab selected"""
@@ -128,18 +128,20 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         if self.tabWidget.currentIndex() == 3:
             raise Exception("ADB mode not implemented yet")
 
-
     def push_project(self, remote_layers=None, remote_save_mode=None):
-
+        self.plugin_instance.action_start()
         export_folder = self.get_export_folder_from_dialog()
         can_only_be_online_layers = project_get_always_online_layers()
         if can_only_be_online_layers:
-            self.show_warning_about_layers_that_cant_work_offline(can_only_be_online_layers)
+            self.show_warning_about_layers_that_cant_work_offline(
+                    can_only_be_online_layers)
         non_qfield_layers = project_get_qfield_unsupported_layers()
         if non_qfield_layers:
-            self.show_warning_about_layers_that_cant_work_with_qfield(non_qfield_layers)
+            self.show_warning_about_layers_that_cant_work_with_qfield(
+                    non_qfield_layers)
 
-        vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
+        vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers,
+                                                            remote_save_mode)
         shpfile_layers = project_get_shp_layers()
         raster_layers = project_get_raster_layers()
         project_directory = offline_convert(self.offline_editing,
@@ -152,42 +154,53 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
             self.set_hybrid_flag()
 
         self.do_post_offline_convert_action()
+        self.plugin_instance.action_end(self.tr('Push to QField'))
         self.close()
 
         # this here doesn't do anything for now
-        #device_index = self.devices_cbx.currentIndex()
-        #device = self.devices[device_index][1]
-        #mtp = connect_device(device)
-        #dest = 'testFILE.qgs'
-        #push_file(mtp, self.project.fileName(), dest, self.update_progress)
-        #disconnect_device(mtp)
+        # device_index = self.devices_cbx.currentIndex()
+        # device = self.devices[device_index][1]
+        # mtp = connect_device(device)
+        # dest = 'testFILE.qgs'
+        # push_file(mtp, self.project.fileName(), dest, self.update_progress)
+        # disconnect_device(mtp)
 
     def do_post_offline_convert_action(self):
         if self.tabWidget.currentIndex() == 0:
             export_folder = self.get_export_folder_from_dialog()
             export_base_folder = get_full_parent_path(export_folder)
-            text = "Your project has been exported sucessfully to {}, please copy the entire folder to the device".format(
-                export_folder)
-            self.iface.messageBar().pushMessage(u'Message from {}'.format(LOG_TAG), text, QgsMessageBar.INFO,
-                                                MSG_DURATION_SECS)
+            text = "Your project has been exported sucessfully to {}, please " \
+                   "copy the entire folder to the device".format(
+                    export_folder)
+            self.iface.messageBar().pushMessage(
+                    u'Message from {}'.format(LOG_TAG), text,
+                    QgsMessageBar.INFO,
+                    MSG_DURATION_SECS)
             if self.checkBox_open.isChecked():
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(export_base_folder))
+                QtGui.QDesktopServices.openUrl(
+                        QtCore.QUrl.fromLocalFile(export_base_folder))
         else:
             raise Exception("FTP and ADB not fully supported yet")
-
 
     def show_warning_about_layers_that_cant_work_offline(self, layers):
         layers_list = ','.join([layer.name() for layer in layers])
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                                      self.tr('Layers {} require a real time connection').format(layers_list))
+                                      self.tr(
+                                              'Layers {} require a real time '
+                                              'connection').format(
+                                              layers_list))
 
     def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
         layers_list = ','.join([layer.name() for layer in layers])
         QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                                      self.tr('Layers {} are not supported by QField').format(layers_list))
+                                      self.tr(
+                                              'Layers {} are not supported by '
+                                              'QField').format(
+                                              layers_list))
 
     def set_hybrid_flag(self):
-        QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE, "REMOTE_LAYER_MODE", HYBRID)
+        QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE,
+                                         "REMOTE_LAYER_MODE", HYBRID)
 
     def on_reload_devices_btn_clicked(self):
         self.refresh_devices()
