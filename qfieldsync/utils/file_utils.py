@@ -29,4 +29,6 @@ def get_full_parent_path(fn):
     return os.path.dirname(os.path.normpath(fn))
 
 
-
+def get_project_in_folder(folder):
+    qgs_file = get_children_with_extension(folder, 'qgs', count=1)[0]
+    return qgs_file
