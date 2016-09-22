@@ -60,7 +60,7 @@ class PullDialog(QDialog, FORM_CLASS):
             open_project(qgs_file)
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.offline_editing.synchronize()  # no way to know exactly if it
-            QApplication.setOverrideCursor()
+            QApplication.restoreOverrideCursor()
             self.plugin_instance.action_end(self.tr('Synchronize from QField'))
             self.close()
         except NoProjectFoundError as e:
