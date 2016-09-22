@@ -25,9 +25,12 @@ from __future__ import print_function
 
 import os
 
-from qgis.PyQt import QtGui, QtCore, uic
-from qgis.PyQt.QtGui import QDialogButtonBox, QPushButton
+from qgis.PyQt.QtCore import pyqtSlot, QUrl
+from qgis.PyQt.QtGui import (QDialogButtonBox, QPushButton, QDialog,
+                             QDesktopServices, QMessageBox)
+
 from qgis.gui import QgsMessageBar
+from qgis.core import QgsProject
 
 from qfieldsync.config import *
 from qfieldsync.utils.data_source_utils import *
@@ -51,7 +54,7 @@ from qfieldsync.dialogs.remote_options_dialog import RemoteOptionsDialog
 FORM_CLASS = get_ui_class('push_dialog_base.ui')
 
 
-class PushDialog(QtGui.QDialog, FORM_CLASS):
+class PushDialog(QDialog, FORM_CLASS):
     def __init__(self, iface, plugin_instance):
         """Constructor."""
         super(PushDialog, self).__init__(parent=None)
@@ -74,6 +77,8 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.cloud_tab.setEnabled(True)
         self.adb_tab.setEnabled(False)
         self.ftp_tab.setEnabled(False)
+
+        self.offline_editing_done = False
 
     def show_remote_options(self):
         dlg = RemoteOptionsDialog(self, self.plugin_instance,
@@ -130,6 +135,13 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
     def push_project(self, remote_layers=None, remote_save_mode=None):
         self.plugin_instance.action_start()
+
+        # progress connections
+        self.offline_editing.progressStopped.connect(self.update_done)
+        self.offline_editing.layerProgressUpdated.connect(self.update_total)
+        self.offline_editing.progressModeSet.connect(self.update_mode)
+        self.offline_editing.progressUpdated.connect(self.update_value)
+
         export_folder = self.get_export_folder_from_dialog()
         can_only_be_online_layers = project_get_always_online_layers()
         if can_only_be_online_layers:
@@ -155,7 +167,13 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
         self.do_post_offline_convert_action()
         self.plugin_instance.action_end(self.tr('Push to QField'))
-        self.close()
+
+        self.progress_group.setEnabled(False)
+        if self.offline_editing_done:
+            self.close()
+        else:
+            message = self.tr("The project export did't work")
+            self.iface.messageBar().pushCritical('Sync dialog', message)
 
         # this here doesn't do anything for now
         # device_index = self.devices_cbx.currentIndex()
@@ -177,14 +195,14 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
                     QgsMessageBar.INFO,
                     MSG_DURATION_SECS)
             if self.checkBox_open.isChecked():
-                QtGui.QDesktopServices.openUrl(
-                        QtCore.QUrl.fromLocalFile(export_base_folder))
+                QDesktopServices.openUrl(
+                        QUrl.fromLocalFile(export_base_folder))
         else:
             raise Exception("FTP and ADB not fully supported yet")
 
     def show_warning_about_layers_that_cant_work_offline(self, layers):
         layers_list = ','.join([layer.name() for layer in layers])
-        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
+        QMessageBox.information(self.iface.mainWindow(), 'Warning',
                                       self.tr(
                                               'Layers {} require a real time '
                                               'connection').format(
@@ -192,7 +210,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
 
     def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
         layers_list = ','.join([layer.name() for layer in layers])
-        QtGui.QMessageBox.information(self.iface.mainWindow(), 'Warning',
+        QMessageBox.information(self.iface.mainWindow(), 'Warning',
                                       self.tr(
                                               'Layers {} are not supported by '
                                               'QField').format(
@@ -202,5 +220,20 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE,
                                          "REMOTE_LAYER_MODE", HYBRID)
 
-    def on_reload_devices_btn_clicked(self):
-        self.refresh_devices()
+    @pyqtSlot(int, int)
+    def update_total(self, current, layer_count):
+        self.totalProgressBar.setMaximum(layer_count)
+        self.totalProgressBar.setValue(current)
+
+    @pyqtSlot(int)
+    def update_value(self, progress):
+        self.layerProgressBar.setValue(progress)
+
+    @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
+    def update_mode(self, _, mode_count):
+        self.layerProgressBar.setMaximum(mode_count)
+        self.layerProgressBar.setValue(0)
+
+    @pyqtSlot()
+    def update_done(self):
+        self.offline_editing_done = True

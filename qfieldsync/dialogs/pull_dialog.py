@@ -75,16 +75,20 @@ class PullDialog(QDialog, FORM_CLASS):
         finally:
             self.progress_group.setEnabled(False)
 
+    @pyqtSlot(int, int)
     def update_total(self, current, layer_count):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
 
+    @pyqtSlot(int)
+    def update_value(self, progress):
+        self.layerProgressBar.setValue(progress)
+
+    @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
     def update_mode(self, _, mode_count):
         self.layerProgressBar.setMaximum(mode_count)
         self.layerProgressBar.setValue(0)
 
-    def update_value(self, progress):
-        self.layerProgressBar.setValue(progress)
-
+    @pyqtSlot()
     def update_done(self):
         self.offline_editing_done = True
