@@ -30,6 +30,7 @@ except:
 import os.path
 from qgis.PyQt.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
 from qgis.PyQt.QtGui import QAction, QIcon
+from qgis.core import QgsOfflineEditing
 
 from qfieldsync import config
 from qfieldsync.dialogs.push_dialog import PushDialog
@@ -86,6 +87,10 @@ class QFieldSync(object):
         self.export_folder = QSettings().value(config.EXPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
         self.import_folder = QSettings().value(config.IMPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
         self.update_qgis_settings()
+
+        # instance of the QgsOfflineEditing
+        self.offline_editing = QgsOfflineEditing()
+        self.offline_editing.warning.connect(self.show_sync_warning)
 
     def update_qgis_settings(self):
         s = QSettings()
@@ -243,3 +248,7 @@ class QFieldSync(object):
             dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
             dlg.exec_()
+
+    def show_sync_warning(self, title, message):
+        self.iface.messageBar().pushWarning(title, message)
+

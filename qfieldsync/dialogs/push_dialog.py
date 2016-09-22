@@ -57,6 +57,7 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         self.setupUi(self)
         self.iface = iface
         self.plugin_instance = plugin_instance
+        self.offline_editing = plugin_instance.offline_editing
         self.project = QgsProject.instance()
         self.project_lbl.setText(get_project_title(self.project))
         self.push_btn = QPushButton(self.tr('Push'))
@@ -141,7 +142,10 @@ class PushDialog(QtGui.QDialog, FORM_CLASS):
         vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers, remote_save_mode)
         shpfile_layers = project_get_shp_layers()
         raster_layers = project_get_raster_layers()
-        project_directory = offline_convert(vector_layer_ids, raster_layers, shpfile_layers,
+        project_directory = offline_convert(self.offline_editing,
+                                            vector_layer_ids,
+                                            raster_layers,
+                                            shpfile_layers,
                                             export_folder=export_folder)
 
         if remote_save_mode == HYBRID:

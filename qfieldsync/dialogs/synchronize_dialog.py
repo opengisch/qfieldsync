@@ -23,9 +23,9 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from qgis.PyQt import QtGui, uic
-from qgis.PyQt.QtGui import QDialogButtonBox, QPushButton
-from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QDialog, QDialogButtonBox, QPushButton, QMessageBox
+from qgis.PyQt.QtWidgets import QApplication, QMessageBox
 from qgis.gui import QgsMessageBar
 from qgis.core import QgsOfflineEditing, QgsProject
 
@@ -37,12 +37,13 @@ from qfieldsync.config import *
 FORM_CLASS = get_ui_class('synchronize_base.ui')
 
 
-class PullDialog(QtGui.QDialog, FORM_CLASS):
+class PullDialog(QDialog, FORM_CLASS):
     def __init__(self, iface, plugin_instance):
         """Constructor."""
         super(PullDialog, self).__init__(parent=None)
         self.setupUi(self)
         self.iface = iface
+        self.offline_editing = plugin_instance.offline_editing
         self.push_btn = QPushButton(self.tr('Synchronize'))
         self.push_btn.clicked.connect(self.start_synchronization)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
@@ -54,21 +55,16 @@ class PullDialog(QtGui.QDialog, FORM_CLASS):
             title = self.tr('Continue synchronization?')
             text = self.tr('The currently open project is not saved. '
                            'QFieldSync will overwrite it. Continue?')
-            answer= QMessageBox.question(self, title, text,
-                                        QtGui.QMessageBox.Yes,
-                                        QtGui.QMessageBox.No)
-            if answer == QtGui.QMessageBox.No:
+            answer = QMessageBox.question(self, title, text,
+                                          QMessageBox.Yes,
+                                          QMessageBox.No)
+            if answer == QMessageBox.No:
                 return
 
         qfield_folder = self.qfieldDir.text()
         qgs_file = get_project_in_folder(qfield_folder)
         open_project(qgs_file)
-        QgsOfflineEditing().synchronize()  # no way to know exactly if it
-        # succeeded?
-
-    def report_sync_status(self):
-        text = "Remote layers from {} synchronized.".format(qgs_file)
-        self.iface.messageBar().pushMessage(u'Message from {}'.format(LOG_TAG),
-                                            text, QgsMessageBar.INFO,
-                                            MSG_DURATION_SECS)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.offline_editing.synchronize()  # no way to know exactly if it
+        QApplication.setOverrideCursor()
         self.close()
