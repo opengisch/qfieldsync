@@ -37,11 +37,7 @@ from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
 from qfieldsync.dialogs.pull_dialog import PullDialog
 
-try:
-    # TODO implement this
-    from qfieldsync.utils.qgis_utils import warn_project_is_dirty
-except ImportError:
-    warn_project_is_dirty = lambda: True
+from qfieldsync.utils.qgis_utils import warn_project_is_dirty, tr
 
 # noinspection PyUnresolvedReferences
 import qfieldsync.resources_rc  # pylint: disable=unused-import  # NOQA
@@ -111,7 +107,7 @@ class QFieldSync(object):
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('QFieldSync', message)
+        return tr(message)
 
     def add_action(
             self,

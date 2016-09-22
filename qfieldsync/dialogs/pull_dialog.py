@@ -52,16 +52,6 @@ class PullDialog(QDialog, FORM_CLASS):
         self.qfieldDir_btn.clicked.connect(make_folder_selector(self.qfieldDir))
 
     def start_synchronization(self):
-        if (QgsProject.instance().isDirty()):
-            title = self.tr('Continue synchronization?')
-            text = self.tr('The currently open project is not saved. '
-                           'QFieldSync will overwrite it. Continue?')
-            answer = QMessageBox.question(self, title, text,
-                                          QMessageBox.Yes,
-                                          QMessageBox.No)
-            if answer == QMessageBox.No:
-                return
-
         qfield_folder = self.qfieldDir.text()
         try:
             qgs_file = get_project_in_folder(qfield_folder)
