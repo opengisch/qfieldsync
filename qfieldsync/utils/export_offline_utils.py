@@ -70,5 +70,5 @@ def offline_convert(offline_editing, vector_layer_ids, raster_layers,
     if not success:
         raise Exception("Converting to offline project did not succeed")
     # Now we have a project state which can be saved as offline project
-    QgsProject.instance().write(QtCore.QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
+    QgsProject.instance().write(QFileInfo(os.path.join(dataPath, existing_fn + "_offline" + ext)))
     return dataPath

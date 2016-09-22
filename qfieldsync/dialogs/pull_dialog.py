@@ -26,14 +26,11 @@ from __future__ import print_function
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QDialog, QDialogButtonBox, QPushButton, QMessageBox
 from qgis.PyQt.QtWidgets import QApplication, QMessageBox
-from qgis.gui import QgsMessageBar
-from qgis.core import QgsOfflineEditing, QgsProject
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder
 from qfieldsync.utils.qgis_utils import open_project
 from qfieldsync.utils.qt_utils import get_ui_class, make_folder_selector
-from qfieldsync.config import *
 
 FORM_CLASS = get_ui_class('synchronize_base.ui')
 
