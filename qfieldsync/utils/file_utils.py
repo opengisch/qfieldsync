@@ -1,5 +1,7 @@
 import os
 
+from qfieldsync.utils.exceptions import NoProjectFoundError, QFieldSyncError
+
 
 def fileparts(fn, extension_dot=True):
     path = os.path.dirname(fn)
@@ -11,6 +13,7 @@ def fileparts(fn, extension_dot=True):
         ext = ext[1:]
     return (path, name, ext)
 
+
 def get_children_with_extension(parent, specified_ext, count=1):
     res = []
     extension_dot = specified_ext.startswith(".")
@@ -18,9 +21,10 @@ def get_children_with_extension(parent, specified_ext, count=1):
         _, _, ext = fileparts(fn, extension_dot=extension_dot)
         if ext == specified_ext:
             res.append(os.path.join(parent, fn))
-    if len(res)!=count:
-        raise Exception("Expected {} children with extension {} under {}, got {}".format(
-            count, specified_ext, parent, len(res)))
+    if len(res) != count:
+        raise QFieldSyncError(
+                "Expected {} children with extension {} under {}, got {}".format(
+                count, specified_ext, parent, len(res)))
 
     return res
 
@@ -30,5 +34,8 @@ def get_full_parent_path(fn):
 
 
 def get_project_in_folder(folder):
-    qgs_file = get_children_with_extension(folder, 'qgs', count=1)[0]
-    return qgs_file
+    try:
+        return get_children_with_extension(folder, 'qgs', count=1)[0]
+    except QFieldSyncError:
+        message = 'No .qgs file found in folder {}'.format(folder)
+        raise NoProjectFoundError(message)

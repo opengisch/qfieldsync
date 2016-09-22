@@ -29,6 +29,7 @@ from qgis.PyQt.QtWidgets import QApplication, QMessageBox
 from qgis.gui import QgsMessageBar
 from qgis.core import QgsOfflineEditing, QgsProject
 
+from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder
 from qfieldsync.utils.qgis_utils import open_project
 from qfieldsync.utils.qt_utils import get_ui_class, make_folder_selector
@@ -62,9 +63,12 @@ class PullDialog(QDialog, FORM_CLASS):
                 return
 
         qfield_folder = self.qfieldDir.text()
-        qgs_file = get_project_in_folder(qfield_folder)
-        open_project(qgs_file)
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.offline_editing.synchronize()  # no way to know exactly if it
-        QApplication.setOverrideCursor()
-        self.close()
+        try:
+            qgs_file = get_project_in_folder(qfield_folder)
+            open_project(qgs_file)
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            self.offline_editing.synchronize()  # no way to know exactly if it
+            QApplication.setOverrideCursor()
+            self.close()
+        except NoProjectFoundError as e:
+            self.iface.messageBar().pushWarning('Sync dialog', str(e))
