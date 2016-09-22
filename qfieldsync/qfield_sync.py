@@ -35,7 +35,7 @@ from qgis.core import QgsOfflineEditing
 from qfieldsync import config
 from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
-from qfieldsync.dialogs.synchronize_dialog import PullDialog
+from qfieldsync.dialogs.pull_dialog import PullDialog
 
 try:
     # TODO implement this
