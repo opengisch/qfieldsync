@@ -23,8 +23,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-from PyQt4 import QtGui, uic
-from PyQt4.QtGui import QDialogButtonBox, QPushButton
+from qgis.PyQt import QtGui, uic
+from qgis.PyQt.QtGui import QDialogButtonBox, QPushButton
 
 from qfieldsync.config import ONLINE, OFFLINE, HYBRID
 

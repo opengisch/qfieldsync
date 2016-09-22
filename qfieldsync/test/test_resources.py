@@ -14,7 +14,7 @@ __copyright__ = 'Copyright 2015, OPENGIS.ch'
 
 import unittest
 
-from PyQt4.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon
 
 
 

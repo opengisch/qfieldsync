@@ -23,9 +23,9 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-from PyQt4 import QtGui, uic
-from PyQt4.QtGui import QDialogButtonBox, QPushButton
-from PyQt5.QtWidgets import QMessageBox
+from qgis.PyQt import QtGui, uic
+from qgis.PyQt.QtGui import QDialogButtonBox, QPushButton
+from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.gui import QgsMessageBar
 from qgis.core import QgsOfflineEditing, QgsProject
 

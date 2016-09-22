@@ -28,8 +28,8 @@ except:
     pass
 
 import os.path
-from PyQt4.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
-from PyQt4.QtGui import QAction, QIcon
+from qgis.PyQt.QtCore import QTranslator, qVersion, QCoreApplication, QSettings
+from qgis.PyQt.QtGui import QAction, QIcon
 
 from qfieldsync import config
 from qfieldsync.utils import qgis2compat

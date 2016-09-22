@@ -1,5 +1,5 @@
 import os
-from PyQt4 import QtGui, uic
+from qgis.PyQt import QtGui, uic
 from functools import partial
 
 

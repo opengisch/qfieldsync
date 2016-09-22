@@ -25,8 +25,8 @@ from __future__ import print_function
 
 import os
 
-from PyQt4 import QtGui, uic
-from PyQt4.QtGui import QDialogButtonBox, QPushButton
+from qgis.PyQt import QtGui, uic
+from qgis.PyQt.QtGui import QDialogButtonBox, QPushButton
 
 from qfieldsync.utils.qt_utils import get_ui_class
 

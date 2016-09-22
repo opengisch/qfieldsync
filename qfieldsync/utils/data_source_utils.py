@@ -1,4 +1,4 @@
-from PyQt4.QtXml import *
+from qgis.PyQt.QtXml import *
 from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing, QgsRasterLayer
 
 

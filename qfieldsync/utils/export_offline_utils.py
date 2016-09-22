@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from PyQt4 import QtCore
+from qgis.PyQt import QtCore
 from qgis.core import QgsProject, QgsOfflineEditing
 
 from qfieldsync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source, \
