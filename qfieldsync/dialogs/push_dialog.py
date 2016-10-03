@@ -26,8 +26,13 @@ from __future__ import print_function
 import os
 
 from qgis.PyQt.QtCore import pyqtSlot, QUrl
-from qgis.PyQt.QtGui import (QDialogButtonBox, QPushButton, QDialog,
-                             QDesktopServices, QMessageBox)
+from qgis.PyQt.QtGui import QDesktopServices
+from qgis.PyQt.QtWidgets import (
+    QDialogButtonBox,
+    QPushButton,
+    QDialog,
+    QMessageBox
+)
 
 from qgis.gui import QgsMessageBar
 from qgis.core import QgsProject

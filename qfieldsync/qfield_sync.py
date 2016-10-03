@@ -31,7 +31,8 @@ except:
 import os.path
 from qgis.PyQt.QtCore import (QObject,QTranslator, qVersion,
                               QCoreApplication, QSettings)
-from qgis.PyQt.QtGui import QAction, QIcon
+from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsOfflineEditing
 
 from qfieldsync import config
