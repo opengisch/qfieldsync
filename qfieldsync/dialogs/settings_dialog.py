@@ -25,8 +25,12 @@ from __future__ import print_function
 
 import os
 
-from qgis.PyQt import QtGui, uic
-from qgis.PyQt.QtGui import QDialogButtonBox, QPushButton
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import (
+        QDialogButtonBox,
+        QPushButton,
+        QDialog
+)
 
 from qfieldsync.utils.qt_utils import get_ui_class
 
@@ -35,7 +39,7 @@ FORM_CLASS = get_ui_class('settings.ui')
 from qfieldsync.utils.qt_utils import make_folder_selector
 
 
-class SettingsDialog(QtGui.QDialog, FORM_CLASS):
+class SettingsDialog(QDialog, FORM_CLASS):
     def __init__(self, plugin_instance):
         """Constructor."""
         super(SettingsDialog, self).__init__(parent=None)

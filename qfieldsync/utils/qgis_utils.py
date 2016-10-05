@@ -32,9 +32,7 @@ def warn_project_is_dirty(text=None):
         if text is None:
             text = default_text
         answer = QMessageBox.question(None, title, text,
-                                      QMessageBox.Yes,
-                                      QMessageBox.No,
-                                      QMessageBox.Save)
+                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Save)
         if answer == QMessageBox.No:
             return False
         if answer == QMessageBox.Save:

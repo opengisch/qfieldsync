@@ -23,8 +23,12 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-from qgis.PyQt import QtGui, uic
-from qgis.PyQt.QtGui import QDialogButtonBox, QPushButton
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import (
+        QDialogButtonBox,
+        QPushButton,
+        QDialog
+)
 
 from qfieldsync.config import ONLINE, OFFLINE, HYBRID
 
@@ -33,7 +37,7 @@ from qfieldsync.utils.qt_utils import get_ui_class
 FORM_CLASS = get_ui_class('remote_options_base.ui')
 
 
-class RemoteOptionsDialog(QtGui.QDialog, FORM_CLASS):
+class RemoteOptionsDialog(QDialog, FORM_CLASS):
     def __init__(self, parent, plugin_instance, remote_layers):
         """Constructor."""
         super(RemoteOptionsDialog, self).__init__(parent)

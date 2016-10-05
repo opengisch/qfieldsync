@@ -1,8 +1,7 @@
 import os
 import shutil
 
-from qgis.PyQt import Qt
-from qgis.PyQt.QtCore import QFileInfo
+from qgis.PyQt.QtCore import QFileInfo, Qt
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsProject, QgsOfflineEditing
 

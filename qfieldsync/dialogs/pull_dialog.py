@@ -24,8 +24,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 from qgis.PyQt.QtCore import Qt, pyqtSlot
-from qgis.PyQt.QtGui import QDialog, QDialogButtonBox, QPushButton, QMessageBox
-from qgis.PyQt.QtWidgets import QApplication, QMessageBox
+from qgis.PyQt.QtWidgets import (
+        QDialog,
+        QDialogButtonBox,
+        QPushButton,
+        QMessageBox,
+        QApplication,
+        QMessageBox
+)
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder
