@@ -43,7 +43,10 @@ from qfieldsync.dialogs.pull_dialog import PullDialog
 from qfieldsync.utils.qgis_utils import warn_project_is_dirty, tr
 
 # noinspection PyUnresolvedReferences
-import qfieldsync.resources_rc  # pylint: disable=unused-import  # NOQA
+if qVersion()[0] == 4:
+    import qfieldsync.resources_rc4  # pylint: disable=unused-import  # NOQA
+else:
+    import qfieldsync.resources_rc5  # pylint: disable=unused-import  # NOQA
 
 
 class QFieldSync(object):
