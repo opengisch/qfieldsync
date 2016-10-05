@@ -42,6 +42,9 @@ from qfieldsync.dialogs.pull_dialog import PullDialog
 
 from qfieldsync.utils.qgis_utils import warn_project_is_dirty, tr
 
+from .processing.provider import QFieldProcessingProvider
+from processing.core.Processing import Processing
+
 # noinspection PyUnresolvedReferences
 if qVersion()[0] == '4':
     import qfieldsync.resources_rc4  # pylint: disable=unused-import  # NOQA
@@ -212,6 +215,9 @@ class QFieldSync(object):
             callback=self.synchronize_qfield,
             parent=self.iface.mainWindow())
 
+        self.processing_provider = QFieldProcessingProvider()
+        Processing.addProvider(self.processing_provider)
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -221,6 +227,8 @@ class QFieldSync(object):
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
+        Processing.removeProvider(self.processing_provider)
+        self.processing_provider = None
 
     def show_settings(self):
         dlg = SettingsDialog(self)
