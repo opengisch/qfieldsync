@@ -324,7 +324,7 @@
       <bool>false</bool>
      </property>
      <property name="title">
-      <string>GroupBox</string>
+      <string>Progress</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_6">
       <item>
