@@ -75,9 +75,9 @@ class BasemapAlgorithm(GeoAlgorithm):
         self.group = 'raster'
 
         # The parameters
-        self.addParameter(ParameterString(self.MAP_THEME, self.tr('Map Theme')))
+        self.addParameter(ParameterString(self.MAP_THEME, self.tr('Map Theme'), default=None, optional=True))
         self.addParameter(ParameterExtent(self.EXTENT, self.tr('Extent')))
-        self.addParameter(ParameterNumber(self.TILE_SIZE, self.tr('Tile size'), 256))
+        self.addParameter(ParameterNumber(self.TILE_SIZE, self.tr('Tile size'), default=256))
         self.addParameter(ParameterNumber(self.MAP_UNITS_PER_PIXEL, self.tr('Map units per pixel'), 1))
 
         # We add a raster layer as output
