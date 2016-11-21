@@ -20,8 +20,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-from __future__ import absolute_import
-from __future__ import print_function
 
 import os
 
@@ -37,24 +35,29 @@ from qgis.PyQt.QtWidgets import (
 from qgis.gui import QgsMessageBar
 from qgis.core import QgsProject
 
-from qfieldsync.config import *
-from qfieldsync.utils.data_source_utils import *
-from qfieldsync.utils.export_offline_utils import offline_convert, \
+from ..config import *
+from ..utils.data_source_utils import *
+from ..utils.export_offline_utils import (
+    offline_convert,
     get_layer_ids_to_offline_convert
-from qfieldsync.utils.file_utils import fileparts, get_full_parent_path
-from qfieldsync.utils.qgis_utils import get_project_title
-from qfieldsync.utils.qt_utils import make_folder_selector
+)
+from ..utils.file_utils import fileparts, get_full_parent_path
+from ..utils.qgis_utils import get_project_title
+from ..utils.qt_utils import make_folder_selector
 
-from qfieldsync.utils.qt_utils import get_ui_class
+from ..utils.qt_utils import get_ui_class
 
 try:
-    from qfieldsync.utils.usb import detect_devices, connect_device, \
-        push_file, \
+    from ..utils.usb import (
+        detect_devices,
+        connect_device,
+        push_file,
         disconnect_device
+    )
 except:
     pass
 
-from qfieldsync.dialogs.remote_options_dialog import RemoteOptionsDialog
+from ..dialogs.remote_options_dialog import RemoteOptionsDialog
 
 FORM_CLASS = get_ui_class('push_dialog_base.ui')
 
@@ -69,7 +72,7 @@ class PushDialog(QDialog, FORM_CLASS):
         self.offline_editing = plugin_instance.offline_editing
         self.project = QgsProject.instance()
         self.project_lbl.setText(get_project_title(self.project))
-        self.push_btn = QPushButton(self.tr('Push'))
+        self.push_btn = QPushButton(self.tr('Create'))
         if project_get_remote_layers():
             self.push_btn.clicked.connect(self.show_remote_options)
         else:
@@ -78,10 +81,7 @@ class PushDialog(QDialog, FORM_CLASS):
 
         self.devices = None
         self.refresh_devices()
-        self.setup_tabs()
-        self.cloud_tab.setEnabled(True)
-        self.adb_tab.setEnabled(False)
-        self.ftp_tab.setEnabled(False)
+        self.setup_gui()
 
         self.offline_editing_done = False
 
@@ -111,32 +111,19 @@ class PushDialog(QDialog, FORM_CLASS):
         progress = float(sent) / total * 100
         self.progress_bar.setValue(progress)
 
-    def setup_tabs(self):
-        """Populate tabs and connect signals for the tabs of the push dialog"""
+    def setup_gui(self):
+        """Populate gui and connect signals of the push dialog"""
         base_folder = self.plugin_instance.get_export_folder()
         project_fn = QgsProject.instance().fileName()
         export_folder_name = fileparts(project_fn)[1]
         export_folder_path = os.path.join(base_folder, export_folder_name)
         self.manualDir.setText(export_folder_path)
-        self.cloudDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
-        self.cloudDir_btn.clicked.connect(make_folder_selector(self.cloudDir))
 
     def get_export_folder_from_dialog(self):
-        """Get the export folder according to the inputs in the tab selected"""
+        """Get the export folder according to the inputs in the selected"""
         # manual
-        if self.tabWidget.currentIndex() == 0:
-            return self.manualDir.text()
-            # cloud
-        if self.tabWidget.currentIndex() == 1:
-            return self.cloudDir.text()
-
-        # ftp (yet to be implemented)
-        if self.tabWidget.currentIndex() == 2:
-            raise Exception("FTP not implemented yet")
-
-        if self.tabWidget.currentIndex() == 3:
-            raise Exception("ADB mode not implemented yet")
+        return self.manualDir.text()
 
     def push_project(self, remote_layers=None, remote_save_mode=None):
         self.plugin_instance.action_start()
@@ -189,21 +176,17 @@ class PushDialog(QDialog, FORM_CLASS):
         # disconnect_device(mtp)
 
     def do_post_offline_convert_action(self):
-        if self.tabWidget.currentIndex() == 0:
-            export_folder = self.get_export_folder_from_dialog()
-            export_base_folder = get_full_parent_path(export_folder)
-            text = "Your project has been exported sucessfully to {}, please " \
-                   "copy the entire folder to the device".format(
-                    export_folder)
-            self.iface.messageBar().pushMessage(
-                    u'Message from {}'.format(LOG_TAG), text,
-                    QgsMessageBar.INFO,
-                    MSG_DURATION_SECS)
-            if self.checkBox_open.isChecked():
-                QDesktopServices.openUrl(
-                        QUrl.fromLocalFile(export_base_folder))
-        else:
-            raise Exception("FTP and ADB not fully supported yet")
+        export_folder = self.get_export_folder_from_dialog()
+        export_base_folder = get_full_parent_path(export_folder)
+        text = self.tr( "Your project has been exported sucessfully to {export_folder}, please " \
+               "copy the entire folder to the device" ).format( export_folder=export_folder)
+        self.iface.messageBar().pushMessage(
+                u'Message from {}'.format(LOG_TAG), text,
+                QgsMessageBar.INFO,
+                MSG_DURATION_SECS)
+        if self.checkBox_open.isChecked():
+            QDesktopServices.openUrl(
+                    QUrl.fromLocalFile(export_base_folder))
 
     def show_warning_about_layers_that_cant_work_offline(self, layers):
         layers_list = ','.join([layer.name() for layer in layers])
