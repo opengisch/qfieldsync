@@ -204,6 +204,7 @@ class QFieldSync(object):
             callback=self.show_settings,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
+
         self.add_action(
             ':/plugins/qfieldsync/refresh.png',
             text=self.tr(u'Sync to QField'),
@@ -217,8 +218,8 @@ class QFieldSync(object):
             parent=self.iface.mainWindow())
 
         self.add_action(
-            ':/plugins/qfieldsync/refresh-reverse.png',
-            text=self.tr(u'Configure project'),
+            ':/plugins/qfieldsync/icon.png',
+            text=self.tr(u'Project Configuration'),
             callback=self.configuration_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False
@@ -258,13 +259,17 @@ class QFieldSync(object):
         self.update_qgis_settings()
 
     def synchronize_qfield(self):
-        """Synchronize from QField"""
+        """
+        Synchronize from QField
+        """
         if warn_project_is_dirty():
             dlg = PullDialog(self.iface, self)
             dlg.exec_()
 
     def push_project(self):
-        """Push to QField"""
+        """
+        Push to QField
+        """
         if warn_project_is_dirty():
             # show the dialog
             dlg = PushDialog(self.iface, self)
@@ -272,6 +277,9 @@ class QFieldSync(object):
             dlg.exec_()
 
     def configuration_dialog(self):
+        """
+        Show the project configuration dialog.
+        """
         dlg = ConfigDialog(self.iface, self.iface.mainWindow())
         dlg.exec_()
 
@@ -285,7 +293,7 @@ class QFieldSync(object):
     def action_end(self, title):
         count = len(self.last_action_warnings)
         if count:
-            message = self.tr('not succesful, see the {} warnings for '
+            message = self.tr('not successful, see the {} warnings for '
                               'details'.format(count))
             self.iface.messageBar().pushWarning(title, message)
         else:

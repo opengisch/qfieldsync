@@ -33,7 +33,10 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from qgis.gui import QgsMessageBar
-from qgis.core import QgsProject
+from qgis.core import (
+    QgsProject,
+    QgsMapLayerRegistry
+)
 
 from ..config import *
 from ..utils.data_source_utils import *
@@ -135,27 +138,14 @@ class PushDialog(QDialog, FORM_CLASS):
         self.offline_editing.progressUpdated.connect(self.update_value)
 
         export_folder = self.get_export_folder_from_dialog()
-        can_only_be_online_layers = project_get_always_online_layers()
-        if can_only_be_online_layers:
-            self.show_warning_about_layers_that_cant_work_offline(
-                    can_only_be_online_layers)
+
         non_qfield_layers = project_get_qfield_unsupported_layers()
+
         if non_qfield_layers:
             self.show_warning_about_layers_that_cant_work_with_qfield(
                     non_qfield_layers)
 
-        vector_layer_ids = get_layer_ids_to_offline_convert(remote_layers,
-                                                            remote_save_mode)
-        shpfile_layers = project_get_shp_layers()
-        raster_layers = project_get_raster_layers()
-        project_directory = offline_convert(self.offline_editing,
-                                            vector_layer_ids,
-                                            raster_layers,
-                                            shpfile_layers,
-                                            export_folder=export_folder)
-
-        if remote_save_mode == HYBRID:
-            self.set_hybrid_flag()
+        project_directory = offline_convert(self.offline_editing, export_folder=export_folder)
 
         self.do_post_offline_convert_action()
         self.plugin_instance.action_end(self.tr('Push to QField'))
@@ -188,14 +178,6 @@ class PushDialog(QDialog, FORM_CLASS):
             QDesktopServices.openUrl(
                     QUrl.fromLocalFile(export_base_folder))
 
-    def show_warning_about_layers_that_cant_work_offline(self, layers):
-        layers_list = ','.join([layer.name() for layer in layers])
-        QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                                      self.tr(
-                                              'Layers {} require a real time '
-                                              'connection').format(
-                                              layers_list))
-
     def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
         layers_list = ','.join([layer.name() for layer in layers])
         QMessageBox.information(self.iface.mainWindow(), 'Warning',
@@ -203,10 +185,6 @@ class PushDialog(QDialog, FORM_CLASS):
                                               'Layers {} are not supported by '
                                               'QField').format(
                                               layers_list))
-
-    def set_hybrid_flag(self):
-        QgsProject.instance().writeEntry(self.plugin_instance.QFIELD_SCOPE,
-                                         "REMOTE_LAYER_MODE", HYBRID)
 
     @pyqtSlot(int, int)
     def update_total(self, current, layer_count):

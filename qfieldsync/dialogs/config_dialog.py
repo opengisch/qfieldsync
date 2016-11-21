@@ -33,6 +33,18 @@ from qgis.core import (
     QgsProject
 )
 
+from qfieldsync.config import (
+    OFFLINE,
+    REMOVE,
+    NO_ACTION,
+    LAYER_ACTION,
+    BASE_MAP_TYPE,
+    CREATE_BASE_MAP,
+    BASE_MAP_THEME,
+    BASE_MAP_TYPE_MAP_THEME,
+    BASE_MAP_TYPE_SINGLE_LAYER
+)
+
 FORM_CLASS = get_ui_class('config_dialog_base.ui')
 
 class ConfigDialog(QDialog, FORM_CLASS):
@@ -66,16 +78,16 @@ class ConfigDialog(QDialog, FORM_CLASS):
             item.setData(Qt.UserRole, layer)
             self.layersTable.setItem(count, 0, item)
 
-            action = layer.customProperty("qfieldsync/action", 'NoAction')
+            action = layer.customProperty(LAYER_ACTION, NO_ACTION)
 
             cbx = QComboBox()
             cbx.addItem(self.tr('No action'))
             cbx.addItem(self.tr('Offline copy'))
             cbx.addItem(self.tr('Remove'))
 
-            if action == 'OfflineCopy':
+            if action == OFFLINE:
                 cbx.setCurrentIndex(1)
-            elif action == 'Remove':
+            elif action == REMOVE:
                 cbx.setCurrentIndex(2)
 
             self.layersTable.setCellWidget(count, 1, cbx)
@@ -84,17 +96,17 @@ class ConfigDialog(QDialog, FORM_CLASS):
         for theme in self.project.mapThemeCollection().mapThemes():
             self.mapThemeComboBox.addItem(theme)
 
-        createBaseMap, _ = self.project.readBoolEntry('qfieldsync', '/createBaseMap', False)
+        createBaseMap, _ = self.project.readBoolEntry('qfieldsync', CREATE_BASE_MAP, False)
         self.createBaseMapGroupBox.setChecked(createBaseMap)
 
-        baseMapType, _ = self.project.readEntry('qfieldsync', '/baseMapType')
+        baseMapType, _ = self.project.readEntry('qfieldsync', BASE_MAP_TYPE)
 
         if baseMapType == 'SingleLayer':
             self.singleLayerRadioButton.setChecked(True)
         else:
             self.mapThemeRadioButton.setChecked(True)
 
-        baseMapTheme, _ = self.project.readEntry('qfieldsync', '/baseMapTheme')
+        baseMapTheme, _ = self.project.readEntry('qfieldsync', BASE_MAP_TYPE)
         self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(baseMapTheme))
 
     def onAccepted(self):
@@ -105,23 +117,23 @@ class ConfigDialog(QDialog, FORM_CLASS):
             item = self.layersTable.item(i, 0)
             layer = item.data(Qt.UserRole)
             cbx = self.layersTable.cellWidget(i, 1)
-            oldConfiguration = layer.customProperty("qfieldsync/action", 'NoAction')
+            oldConfiguration = layer.customProperty(LAYER_ACTION, NO_ACTION)
             if cbx.currentIndex() == 1:
-                layer.setCustomProperty('qfieldsync/action', 'OfflineCopy')
+                layer.setCustomProperty(LAYER_ACTION, OFFLINE)
             elif cbx.currentIndex() == 2:
-                layer.setCustomProperty('qfieldsync/action', 'Remove')
+                layer.setCustomProperty(LAYER_ACTION, REMOVE)
             else:
-                layer.setCustomProperty('qfieldsync/action', 'NoAction')
+                layer.setCustomProperty(LAYER_ACTION, NO_ACTION)
 
-            if layer.customProperty('qfieldsync/action') != oldConfiguration:
+            if layer.customProperty(LAYER_ACTION) != oldConfiguration:
                 self.project.setDirty()
 
-        self.project.writeEntry('qfieldsync', '/createBaseMap', self.createBaseMapGroupBox.isChecked())
-        self.project.writeEntry('qfieldsync', '/baseMapTheme', self.mapThemeComboBox.currentText())
+        self.project.writeEntry('qfieldsync', CREATE_BASE_MAP, self.createBaseMapGroupBox.isChecked())
+        self.project.writeEntry('qfieldsync', BASE_MAP_THEME, self.mapThemeComboBox.currentText())
         if self.singleLayerRadioButton.isChecked():
-            self.project.writeEntry('qfieldsync', '/baseMapType', 'SingleLayer')
+            self.project.writeEntry('qfieldsync', BASE_MAP_TYPE, BASE_MAP_TYPE_SINGLE_LAYER)
         else:
-            self.project.writeEntry('qfieldsync', '/baseMapType', 'MapTheme')
+            self.project.writeEntry('qfieldsync', BASE_MAP_TYPE, BASE_MAP_TYPE_MAP_THEME)
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():

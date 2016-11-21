@@ -65,12 +65,6 @@ def project_get_qfield_unsupported_layers():
     return project_filter_layers(layer_is_jpeg2000) + project_filter_layers(layer_is_ecw_raster)
 
 
-def project_get_always_online_layers():
-    """ Layers that can't be made offline by the offline plugin """
-    online_types = ["WFS", "wcs", "wms", "mssql", "ows"]
-    return project_get_layers_of_given_types(online_types)
-
-
 def project_get_remote_layers():
     """ Remote layers are layers that can either be converted to offline or kept in a realtime or hybrid mode"""
     return project_get_layers_of_given_types(types=["postgres"])

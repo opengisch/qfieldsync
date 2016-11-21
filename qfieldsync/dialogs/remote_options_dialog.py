@@ -30,8 +30,6 @@ from qgis.PyQt.QtWidgets import (
         QDialog
 )
 
-from qfieldsync.config import ONLINE, OFFLINE, HYBRID
-
 from qfieldsync.utils.qt_utils import get_ui_class
 
 FORM_CLASS = get_ui_class('remote_options_base.ui')
@@ -49,13 +47,6 @@ class RemoteOptionsDialog(QDialog, FORM_CLASS):
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
         self.radioButton_hybrid.setEnabled(False)
 
-    def get_selected_mode(self):
-        if self.radioButton_offline.isChecked():
-            return OFFLINE
-        if self.radioButton_online.isChecked():
-            return ONLINE
-        if self.radioButton_hybrid.isChecked():
-            return HYBRID
 
     def save_options(self):
         mode = self.get_selected_mode()
