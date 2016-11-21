@@ -24,9 +24,7 @@
 
 
 #Add iso code for any locales you want to support here (space separated)
-# default is no locales
-# LOCALES = af
-LOCALES =
+LOCALES = en de
 
 # If locales are enabled, set the name of the lrelease binary on your system. If
 # you have trouble compiling the translations, you may have to specify the full path to
@@ -171,7 +169,7 @@ transup:
 	@chmod +x scripts/update-strings.sh
 	@scripts/update-strings.sh $(LOCALES)
 
-transcompile:
+transcompile: transifex_sync
 	@echo
 	@echo "----------------------------------------"
 	@echo "Compiled translation files to .qm files."
@@ -185,6 +183,16 @@ transclean:
 	@echo "Removing compiled translation files."
 	@echo "------------------------------------"
 	rm -f i18n/*.qm
+
+transifex_sync: transup
+	@echo
+	@echo "------------------------------------"
+	@echo "Synchronizing transifex resources."
+	@echo "------------------------------------"
+	@set -e;\
+	  tx push -s; \
+	  tx pull
+	@echo "Transifex resources synchronized"
 
 clean:
 	@echo
