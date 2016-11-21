@@ -39,6 +39,7 @@ from qfieldsync import config
 from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
 from qfieldsync.dialogs.pull_dialog import PullDialog
+from qfieldsync.dialogs.config_dialog import ConfigDialog
 
 from qfieldsync.utils.qgis_utils import warn_project_is_dirty, tr
 
@@ -215,6 +216,14 @@ class QFieldSync(object):
             callback=self.synchronize_qfield,
             parent=self.iface.mainWindow())
 
+        self.add_action(
+            ':/plugins/qfieldsync/refresh-reverse.png',
+            text=self.tr(u'Configure project'),
+            callback=self.configuration_dialog,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False
+        )
+
         self.processing_provider = QFieldProcessingProvider()
         Processing.addProvider(self.processing_provider)
 
@@ -261,6 +270,10 @@ class QFieldSync(object):
             dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
             dlg.exec_()
+
+    def configuration_dialog(self):
+        dlg = ConfigDialog(self.iface, self.iface.mainWindow())
+        dlg.exec_()
 
     def show_warning(self, title, message):
         self.last_action_warnings.append((title, message))
