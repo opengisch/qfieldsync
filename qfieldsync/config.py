@@ -1,5 +1,9 @@
 # sync options
 OFFLINE   = "offline"
+# No action will in general leave the source untouched.
+# For file based layers, the source
+# - will be made relative
+# - the file(s) will be copied
 NO_ACTION = "no_action"
 REMOVE    = "remove"
 

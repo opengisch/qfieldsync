@@ -101,12 +101,12 @@ class ConfigDialog(QDialog, FORM_CLASS):
 
         baseMapType, _ = self.project.readEntry('qfieldsync', BASE_MAP_TYPE)
 
-        if baseMapType == 'SingleLayer':
+        if baseMapType == BASE_MAP_TYPE_SINGLE_LAYER:
             self.singleLayerRadioButton.setChecked(True)
         else:
             self.mapThemeRadioButton.setChecked(True)
 
-        baseMapTheme, _ = self.project.readEntry('qfieldsync', BASE_MAP_TYPE)
+        baseMapTheme, _ = self.project.readEntry('qfieldsync', BASE_MAP_THEME)
         self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(baseMapTheme))
 
     def onAccepted(self):

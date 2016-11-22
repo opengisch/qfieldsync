@@ -23,14 +23,16 @@
 
 import os
 
-from qgis.PyQt.QtCore import pyqtSlot, QUrl
-from qgis.PyQt.QtGui import QDesktopServices
+from qgis.PyQt.QtCore import (
+    pyqtSlot,
+    Qt
+)
 from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QPushButton,
     QDialog,
-    QMessageBox
-)
+    QMessageBox,
+    QLabel)
 
 from qgis.gui import QgsMessageBar
 from qgis.core import (
@@ -41,10 +43,9 @@ from qgis.core import (
 from ..config import *
 from ..utils.data_source_utils import *
 from ..utils.export_offline_utils import (
-    offline_convert,
-    get_layer_ids_to_offline_convert
+    OfflineConvertor
 )
-from ..utils.file_utils import fileparts, get_full_parent_path
+from ..utils.file_utils import fileparts, get_full_parent_path, open_folder
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import make_folder_selector
 
@@ -60,8 +61,6 @@ try:
 except:
     pass
 
-from ..dialogs.remote_options_dialog import RemoteOptionsDialog
-
 FORM_CLASS = get_ui_class('push_dialog_base.ui')
 
 
@@ -76,39 +75,16 @@ class PushDialog(QDialog, FORM_CLASS):
         self.project = QgsProject.instance()
         self.project_lbl.setText(get_project_title(self.project))
         self.push_btn = QPushButton(self.tr('Create'))
-        if project_get_remote_layers():
-            self.push_btn.clicked.connect(self.show_remote_options)
-        else:
-            self.push_btn.clicked.connect(self.push_project)
+        self.push_btn.clicked.connect(self.push_project)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
+        self.iface.mapCanvas().extentsChanged.connect(self.extentChanged)
+        self.extentChanged()
 
         self.devices = None
-        self.refresh_devices()
+        # self.refresh_devices()
         self.setup_gui()
 
         self.offline_editing_done = False
-
-    def show_remote_options(self):
-        dlg = RemoteOptionsDialog(self, self.plugin_instance,
-                                  remote_layers=project_get_remote_layers())
-        dlg.exec_()
-
-    def refresh_devices(self):
-        return
-        self.devices = detect_devices()
-        device_names = []
-        for d in self.devices:
-            device_name, device = d
-            device_names.append(device_name)
-        if device_names:
-            self.devices_cbx.clear()
-            self.push_btn.setEnabled(True)
-            self.devices_cbx.setEnabled(True)
-            self.devices_cbx.addItems(device_names)
-        else:
-            self.push_btn.setEnabled(False)
-            self.devices_cbx.setEnabled(False)
-            self.devices_cbx.addItems('No devices detected')
 
     def update_progress(self, sent, total):
         progress = float(sent) / total * 100
@@ -129,13 +105,8 @@ class PushDialog(QDialog, FORM_CLASS):
         return self.manualDir.text()
 
     def push_project(self, remote_layers=None, remote_save_mode=None):
+        self.informationStack.setCurrentWidget(self.progressPage)
         self.plugin_instance.action_start()
-
-        # progress connections
-        self.offline_editing.progressStopped.connect(self.update_done)
-        self.offline_editing.layerProgressUpdated.connect(self.update_total)
-        self.offline_editing.progressModeSet.connect(self.update_mode)
-        self.offline_editing.progressUpdated.connect(self.update_value)
 
         export_folder = self.get_export_folder_from_dialog()
 
@@ -143,9 +114,18 @@ class PushDialog(QDialog, FORM_CLASS):
 
         if non_qfield_layers:
             self.show_warning_about_layers_that_cant_work_with_qfield(
-                    non_qfield_layers)
+                non_qfield_layers)
 
-        project_directory = offline_convert(self.offline_editing, export_folder=export_folder)
+        offline_convertor = OfflineConvertor(export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
+
+        # progress connections
+        offline_convertor.progressStopped.connect(self.update_done)
+        offline_convertor.layerProgressUpdated.connect(self.update_total)
+        offline_convertor.progressModeSet.connect(self.update_mode)
+        offline_convertor.progressUpdated.connect(self.update_value)
+        offline_convertor.progressJob.connect(self.update_job_status)
+
+        offline_convertor.convert()
 
         self.do_post_offline_convert_action()
         self.plugin_instance.action_end(self.tr('Push to QField'))
@@ -154,37 +134,41 @@ class PushDialog(QDialog, FORM_CLASS):
         if self.offline_editing_done:
             self.close()
         else:
-            message = self.tr("The project export did't work")
-            self.iface.messageBar().pushCritical('Sync dialog', message)
+            message = self.tr("The project export did not work")
+            self.iface.messageBar().pushCritical('QFieldSync', message)
 
-        # this here doesn't do anything for now
-        # device_index = self.devices_cbx.currentIndex()
-        # device = self.devices[device_index][1]
-        # mtp = connect_device(device)
-        # dest = 'testFILE.qgs'
-        # push_file(mtp, self.project.fileName(), dest, self.update_progress)
-        # disconnect_device(mtp)
+            # this here doesn't do anything for now
+            # device_index = self.devices_cbx.currentIndex()
+            # device = self.devices[device_index][1]
+            # mtp = connect_device(device)
+            # dest = 'testFILE.qgs'
+            # push_file(mtp, self.project.fileName(), dest, self.update_progress)
+            # disconnect_device(mtp)
 
     def do_post_offline_convert_action(self):
         export_folder = self.get_export_folder_from_dialog()
         export_base_folder = get_full_parent_path(export_folder)
-        text = self.tr( "Your project has been exported sucessfully to {export_folder}, please " \
-               "copy the entire folder to the device" ).format( export_folder=export_folder)
+        text = self.tr("Your project has been exported sucessfully to {export_folder}, please " \
+                       "copy the entire folder to the device").format(export_folder=export_folder)
         self.iface.messageBar().pushMessage(
-                u'Message from {}'.format(LOG_TAG), text,
-                QgsMessageBar.INFO,
-                MSG_DURATION_SECS)
-        if self.checkBox_open.isChecked():
-            QDesktopServices.openUrl(
-                    QUrl.fromLocalFile(export_base_folder))
+            u'Message from {}'.format(LOG_TAG), text,
+            QgsMessageBar.INFO,
+            MSG_DURATION_SECS)
+
+        resultLabel = QLabel(self.tr('Finished creating the project at {result_folder}.').format(
+            result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
+        resultLabel.setTextFormat(Qt.RichText)
+        resultLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        resultLabel.linkActivated.connect(lambda: open_folder(export_base_folder))
+        self.iface.messageBar().pushWidget(resultLabel, QgsMessageBar.INFO, 0)
 
     def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
         layers_list = ','.join([layer.name() for layer in layers])
         QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                                      self.tr(
-                                              'Layers {} are not supported by '
-                                              'QField').format(
-                                              layers_list))
+                                self.tr(
+                                    'Layers {} are not supported by '
+                                    'QField').format(
+                                    layers_list))
 
     @pyqtSlot(int, int)
     def update_total(self, current, layer_count):
@@ -203,3 +187,33 @@ class PushDialog(QDialog, FORM_CLASS):
     @pyqtSlot()
     def update_done(self):
         self.offline_editing_done = True
+
+    @pyqtSlot(str)
+    def update_job_status(self, status):
+        self.statusLabel.setText(status)
+
+    @pyqtSlot()
+    def extentChanged(self):
+        extent = self.iface.mapCanvas().extent()
+        self.xMinLabel.setText(str(extent.xMinimum()))
+        self.xMaxLabel.setText(str(extent.xMaximum()))
+        self.yMinLabel.setText(str(extent.yMinimum()))
+        self.yMaxLabel.setText(str(extent.yMaximum()))
+
+
+    # def refresh_devices(self):
+    #     return
+    #     self.devices = detect_devices()
+    #     device_names = []
+    #     for d in self.devices:
+    #         device_name, device = d
+    #         device_names.append(device_name)
+    #     if device_names:
+    #         self.devices_cbx.clear()
+    #         self.push_btn.setEnabled(True)
+    #         self.devices_cbx.setEnabled(True)
+    #         self.devices_cbx.addItems(device_names)
+    #     else:
+    #         self.push_btn.setEnabled(False)
+    #         self.devices_cbx.setEnabled(False)
+    #         self.devices_cbx.addItems('No devices detected')

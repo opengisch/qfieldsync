@@ -1,4 +1,6 @@
 import os
+import platform
+import subprocess
 
 from qfieldsync.utils.exceptions import NoProjectFoundError, QFieldSyncError
 
@@ -39,3 +41,12 @@ def get_project_in_folder(folder):
     except QFieldSyncError:
         message = 'No .qgs file found in folder {}'.format(folder)
         raise NoProjectFoundError(message)
+
+
+def open_folder(path):
+    if platform.system() == "Windows":
+        subprocess.Popen(r'explorer /select,"{}"'.format(path))
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", '-R', path])
+    else:
+        subprocess.Popen(["xdg-open", path])

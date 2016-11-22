@@ -135,7 +135,7 @@ class TileSet():
         ysize = self.y_tile_count * tile_size
 
         self.dataset = driver.Create(output, xsize, ysize, 3)  # 3 bands
-        self.dataset.SetProjection(crs.toWkt())
+        self.dataset.SetProjection(bytes(crs.toWkt()))
         self.dataset.SetGeoTransform([extent.xMinimum(), mupp, 0, extent.yMaximum(), 0, -mupp])
 
         self.image = QImage(QSize(tile_size, tile_size), QImage.Format_RGB32)

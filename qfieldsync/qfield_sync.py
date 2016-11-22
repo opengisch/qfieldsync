@@ -272,9 +272,9 @@ class QFieldSync(object):
         """
         if warn_project_is_dirty():
             # show the dialog
-            dlg = PushDialog(self.iface, self)
+            self.push_dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
-            dlg.exec_()
+            self.push_dlg.show()
 
     def configuration_dialog(self):
         """
