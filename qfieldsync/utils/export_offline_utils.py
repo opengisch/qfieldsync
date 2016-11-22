@@ -1,6 +1,8 @@
 import os
 import shutil
 
+from processing import ProcessingConfig
+from processing.gui import RenderingStyles
 from qgis.PyQt.QtCore import (
     QFileInfo,
     Qt,
@@ -10,7 +12,8 @@ from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (
     QgsProject,
     QgsOfflineEditing,
-    QgsMapLayerRegistry
+    QgsMapLayerRegistry,
+    QgsRasterLayer
 )
 import processing
 
@@ -100,10 +103,12 @@ class OfflineConvertor(QObject):
         success = self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename, [l.id() for l in self.__offline_layers])
 
         QApplication.restoreOverrideCursor()
-        if not success:
-            raise Exception("Converting to offline project did not succeed")
         # Now we have a project state which can be saved as offline project
         QgsProject.instance().write(QFileInfo(project_filename))
+
+        if not success:
+            self.progressJob.emit(self.tr('Failure'))
+            raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
         self.progressJob.emit(self.tr('Finished'))
 
@@ -164,6 +169,13 @@ class OfflineConvertor(QObject):
         alg.setParameterValue('TILE_SIZE', tile_size)
         alg.setOutputValue('OUTPUT_LAYER', os.path.join(self.export_folder, 'basemap.gpkg'))
         alg.execute(progress=self.convertorProcessingProgress())
+
+        out = alg.outputs[0]
+        new_layer = QgsRasterLayer(out.value, self.tr('Basemap'))
+        QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
+        layer_tree = QgsProject.instance().layerTreeRoot()
+        layer_tree.insertLayer(len(layer_tree.children()), new_layer)
+
 
     def onLayerProgressUpdated(self, layer_index, layer_count):
         print(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index, layer_count=layer_count)))

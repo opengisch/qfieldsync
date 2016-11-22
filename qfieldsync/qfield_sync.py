@@ -33,7 +33,7 @@ from qgis.PyQt.QtCore import (QObject,QTranslator, qVersion,
                               QCoreApplication, QSettings)
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
-from qgis.core import QgsOfflineEditing
+from qgis.core import QgsOfflineEditing, QgsProject
 
 from qfieldsync import config
 from qfieldsync.dialogs.push_dialog import PushDialog
@@ -56,6 +56,8 @@ else:
 class QFieldSync(object):
     """QGIS Plugin Implementation."""
     QFIELD_SCOPE = "QFieldSync"
+
+    push_dlg = None
 
     def __init__(self, iface):
         """Constructor.
@@ -96,7 +98,8 @@ class QFieldSync(object):
 
         # instance of the QgsOfflineEditing
         self.offline_editing = QgsOfflineEditing()
-        self.offline_editing.warning.connect(self.show_warning)
+
+        QgsProject.instance().readProject.connect(self.update_button_enabled_status)
 
         # store warnings from last run
         self.last_action_warnings = []
@@ -200,12 +203,13 @@ class QFieldSync(object):
 
         self.add_action(
             ':/plugins/qfieldsync/icon.png',
-            text=self.tr(u'Settings'),
-            callback=self.show_settings,
+            text=self.tr(u'Project Configuration'),
+            callback=self.configuration_dialog,
             parent=self.iface.mainWindow(),
-            add_to_toolbar=False)
+            add_to_toolbar=False
+        )
 
-        self.add_action(
+        self.push_action = self.add_action(
             ':/plugins/qfieldsync/refresh.png',
             text=self.tr(u'Sync to QField'),
             callback=self.push_project,
@@ -219,14 +223,15 @@ class QFieldSync(object):
 
         self.add_action(
             ':/plugins/qfieldsync/icon.png',
-            text=self.tr(u'Project Configuration'),
-            callback=self.configuration_dialog,
+            text=self.tr(u'Settings'),
+            callback=self.show_settings,
             parent=self.iface.mainWindow(),
-            add_to_toolbar=False
-        )
+            add_to_toolbar=False)
 
         self.processing_provider = QFieldProcessingProvider()
         Processing.addProvider(self.processing_provider)
+
+        self.update_button_enabled_status()
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -275,6 +280,8 @@ class QFieldSync(object):
             self.push_dlg = PushDialog(self.iface, self)
             # Run the dialog event loop
             self.push_dlg.show()
+            self.push_dlg.finished.connect(self.update_button_enabled_status)
+            self.update_button_enabled_status()
 
     def configuration_dialog(self):
         """
@@ -283,22 +290,14 @@ class QFieldSync(object):
         dlg = ConfigDialog(self.iface, self.iface.mainWindow())
         dlg.exec_()
 
-    def show_warning(self, title, message):
-        self.last_action_warnings.append((title, message))
-        self.iface.messageBar().pushWarning(title, message)
-
     def action_start(self):
         self.clear_last_action_warnings()
 
-    def action_end(self, title):
-        count = len(self.last_action_warnings)
-        if count:
-            message = self.tr('not successful, see the {} warnings for '
-                              'details'.format(count))
-            self.iface.messageBar().pushWarning(title, message)
-        else:
-            message = self.tr('successful')
-            self.iface.messageBar().pushInfo(title, message)
-
     def clear_last_action_warnings(self):
         self.last_action_warnings = []
+
+    def update_button_enabled_status(self):
+        if self.offline_editing.isOfflineProject() or (self.push_dlg and self.push_dlg.isEnabled()):
+            self.push_action.setEnabled(False)
+        else:
+            self.push_action.setEnabled(True)

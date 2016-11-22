@@ -23,6 +23,7 @@
 
 import os
 
+from qfieldsync.dialogs.config_dialog import ConfigDialog
 from qgis.PyQt.QtCore import (
     pyqtSlot,
     Qt
@@ -32,12 +33,13 @@ from qgis.PyQt.QtWidgets import (
     QPushButton,
     QDialog,
     QMessageBox,
-    QLabel)
+    QLabel, QSizePolicy)
 
 from qgis.gui import QgsMessageBar
 from qgis.core import (
     QgsProject,
-    QgsMapLayerRegistry
+    QgsMapLayerRegistry,
+    QgsMessageLog
 )
 
 from ..config import *
@@ -84,7 +86,7 @@ class PushDialog(QDialog, FORM_CLASS):
         # self.refresh_devices()
         self.setup_gui()
 
-        self.offline_editing_done = False
+        self.offline_editing.warning.connect(self.show_warning)
 
     def update_progress(self, sent, total):
         progress = float(sent) / total * 100
@@ -98,13 +100,16 @@ class PushDialog(QDialog, FORM_CLASS):
         export_folder_path = os.path.join(base_folder, export_folder_name)
         self.manualDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
+        self.update_info_visibility()
+        self.infoLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        self.infoLabel.linkActivated.connect(lambda: self.show_settings())
 
     def get_export_folder_from_dialog(self):
         """Get the export folder according to the inputs in the selected"""
         # manual
         return self.manualDir.text()
 
-    def push_project(self, remote_layers=None, remote_save_mode=None):
+    def push_project(self):
         self.informationStack.setCurrentWidget(self.progressPage)
         self.plugin_instance.action_start()
 
@@ -119,47 +124,35 @@ class PushDialog(QDialog, FORM_CLASS):
         offline_convertor = OfflineConvertor(export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
 
         # progress connections
-        offline_convertor.progressStopped.connect(self.update_done)
         offline_convertor.layerProgressUpdated.connect(self.update_total)
         offline_convertor.progressModeSet.connect(self.update_mode)
         offline_convertor.progressUpdated.connect(self.update_value)
         offline_convertor.progressJob.connect(self.update_job_status)
 
-        offline_convertor.convert()
-
-        self.do_post_offline_convert_action()
-        self.plugin_instance.action_end(self.tr('Push to QField'))
+        try:
+            offline_convertor.convert()
+            self.do_post_offline_convert_action()
+            self.close()
+        except Exception as e:
+            QMessageBox.warning(self, self.tr('Error in packaging'), self.tr('Unfortunately, there was a problem converting the project. {}'.format(e.message)))
 
         self.progress_group.setEnabled(False)
-        if self.offline_editing_done:
-            self.close()
-        else:
-            message = self.tr("The project export did not work")
-            self.iface.messageBar().pushCritical('QFieldSync', message)
-
-            # this here doesn't do anything for now
-            # device_index = self.devices_cbx.currentIndex()
-            # device = self.devices[device_index][1]
-            # mtp = connect_device(device)
-            # dest = 'testFILE.qgs'
-            # push_file(mtp, self.project.fileName(), dest, self.update_progress)
-            # disconnect_device(mtp)
 
     def do_post_offline_convert_action(self):
+        """
+        Show an information label that the project has been copied
+        with a nice link to open the result folder.
+        """
         export_folder = self.get_export_folder_from_dialog()
         export_base_folder = get_full_parent_path(export_folder)
-        text = self.tr("Your project has been exported sucessfully to {export_folder}, please " \
-                       "copy the entire folder to the device").format(export_folder=export_folder)
-        self.iface.messageBar().pushMessage(
-            u'Message from {}'.format(LOG_TAG), text,
-            QgsMessageBar.INFO,
-            MSG_DURATION_SECS)
 
-        resultLabel = QLabel(self.tr('Finished creating the project at {result_folder}.').format(
+        resultLabel = QLabel(self.tr('Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.').format(
             result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
         resultLabel.setTextFormat(Qt.RichText)
         resultLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        resultLabel.linkActivated.connect(lambda: open_folder(export_base_folder))
+        resultLabel.linkActivated.connect(lambda: open_folder(export_folder))
+        resultLabel.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
+
         self.iface.messageBar().pushWidget(resultLabel, QgsMessageBar.INFO, 0)
 
     def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
@@ -169,6 +162,20 @@ class PushDialog(QDialog, FORM_CLASS):
                                     'Layers {} are not supported by '
                                     'QField').format(
                                     layers_list))
+
+    def update_info_visibility(self):
+        """
+        Show the info label if there are unconfigured layers
+        """
+        self.infoGroupBox.hide()
+        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+            if not layer.customProperty(LAYER_ACTION):
+                self.infoGroupBox.show()
+
+    def show_settings(self):
+        dlg = ConfigDialog(self.iface, self.iface.mainWindow())
+        dlg.exec_()
+        self.update_info_visibility()
 
     @pyqtSlot(int, int)
     def update_total(self, current, layer_count):
@@ -184,10 +191,6 @@ class PushDialog(QDialog, FORM_CLASS):
         self.layerProgressBar.setMaximum(mode_count)
         self.layerProgressBar.setValue(0)
 
-    @pyqtSlot()
-    def update_done(self):
-        self.offline_editing_done = True
-
     @pyqtSlot(str)
     def update_job_status(self, status):
         self.statusLabel.setText(status)
@@ -200,20 +203,8 @@ class PushDialog(QDialog, FORM_CLASS):
         self.yMinLabel.setText(str(extent.yMinimum()))
         self.yMaxLabel.setText(str(extent.yMaximum()))
 
-
-    # def refresh_devices(self):
-    #     return
-    #     self.devices = detect_devices()
-    #     device_names = []
-    #     for d in self.devices:
-    #         device_name, device = d
-    #         device_names.append(device_name)
-    #     if device_names:
-    #         self.devices_cbx.clear()
-    #         self.push_btn.setEnabled(True)
-    #         self.devices_cbx.setEnabled(True)
-    #         self.devices_cbx.addItems(device_names)
-    #     else:
-    #         self.push_btn.setEnabled(False)
-    #         self.devices_cbx.setEnabled(False)
-    #         self.devices_cbx.addItems('No devices detected')
+    @pyqtSlot(str, str)
+    def show_warning(self, _, message):
+        # Most messages from the offline editing plugin are not important enough to show in the message bar.
+        # In case we find important ones in the future, we need to filter them.
+        QgsMessageLog.instance().logMessage(message,'QFieldSync')
