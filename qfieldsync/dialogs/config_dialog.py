@@ -17,6 +17,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os
 
 from ..utils.qt_utils import get_ui_class
 
@@ -81,7 +82,11 @@ class ConfigDialog(QDialog, FORM_CLASS):
             action = layer.customProperty(LAYER_ACTION, NO_ACTION)
 
             cbx = QComboBox()
-            cbx.addItem(self.tr('No action'))
+            file_path = layer.source()
+            if os.path.isfile(file_path):
+                cbx.addItem(self.tr('Copy'))
+            else:
+                cbx.addItem(self.tr('No action'))
             cbx.addItem(self.tr('Offline copy'))
             cbx.addItem(self.tr('Remove'))
 
