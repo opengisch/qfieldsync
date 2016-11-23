@@ -43,8 +43,8 @@ from qfieldsync.config import (
     CREATE_BASE_MAP,
     BASE_MAP_THEME,
     BASE_MAP_TYPE_MAP_THEME,
-    BASE_MAP_TYPE_SINGLE_LAYER
-)
+    BASE_MAP_TYPE_SINGLE_LAYER,
+    BASE_MAP_LAYER, BASE_MAP_MUPP, BASE_MAP_TILE_SIZE)
 
 FORM_CLASS = get_ui_class('config_dialog_base.ui')
 
@@ -114,6 +114,15 @@ class ConfigDialog(QDialog, FORM_CLASS):
         baseMapTheme, _ = self.project.readEntry('qfieldsync', BASE_MAP_THEME)
         self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(baseMapTheme))
 
+        baseMapLayer, _ = self.project.readEntry('qfieldsync', BASE_MAP_LAYER)
+        layer = QgsMapLayerRegistry.instance().mapLayer(baseMapLayer)
+        self.layerComboBox.setLayer(layer)
+
+        baseMapTileSize, _ = self.project.readEntry('qfieldsync', BASE_MAP_TILE_SIZE, '1024')
+        self.mapUnitsPerPixel.setText(baseMapTileSize)
+        baseMapMupp, _ = self.project.readEntry('qfieldsync', BASE_MAP_MUPP, '100')
+        self.tileSize.setText(baseMapMupp)
+
     def onAccepted(self):
         """
         Update layer configuration in project
@@ -135,10 +144,17 @@ class ConfigDialog(QDialog, FORM_CLASS):
 
         self.project.writeEntry('qfieldsync', CREATE_BASE_MAP, self.createBaseMapGroupBox.isChecked())
         self.project.writeEntry('qfieldsync', BASE_MAP_THEME, self.mapThemeComboBox.currentText())
+        try:
+            self.project.writeEntry('qfieldsync', BASE_MAP_LAYER, self.layerComboBox.currentLayer().id())
+        except AttributeError:
+            pass
         if self.singleLayerRadioButton.isChecked():
             self.project.writeEntry('qfieldsync', BASE_MAP_TYPE, BASE_MAP_TYPE_SINGLE_LAYER)
         else:
             self.project.writeEntry('qfieldsync', BASE_MAP_TYPE, BASE_MAP_TYPE_MAP_THEME)
+
+        self.project.writeEntry('qfieldsync', BASE_MAP_TILE_SIZE, self.mapUnitsPerPixel.text())
+        self.project.writeEntry('qfieldsync', BASE_MAP_MUPP, self.tileSize.text())
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>665</width>
-    <height>735</height>
+    <width>608</width>
+    <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,7 +97,7 @@
         </attribute>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
+      <item row="2" column="0" colspan="2">
        <widget class="QStackedWidget" name="baseMapTypeStack">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -153,10 +153,50 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QgsMapLayerComboBox" name="comboBox"/>
+           <widget class="QgsMapLayerComboBox" name="layerComboBox"/>
           </item>
          </layout>
         </widget>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Tile Size</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="tileSize">
+        <property name="toolTip">
+         <string>Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile.</string>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly</set>
+        </property>
+        <property name="text">
+         <string>1024</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Map Units/Pixel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="mapUnitsPerPixel">
+        <property name="toolTip">
+         <string>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</string>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly</set>
+        </property>
+        <property name="text">
+         <string>100</string>
+        </property>
        </widget>
       </item>
      </layout>

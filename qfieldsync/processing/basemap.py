@@ -29,7 +29,7 @@ __copyright__ = '(C) 2016 by OPENGIS.ch'
 __revision__ = '$Format:%H$'
 
 from processing.core.GeoAlgorithm import GeoAlgorithm
-from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber
+from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber, ParameterRaster
 from processing.core.outputs import OutputRaster
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
@@ -59,6 +59,7 @@ class BasemapAlgorithm(GeoAlgorithm):
 
     OUTPUT_LAYER =        'OUTPUT_LAYER'
     MAP_THEME =           'MAP_THEME'
+    LAYER =               'LAYER'
     EXTENT =              'EXTENT'
     TILE_SIZE =           'TILE_SIZE'
     MAP_UNITS_PER_PIXEL = 'MAP_UNITS_PER_PIXEL'
@@ -75,10 +76,11 @@ class BasemapAlgorithm(GeoAlgorithm):
         self.group = 'raster'
 
         # The parameters
-        self.addParameter(ParameterString(self.MAP_THEME, self.tr('Map Theme'), default=None, optional=True))
-        self.addParameter(ParameterExtent(self.EXTENT, self.tr('Extent')))
-        self.addParameter(ParameterNumber(self.TILE_SIZE, self.tr('Tile size'), default=256))
-        self.addParameter(ParameterNumber(self.MAP_UNITS_PER_PIXEL, self.tr('Map units per pixel'), 1))
+        self.addParameter(ParameterString(self.MAP_THEME, description=self.tr('Map theme to render.'), default=None, optional=True))
+        self.addParameter(ParameterRaster(self.LAYER, description=self.tr('Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.'), optional=True))
+        self.addParameter(ParameterExtent(self.EXTENT, description=self.tr('The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.')))
+        self.addParameter(ParameterNumber(self.TILE_SIZE, self.tr('Tile size'), default=1024))
+        self.addParameter(ParameterNumber(self.MAP_UNITS_PER_PIXEL, self.tr('Map units per pixel'), default=100))
 
         # We add a raster layer as output
         self.addOutput(OutputRaster(self.OUTPUT_LAYER, self.tr('Output layer')))
@@ -89,6 +91,7 @@ class BasemapAlgorithm(GeoAlgorithm):
         # The first thing to do is retrieve the values of the parameters
         # entered by the user
         map_theme = self.getParameterValue(self.MAP_THEME)
+        layer = self.getParameterValue(self.LAYER)
         raw_extent = self.getParameterValue(self.EXTENT)
         split_extent = [float(c) for c in raw_extent.split(',')]
         extent = QgsRectangle(split_extent[0], split_extent[2], split_extent[1], split_extent[3])
@@ -97,7 +100,7 @@ class BasemapAlgorithm(GeoAlgorithm):
 
         output = self.getOutputValue(self.OUTPUT_LAYER)
 
-        tile_set = TileSet(map_theme, extent, tile_size, mupp, output, qgis.utils.iface.mapCanvas().mapSettings())
+        tile_set = TileSet(map_theme, layer, extent, tile_size, mupp, output, qgis.utils.iface.mapCanvas().mapSettings())
         tile_set.render(progress)
 
 
@@ -105,11 +108,12 @@ class TileSet():
     """
     A set of tiles
     """
-    def __init__(self, map_theme, extent, tile_size, mupp, output, map_settings):
+    def __init__(self, map_theme, layer, extent, tile_size, mupp, output, map_settings):
         """
 
         :param map_theme:
         :param extent:
+        :param layer:
         :param tile_size:
         :param mupp:
         :param output:
@@ -154,6 +158,8 @@ class TileSet():
         if QgsProject.instance().mapThemeCollection().hasMapTheme(map_theme):
             self.settings.setLayers(QgsProject.instance().mapThemeCollection().mapThemeVisibleLayers(map_theme))
             self.settings.setLayerStyleOverrides(QgsProject.instance().mapThemeCollection().mapThemeStyleOverrides(map_theme))
+        elif layer:
+            self.settings.setLayers([layer])
         else:
             self.settings.setLayers(map_settings.layers())
 

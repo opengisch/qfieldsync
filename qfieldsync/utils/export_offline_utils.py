@@ -28,18 +28,18 @@ from qfieldsync.config import (
     BASE_MAP_TYPE,
     BASE_MAP_TYPE_SINGLE_LAYER,
     CREATE_BASE_MAP,
-    BASE_MAP_THEME
-)
+    BASE_MAP_THEME,
+    BASE_MAP_LAYER, BASE_MAP_TILE_SIZE, BASE_MAP_MUPP)
+
 
 class OfflineConvertor(QObject):
-
     progressStopped = pyqtSignal()
     layerProgressUpdated = pyqtSignal(int, int)
     progressModeSet = pyqtSignal('QgsOfflineEditing::ProgressMode', int)
     progressUpdated = pyqtSignal(int)
     progressJob = pyqtSignal(str)
     __offline_layers = list()
-    __convertor_progress = None # for processing feedback
+    __convertor_progress = None  # for processing feedback
 
     def __init__(self, export_folder, extent, offline_editing):
         super(OfflineConvertor, self).__init__(parent=None)
@@ -73,12 +73,15 @@ class OfflineConvertor(QObject):
         createBaseMap = QgsProject.instance().readBoolEntry('qfieldsync', CREATE_BASE_MAP, False)
         if createBaseMap:
             baseMapType, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_TYPE)
+            tile_size, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_TILE_SIZE, 1024)
+            map_units_per_pixel, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_MUPP, 100)
 
             if baseMapType == BASE_MAP_TYPE_SINGLE_LAYER:
-                raise Exception("Single layer base map not yet implemented. Please stay tuned.")
+                baseMapLayer, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_LAYER)
+                self.createBaseMapLayer(None, baseMapLayer, tile_size, map_units_per_pixel)
             else:
                 baseMapTheme, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_THEME)
-                self.createBaseMapLayer(baseMapTheme, 1024, 1)
+                self.createBaseMapLayer(baseMapTheme, None, tile_size, map_units_per_pixel)
 
         self.progressJob.emit(self.tr('Copying layers'))
         # Loop through all layers and copy/remove/offline them
@@ -100,7 +103,8 @@ class OfflineConvertor(QObject):
         self.progressJob.emit(self.tr('Copying offline layers'))
         # Run the offline plugin
         spatialite_filename = "data.sqlite"
-        success = self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename, [l.id() for l in self.__offline_layers])
+        success = self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
+                                                               [l.id() for l in self.__offline_layers])
 
         QApplication.restoreOverrideCursor()
         # Now we have a project state which can be saved as offline project
@@ -112,7 +116,7 @@ class OfflineConvertor(QObject):
 
         self.progressJob.emit(self.tr('Finished'))
 
-    def extensionlist_for_layer(self,file_path):
+    def extensionlist_for_layer(self, file_path):
         """
         Returns a list of extensions that should be copied for the
         provided file_path. This is required for shapefiles because they
@@ -125,7 +129,6 @@ class OfflineConvertor(QObject):
             return SHP_EXTENSIONS
         else:
             return [ext]
-
 
     def copy_layer(self, layer):
         """
@@ -148,7 +151,7 @@ class OfflineConvertor(QObject):
 
             change_layer_data_source(layer, new_file_path)
 
-    def createBaseMapLayer(self, map_theme, tile_size, map_units_per_pixel):
+    def createBaseMapLayer(self, map_theme, layer, tile_size, map_units_per_pixel):
         """
         Create a basemap from map layer(s)
 
@@ -159,12 +162,14 @@ class OfflineConvertor(QObject):
         :param tile_size:            The extent rectangle in which data shall be fetched
         :param map_units_per_pixel:  Number of map units per pixel (1: 1 m per pixel, 10: 10 m per pixel...)
         """
-        extent_string = '{},{},{},{}'.format(self.extent.xMinimum(), self.extent.xMaximum(), self.extent.yMinimum(), self.extent.yMaximum())
+        extent_string = '{},{},{},{}'.format(self.extent.xMinimum(), self.extent.xMaximum(), self.extent.yMinimum(),
+                                             self.extent.yMaximum())
 
         alg = processing.Processing.getAlgorithm('qfieldsync:basemap').getCopy()
 
         alg.setParameterValue('EXTENT', extent_string)
         alg.setParameterValue('MAP_THEME', map_theme)
+        alg.setParameterValue('LAYER', layer)
         alg.setParameterValue('MAP_UNITS_PER_PIXEL', map_units_per_pixel)
         alg.setParameterValue('TILE_SIZE', tile_size)
         alg.setOutputValue('OUTPUT_LAYER', os.path.join(self.export_folder, 'basemap.gpkg'))
@@ -176,10 +181,13 @@ class OfflineConvertor(QObject):
         layer_tree = QgsProject.instance().layerTreeRoot()
         layer_tree.insertLayer(len(layer_tree.children()), new_layer)
 
-
     def onLayerProgressUpdated(self, layer_index, layer_count):
-        print(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index, layer_count=layer_count)))
-        self.progressJob.emit(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index, layer_count=layer_count)))
+        print(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(
+            layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
+            layer_count=layer_count)))
+        self.progressJob.emit(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(
+            layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
+            layer_count=layer_count)))
 
     def convertorProcessingProgress(self):
         """
@@ -217,10 +225,8 @@ class OfflineConvertor(QObject):
             def close(self):
                 pass
 
-
         if not self.__convertor_progress:
             self.__convertor_progress = ConvertorProgress()
             self.__convertor_progress.progressUpdated.connect(self.layerProgressUpdated)
 
         return self.__convertor_progress
-
