@@ -135,7 +135,7 @@ class TileSet():
         ysize = self.y_tile_count * tile_size
 
         self.dataset = driver.Create(output, xsize, ysize, 3)  # 3 bands
-        self.dataset.SetProjection(bytes(crs.toWkt()))
+        self.dataset.SetProjection(str(crs.toWkt()))
         self.dataset.SetGeoTransform([extent.xMinimum(), mupp, 0, extent.yMaximum(), 0, -mupp])
 
         self.image = QImage(QSize(tile_size, tile_size), QImage.Format_RGB32)
@@ -151,9 +151,9 @@ class TileSet():
         self.settings.setFlag(QgsMapSettings.RenderMapTile, True)
 
 
-        if QgsProject.instance().mapThemeCollection().hasPreset(map_theme):
-            self.settings.setLayers(QgsProject.instance().mapThemeCollection().presetVisibleLayers(map_theme))
-            self.settings.setLayerStyleOverrides(QgsProject.instance().mapThemeCollection().presetStyleOverrides(map_theme))
+        if QgsProject.instance().mapThemeCollection().hasMapTheme(map_theme):
+            self.settings.setLayers(QgsProject.instance().mapThemeCollection().mapThemeVisibleLayers(map_theme))
+            self.settings.setLayerStyleOverrides(QgsProject.instance().mapThemeCollection().mapThemeStyleOverrides(map_theme))
         else:
             self.settings.setLayers(map_settings.layers())
 
