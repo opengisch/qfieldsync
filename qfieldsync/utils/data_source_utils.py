@@ -46,8 +46,10 @@ def project_get_layers_of_given_types(types):
     # can see all types via
     # QgsProviderRegistry.instance().providerList()
     map_layers = QgsMapLayerRegistry.instance().mapLayers()
-    return [layer for name, layer in map_layers.items() if layer.providerType() in \
-                                                           types and not isinstance(layer, QgsRasterLayer)]
+    return [layer for name, layer in map_layers.items() if
+            hasattr(layer, 'providerType')
+            and layer.providerType() in types
+            and not isinstance(layer, QgsRasterLayer)]
 
 
 def layer_is_jpeg2000(layer):
