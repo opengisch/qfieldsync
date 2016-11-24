@@ -34,7 +34,7 @@ from qgis.PyQt.QtWidgets import (
 
 from qfieldsync.utils.qt_utils import get_ui_class
 
-FORM_CLASS = get_ui_class('settings.ui')
+FORM_CLASS = get_ui_class('settings')
 
 from qfieldsync.utils.qt_utils import make_folder_selector
 

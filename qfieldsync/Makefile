@@ -42,15 +42,29 @@ SOURCES = \
 PLUGINNAME = qfieldsync
 
 PY_FILES = \
-	qfield_sync.py \
-	qfield_sync_dialog.py \
-	__init__.py
+        qfield_sync.py \
+        qfield_sync_dialog.py \
+        __init__.py
 
-UI_FILES = we_use_dynamic_loading_of_ui_classes
+UI_FILES = \
+        ui/config_dialog_base.ui \
+        ui/push_dialog_base.ui \
+        ui/settings.ui \
+        ui/synchronize_base.ui
 
 EXTRAS = icon.png metadata.txt
 
-COMPILED_RESOURCE_FILES = resources_rc.py
+COMPILED_RESOURCE_FILES = resources_rc4.py
+
+COMPILED_UI_FILES = \
+        ui/config_dialog_base_ui4.py \
+	ui/push_dialog_base_ui4.py \
+	ui/settings_ui4.py \
+	ui/synchronize_base_ui4.py \
+        ui/config_dialog_base_ui5.py \
+	ui/push_dialog_base_ui5.py \
+	ui/settings_ui5.py \
+	ui/synchronize_base_ui5.py
 
 PEP8EXCLUDE=pydev,resources_rc.py,conf.py,third_party,ui
 
@@ -69,11 +83,15 @@ QGISDIR=.qgis2
 
 default: compile
 
-compile: $(COMPILED_RESOURCE_FILES)
+compile: $(COMPILED_RESOURCE_FILES) $(COMPILED_UI_FILES)
 
-%_rc.py : %.qrc $(RESOURCES_SRC)
+%_rc4.py : %.qrc $(RESOURCES_SRC)
 	pyrcc4 -o $*_rc4.py  $<
 	pyrcc5 -o $*_rc5.py  $<
+
+ui/%_ui4.py ui/%_ui5.py : ui/%.ui $(UI_FILES)
+	pyuic4 -o ui/$*_ui4.py  $<
+	pyuic5 -o ui/$*_ui5.py  $<
 
 %.qm : %.ts
 	$(LRELEASE) $<
@@ -106,7 +124,6 @@ deploy: compile doc transcompile
 	# $HOME/$(QGISDIR)/python/plugins
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)

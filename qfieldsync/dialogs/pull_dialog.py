@@ -38,7 +38,7 @@ from qfieldsync.utils.file_utils import get_project_in_folder
 from qfieldsync.utils.qgis_utils import open_project
 from qfieldsync.utils.qt_utils import get_ui_class, make_folder_selector
 
-FORM_CLASS = get_ui_class('synchronize_base.ui')
+FORM_CLASS = get_ui_class('synchronize_base')
 
 
 class PullDialog(QDialog, FORM_CLASS):

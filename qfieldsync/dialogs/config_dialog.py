@@ -48,7 +48,7 @@ from qfieldsync.config import (
     BASE_MAP_TILE_SIZE,
     OFFLINE_COPY_ONLY_AOI)
 
-FORM_CLASS = get_ui_class('config_dialog_base.ui')
+FORM_CLASS = get_ui_class('config_dialog_base')
 
 class ConfigDialog(QDialog, FORM_CLASS):
     """

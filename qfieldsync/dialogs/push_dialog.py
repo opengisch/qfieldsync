@@ -63,8 +63,7 @@ try:
 except:
     pass
 
-FORM_CLASS = get_ui_class('push_dialog_base.ui')
-
+FORM_CLASS = get_ui_class('push_dialog_base')
 
 class PushDialog(QDialog, FORM_CLASS):
     def __init__(self, iface, plugin_instance):
