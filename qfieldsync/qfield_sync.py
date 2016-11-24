@@ -41,7 +41,7 @@ from qfieldsync.dialogs.settings_dialog import SettingsDialog
 from qfieldsync.dialogs.pull_dialog import PullDialog
 from qfieldsync.dialogs.config_dialog import ConfigDialog
 
-from qfieldsync.utils.qgis_utils import warn_project_is_dirty, tr
+from qfieldsync.utils.qgis_utils import tr
 
 from .processing.provider import QFieldProcessingProvider
 from processing.core.Processing import Processing
@@ -275,13 +275,11 @@ class QFieldSync(object):
         """
         Push to QField
         """
-        if warn_project_is_dirty():
-            # show the dialog
-            self.push_dlg = PushDialog(self.iface, self)
-            # Run the dialog event loop
-            self.push_dlg.show()
-            self.push_dlg.finished.connect(self.update_button_enabled_status)
-            self.update_button_enabled_status()
+        self.push_dlg = PushDialog(self.iface, self)
+        self.push_dlg.show()
+
+        self.push_dlg.finished.connect(self.update_button_enabled_status)
+        self.update_button_enabled_status()
 
     def configuration_dialog(self):
         """

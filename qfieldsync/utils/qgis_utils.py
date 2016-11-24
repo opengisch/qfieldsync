@@ -22,19 +22,3 @@ def open_project(fn):
     QgsProject.instance().clear()
     QgsProject.instance().setFileName(fn)
     QgsProject.instance().read()
-
-
-def warn_project_is_dirty(text=None):
-    if (QgsProject.instance().isDirty()):
-        title = tr('Continue?')
-        default_text = tr('The currently open project is not saved. '
-                         '\nDo you want to save the project before proceeding?')
-        if text is None:
-            text = default_text
-        answer = QMessageBox.question(None, title, text,
-                                      QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
-        if answer == QMessageBox.Cancel:
-            return False
-        if answer == QMessageBox.Save:
-            QgsProject.instance().write()
-    return True

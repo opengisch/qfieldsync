@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 
 from processing import ProcessingConfig
 from processing.gui import RenderingStyles
@@ -7,7 +8,7 @@ from qgis.PyQt.QtCore import (
     QFileInfo,
     Qt,
     QObject,
-    pyqtSignal)
+    pyqtSignal, QTimer)
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (
     QgsProject,
@@ -60,55 +61,67 @@ class OfflineConvertor(QObject):
         :param export_folder:   The folder to export to
         """
 
-        existing_filepath = QgsProject.instance().fileName()
-        existing_fn, _ = os.path.splitext(os.path.basename(existing_filepath))
+        original_project_path = QgsProject.instance().fileName()
+        project_filename, _ = os.path.splitext(os.path.basename(original_project_path))
 
-        if not os.path.exists(self.export_folder):
-            os.mkdir(self.export_folder)
+        # Write a backup of the current project to a temporary file
+        project_backup_folder = tempfile.mkdtemp()
+        backup_project_path = os.path.join(project_backup_folder, project_filename + '.qgs')
+        QgsProject.instance().write(QFileInfo(backup_project_path))
 
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            if not os.path.exists(self.export_folder):
+                os.mkdir(self.export_folder)
 
-        self.progressJob.emit(self.tr('Creating base map'))
-        # Create the base map before layers are removed
-        createBaseMap = QgsProject.instance().readBoolEntry('qfieldsync', CREATE_BASE_MAP, False)
-        if createBaseMap:
-            baseMapType, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_TYPE)
-            tile_size, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_TILE_SIZE, 1024)
-            map_units_per_pixel, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_MUPP, 100)
+            QApplication.setOverrideCursor(Qt.WaitCursor)
 
-            if baseMapType == BASE_MAP_TYPE_SINGLE_LAYER:
-                baseMapLayer, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_LAYER)
-                self.createBaseMapLayer(None, baseMapLayer, tile_size, map_units_per_pixel)
-            else:
-                baseMapTheme, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_THEME)
-                self.createBaseMapLayer(baseMapTheme, None, tile_size, map_units_per_pixel)
+            self.progressJob.emit(self.tr('Creating base map'))
+            # Create the base map before layers are removed
+            createBaseMap = QgsProject.instance().readBoolEntry('qfieldsync', CREATE_BASE_MAP, False)
+            if createBaseMap:
+                baseMapType, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_TYPE)
+                tile_size, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_TILE_SIZE, 1024)
+                map_units_per_pixel, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_MUPP, 100)
 
-        self.progressJob.emit(self.tr('Copying layers'))
-        # Loop through all layers and copy/remove/offline them
-        self.__offline_layers = list()
-        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
-            if layer.customProperty(LAYER_ACTION) == OFFLINE:
-                layer.selectByRect(self.extent)
-                self.__offline_layers.append(layer)
-            elif layer.customProperty(LAYER_ACTION) == NO_ACTION:
-                self.copy_layer(layer)
-            elif layer.customProperty(LAYER_ACTION) == REMOVE:
-                QgsMapLayerRegistry.instance().removeMapLayer(layer)
+                if baseMapType == BASE_MAP_TYPE_SINGLE_LAYER:
+                    baseMapLayer, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_LAYER)
+                    self.createBaseMapLayer(None, baseMapLayer, tile_size, map_units_per_pixel)
+                else:
+                    baseMapTheme, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_THEME)
+                    self.createBaseMapLayer(baseMapTheme, None, tile_size, map_units_per_pixel)
 
-        project_filename = os.path.join(self.export_folder, existing_fn + "_qfield.qgs")
+            self.progressJob.emit(self.tr('Copying layers'))
+            # Loop through all layers and copy/remove/offline them
+            self.__offline_layers = list()
+            for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+                if layer.customProperty(LAYER_ACTION) == OFFLINE:
+                    layer.selectByRect(self.extent)
+                    self.__offline_layers.append(layer)
+                elif layer.customProperty(LAYER_ACTION) == NO_ACTION:
+                    self.copy_layer(layer)
+                elif layer.customProperty(LAYER_ACTION) == REMOVE:
+                    QgsMapLayerRegistry.instance().removeMapLayer(layer)
 
-        # save the offline project twice so that the offline plugin can "know" that it's a relative path
-        QgsProject.instance().write(QFileInfo(project_filename))
+            project_filename = os.path.join(self.export_folder, project_filename + "_qfield.qgs")
 
-        self.progressJob.emit(self.tr('Copying offline layers'))
-        # Run the offline plugin
-        spatialite_filename = "data.sqlite"
-        success = self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
-                                                               [l.id() for l in self.__offline_layers])
+            # save the offline project twice so that the offline plugin can "know" that it's a relative path
+            QgsProject.instance().write(QFileInfo(project_filename))
 
-        QApplication.restoreOverrideCursor()
-        # Now we have a project state which can be saved as offline project
-        QgsProject.instance().write(QFileInfo(project_filename))
+            self.progressJob.emit(self.tr('Copying offline layers'))
+            # Run the offline plugin
+            spatialite_filename = "data.sqlite"
+            success = self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
+                                                                   [l.id() for l in self.__offline_layers])
+
+            # Now we have a project state which can be saved as offline project
+            QgsProject.instance().write(QFileInfo(project_filename))
+        finally:
+            def loadProject():
+                QgsProject.instance().read(QFileInfo(backup_project_path))
+                QgsProject.instance().setFileName(original_project_path)
+
+            QTimer.singleShot(10, lambda: loadProject())
+            QApplication.restoreOverrideCursor()
 
         if not success:
             self.progressJob.emit(self.tr('Failure'))
