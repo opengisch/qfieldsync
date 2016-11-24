@@ -155,17 +155,16 @@ class OfflineConvertor(QObject):
         :param dataPath: The target folder
         :param layer: The layer to copy
         """
-        file_path = file_path_for_layer(layer)
+        file_path, new_data_source = file_path_for_layer(layer, self.export_folder)
         if file_path:
             parent, fn, ext = fileparts(file_path)
-            new_file_path = os.path.join(self.export_folder, fn + ext)
 
             for extra_ext in self.extensionlist_for_layer(file_path):
                 source_file_path = os.path.join(parent, fn + extra_ext)
                 if os.path.exists(source_file_path):
                     shutil.copy(source_file_path, self.export_folder)
 
-            change_layer_data_source(layer, new_file_path)
+            change_layer_data_source(layer, new_data_source)
 
     def createBaseMapLayer(self, map_theme, layer, tile_size, map_units_per_pixel):
         """

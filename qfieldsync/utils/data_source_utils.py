@@ -88,11 +88,24 @@ def project_filter_layers(filter_func):
     map_layers = QgsMapLayerRegistry.instance().mapLayers()
     return [layer for name, layer in map_layers.items() if filter_func(layer)]
 
-def file_path_for_layer(layer):
+def file_path_for_layer(layer, new_folder):
+    """
+    Checks if the layer is file based and returns the original file path as well
+    as an updated data source string for the new location.
+    """
     file_path = layer.source()
+    # Shapefiles have a simple path in the source
     if os.path.isfile(file_path):
-        return file_path
-    elif os.path.isfile(QgsDataSourceUri(layer.dataProvider().dataSourceUri()).database()):
-        return QgsDataSourceUri(layer.dataProvider().dataSourceUri()).database()
+        _, file_name = os.path.split(file_path)
+        return (file_path, os.path.join(new_folder, file_name))
+    # Spatialite files have a uri
     else:
-        return None
+        uri = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
+        file_path = uri.database()
+        if os.path.isfile(file_path):
+            _, file_name = os.path.split(file_path)
+            uri.setDatabase(os.path.join(new_folder, file_name))
+            return (file_path, uri.uri())
+        # It's a non-file-based format (WMS...)
+        else:
+            return (None, None)

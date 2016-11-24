@@ -170,6 +170,14 @@ class PushDialog(QDialog, FORM_CLASS):
             if not layer.customProperty(LAYER_ACTION):
                 self.infoGroupBox.show()
 
+        only_aoi, _ = QgsProject.instance().readBoolEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI)
+        create_base_map, _ = QgsProject.instance().readBoolEntry('qfieldsync', CREATE_BASE_MAP)
+
+        if only_aoi or create_base_map:
+            self.informationStack.setCurrentWidget(self.selectExtentPage)
+        else:
+            self.informationStack.setCurrentWidget(self.progressPage)
+
     def show_settings(self):
         dlg = ConfigDialog(self.iface, self.iface.mainWindow())
         dlg.exec_()
