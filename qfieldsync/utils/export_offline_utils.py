@@ -18,7 +18,7 @@ from qgis.core import (
 )
 import processing
 
-from qfieldsync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source
+from qfieldsync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source, file_path_for_layer
 from qfieldsync.utils.file_utils import fileparts
 
 from qfieldsync.config import (
@@ -30,7 +30,7 @@ from qfieldsync.config import (
     BASE_MAP_TYPE_SINGLE_LAYER,
     CREATE_BASE_MAP,
     BASE_MAP_THEME,
-    BASE_MAP_LAYER, BASE_MAP_TILE_SIZE, BASE_MAP_MUPP)
+    BASE_MAP_LAYER, BASE_MAP_TILE_SIZE, BASE_MAP_MUPP, OFFLINE_COPY_ONLY_AOI)
 
 
 class OfflineConvertor(QObject):
@@ -90,12 +90,15 @@ class OfflineConvertor(QObject):
                     baseMapTheme, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_THEME)
                     self.createBaseMapLayer(baseMapTheme, None, tile_size, map_units_per_pixel)
 
+            offline_copy_only_aoi, _ = QgsProject.instance().readBoolEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI)
+
             self.progressJob.emit(self.tr('Copying layers'))
             # Loop through all layers and copy/remove/offline them
             self.__offline_layers = list()
             for layer in QgsMapLayerRegistry.instance().mapLayers().values():
                 if layer.customProperty(LAYER_ACTION) == OFFLINE:
-                    layer.selectByRect(self.extent)
+                    if offline_copy_only_aoi:
+                        layer.selectByRect(self.extent)
                     self.__offline_layers.append(layer)
                 elif layer.customProperty(LAYER_ACTION) == NO_ACTION:
                     self.copy_layer(layer)
@@ -111,7 +114,7 @@ class OfflineConvertor(QObject):
             # Run the offline plugin
             spatialite_filename = "data.sqlite"
             success = self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
-                                                                   [l.id() for l in self.__offline_layers])
+                                                                   [l.id() for l in self.__offline_layers], offline_copy_only_aoi)
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(QFileInfo(project_filename))
@@ -152,8 +155,8 @@ class OfflineConvertor(QObject):
         :param dataPath: The target folder
         :param layer: The layer to copy
         """
-        file_path = layer.source()
-        if os.path.isfile(file_path):
+        file_path = file_path_for_layer(layer)
+        if file_path:
             parent, fn, ext = fileparts(file_path)
             new_file_path = os.path.join(self.export_folder, fn + ext)
 

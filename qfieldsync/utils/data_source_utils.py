@@ -1,5 +1,13 @@
+import os
+
 from qgis.PyQt.QtXml import *
-from qgis.core import QgsMapLayerRegistry, QgsProject, QgsOfflineEditing, QgsRasterLayer
+from qgis.core import (
+    QgsMapLayerRegistry,
+    QgsProject,
+    QgsOfflineEditing,
+    QgsRasterLayer,
+    QgsDataSourceUri
+)
 
 
 SHP_EXTENSIONS = ['.shp', '.shx', '.dbf', '.sbx', '.sbn', '.shp.xml']
@@ -79,3 +87,12 @@ def project_get_always_offline_layers():
 def project_filter_layers(filter_func):
     map_layers = QgsMapLayerRegistry.instance().mapLayers()
     return [layer for name, layer in map_layers.items() if filter_func(layer)]
+
+def file_path_for_layer(layer):
+    file_path = layer.source()
+    if os.path.isfile(file_path):
+        return file_path
+    elif os.path.isfile(QgsDataSourceUri(layer.dataProvider().dataSourceUri()).database()):
+        return QgsDataSourceUri(layer.dataProvider().dataSourceUri()).database()
+    else:
+        return None

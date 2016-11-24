@@ -44,7 +44,9 @@ from qfieldsync.config import (
     BASE_MAP_THEME,
     BASE_MAP_TYPE_MAP_THEME,
     BASE_MAP_TYPE_SINGLE_LAYER,
-    BASE_MAP_LAYER, BASE_MAP_MUPP, BASE_MAP_TILE_SIZE)
+    BASE_MAP_LAYER, BASE_MAP_MUPP,
+    BASE_MAP_TILE_SIZE,
+    OFFLINE_COPY_ONLY_AOI)
 
 FORM_CLASS = get_ui_class('config_dialog_base.ui')
 
@@ -123,6 +125,9 @@ class ConfigDialog(QDialog, FORM_CLASS):
         baseMapMupp, _ = self.project.readEntry('qfieldsync', BASE_MAP_MUPP, '100')
         self.tileSize.setText(baseMapMupp)
 
+        only_copy_features_in_aoi, _ = self.project.readBoolEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI, False)
+        self.onlyOfflineCopyFeaturesInAoi.setChecked(only_copy_features_in_aoi)
+
     def onAccepted(self):
         """
         Update layer configuration in project
@@ -155,6 +160,8 @@ class ConfigDialog(QDialog, FORM_CLASS):
 
         self.project.writeEntry('qfieldsync', BASE_MAP_TILE_SIZE, self.mapUnitsPerPixel.text())
         self.project.writeEntry('qfieldsync', BASE_MAP_MUPP, self.tileSize.text())
+
+        self.project.writeEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI, self.onlyOfflineCopyFeaturesInAoi.isChecked())
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():

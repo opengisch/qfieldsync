@@ -118,8 +118,7 @@ class PushDialog(QDialog, FORM_CLASS):
         non_qfield_layers = project_get_qfield_unsupported_layers()
 
         if non_qfield_layers:
-            self.show_warning_about_layers_that_cant_work_with_qfield(
-                non_qfield_layers)
+            self.show_warning_about_layers_that_cant_work_with_qfield(non_qfield_layers)
 
         offline_convertor = OfflineConvertor(export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
 
@@ -160,8 +159,7 @@ class PushDialog(QDialog, FORM_CLASS):
         QMessageBox.information(self.iface.mainWindow(), 'Warning',
                                 self.tr(
                                     'Layers {} are not supported by '
-                                    'QField').format(
-                                    layers_list))
+                                    'QField').format(layers_list))
 
     def update_info_visibility(self):
         """

@@ -19,6 +19,7 @@ BASE_MAP_THEME             = '/baseMapTheme'
 BASE_MAP_LAYER             = '/baseMapLayer'
 BASE_MAP_TILE_SIZE         = '/baseMapTileSize'
 BASE_MAP_MUPP              = '/baseMapMupp'
+OFFLINE_COPY_ONLY_AOI      = '/offlineCopyOnlyAoi'
 
 # GUI messages options
 LOG_TAG = "QFieldSync"
