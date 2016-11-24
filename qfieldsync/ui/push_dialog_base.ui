@@ -17,7 +17,7 @@
    <item row="2" column="0" colspan="2">
     <widget class="QStackedWidget" name="informationStack">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="progressPage">
       <layout class="QGridLayout" name="gridLayout_3">
@@ -35,9 +35,6 @@
        </property>
        <item row="0" column="0">
         <widget class="QGroupBox" name="progress_group">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="title">
           <string>Progress</string>
          </property>
