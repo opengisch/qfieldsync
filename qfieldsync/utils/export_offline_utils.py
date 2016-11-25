@@ -18,7 +18,7 @@ from qgis.core import (
 )
 
 
-class OfflineConvertor(QObject):
+class OfflineConverter(QObject):
     progressStopped = pyqtSignal()
     layerProgressUpdated = pyqtSignal(int, int)
     progressModeSet = pyqtSignal('QgsOfflineEditing::ProgressMode', int)
@@ -28,7 +28,7 @@ class OfflineConvertor(QObject):
     __convertor_progress = None  # for processing feedback
 
     def __init__(self, project, export_folder, extent, offline_editing):
-        super(OfflineConvertor, self).__init__(parent=None)
+        super(OfflineConverter, self).__init__(parent=None)
         self.export_folder = export_folder
         self.extent = extent
         self.offline_editing = offline_editing

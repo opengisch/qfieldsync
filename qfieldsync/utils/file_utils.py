@@ -44,6 +44,11 @@ def get_project_in_folder(folder):
 
 
 def open_folder(path):
+    """
+    Opens the provided path in a file browser.
+    On Windows and Mac, this will open the parent directory
+    and pre-select the actual folder.
+    """
     if platform.system() == "Windows":
         subprocess.Popen(r'explorer /select,"{}"'.format(path))
     elif platform.system() == "Darwin":

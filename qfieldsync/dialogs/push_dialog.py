@@ -40,7 +40,7 @@ from qgis.core import (
 from qgis.gui import QgsMessageBar
 from ..config import *
 from ..utils.export_offline_utils import (
-    OfflineConvertor
+    OfflineConverter
 )
 from ..utils.file_utils import fileparts, get_full_parent_path, open_folder
 from ..utils.qgis_utils import get_project_title
@@ -108,7 +108,7 @@ class PushDialog(QDialog, FORM_CLASS):
 
         export_folder = self.get_export_folder_from_dialog()
 
-        offline_convertor = OfflineConvertor(self.project, export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
+        offline_convertor = OfflineConverter(self.project, export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
 
         # progress connections
         offline_convertor.layerProgressUpdated.connect(self.update_total)
