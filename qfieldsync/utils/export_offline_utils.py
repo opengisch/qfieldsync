@@ -4,6 +4,8 @@ import tempfile
 
 from processing import ProcessingConfig
 from processing.gui import RenderingStyles
+
+from qfieldsync.utils.data_source_utils import LayerSource, SyncAction
 from qgis.PyQt.QtCore import (
     QFileInfo,
     Qt,
@@ -18,14 +20,9 @@ from qgis.core import (
 )
 import processing
 
-from qfieldsync.utils.data_source_utils import SHP_EXTENSIONS, change_layer_data_source, file_path_for_layer
 from qfieldsync.utils.file_utils import fileparts
 
 from qfieldsync.config import (
-    OFFLINE,
-    LAYER_ACTION,
-    NO_ACTION,
-    REMOVE,
     BASE_MAP_TYPE,
     BASE_MAP_TYPE_SINGLE_LAYER,
     CREATE_BASE_MAP,
@@ -63,6 +60,7 @@ class OfflineConvertor(QObject):
 
         original_project_path = QgsProject.instance().fileName()
         project_filename, _ = os.path.splitext(os.path.basename(original_project_path))
+        print project_filename
 
         # Write a backup of the current project to a temporary file
         project_backup_folder = tempfile.mkdtemp()
@@ -74,6 +72,8 @@ class OfflineConvertor(QObject):
                 os.mkdir(self.export_folder)
 
             QApplication.setOverrideCursor(Qt.WaitCursor)
+
+            layers = QgsMapLayerRegistry.instance().mapLayers().values()
 
             self.progressJob.emit(self.tr('Creating base map'))
             # Create the base map before layers are removed
@@ -95,76 +95,46 @@ class OfflineConvertor(QObject):
             self.progressJob.emit(self.tr('Copying layers'))
             # Loop through all layers and copy/remove/offline them
             self.__offline_layers = list()
-            for layer in QgsMapLayerRegistry.instance().mapLayers().values():
-                if layer.customProperty(LAYER_ACTION) == OFFLINE:
+            for layer in layers:
+                layer_source = LayerSource(layer)
+
+                if layer_source.action == SyncAction.OFFLINE:
                     if offline_copy_only_aoi:
                         layer.selectByRect(self.extent)
                     self.__offline_layers.append(layer)
-                elif layer.customProperty(LAYER_ACTION) == NO_ACTION:
-                    self.copy_layer(layer)
-                elif layer.customProperty(LAYER_ACTION) == REMOVE:
+                elif layer_source.action == SyncAction.NO_ACTION:
+                    layer_source.copy(self.export_folder)
+                elif layer_source.action == SyncAction.REMOVE:
                     QgsMapLayerRegistry.instance().removeMapLayer(layer)
 
-            project_filename = os.path.join(self.export_folder, project_filename + "_qfield.qgs")
+            project_path = os.path.join(self.export_folder, project_filename + "_qfield.qgs")
+            print project_path
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
-            QgsProject.instance().write(QFileInfo(project_filename))
+            QgsProject.instance().write(QFileInfo(project_path))
 
             self.progressJob.emit(self.tr('Copying offline layers'))
             # Run the offline plugin
             spatialite_filename = "data.sqlite"
-            success = self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
-                                                                   [l.id() for l in self.__offline_layers], offline_copy_only_aoi)
+            if self.__offline_layers:
+                offline_layer_ids = [l.id() for l in self.__offline_layers]
+                if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
+                                                                    offline_layer_ids, offline_copy_only_aoi):
+                    self.progressJob.emit(self.tr('Failure'))
+                    raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             # Now we have a project state which can be saved as offline project
-            QgsProject.instance().write(QFileInfo(project_filename))
+            QgsProject.instance().write(QFileInfo(project_path))
         finally:
-            def loadProject():
+            def reload_original_project():
                 QgsProject.instance().read(QFileInfo(backup_project_path))
                 QgsProject.instance().setFileName(original_project_path)
 
-            QTimer.singleShot(10, lambda: loadProject())
+            # Calling this directly crashes QGIS 2.18 when loading WMS layers
+            QTimer.singleShot(10, lambda: reload_original_project())
             QApplication.restoreOverrideCursor()
 
-        if not success:
-            self.progressJob.emit(self.tr('Failure'))
-            raise Exception(self.tr("Error trying to convert layers to offline layers"))
-
         self.progressJob.emit(self.tr('Finished'))
-
-    def extensionlist_for_layer(self, file_path):
-        """
-        Returns a list of extensions that should be copied for the
-        provided file_path. This is required for shapefiles because they
-        consist of a multitude of files that need to be copied.
-        For most layer types this will return a list with a single entry
-        """
-        parent, fn, ext = fileparts(file_path)
-
-        if ext == '.shp':
-            return SHP_EXTENSIONS
-        else:
-            return [ext]
-
-    def copy_layer(self, layer):
-        """
-        Copy a layer to the qfield project.
-        We might get a file, in this case we copy it.
-        We might also get something else like a WMS. In this case we just don't do anything at all.
-
-        :param dataPath: The target folder
-        :param layer: The layer to copy
-        """
-        file_path, new_data_source = file_path_for_layer(layer, self.export_folder)
-        if file_path:
-            parent, fn, ext = fileparts(file_path)
-
-            for extra_ext in self.extensionlist_for_layer(file_path):
-                source_file_path = os.path.join(parent, fn + extra_ext)
-                if os.path.exists(source_file_path):
-                    shutil.copy(source_file_path, self.export_folder)
-
-            change_layer_data_source(layer, new_data_source)
 
     def createBaseMapLayer(self, map_theme, layer, tile_size, map_units_per_pixel):
         """

@@ -114,11 +114,6 @@ class PushDialog(QDialog, FORM_CLASS):
 
         export_folder = self.get_export_folder_from_dialog()
 
-        non_qfield_layers = project_get_qfield_unsupported_layers()
-
-        if non_qfield_layers:
-            self.show_warning_about_layers_that_cant_work_with_qfield(non_qfield_layers)
-
         offline_convertor = OfflineConvertor(export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
 
         # progress connections
@@ -127,12 +122,9 @@ class PushDialog(QDialog, FORM_CLASS):
         offline_convertor.progressUpdated.connect(self.update_value)
         offline_convertor.progressJob.connect(self.update_job_status)
 
-        try:
-            offline_convertor.convert()
-            self.do_post_offline_convert_action()
-            self.close()
-        except Exception as e:
-            QMessageBox.warning(self, self.tr('Error in packaging'), self.tr('Unfortunately, there was a problem converting the project. {}'.format(e.message)))
+        offline_convertor.convert()
+        self.do_post_offline_convert_action()
+        self.close()
 
         self.progress_group.setEnabled(False)
 
@@ -153,20 +145,13 @@ class PushDialog(QDialog, FORM_CLASS):
 
         self.iface.messageBar().pushWidget(resultLabel, QgsMessageBar.INFO, 0)
 
-    def show_warning_about_layers_that_cant_work_with_qfield(self, layers):
-        layers_list = ','.join([layer.name() for layer in layers])
-        QMessageBox.information(self.iface.mainWindow(), 'Warning',
-                                self.tr(
-                                    'Layers {} are not supported by '
-                                    'QField').format(layers_list))
-
     def update_info_visibility(self):
         """
         Show the info label if there are unconfigured layers
         """
         self.infoGroupBox.hide()
         for layer in QgsMapLayerRegistry.instance().mapLayers().values():
-            if not layer.customProperty(LAYER_ACTION):
+            if not LayerSource(layer).is_configured:
                 self.infoGroupBox.show()
 
         only_aoi, _ = QgsProject.instance().readBoolEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI)

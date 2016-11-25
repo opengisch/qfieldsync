@@ -19,6 +19,7 @@
 """
 import os
 
+from qfieldsync.utils.data_source_utils import LayerSource
 from ..utils.qt_utils import get_ui_class
 
 from qgis.PyQt.QtWidgets import (
@@ -35,10 +36,6 @@ from qgis.core import (
 )
 
 from qfieldsync.config import (
-    OFFLINE,
-    REMOVE,
-    NO_ACTION,
-    LAYER_ACTION,
     BASE_MAP_TYPE,
     CREATE_BASE_MAP,
     BASE_MAP_THEME,
@@ -75,27 +72,19 @@ class ConfigDialog(QDialog, FORM_CLASS):
         """
         self.layersTable.setRowCount(0)
         for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+            layer_source = LayerSource(layer)
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer.name())
-            item.setData(Qt.UserRole, layer)
+            item.setData(Qt.UserRole, layer_source)
             self.layersTable.setItem(count, 0, item)
 
-            action = layer.customProperty(LAYER_ACTION, NO_ACTION)
-
             cbx = QComboBox()
-            file_path = layer.source()
-            if os.path.isfile(file_path):
-                cbx.addItem(self.tr('Copy'))
-            else:
-                cbx.addItem(self.tr('No action'))
-            cbx.addItem(self.tr('Offline copy'))
-            cbx.addItem(self.tr('Remove'))
-
-            if action == OFFLINE:
-                cbx.setCurrentIndex(1)
-            elif action == REMOVE:
-                cbx.setCurrentIndex(2)
+            for action, description in layer_source.available_actions:
+                cbx.addItem(description)
+                cbx.setItemData(Qt.UserRole, action)
+                if layer_source.action == action:
+                    cbx.setCurrentIndex(cbx.count() - 1)
 
             self.layersTable.setCellWidget(count, 1, cbx)
 
@@ -134,18 +123,15 @@ class ConfigDialog(QDialog, FORM_CLASS):
         """
         for i in range(self.layersTable.rowCount()):
             item = self.layersTable.item(i, 0)
-            layer = item.data(Qt.UserRole)
+            layer_source = item.data(Qt.UserRole)
             cbx = self.layersTable.cellWidget(i, 1)
-            oldConfiguration = layer.customProperty(LAYER_ACTION, NO_ACTION)
-            if cbx.currentIndex() == 1:
-                layer.setCustomProperty(LAYER_ACTION, OFFLINE)
-            elif cbx.currentIndex() == 2:
-                layer.setCustomProperty(LAYER_ACTION, REMOVE)
-            else:
-                layer.setCustomProperty(LAYER_ACTION, NO_ACTION)
 
-            if layer.customProperty(LAYER_ACTION) != oldConfiguration:
+            old_action = layer_source.action
+            layer_source.action = cbx.itemData(cbx.currentIndex())
+            if layer_source.action != old_action:
                 self.project.setDirty()
+
+            layer_source.apply()
 
         self.project.writeEntry('qfieldsync', CREATE_BASE_MAP, self.createBaseMapGroupBox.isChecked())
         self.project.writeEntry('qfieldsync', BASE_MAP_THEME, self.mapThemeComboBox.currentText())

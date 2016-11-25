@@ -1,111 +1,193 @@
 import os
+import shutil
 
 from qgis.PyQt.QtXml import *
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsMapLayerRegistry,
     QgsProject,
     QgsOfflineEditing,
     QgsRasterLayer,
-    QgsDataSourceUri
+    QgsDataSourceUri,
+    QgsMapLayer
 )
 
-
-SHP_EXTENSIONS = ['.shp', '.shx', '.dbf', '.sbx', '.sbn', '.shp.xml']
-
-
-def is_shapefile_layer(layer):
-    source = layer.source()
-    for ext in SHP_EXTENSIONS:
-        if source.endswith(ext): #.shp.xml is not handled correctly as an extension by
-        # os.path.splitext
-            return True
-    return False
+# When copying files, if any of the extension in any of the groups is found,
+# other files with the same extension in the same folder will be copied as well.
+file_extension_groups = [
+    ['.shp', '.shx', '.dbf', '.sbx', '.sbn', '.shp.xml']
+]
 
 
-def change_layer_data_source(layer, new_data_source):
-    # read layer DOM definition
-    XMLDocument = QDomDocument("style")
-    XMLMapLayers = QDomElement()
-    XMLMapLayers = XMLDocument.createElement("maplayers")
-    XMLMapLayer = QDomElement()
-    XMLMapLayer = XMLDocument.createElement("maplayer")
-    layer.writeLayerXml(XMLMapLayer, XMLDocument)
-
-    # modify DOM element with new layer reference
-    XMLMapLayer.firstChildElement("datasource").firstChild().setNodeValue(new_data_source)
-    #XMLMapLayer.firstChildElement("provider").firstChild().setNodeValue(newDatasourceProvider)
-    XMLMapLayers.appendChild(XMLMapLayer)
-    XMLDocument.appendChild(XMLMapLayers)
-
-    # reload layer definition
-    layer.readLayerXml(XMLMapLayer)
-    layer.reload()
-
-
-def project_get_raster_layers():
-    return project_filter_layers(lambda layer: isinstance(layer, QgsRasterLayer))
-
-
-def project_get_shp_layers():
-    return project_filter_layers(is_shapefile_layer)
-
-
-def project_get_layers_of_given_types(types):
-    # can see all types via
-    # QgsProviderRegistry.instance().providerList()
-    map_layers = QgsMapLayerRegistry.instance().mapLayers()
-    return [layer for name, layer in map_layers.items() if
-            hasattr(layer, 'providerType')
-            and layer.providerType() in types
-            and not isinstance(layer, QgsRasterLayer)]
-
-
-def layer_is_jpeg2000(layer):
-    # those have providerType() gdal, so we can't detect them by looking at the providerType
-    return layer.source().endswith(('jp2', 'jpx'))
-
-
-def layer_is_ecw_raster(layer):
-    return layer.source().endswith('ecw')
-
-
-def project_get_qfield_unsupported_layers():
-    return project_filter_layers(layer_is_jpeg2000) + project_filter_layers(layer_is_ecw_raster)
-
-
-def project_get_remote_layers():
-    """ Remote layers are layers that can either be converted to offline or kept in a realtime or hybrid mode"""
-    return project_get_layers_of_given_types(types=["postgres"])
-
-
-def project_get_always_offline_layers():
-    """ Layers that are file based and hence can always be handled by the offline plugin"""
-    types = ['delimitedtext', u'gdal', u'gpx', u'memory', u'ogr', u'spatialite']
-    return project_get_layers_of_given_types(types=types)
-
-
-def project_filter_layers(filter_func):
-    map_layers = QgsMapLayerRegistry.instance().mapLayers()
-    return [layer for name, layer in map_layers.items() if filter_func(layer)]
-
-def file_path_for_layer(layer, new_folder):
+def get_file_extension_group(filename):
     """
-    Checks if the layer is file based and returns the original file path as well
-    as an updated data source string for the new location.
+    Return the basename and an extension group (if applicable)
+
+    Examples:
+         airports.shp -> 'airport', ['.shp', '.shx', '.dbf', '.sbx', '.sbn', '.shp.xml']
+         forests.gpkg -> 'forests', ['.gpkg']
     """
-    file_path = layer.source()
-    # Shapefiles have a simple path in the source
-    if os.path.isfile(file_path):
-        _, file_name = os.path.split(file_path)
-        return (file_path, os.path.join(new_folder, file_name))
-    # Spatialite files have a uri
-    else:
-        uri = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
-        file_path = uri.database()
-        if os.path.isfile(file_path):
-            _, file_name = os.path.split(file_path)
-            uri.setDatabase(os.path.join(new_folder, file_name))
-            return (file_path, uri.uri())
-        # It's a non-file-based format (WMS...)
+    for group in file_extension_groups:
+        for extension in group:
+            if filename.endswith(extension):
+                return filename[:-len(extension)], group
+    basename, ext = os.path.splitext(filename)
+    return basename, [ext]
+
+
+class SyncAction:
+    """
+    Enumeration of sync actions
+    """
+    # Make an offline editing copy
+    def __init__(self):
+        raise RuntimeError('Should only be used as enumeration')
+
+    # Take an offline editing copy of this layer
+    OFFLINE = "offline"
+
+    # No action will in general leave the source untouched.
+    # For file based layers, the source
+    # - will be made relative
+    # - the file(s) will be copied
+    NO_ACTION = "no_action"
+
+    # remove from the project
+    REMOVE = "remove"
+
+
+class LayerSource:
+    def __init__(self, layer):
+        self.layer = layer
+        self.read_layer()
+
+    def read_layer(self):
+        self._action = self.layer.customProperty('QFieldSync/action')
+
+    def apply(self):
+        self.layer.setCustomProperty('QFieldSync/action', self.action)
+
+    @property
+    def action(self):
+        if self._action is None:
+            return self.default_action
         else:
-            return (None, None)
+            return self._action
+
+    @action.setter
+    def action(self, action):
+        self._action = action
+
+    @property
+    def default_action(self):
+        if self.is_file:
+            return SyncAction.NO_ACTION
+        elif not self.is_supported:
+            return SyncAction.REMOVE
+        elif self.layer.providerType() == 'postgres':
+            return SyncAction.OFFLINE
+        else:
+            return SyncAction.NO_ACTION
+
+    @property
+    def is_configured(self):
+        return self._action is not None
+
+    @property
+    def is_file(self):
+        if os.path.isfile(self.layer.source()):
+            return True
+        elif os.path.isfile(QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).database()):
+            return True
+        else:
+            return False
+
+    @property
+    def available_actions(self):
+        actions = list()
+
+        if self.is_file:
+            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'copy')))
+        else:
+            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'no action')))
+
+        if self.layer.type() == QgsMapLayer.VectorLayer:
+            actions.append((SyncAction.OFFLINE, QCoreApplication.translate('LayerAction', 'offline editing')))
+
+        actions.append((SyncAction.REMOVE, QCoreApplication.translate('LayerAction', 'remove')))
+
+        return actions
+
+    @property
+    def is_supported(self):
+        # jpeg 2000
+        if self.layer.source().endswith(('jp2', 'jpx')):
+            return False
+        # ecw raster
+        elif self.layer.source().endswith('ecw'):
+            return False
+        else:
+            return True
+
+    @property
+    def warning(self):
+        if self.layer.source().endswith('jp2', 'jpx'):
+            return QCoreApplication.translate('DataSourceWarning',
+                                              'JPEG2000 layers are not supported by QField.<br>You can rasterize them as basemap.')
+        if self.layer.source().endswith('ecw'):
+            return QCoreApplication.translate('DataSourceWarning',
+                                              'ECW layers are not supported by QField.<br>You can rasterize them as basemap.')
+        return None
+
+    def copy(self, target_path):
+        """
+        Copy a layer to a new path and adjust its datasource.
+
+        :param layer: The layer to copy
+        :param target_path: A path to a folder into which the data will be copied
+        :raises ValueError if the layer is not file-based
+        """
+        if not self.is_file:
+            raise ValueError('Can only copy file-based layers')
+
+        # Shapefiles... have the path in the source
+        file_path = self.layer.source()
+        # Spatialite have the path in the table part of the uri
+        uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
+
+        if os.path.isfile(file_path):
+            source_path, file_name = os.path.split(file_path)
+            basename, extensions = get_file_extension_group(file_name)
+            for ext in extensions:
+                    if os.path.exists(os.path.join(source_path, basename + ext)):
+                        shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
+            self._change_data_source(os.path.join(target_path, file_name))
+        # Spatialite files have a uri
+        else:
+            file_path = uri.database()
+            if os.path.isfile(file_path):
+                source_path, file_name = os.path.split(file_path)
+                basename, extensions = get_file_extension_group(file_name)
+                for ext in extensions:
+                    if os.path.exists(os.path.join(source_path, basename + ext)):
+                        shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
+                uri.setDatabase(file_name)
+                self._change_data_source(os.path.join(target_path,uri.uri()))
+
+    def _change_data_source(self, new_data_source):
+        """
+        Changes the datasource string of the layer
+        """
+        document = QDomDocument("style")
+        map_layers_element = document.createElement("maplayers")
+        map_layer_element = document.createElement("maplayer")
+        self.layer.writeLayerXml(map_layer_element, document)
+
+        # modify DOM element with new layer reference
+        map_layer_element.firstChildElement("datasource").firstChild().setNodeValue(new_data_source)
+        map_layers_element.appendChild(map_layer_element)
+        document.appendChild(map_layers_element)
+
+        # reload layer definition
+        self.layer.readLayerXml(map_layer_element)
+        self.layer.reload()
