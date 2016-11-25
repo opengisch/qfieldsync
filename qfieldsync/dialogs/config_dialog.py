@@ -17,33 +17,20 @@
  *                                                                         *
  ***************************************************************************/
 """
-import os
-
-from qfieldsync.utils.data_source_utils import LayerSource
-from ..utils.qt_utils import get_ui_class
-
+from qfieldsync.core import ProjectConfiguration
+from qfieldsync.core.layer import LayerSource
+from qfieldsync.core.project import ProjectProperties
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QTableWidgetItem,
     QComboBox
 )
-
-from qgis.PyQt.QtCore import Qt
-
 from qgis.core import (
     QgsMapLayerRegistry,
     QgsProject
 )
-
-from qfieldsync.config import (
-    BASE_MAP_TYPE,
-    CREATE_BASE_MAP,
-    BASE_MAP_THEME,
-    BASE_MAP_TYPE_MAP_THEME,
-    BASE_MAP_TYPE_SINGLE_LAYER,
-    BASE_MAP_LAYER, BASE_MAP_MUPP,
-    BASE_MAP_TILE_SIZE,
-    OFFLINE_COPY_ONLY_AOI)
+from ..utils.qt_utils import get_ui_class
 
 FORM_CLASS = get_ui_class('config_dialog_base')
 
@@ -92,30 +79,20 @@ class ConfigDialog(QDialog, FORM_CLASS):
         for theme in self.project.mapThemeCollection().mapThemes():
             self.mapThemeComboBox.addItem(theme)
 
-        createBaseMap, _ = self.project.readBoolEntry('qfieldsync', CREATE_BASE_MAP, False)
-        self.createBaseMapGroupBox.setChecked(createBaseMap)
+        self.project_configuration = ProjectConfiguration(self.project)
+        self.createBaseMapGroupBox.setChecked(self.project_configuration.create_base_map)
 
-        baseMapType, _ = self.project.readEntry('qfieldsync', BASE_MAP_TYPE)
-
-        if baseMapType == BASE_MAP_TYPE_SINGLE_LAYER:
+        if self.project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
             self.singleLayerRadioButton.setChecked(True)
         else:
             self.mapThemeRadioButton.setChecked(True)
 
-        baseMapTheme, _ = self.project.readEntry('qfieldsync', BASE_MAP_THEME)
-        self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(baseMapTheme))
-
-        baseMapLayer, _ = self.project.readEntry('qfieldsync', BASE_MAP_LAYER)
-        layer = QgsMapLayerRegistry.instance().mapLayer(baseMapLayer)
+        self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(self.project_configuration.base_map_theme))
+        layer = QgsMapLayerRegistry.instance().mapLayer(self.project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
-
-        baseMapTileSize, _ = self.project.readEntry('qfieldsync', BASE_MAP_TILE_SIZE, '1024')
-        self.mapUnitsPerPixel.setText(baseMapTileSize)
-        baseMapMupp, _ = self.project.readEntry('qfieldsync', BASE_MAP_MUPP, '100')
-        self.tileSize.setText(baseMapMupp)
-
-        only_copy_features_in_aoi, _ = self.project.readBoolEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI, False)
-        self.onlyOfflineCopyFeaturesInAoi.setChecked(only_copy_features_in_aoi)
+        self.mapUnitsPerPixel.setText(str(self.project_configuration.base_map_tile_size))
+        self.tileSize.setText(str(self.project_configuration.base_map_mupp))
+        self.onlyOfflineCopyFeaturesInAoi.setChecked(self.project_configuration.offline_copy_only_aoi)
 
     def onAccepted(self):
         """
@@ -133,21 +110,21 @@ class ConfigDialog(QDialog, FORM_CLASS):
 
             layer_source.apply()
 
-        self.project.writeEntry('qfieldsync', CREATE_BASE_MAP, self.createBaseMapGroupBox.isChecked())
-        self.project.writeEntry('qfieldsync', BASE_MAP_THEME, self.mapThemeComboBox.currentText())
+        self.project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
+        self.project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
         try:
-            self.project.writeEntry('qfieldsync', BASE_MAP_LAYER, self.layerComboBox.currentLayer().id())
+            self.project_configuration.base_map_layer = self.layerComboBox.currentLayer().id()
         except AttributeError:
             pass
         if self.singleLayerRadioButton.isChecked():
-            self.project.writeEntry('qfieldsync', BASE_MAP_TYPE, BASE_MAP_TYPE_SINGLE_LAYER)
+            self.project_configuration.base_map_type = ProjectProperties.BaseMapType.SINGLE_LAYER
         else:
-            self.project.writeEntry('qfieldsync', BASE_MAP_TYPE, BASE_MAP_TYPE_MAP_THEME)
+            self.project_configuration.base_map_type = ProjectProperties.BaseMapType.MAP_THEME
 
-        self.project.writeEntry('qfieldsync', BASE_MAP_TILE_SIZE, self.mapUnitsPerPixel.text())
-        self.project.writeEntry('qfieldsync', BASE_MAP_MUPP, self.tileSize.text())
+        self.project_configuration.base_map_mupp = float(self.mapUnitsPerPixel.text())
+        self.project_configuration.base_map_tile_size = int(self.tileSize.text())
 
-        self.project.writeEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI, self.onlyOfflineCopyFeaturesInAoi.isChecked())
+        self.project_configuration.offline_copy_only_aoi = self.onlyOfflineCopyFeaturesInAoi.isChecked()
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():

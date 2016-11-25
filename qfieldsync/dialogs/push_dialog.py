@@ -20,9 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 """
-
-import os
-
+from qfieldsync.core import ProjectConfiguration
+from qfieldsync.core.layer import *
 from qfieldsync.dialogs.config_dialog import ConfigDialog
 from qgis.PyQt.QtCore import (
     pyqtSlot,
@@ -32,26 +31,21 @@ from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QPushButton,
     QDialog,
-    QMessageBox,
     QLabel, QSizePolicy)
-
-from qgis.gui import QgsMessageBar
 from qgis.core import (
     QgsProject,
     QgsMapLayerRegistry,
     QgsMessageLog
 )
-
+from qgis.gui import QgsMessageBar
 from ..config import *
-from ..utils.data_source_utils import *
 from ..utils.export_offline_utils import (
     OfflineConvertor
 )
 from ..utils.file_utils import fileparts, get_full_parent_path, open_folder
 from ..utils.qgis_utils import get_project_title
-from ..utils.qt_utils import make_folder_selector
-
 from ..utils.qt_utils import get_ui_class
+from ..utils.qt_utils import make_folder_selector
 
 try:
     from ..utils.usb import (
@@ -114,7 +108,7 @@ class PushDialog(QDialog, FORM_CLASS):
 
         export_folder = self.get_export_folder_from_dialog()
 
-        offline_convertor = OfflineConvertor(export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
+        offline_convertor = OfflineConvertor(self.project, export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
 
         # progress connections
         offline_convertor.layerProgressUpdated.connect(self.update_total)
@@ -154,10 +148,9 @@ class PushDialog(QDialog, FORM_CLASS):
             if not LayerSource(layer).is_configured:
                 self.infoGroupBox.show()
 
-        only_aoi, _ = QgsProject.instance().readBoolEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI)
-        create_base_map, _ = QgsProject.instance().readBoolEntry('qfieldsync', CREATE_BASE_MAP)
+        project_configuration = ProjectConfiguration(self.project)
 
-        if only_aoi or create_base_map:
+        if project_configuration.offline_copy_only_aoi or project_configuration.create_base_map:
             self.informationStack.setCurrentWidget(self.selectExtentPage)
         else:
             self.informationStack.setCurrentWidget(self.progressPage)

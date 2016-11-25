@@ -1,11 +1,10 @@
 import os
-import shutil
 import tempfile
 
-from processing import ProcessingConfig
-from processing.gui import RenderingStyles
+import processing
 
-from qfieldsync.utils.data_source_utils import LayerSource, SyncAction
+from qfieldsync.core.layer import LayerSource, SyncAction
+from qfieldsync.core.project import ProjectProperties, ProjectConfiguration
 from qgis.PyQt.QtCore import (
     QFileInfo,
     Qt,
@@ -14,20 +13,9 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (
     QgsProject,
-    QgsOfflineEditing,
     QgsMapLayerRegistry,
     QgsRasterLayer
 )
-import processing
-
-from qfieldsync.utils.file_utils import fileparts
-
-from qfieldsync.config import (
-    BASE_MAP_TYPE,
-    BASE_MAP_TYPE_SINGLE_LAYER,
-    CREATE_BASE_MAP,
-    BASE_MAP_THEME,
-    BASE_MAP_LAYER, BASE_MAP_TILE_SIZE, BASE_MAP_MUPP, OFFLINE_COPY_ONLY_AOI)
 
 
 class OfflineConvertor(QObject):
@@ -39,11 +27,12 @@ class OfflineConvertor(QObject):
     __offline_layers = list()
     __convertor_progress = None  # for processing feedback
 
-    def __init__(self, export_folder, extent, offline_editing):
+    def __init__(self, project, export_folder, extent, offline_editing):
         super(OfflineConvertor, self).__init__(parent=None)
         self.export_folder = export_folder
         self.extent = extent
         self.offline_editing = offline_editing
+        self.project_configuration = ProjectConfiguration(project)
 
         offline_editing.progressStopped.connect(self.progressStopped)
         offline_editing.layerProgressUpdated.connect(self.onLayerProgressUpdated)
@@ -77,20 +66,11 @@ class OfflineConvertor(QObject):
 
             self.progressJob.emit(self.tr('Creating base map'))
             # Create the base map before layers are removed
-            createBaseMap = QgsProject.instance().readBoolEntry('qfieldsync', CREATE_BASE_MAP, False)
-            if createBaseMap:
-                baseMapType, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_TYPE)
-                tile_size, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_TILE_SIZE, 1024)
-                map_units_per_pixel, _ = QgsProject.instance().readNumEntry('qfieldsync', BASE_MAP_MUPP, 100)
-
-                if baseMapType == BASE_MAP_TYPE_SINGLE_LAYER:
-                    baseMapLayer, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_LAYER)
-                    self.createBaseMapLayer(None, baseMapLayer, tile_size, map_units_per_pixel)
+            if self.project_configuration.create_base_map:
+                if self.project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
+                    self.createBaseMapLayer(None, self.project_configuration.base_map_layer, self.project_configuration.base_map_tile_size, self.project_configuration.base_map_mupp)
                 else:
-                    baseMapTheme, _ = QgsProject.instance().readEntry('qfieldsync', BASE_MAP_THEME)
-                    self.createBaseMapLayer(baseMapTheme, None, tile_size, map_units_per_pixel)
-
-            offline_copy_only_aoi, _ = QgsProject.instance().readBoolEntry('qfieldsync', OFFLINE_COPY_ONLY_AOI)
+                    self.createBaseMapLayer(self.project_configuration.base_map_theme, None, self.project_configuration.base_map_tile_size, self.project_configuration.base_map_mupp)
 
             self.progressJob.emit(self.tr('Copying layers'))
             # Loop through all layers and copy/remove/offline them
@@ -99,7 +79,7 @@ class OfflineConvertor(QObject):
                 layer_source = LayerSource(layer)
 
                 if layer_source.action == SyncAction.OFFLINE:
-                    if offline_copy_only_aoi:
+                    if self.project_configuration.offline_copy_only_aoi:
                         layer.selectByRect(self.extent)
                     self.__offline_layers.append(layer)
                 elif layer_source.action == SyncAction.NO_ACTION:
