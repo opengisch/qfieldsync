@@ -5,4 +5,6 @@ host = https://www.transifex.com
 source_file = i18n/QFieldSync_en.ts
 source_lang = en
 trans.de = i18n/QFieldSync_de.ts
+trans.ro = i18n/QFieldSync_ro.ts
+trans.gl = i18n/QFieldSync_gl.ts
 type = QT
