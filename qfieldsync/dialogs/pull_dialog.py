@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 from __future__ import absolute_import
+from __future__ import print_function
 
 from qgis.PyQt.QtCore import Qt, pyqtSlot
 from qgis.PyQt.QtWidgets import (

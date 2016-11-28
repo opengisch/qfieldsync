@@ -149,6 +149,9 @@ class OfflineConverter(QObject):
         layer_tree.insertLayer(len(layer_tree.children()), new_layer)
 
     def onLayerProgressUpdated(self, layer_index, layer_count):
+        print(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(
+            layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
+            layer_count=layer_count)))
         self.progressJob.emit(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(
             layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
             layer_count=layer_count)))
