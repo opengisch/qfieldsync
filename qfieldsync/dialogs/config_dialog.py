@@ -105,6 +105,7 @@ class ConfigDialog(QDialog, FORM_CLASS):
 
             old_action = layer_source.action
             layer_source.action = cbx.itemData(cbx.currentIndex())
+            print('Apply action {} <- {}'.format(layer_source.layer.name(), layer_source.action))
             if layer_source.action != old_action:
                 self.project.setDirty()
 
