@@ -33,8 +33,8 @@ from qgis.PyQt.QtCore import (
     QTranslator,
     qVersion,
     QCoreApplication,
-    QSettings
-)
+    QSettings,
+    Qt)
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsOfflineEditing, QgsProject
@@ -280,9 +280,10 @@ class QFieldSync(object):
         Push to QField
         """
         self.push_dlg = PushDialog(self.iface, self)
+        self.push_dlg.setAttribute(Qt.WA_DeleteOnClose)
         self.push_dlg.show()
 
-        self.push_dlg.finished.connect(self.update_button_enabled_status)
+        self.push_dlg.finished.connect(self.push_dialog_finished)
         self.update_button_enabled_status()
 
     def configuration_dialog(self):
@@ -298,8 +299,27 @@ class QFieldSync(object):
     def clear_last_action_warnings(self):
         self.last_action_warnings = []
 
+    def push_dialog_finished(self):
+        """
+        When the push dialog is closed, make sure it's no longer
+        enabled before entering update_button_enabled_status()
+        """
+        try:
+            self.push_dlg.setEnabled(False)
+        except RuntimeError:
+            pass
+        self.update_button_enabled_status()
+
     def update_button_enabled_status(self):
-        if self.offline_editing.isOfflineProject() or (self.push_dlg and self.push_dlg.isEnabled()):
+        """
+        Will update the plugin buttons according to open dialog and project properties.
+        """
+        try:
+            dialog_is_enabled = self.push_dlg and self.push_dlg.isEnabled()
+        except RuntimeError:
+            dialog_is_enabled = False
+
+        if self.offline_editing.isOfflineProject() or dialog_is_enabled:
             self.push_action.setEnabled(False)
         else:
             self.push_action.setEnabled(True)

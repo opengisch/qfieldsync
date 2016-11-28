@@ -145,10 +145,10 @@ class LayerSource:
 
         :param layer: The layer to copy
         :param target_path: A path to a folder into which the data will be copied
-        :raises ValueError if the layer is not file-based
         """
         if not self.is_file:
-            raise ValueError('Can only copy file-based layers')
+            # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
+            return
 
         # Shapefiles... have the path in the source
         file_path = self.layer.source()

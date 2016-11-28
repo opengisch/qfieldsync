@@ -99,7 +99,7 @@ class OfflineConverter(QObject):
             if self.__offline_layers:
                 offline_layer_ids = [l.id() for l in self.__offline_layers]
                 if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
-                                                                    offline_layer_ids, offline_copy_only_aoi):
+                                                                    offline_layer_ids, self.project_configuration.offline_copy_only_aoi):
                     self.progressJob.emit(self.tr('Failure'))
                     raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
@@ -111,7 +111,7 @@ class OfflineConverter(QObject):
                 QgsProject.instance().setFileName(original_project_path)
 
             # Calling this directly crashes QGIS 2.18 when loading WMS layers
-            QTimer.singleShot(10, lambda: reload_original_project())
+            QTimer.singleShot(100, lambda: reload_original_project())
             QApplication.restoreOverrideCursor()
 
         self.progressJob.emit(self.tr('Finished'))
