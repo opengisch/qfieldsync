@@ -273,6 +273,7 @@ class QFieldSync(object):
         """
         self.push_dlg = PushDialog(self.iface, self)
         self.push_dlg.setAttribute(Qt.WA_DeleteOnClose)
+        self.push_dlg.setWindowFlags(self.push_dlg.windowFlags() | Qt.Tool)
         self.push_dlg.show()
 
         self.push_dlg.finished.connect(self.push_dialog_finished)
