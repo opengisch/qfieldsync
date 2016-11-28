@@ -73,7 +73,7 @@ class Ui_QFieldSynchronizeBase(object):
         QtCore.QMetaObject.connectSlotsByName(QFieldSynchronizeBase)
 
     def retranslateUi(self, QFieldSynchronizeBase):
-        QFieldSynchronizeBase.setWindowTitle(_translate("QFieldSynchronizeBase", "Syncronize remote project", None))
+        QFieldSynchronizeBase.setWindowTitle(_translate("QFieldSynchronizeBase", "Synchronize remote project", None))
         self.label.setText(_translate("QFieldSynchronizeBase", "<html><head/><body><p>Select the directory containing the</p><p>QField project file:</p></body></html>", None))
         self.qfieldDir_btn.setText(_translate("QFieldSynchronizeBase", "Browse", None))
         self.progress_group.setTitle(_translate("QFieldSynchronizeBase", "Progress", None))

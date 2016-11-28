@@ -60,7 +60,7 @@ class Ui_QFieldSynchronizeBase(object):
 
     def retranslateUi(self, QFieldSynchronizeBase):
         _translate = QtCore.QCoreApplication.translate
-        QFieldSynchronizeBase.setWindowTitle(_translate("QFieldSynchronizeBase", "Syncronize remote project"))
+        QFieldSynchronizeBase.setWindowTitle(_translate("QFieldSynchronizeBase", "Synchronize remote project"))
         self.label.setText(_translate("QFieldSynchronizeBase", "<html><head/><body><p>Select the directory containing the</p><p>QField project file:</p></body></html>"))
         self.qfieldDir_btn.setText(_translate("QFieldSynchronizeBase", "Browse"))
         self.progress_group.setTitle(_translate("QFieldSynchronizeBase", "Progress"))

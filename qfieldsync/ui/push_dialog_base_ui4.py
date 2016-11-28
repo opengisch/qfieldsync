@@ -131,6 +131,7 @@ class Ui_QFieldPushDialogBase(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.project_lbl.sizePolicy().hasHeightForWidth())
         self.project_lbl.setSizePolicy(sizePolicy)
+        self.project_lbl.setText(_fromUtf8(""))
         self.project_lbl.setObjectName(_fromUtf8("project_lbl"))
         self.gridLayout_2.addWidget(self.project_lbl, 0, 1, 1, 1)
         self.button_box = QtGui.QDialogButtonBox(QFieldPushDialogBase)
@@ -163,7 +164,6 @@ class Ui_QFieldPushDialogBase(object):
         self.groupBox.setTitle(_translate("QFieldPushDialogBase", "Export Directory", None))
         self.manualDir_btn.setText(_translate("QFieldPushDialogBase", "...", None))
         self.label_2.setText(_translate("QFieldPushDialogBase", "<html><head/><body><p><span style=\" font-weight:600;\">Project:</span></p></body></html>", None))
-        self.project_lbl.setText(_translate("QFieldPushDialogBase", "TextLabel", None))
         self.infoGroupBox.setTitle(_translate("QFieldPushDialogBase", "Information", None))
         self.infoLabel.setText(_translate("QFieldPushDialogBase", "Some layers in this project have not yet been configured. <a href=\"configuration\">Configure project now</a>.", None))
 
