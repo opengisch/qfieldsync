@@ -35,7 +35,7 @@ def get_file_extension_group(filename):
     return basename, [ext]
 
 
-class SyncAction(object):
+class SyncAction:
     """
     Enumeration of sync actions
     """
@@ -56,7 +56,7 @@ class SyncAction(object):
     REMOVE = "remove"
 
 
-class LayerSource:
+class LayerSource(object):
     def __init__(self, layer):
         self.layer = layer
         self.read_layer()
