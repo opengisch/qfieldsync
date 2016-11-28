@@ -34,7 +34,7 @@ from qgis.PyQt.QtCore import (
     qVersion,
     QCoreApplication,
     QSettings,
-    Qt)
+    Qt, QLocale)
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsOfflineEditing, QgsProject
@@ -44,8 +44,6 @@ from qfieldsync.dialogs.push_dialog import PushDialog
 from qfieldsync.dialogs.settings_dialog import SettingsDialog
 from qfieldsync.dialogs.pull_dialog import PullDialog
 from qfieldsync.dialogs.config_dialog import ConfigDialog
-
-from qfieldsync.utils.qgis_utils import tr
 
 from .processing.provider import QFieldProcessingProvider
 from processing.core.Processing import Processing
@@ -76,17 +74,12 @@ class QFieldSync(object):
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'QFieldSync_{}.qm'.format(locale))
-        if os.path.exists(locale_path):
-            self.translator = QTranslator()
-            self.translator.load(locale_path)
+        locale = QLocale(QSettings().value('locale/userLocale'))
+        locale_path = os.path.join(self.plugin_dir, 'i18n')
+        self.translator = QTranslator()
+        self.translator.load(locale, 'QFieldSync', '_', locale_path))
 
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
+        QCoreApplication.installTranslator(self.translator)
 
         # Declare instance attributes
         self.actions = []
@@ -127,7 +120,7 @@ class QFieldSync(object):
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return tr(message)
+        return QCoreApplication.translate('QFieldSync', message)
 
     def add_action(
             self,

@@ -5,10 +5,6 @@ from qgis.core import QgsProject
 from qfieldsync.utils.file_utils import fileparts
 
 
-def tr(message):
-    return QCoreApplication.translate('QFieldSync', message)
-
-
 def get_project_title(proj):
     """ Gets project title, or if non available, the basename of the filename"""
     title = proj.title()
