@@ -158,11 +158,6 @@
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Proiect:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="push_dialog_base_ui5.py" line="154"/>
-        <source>TextLabel</source>
-        <translation>TextLabel</translation>
-    </message>
-    <message>
         <location filename="push_dialog_base.ui" line="185"/>
         <source>Export Directory</source>
         <translation>Directorul exportului </translation>
@@ -234,38 +229,33 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="236"/>
+        <location filename="qfield_sync.py" line="237"/>
         <source>&amp;QFieldSync</source>
         <translation>&amp;QFieldSync</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="221"/>
+        <location filename="qfield_sync.py" line="222"/>
         <source>Settings</source>
         <translation>Setări</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="209"/>
-        <source>Sync to QField</source>
-        <translation>Sincronizare în QField</translation>
-    </message>
-    <message>
-        <location filename="qfield_sync.py" line="215"/>
-        <source>Sync from QField</source>
-        <translation>Sincronizare dinspre QField</translation>
-    </message>
-    <message>
-        <location filename="qfield_sync.py" line="201"/>
+        <location filename="qfield_sync.py" line="202"/>
         <source>Project Configuration</source>
         <translation>Configurare Proiect</translation>
+    </message>
+    <message>
+        <location filename="qfield_sync.py" line="210"/>
+        <source>Package for QField</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="qfield_sync.py" line="216"/>
+        <source>Synchronize from QField</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
     <name>QFieldSynchronizeBase</name>
-    <message>
-        <location filename="synchronize_base_ui5.py" line="63"/>
-        <source>Syncronize remote project</source>
-        <translation>Sincronizare proiect aflat la distanță</translation>
-    </message>
     <message>
         <location filename="synchronize_base_ui5.py" line="64"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the directory containing the&lt;/p&gt;&lt;p&gt;QField project file:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -292,7 +282,7 @@
         <translation>Strat</translation>
     </message>
     <message>
-        <location filename="synchronize_base.ui" line="14"/>
+        <location filename="synchronize_base_ui5.py" line="63"/>
         <source>Synchronize remote project</source>
         <translation type="unfinished"/>
     </message>

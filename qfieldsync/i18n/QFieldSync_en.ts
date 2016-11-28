@@ -159,11 +159,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base_ui5.py" line="154"/>
-        <source>TextLabel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="push_dialog_base.ui" line="185"/>
         <source>Export Directory</source>
         <translation type="unfinished"></translation>
@@ -235,38 +230,33 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="236"/>
+        <location filename="qfield_sync.py" line="237"/>
         <source>&amp;QFieldSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="221"/>
+        <location filename="qfield_sync.py" line="222"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="209"/>
-        <source>Sync to QField</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="qfield_sync.py" line="215"/>
-        <source>Sync from QField</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="qfield_sync.py" line="201"/>
+        <location filename="qfield_sync.py" line="202"/>
         <source>Project Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="qfield_sync.py" line="210"/>
+        <source>Package for QField</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="qfield_sync.py" line="216"/>
+        <source>Synchronize from QField</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QFieldSynchronizeBase</name>
-    <message>
-        <location filename="synchronize_base_ui5.py" line="63"/>
-        <source>Syncronize remote project</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="synchronize_base_ui5.py" line="64"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the directory containing the&lt;/p&gt;&lt;p&gt;QField project file:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -293,7 +283,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="synchronize_base.ui" line="14"/>
+        <location filename="synchronize_base_ui5.py" line="63"/>
         <source>Synchronize remote project</source>
         <translation type="unfinished"></translation>
     </message>

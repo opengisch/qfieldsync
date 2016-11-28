@@ -116,7 +116,7 @@
     <message>
         <location filename="export_offline_utils.py" line="153"/>
         <source>Preparing layer {layer_name} ({layer_index}/{layer_count})</source>
-        <translation type="unfinished"/>
+        <translation>Layer {layer_name} vorbereiten ({layer_index}/{layer_count})</translation>
     </message>
 </context>
 <context>
@@ -158,11 +158,6 @@
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Projekt:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="push_dialog_base_ui5.py" line="154"/>
-        <source>TextLabel</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <location filename="push_dialog_base.ui" line="185"/>
         <source>Export Directory</source>
         <translation>Exportordner</translation>
@@ -195,7 +190,7 @@
     <message>
         <location filename="push_dialog_base.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Die Karte kann&lt;br/&gt;wie üblich gezoomt&lt;br/&gt;und verschoben werden &lt;br/&gt;währenddem dieses Fenster&lt;br/&gt;offen ist.&lt;br/&gt;Versuch es!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="237"/>
@@ -234,42 +229,37 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="236"/>
+        <location filename="qfield_sync.py" line="237"/>
         <source>&amp;QFieldSync</source>
         <translation>&amp;QFieldSync</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="221"/>
+        <location filename="qfield_sync.py" line="222"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="209"/>
-        <source>Sync to QField</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="qfield_sync.py" line="215"/>
-        <source>Sync from QField</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="qfield_sync.py" line="201"/>
+        <location filename="qfield_sync.py" line="202"/>
         <source>Project Configuration</source>
         <translation>Projektkonfiguration</translation>
+    </message>
+    <message>
+        <location filename="qfield_sync.py" line="210"/>
+        <source>Package for QField</source>
+        <translation>Für QField verpacken</translation>
+    </message>
+    <message>
+        <location filename="qfield_sync.py" line="216"/>
+        <source>Synchronize from QField</source>
+        <translation>Von QField synchronisieren</translation>
     </message>
 </context>
 <context>
     <name>QFieldSynchronizeBase</name>
     <message>
-        <location filename="synchronize_base_ui5.py" line="63"/>
-        <source>Syncronize remote project</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <location filename="synchronize_base_ui5.py" line="64"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the directory containing the&lt;/p&gt;&lt;p&gt;QField project file:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;p&gt;Den Ordner mit der&lt;/p&gt;&lt;p&gt;QField Projektdatei auswählen&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="synchronize_base_ui5.py" line="65"/>
@@ -292,7 +282,7 @@
         <translation>Layer</translation>
     </message>
     <message>
-        <location filename="synchronize_base.ui" line="14"/>
+        <location filename="synchronize_base_ui5.py" line="63"/>
         <source>Synchronize remote project</source>
         <translation>Offlineprojekt synchronisieren</translation>
     </message>
@@ -375,7 +365,7 @@
     <message>
         <location filename="config_dialog_base_ui5.py" line="155"/>
         <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
-        <translation type="unfinished"/>
+        <translation>Dies legt die räumliche Auflösung des erstellen Kartenbildes fest. Es hängt vom verwendeten KBS des Kartenfensters ab. Für Karteneinheiten in [m] bedeutet ein Wert von 1, dass jedes Pixel eine Fläche von 1x1 m abdeckt und ein Wert von 1000 bedeutet 1 Pixel pro Quadratkilometer.</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="156"/>

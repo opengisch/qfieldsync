@@ -208,13 +208,13 @@ class QFieldSync(object):
 
         self.push_action = self.add_action(
             ':/plugins/qfieldsync/refresh.png',
-            text=self.tr(u'Sync to QField'),
+            text=self.tr(u'Package for QField'),
             callback=self.push_project,
             parent=self.iface.mainWindow())
 
         self.add_action(
             ':/plugins/qfieldsync/refresh-reverse.png',
-            text=self.tr(u'Sync from QField'),
+            text=self.tr(u'Synchronize from QField'),
             callback=self.synchronize_qfield,
             parent=self.iface.mainWindow())
 
