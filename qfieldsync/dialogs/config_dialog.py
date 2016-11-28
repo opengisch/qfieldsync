@@ -69,7 +69,7 @@ class ConfigDialog(QDialog, FORM_CLASS):
             cbx = QComboBox()
             for action, description in layer_source.available_actions:
                 cbx.addItem(description)
-                cbx.setItemData(Qt.UserRole, action)
+                cbx.setItemData(cbx.count() - 1, action)
                 if layer_source.action == action:
                     cbx.setCurrentIndex(cbx.count() - 1)
 
