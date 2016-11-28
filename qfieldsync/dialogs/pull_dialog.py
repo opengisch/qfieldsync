@@ -69,11 +69,10 @@ class PullDialog(QDialog, FORM_CLASS):
             self.offline_editing.progressModeSet.connect(self.update_mode)
             self.offline_editing.progressUpdated.connect(self.update_value)
             self.offline_editing.synchronize()
-            self.plugin_instance.action_end(self.tr('Synchronize from QField'))
             if self.offline_editing_done:
                 self.close()
             else:
-                message = self.tr("The project you imported doesn't seem to be "
+                message = self.tr("The project you imported does not seem to be "
                                   "an offline project")
                 raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
