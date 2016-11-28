@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Syncronize remote project</string>
+   <string>Synchronize remote project</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

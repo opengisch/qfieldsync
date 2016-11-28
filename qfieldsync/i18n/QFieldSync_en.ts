@@ -159,7 +159,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="220"/>
+        <location filename="push_dialog_base_ui5.py" line="154"/>
         <source>TextLabel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -235,27 +235,27 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="237"/>
+        <location filename="qfield_sync.py" line="236"/>
         <source>&amp;QFieldSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="223"/>
+        <location filename="qfield_sync.py" line="221"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="211"/>
+        <location filename="qfield_sync.py" line="209"/>
         <source>Sync to QField</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="217"/>
+        <location filename="qfield_sync.py" line="215"/>
         <source>Sync from QField</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="203"/>
+        <location filename="qfield_sync.py" line="201"/>
         <source>Project Configuration</source>
         <translation type="unfinished"></translation>
     </message>
@@ -290,6 +290,11 @@
     <message>
         <location filename="synchronize_base_ui5.py" line="68"/>
         <source>Layer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="synchronize_base.ui" line="14"/>
+        <source>Synchronize remote project</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

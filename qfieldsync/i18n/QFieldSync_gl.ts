@@ -158,7 +158,7 @@
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Proxecto:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="220"/>
+        <location filename="push_dialog_base_ui5.py" line="154"/>
         <source>TextLabel</source>
         <translation>Etiqueta de texto</translation>
     </message>
@@ -234,27 +234,27 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="237"/>
+        <location filename="qfield_sync.py" line="236"/>
         <source>&amp;QFieldSync</source>
         <translation>&amp;QFieldSync</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="223"/>
+        <location filename="qfield_sync.py" line="221"/>
         <source>Settings</source>
         <translation>Configuración</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="211"/>
+        <location filename="qfield_sync.py" line="209"/>
         <source>Sync to QField</source>
         <translation>Sincronizar a QField</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="217"/>
+        <location filename="qfield_sync.py" line="215"/>
         <source>Sync from QField</source>
         <translation>Sincronizar dende QField</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="203"/>
+        <location filename="qfield_sync.py" line="201"/>
         <source>Project Configuration</source>
         <translation>Configuración do Proxecto</translation>
     </message>
@@ -290,6 +290,11 @@
         <location filename="synchronize_base_ui5.py" line="68"/>
         <source>Layer</source>
         <translation>Capa</translation>
+    </message>
+    <message>
+        <location filename="synchronize_base.ui" line="14"/>
+        <source>Synchronize remote project</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
