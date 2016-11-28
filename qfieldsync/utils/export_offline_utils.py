@@ -9,7 +9,9 @@ from qgis.PyQt.QtCore import (
     QFileInfo,
     Qt,
     QObject,
-    pyqtSignal, QTimer)
+    pyqtSignal,
+    QTimer
+)
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (
     QgsProject,
@@ -160,7 +162,7 @@ class OfflineConverter(QObject):
         algorithm.
         """
 
-        class ConvertorProgress(QObject):
+        class ConverterProgress(QObject):
             progressUpdated = pyqtSignal(int, int)
 
             def __init__(self):
@@ -191,7 +193,7 @@ class OfflineConverter(QObject):
                 pass
 
         if not self.__convertor_progress:
-            self.__convertor_progress = ConvertorProgress()
+            self.__convertor_progress = ConverterProgress()
             self.__convertor_progress.progressUpdated.connect(self.layerProgressUpdated)
 
         return self.__convertor_progress

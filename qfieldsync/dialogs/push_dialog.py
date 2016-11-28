@@ -30,15 +30,17 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QPushButton,
-    QDialog,
-    QLabel, QSizePolicy)
+    QLabel, QSizePolicy
+)
 from qgis.core import (
     QgsProject,
     QgsMapLayerRegistry,
     QgsMessageLog
 )
-from qgis.gui import QgsMessageBar
-from ..config import *
+from qgis.gui import (
+    QgsMessageBar,
+    QgsDockWidget
+)
 from ..utils.export_offline_utils import (
     OfflineConverter
 )
@@ -59,7 +61,8 @@ except:
 
 FORM_CLASS = get_ui_class('push_dialog_base')
 
-class PushDialog(QDialog, FORM_CLASS):
+
+class PushDialog(QgsDockWidget, FORM_CLASS):
     def __init__(self, iface, plugin_instance):
         """Constructor."""
         super(PushDialog, self).__init__(parent=None)
