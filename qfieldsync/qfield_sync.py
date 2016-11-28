@@ -29,8 +29,12 @@ except:
     pass
 
 import os.path
-from qgis.PyQt.QtCore import (QObject,QTranslator, qVersion,
-                              QCoreApplication, QSettings)
+from qgis.PyQt.QtCore import (
+    QTranslator,
+    qVersion,
+    QCoreApplication,
+    QSettings
+)
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsOfflineEditing, QgsProject

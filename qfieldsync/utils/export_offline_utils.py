@@ -51,7 +51,6 @@ class OfflineConverter(QObject):
 
         original_project_path = QgsProject.instance().fileName()
         project_filename, _ = os.path.splitext(os.path.basename(original_project_path))
-        print project_filename
 
         # Write a backup of the current project to a temporary file
         project_backup_folder = tempfile.mkdtemp()
@@ -90,7 +89,6 @@ class OfflineConverter(QObject):
                     QgsMapLayerRegistry.instance().removeMapLayer(layer)
 
             project_path = os.path.join(self.export_folder, project_filename + "_qfield.qgs")
-            print project_path
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             QgsProject.instance().write(QFileInfo(project_path))

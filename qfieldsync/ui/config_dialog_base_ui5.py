@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/config_dialog_base.ui'
 #
-# Created by: PyQt5 UI code generator 5.6.dev1604121819
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
