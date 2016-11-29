@@ -25,7 +25,6 @@ from __future__ import print_function
 
 import os
 
-from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import (
         QDialogButtonBox,
         QPushButton,
