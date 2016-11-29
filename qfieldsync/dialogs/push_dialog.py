@@ -134,8 +134,8 @@ class PushDialog(QDialog, FORM_CLASS):
         export_folder = self.get_export_folder_from_dialog()
         export_base_folder = get_full_parent_path(export_folder)
 
-        resultLabel = QLabel(self.tr('Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.').format(
-            result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
+        resultLabel = QLabel(self.tr(u'Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.').format(
+            result_folder=u'<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
         resultLabel.setTextFormat(Qt.RichText)
         resultLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
         resultLabel.linkActivated.connect(lambda: open_folder(export_folder))
