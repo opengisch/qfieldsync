@@ -58,7 +58,7 @@ class ConfigDialog(QDialog, FORM_CLASS):
         Load all layers from the map layer registry into the table.
         """
         self.layersTable.setRowCount(0)
-	self.layersTable.setSortingEnabled(False)
+        self.layersTable.setSortingEnabled(False)
         for layer in QgsMapLayerRegistry.instance().mapLayers().values():
             layer_source = LayerSource(layer)
             count = self.layersTable.rowCount()
@@ -76,9 +76,9 @@ class ConfigDialog(QDialog, FORM_CLASS):
                     cbx.setCurrentIndex(cbx.count() - 1)
 
             self.layersTable.setCellWidget(count, 1, cbx)
-	self.layersTable.resizeColumnsToContents()
-	self.layersTable.sortByColumn(0, Qt.AscendingOrder)
-	self.layersTable.setSortingEnabled(True)
+        self.layersTable.resizeColumnsToContents()
+        self.layersTable.sortByColumn(0, Qt.AscendingOrder)
+        self.layersTable.setSortingEnabled(True)
 
         # Load Map Themes
         for theme in self.project.mapThemeCollection().mapThemes():
