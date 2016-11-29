@@ -34,7 +34,9 @@ from qgis.PyQt.QtCore import (
     qVersion,
     QCoreApplication,
     QSettings,
-    Qt, QLocale)
+    Qt,
+    QLocale
+)
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsOfflineEditing, QgsProject
@@ -45,8 +47,10 @@ from qfieldsync.dialogs.settings_dialog import SettingsDialog
 from qfieldsync.dialogs.pull_dialog import PullDialog
 from qfieldsync.dialogs.config_dialog import ConfigDialog
 
-from .processing.provider import QFieldProcessingProvider
+# Core processing imports
 from processing.core.Processing import Processing
+# Plugin provided processing extension
+from .processing.provider import QFieldProcessingProvider
 
 # noinspection PyUnresolvedReferences
 if qVersion()[0] == '4':
