@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="fr" sourcelanguage="">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="fr" version="2.0">
 <context>
     <name>@default</name>
     <message>
@@ -28,12 +27,12 @@
     <message>
         <location filename="basemap.py" line="79"/>
         <source>Map theme to render.</source>
-        <translation type="unfinished"></translation>
+        <translation>Rendu depuis un réglage de visibilité.</translation>
     </message>
     <message>
         <location filename="basemap.py" line="80"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
-        <translation type="unfinished"></translation>
+        <translation>Rendu depuis une couche. Cette couche sera utilisé si aucun réglage de visibilité n&apos;est paramétré. Si le réglage de visibilité et la couche ne sont pas choisi, la carte actuelle sera utilisé.</translation>
     </message>
     <message>
         <location filename="basemap.py" line="81"/>
@@ -191,7 +190,7 @@
     <message>
         <location filename="push_dialog_base.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="237"/>
@@ -219,7 +218,7 @@
     <message>
         <location filename="settings_ui5.py" line="58"/>
         <source>Browse</source>
-        <translation>Naviguer</translation>
+        <translation>Parcourir</translation>
     </message>
     <message>
         <location filename="settings_ui5.py" line="57"/>
@@ -265,7 +264,7 @@
     <message>
         <location filename="synchronize_base_ui5.py" line="65"/>
         <source>Browse</source>
-        <translation>Naviguer</translation>
+        <translation>Parcourir</translation>
     </message>
     <message>
         <location filename="synchronize_base_ui5.py" line="66"/>
@@ -285,7 +284,7 @@
     <message>
         <location filename="synchronize_base_ui5.py" line="63"/>
         <source>Synchronize remote project</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -336,7 +335,7 @@
     <message>
         <location filename="config_dialog_base_ui5.py" line="149"/>
         <source>Map Theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Réglage de visibilité</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="158"/>

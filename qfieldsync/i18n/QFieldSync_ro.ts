@@ -27,17 +27,17 @@
     <message>
         <location filename="basemap.py" line="79"/>
         <source>Map theme to render.</source>
-        <translation type="unfinished"/>
+        <translation>Tema hărții de randat.</translation>
     </message>
     <message>
         <location filename="basemap.py" line="80"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
-        <translation type="unfinished"/>
+        <translation>Stratul de randat. Se va utiliza numai în cazul în care tema hărții nu este setată. Atunci când, atât tema hărții, cât și stratul nu sunt setate, va fi randat conținutul hărții curente.</translation>
     </message>
     <message>
         <location filename="basemap.py" line="81"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
-        <translation type="unfinished"/>
+        <translation>Extinderea minimă de randat. Va fi extinsă în mod automat, pentru a fi un multiplu al dimensiunilor plăcuțelor.</translation>
     </message>
 </context>
 <context>
@@ -45,12 +45,12 @@
     <message>
         <location filename="layer.py" line="135"/>
         <source>JPEG2000 layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation type="unfinished"/>
+        <translation>Straturile JPEG2000 nu sunt acceptate de către QField.&lt;br&gt;Le puteți rasteriza ca hartă de bază.</translation>
     </message>
     <message>
         <location filename="layer.py" line="138"/>
         <source>ECW layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation type="unfinished"/>
+        <translation>Straturile ECW nu sunt acceptate de către QField.&lt;br&gt;Le puteți rasteriza ca hartă de bază.</translation>
     </message>
 </context>
 <context>
@@ -58,22 +58,22 @@
     <message>
         <location filename="layer.py" line="110"/>
         <source>copy</source>
-        <translation type="unfinished"/>
+        <translation>copiere</translation>
     </message>
     <message>
         <location filename="layer.py" line="112"/>
         <source>no action</source>
-        <translation type="unfinished"/>
+        <translation>fără acțiune</translation>
     </message>
     <message>
         <location filename="layer.py" line="115"/>
         <source>offline editing</source>
-        <translation type="unfinished"/>
+        <translation>editare offline</translation>
     </message>
     <message>
         <location filename="layer.py" line="117"/>
         <source>remove</source>
-        <translation type="unfinished"/>
+        <translation>eliminare</translation>
     </message>
 </context>
 <context>
@@ -81,42 +81,42 @@
     <message>
         <location filename="export_offline_utils.py" line="68"/>
         <source>Creating base map</source>
-        <translation type="unfinished"/>
+        <translation>Creare hartă de bază</translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="76"/>
         <source>Copying layers</source>
-        <translation type="unfinished"/>
+        <translation>Copiere straturi</translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="96"/>
         <source>Copying offline layers</source>
-        <translation type="unfinished"/>
+        <translation>Copiere straturi offline </translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="103"/>
         <source>Failure</source>
-        <translation type="unfinished"/>
+        <translation>Eșec</translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="104"/>
         <source>Error trying to convert layers to offline layers</source>
-        <translation type="unfinished"/>
+        <translation>A apărut o eroare în încercarea de a converti straturi în straturi offline</translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="117"/>
         <source>Finished</source>
-        <translation type="unfinished"/>
+        <translation>Definitivat</translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="144"/>
         <source>Basemap</source>
-        <translation type="unfinished"/>
+        <translation>Hartă de bază</translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="153"/>
         <source>Preparing layer {layer_name} ({layer_index}/{layer_count})</source>
-        <translation type="unfinished"/>
+        <translation>Pregătire strat {layer_name} ({layer_index}/{layer_count})</translation>
     </message>
 </context>
 <context>
@@ -129,7 +129,7 @@
     <message>
         <location filename="pull_dialog.py" line="75"/>
         <source>The project you imported does not seem to be an offline project</source>
-        <translation type="unfinished"/>
+        <translation>Proiectul importat nu pare a fi un proiect offline</translation>
     </message>
 </context>
 <context>
@@ -142,7 +142,7 @@
     <message>
         <location filename="push_dialog.py" line="137"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.</source>
-        <translation type="unfinished"/>
+        <translation>S-a încheiat crearea proiectului în {result_folder}. Vă rugăm să copiați acest dosar pe dispozitivul cu care doriți să lucrați.</translation>
     </message>
 </context>
 <context>
@@ -185,22 +185,22 @@
     <message>
         <location filename="push_dialog_base.ui" line="92"/>
         <source>Select extent</source>
-        <translation type="unfinished"/>
+        <translation>Selectare extindere</translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Canevasul hărții principale&lt;br/&gt;poate fi deplasat și&lt;br/&gt;transfocat ca de obicei&lt;br/&gt;atât timp cât această fereastră este&lt;br/&gt;deschisă.&lt;br/&gt;Încercați!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="237"/>
         <source>Information</source>
-        <translation type="unfinished"/>
+        <translation>Informaţii</translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="243"/>
         <source>Some layers in this project have not yet been configured. &lt;a href=&quot;configuration&quot;&gt;Configure project now&lt;/a&gt;.</source>
-        <translation type="unfinished"/>
+        <translation>Anumite straturi ale proiectului nu au fost configurate încă. &lt;a href=&quot;configuration&quot;&gt; Configurați proiectul acum&lt;/a&gt;.</translation>
     </message>
 </context>
 <context>
@@ -229,29 +229,29 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="237"/>
+        <location filename="qfield_sync.py" line="236"/>
         <source>&amp;QFieldSync</source>
         <translation>&amp;QFieldSync</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="222"/>
+        <location filename="qfield_sync.py" line="221"/>
         <source>Settings</source>
         <translation>Setări</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="202"/>
+        <location filename="qfield_sync.py" line="201"/>
         <source>Project Configuration</source>
         <translation>Configurare Proiect</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="210"/>
+        <location filename="qfield_sync.py" line="209"/>
         <source>Package for QField</source>
-        <translation type="unfinished"/>
+        <translation>Pachet pentru QField</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="216"/>
+        <location filename="qfield_sync.py" line="215"/>
         <source>Synchronize from QField</source>
-        <translation type="unfinished"/>
+        <translation>Sincronizare din QField</translation>
     </message>
 </context>
 <context>
@@ -284,13 +284,13 @@
     <message>
         <location filename="synchronize_base_ui5.py" line="63"/>
         <source>Synchronize remote project</source>
-        <translation type="unfinished"/>
+        <translation>Sincronizare proiect aflat la distanță</translation>
     </message>
 </context>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="settings_dialog.py" line="47"/>
+        <location filename="settings_dialog.py" line="46"/>
         <source>Save</source>
         <translation>Salvare</translation>
     </message>
@@ -340,47 +340,47 @@
     <message>
         <location filename="config_dialog_base_ui5.py" line="158"/>
         <source>Base map</source>
-        <translation type="unfinished"/>
+        <translation>Hartă de bază</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="151"/>
         <source>Tile Size</source>
-        <translation type="unfinished"/>
+        <translation>Dimensiunea Plăcuței</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="152"/>
         <source>Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile.</source>
-        <translation type="unfinished"/>
+        <translation>Randarea va avea loc în plăcuțe. Acest număr determină lățimea și înălțimea (în pixeli) care vor fi randate per plăcuță..</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="153"/>
         <source>1024</source>
-        <translation type="unfinished"/>
+        <translation>1024</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="154"/>
         <source>Map Units/Pixel</source>
-        <translation type="unfinished"/>
+        <translation>Unități de Hartă/Pixel</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="155"/>
         <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
-        <translation type="unfinished"/>
+        <translation>Acest lucru determină rezoluția spațială a imaginii hărții rezultate. Depinde de CRS-ul canevasului hărții. Pentru unități de hartă în [m], o valoare de 1 indică faptul că fiecare pixel acoperă o suprafață de 1x1 m, iar o valoare de 1000 echivalează cu 1 pixel pe un kilometru pătrat.</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="156"/>
         <source>100</source>
-        <translation type="unfinished"/>
+        <translation>100</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="160"/>
         <source>Offline editing</source>
-        <translation type="unfinished"/>
+        <translation>Editare offline</translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="159"/>
         <source>Only copy features in area of interest</source>
-        <translation type="unfinished"/>
+        <translation>Se copie doar entitățile din zona de interes</translation>
     </message>
 </context>
 </TS>
