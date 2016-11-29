@@ -27,7 +27,7 @@ changelog=
     Allow syncing from QGIS to QField
 
 # Tags are comma separated with spaces allowed
-tags=QField, Android, Synchronization, Offline
+tags=QField, Android, Synchronization, Offline, qfieldsync
 
 homepage=http://qfield.org/sync/
 tracker=https://github.com/opengisch/QFieldSync/issues
