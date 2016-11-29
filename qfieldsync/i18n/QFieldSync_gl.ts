@@ -1,4 +1,5 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="gl" version="2.0">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS><TS version="2.0" language="gl" sourcelanguage="">
 <context>
     <name>@default</name>
     <message>
@@ -27,17 +28,17 @@
     <message>
         <location filename="basemap.py" line="79"/>
         <source>Map theme to render.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="basemap.py" line="80"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="basemap.py" line="81"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -45,12 +46,12 @@
     <message>
         <location filename="layer.py" line="135"/>
         <source>JPEG2000 layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="layer.py" line="138"/>
         <source>ECW layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -58,22 +59,22 @@
     <message>
         <location filename="layer.py" line="110"/>
         <source>copy</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="layer.py" line="112"/>
         <source>no action</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="layer.py" line="115"/>
         <source>offline editing</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="layer.py" line="117"/>
         <source>remove</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -81,42 +82,42 @@
     <message>
         <location filename="export_offline_utils.py" line="68"/>
         <source>Creating base map</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="76"/>
         <source>Copying layers</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="96"/>
         <source>Copying offline layers</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="103"/>
         <source>Failure</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="104"/>
         <source>Error trying to convert layers to offline layers</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="117"/>
         <source>Finished</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="144"/>
         <source>Basemap</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="export_offline_utils.py" line="153"/>
         <source>Preparing layer {layer_name} ({layer_index}/{layer_count})</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -129,7 +130,7 @@
     <message>
         <location filename="pull_dialog.py" line="75"/>
         <source>The project you imported does not seem to be an offline project</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -142,7 +143,7 @@
     <message>
         <location filename="push_dialog.py" line="137"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -185,22 +186,22 @@
     <message>
         <location filename="push_dialog_base.ui" line="92"/>
         <source>Select extent</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="237"/>
         <source>Information</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="push_dialog_base.ui" line="243"/>
         <source>Some layers in this project have not yet been configured. &lt;a href=&quot;configuration&quot;&gt;Configure project now&lt;/a&gt;.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -229,29 +230,29 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="237"/>
+        <location filename="qfield_sync.py" line="236"/>
         <source>&amp;QFieldSync</source>
         <translation>&amp;QFieldSync</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="222"/>
+        <location filename="qfield_sync.py" line="221"/>
         <source>Settings</source>
         <translation>Configuración</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="202"/>
+        <location filename="qfield_sync.py" line="201"/>
         <source>Project Configuration</source>
         <translation>Configuración do Proxecto</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="210"/>
+        <location filename="qfield_sync.py" line="209"/>
         <source>Package for QField</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="216"/>
+        <location filename="qfield_sync.py" line="215"/>
         <source>Synchronize from QField</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -284,13 +285,13 @@
     <message>
         <location filename="synchronize_base_ui5.py" line="63"/>
         <source>Synchronize remote project</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="settings_dialog.py" line="47"/>
+        <location filename="settings_dialog.py" line="46"/>
         <source>Save</source>
         <translation>Gardar</translation>
     </message>
@@ -340,47 +341,47 @@
     <message>
         <location filename="config_dialog_base_ui5.py" line="158"/>
         <source>Base map</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="151"/>
         <source>Tile Size</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="152"/>
         <source>Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="153"/>
         <source>1024</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="154"/>
         <source>Map Units/Pixel</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="155"/>
         <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="156"/>
         <source>100</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="160"/>
         <source>Offline editing</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="config_dialog_base_ui5.py" line="159"/>
         <source>Only copy features in area of interest</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

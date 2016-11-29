@@ -230,27 +230,27 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="237"/>
+        <location filename="qfield_sync.py" line="236"/>
         <source>&amp;QFieldSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="222"/>
+        <location filename="qfield_sync.py" line="221"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="202"/>
+        <location filename="qfield_sync.py" line="201"/>
         <source>Project Configuration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="210"/>
+        <location filename="qfield_sync.py" line="209"/>
         <source>Package for QField</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="216"/>
+        <location filename="qfield_sync.py" line="215"/>
         <source>Synchronize from QField</source>
         <translation type="unfinished"></translation>
     </message>
@@ -291,7 +291,7 @@
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="settings_dialog.py" line="47"/>
+        <location filename="settings_dialog.py" line="46"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
