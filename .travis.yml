@@ -19,7 +19,6 @@ install:
   - sudo apt-get install -y python-qgis python-nose pyqt4-dev-tools qgis
   - pip install -r requirements.txt
   - ./scripts/ci/install_qgis2compat.sh
-  - which qgis
 
 before_script:
   - export QGIS_PREFIX_PATH=/usr
