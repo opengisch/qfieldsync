@@ -13,7 +13,7 @@ class Preferences(object):
 
     @property
     def export_directory(self):
-        return QSettings().value(self.__EXPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
+        return QSettings().value(self.__EXPORT_DIRECTORY_SETTING, os.path.expanduser("~/QField/export"))
 
     @export_directory.setter
     def export_directory(self, value):
@@ -21,7 +21,7 @@ class Preferences(object):
 
     @property
     def import_directory(self):
-        return QSettings().value(self.__IMPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
+        return QSettings().value(self.__IMPORT_DIRECTORY_SETTING, os.path.expanduser("~/QField/import"))
 
     @import_directory.setter
     def import_directory(self, value):
