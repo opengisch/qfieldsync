@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the directory containing the&lt;/p&gt;&lt;p&gt;QField project file:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the QField project folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -30,9 +30,9 @@
       <widget class="QLineEdit" name="qfieldDir"/>
      </item>
      <item>
-      <widget class="QPushButton" name="qfieldDir_btn">
+      <widget class="QToolButton" name="qfieldDir_button">
        <property name="text">
-        <string>Browse</string>
+        <string>...</string>
        </property>
       </widget>
      </item>

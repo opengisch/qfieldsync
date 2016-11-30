@@ -1,12 +1,12 @@
 import inspect
-from qgis.PyQt import QtGui
+from qgis.PyQt import QtWidgets
 from functools import partial
 import importlib
 from qgis.PyQt.QtCore import qVersion
 
 
 def selectFolder(lineEditWidget):
-    lineEditWidget.setText(QtGui.QFileDialog.getExistingDirectory(directory=lineEditWidget.text()))
+    lineEditWidget.setText(QtWidgets.QFileDialog.getExistingDirectory(directory=lineEditWidget.text()))
 
 
 def make_folder_selector(widget):

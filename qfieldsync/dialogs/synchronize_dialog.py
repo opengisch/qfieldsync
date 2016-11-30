@@ -55,7 +55,6 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
         self.offline_editing_done = False
 
     def start_synchronization(self):
-        self.plugin_instance.action_start()
         qfield_folder = self.qfieldDir.text()
         try:
             self.progress_group.setEnabled(True)

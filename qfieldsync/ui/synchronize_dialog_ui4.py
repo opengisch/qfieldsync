@@ -37,9 +37,9 @@ class Ui_QFieldSynchronizeBase(object):
         self.qfieldDir = QtGui.QLineEdit(QFieldSynchronizeBase)
         self.qfieldDir.setObjectName(_fromUtf8("qfieldDir"))
         self.horizontalLayout.addWidget(self.qfieldDir)
-        self.qfieldDir_btn = QtGui.QPushButton(QFieldSynchronizeBase)
-        self.qfieldDir_btn.setObjectName(_fromUtf8("qfieldDir_btn"))
-        self.horizontalLayout.addWidget(self.qfieldDir_btn)
+        self.qfieldDir_button = QtGui.QToolButton(QFieldSynchronizeBase)
+        self.qfieldDir_button.setObjectName(_fromUtf8("qfieldDir_button"))
+        self.horizontalLayout.addWidget(self.qfieldDir_button)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.progress_group = QtGui.QGroupBox(QFieldSynchronizeBase)
         self.progress_group.setEnabled(False)
@@ -74,8 +74,8 @@ class Ui_QFieldSynchronizeBase(object):
 
     def retranslateUi(self, QFieldSynchronizeBase):
         QFieldSynchronizeBase.setWindowTitle(_translate("QFieldSynchronizeBase", "Synchronize project", None))
-        self.label.setText(_translate("QFieldSynchronizeBase", "<html><head/><body><p>Select the directory containing the</p><p>QField project file:</p></body></html>", None))
-        self.qfieldDir_btn.setText(_translate("QFieldSynchronizeBase", "Browse", None))
+        self.label.setText(_translate("QFieldSynchronizeBase", "<html><head/><body><p>Select the QField project folder</p></body></html>", None))
+        self.qfieldDir_button.setText(_translate("QFieldSynchronizeBase", "...", None))
         self.progress_group.setTitle(_translate("QFieldSynchronizeBase", "Progress", None))
         self.label_2.setText(_translate("QFieldSynchronizeBase", "Total", None))
         self.label_3.setText(_translate("QFieldSynchronizeBase", "Layer", None))
