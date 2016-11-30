@@ -1,16 +1,16 @@
 # This file contains metadata for your plugin. Since 
 # version 2.0 of QGIS this is the proper way to supply 
 # information about a plugin. The old method of 
-# embedding metadata in __init__.py will 
+# embedding metadata in __init__.py
 # is no longer supported since version 2.0.
 
-# This file should be included when you package your plugin.# Mandatory items:
+# Mandatory items:
 
 [general]
 name=QField Sync
 qgisMinimumVersion=2.8
 description=Sync your projects to QField
-version=0.8.7
+version=0.8.8
 author=OPENGIS.ch
 email=info@opengis.ch
 
@@ -18,7 +18,6 @@ email=info@opengis.ch
 
 # Recommended items:
 
-# Uncomment the following line and add your changelog:
 changelog=
     Allow syncing from QField to QGIS
     Use qgis2compat plugin
@@ -29,7 +28,7 @@ changelog=
 # Tags are comma separated with spaces allowed
 tags=QField, Android, Synchronization, Offline, qfieldsync
 
-homepage=http://qfield.org/sync/
+homepage=http://www.qfield.org/docs/qfieldsync/index.html
 tracker=https://github.com/opengisch/QFieldSync/issues
 repository=https://github.com/opengisch/QFieldSync
 category=Plugins
