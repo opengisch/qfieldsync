@@ -131,7 +131,8 @@ class PackageDialog(QDialog, FORM_CLASS):
         """
         export_folder = self.get_export_folder_from_dialog()
 
-        result_label = QLabel(self.tr(u'Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.').format(
+        result_label = QLabel(self.tr(u'Finished creating the project at {result_folder}. Please copy this folder to '
+                                      u'your QField device.').format(
             result_folder=u'<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
         result_label.setTextFormat(Qt.RichText)
         result_label.setTextInteractionFlags(Qt.TextBrowserInteraction)

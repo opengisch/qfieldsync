@@ -121,266 +121,258 @@
     </message>
 </context>
 <context>
-    <name>PullDialog</name>
+    <name>PackageDialog</name>
     <message>
-        <location filename="pull_dialog.py" line="52"/>
-        <source>Synchronize</source>
-        <translation>Sincronizar</translation>
-    </message>
-    <message>
-        <location filename="pull_dialog.py" line="75"/>
-        <source>The project you imported does not seem to be an offline project</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>PushDialog</name>
-    <message>
-        <location filename="push_dialog.py" line="76"/>
+        <location filename="package_dialog.py" line="75"/>
         <source>Create</source>
-        <translation>Crear</translation>
+        <translation type="unfinished">Crear</translation>
     </message>
     <message>
-        <location filename="push_dialog.py" line="137"/>
-        <source>Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.</source>
+        <location filename="package_dialog.py" line="134"/>
+        <source>Finished creating the project at {result_folder}. Please copy this folder to your QField device.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>QFieldPushDialogBase</name>
+    <name>QFieldPackageDialogBase</name>
     <message>
-        <location filename="push_dialog_base.ui" line="14"/>
-        <source>Prepare project for QField</source>
-        <translation>Preparar proxecto para QField</translation>
+        <location filename="package_dialog.ui" line="14"/>
+        <source>Package project for QField</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="204"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Project:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Proxecto:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="push_dialog_base.ui" line="185"/>
-        <source>Export Directory</source>
-        <translation>Directorio de exportación</translation>
-    </message>
-    <message>
-        <location filename="push_dialog_base.ui" line="194"/>
-        <source>...</source>
-        <translation>...</translation>
-    </message>
-    <message>
-        <location filename="push_dialog_base.ui" line="39"/>
+        <location filename="package_dialog.ui" line="39"/>
         <source>Progress</source>
-        <translation>Progreso</translation>
+        <translation type="unfinished">Progreso</translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="45"/>
+        <location filename="package_dialog.ui" line="45"/>
         <source>Total</source>
-        <translation>Total</translation>
+        <translation type="unfinished">Total</translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="59"/>
+        <location filename="package_dialog.ui" line="59"/>
         <source>Layer</source>
-        <translation>Capa</translation>
+        <translation type="unfinished">Capa</translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="92"/>
+        <location filename="package_dialog.ui" line="92"/>
         <source>Select extent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="159"/>
+        <location filename="package_dialog.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="237"/>
+        <location filename="package_dialog.ui" line="185"/>
+        <source>Export Directory</source>
+        <translation type="unfinished">Directorio de exportación</translation>
+    </message>
+    <message>
+        <location filename="package_dialog.ui" line="194"/>
+        <source>...</source>
+        <translation type="unfinished">...</translation>
+    </message>
+    <message>
+        <location filename="package_dialog.ui" line="204"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Project:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Proxecto:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="package_dialog.ui" line="237"/>
         <source>Information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="push_dialog_base.ui" line="243"/>
+        <location filename="package_dialog.ui" line="243"/>
         <source>Some layers in this project have not yet been configured. &lt;a href=&quot;configuration&quot;&gt;Configure project now&lt;/a&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>QFieldRemoteOptionsBase</name>
+    <name>QFieldPreferencesBase</name>
     <message>
-        <location filename="settings_ui5.py" line="54"/>
-        <source>QFieldSync settings</source>
-        <translation>Configuración de QFieldSync</translation>
+        <location filename="preferences_dialog_ui5.py" line="54"/>
+        <source>QFieldSync preferences</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="settings_ui5.py" line="55"/>
+        <location filename="preferences_dialog_ui5.py" line="55"/>
         <source>Default Import Directory</source>
-        <translation>Directorio de Importación Predeterminado</translation>
+        <translation type="unfinished">Directorio de Importación Predeterminado</translation>
     </message>
     <message>
-        <location filename="settings_ui5.py" line="58"/>
-        <source>Browse</source>
-        <translation>Buscar</translation>
+        <location filename="preferences_dialog_ui5.py" line="58"/>
+        <source>...</source>
+        <translation type="unfinished">...</translation>
     </message>
     <message>
-        <location filename="settings_ui5.py" line="57"/>
+        <location filename="preferences_dialog_ui5.py" line="57"/>
         <source>Default Export Directory</source>
-        <translation>Directorio de Exportación Predeterminado</translation>
+        <translation type="unfinished">Directorio de Exportación Predeterminado</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldProjectConfigurationBase</name>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="140"/>
+        <source>Configure Project for QField synchronisation</source>
+        <translation type="unfinished">Configurar Proxecto para sincronización con QField</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="141"/>
+        <source>Layers</source>
+        <translation type="unfinished">Capas</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="150"/>
+        <source>Layer</source>
+        <translation type="unfinished">Capa</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="145"/>
+        <source>Action</source>
+        <translation type="unfinished">Acción</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="158"/>
+        <source>Base map</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="146"/>
+        <source>A base map is fully rendered to a raster image. Attributes from layers on a base map are no longer accessible.</source>
+        <translation type="unfinished">Un mapa base represéntase enteiramente como unha imaxe ráster. Os atributos das capas dun mapa base xa non estarán accesibles.</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="147"/>
+        <source>Create base map</source>
+        <translation type="unfinished">Crear mapa base</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="149"/>
+        <source>Map Theme</source>
+        <translation type="unfinished">Tema de Mapa</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="151"/>
+        <source>Tile Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="152"/>
+        <source>Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="153"/>
+        <source>1024</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="154"/>
+        <source>Map Units/Pixel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="155"/>
+        <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="156"/>
+        <source>100</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="157"/>
+        <source>Single Layer</source>
+        <translation type="unfinished">Capa Única</translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="160"/>
+        <source>Offline editing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="project_configuration_dialog_ui5.py" line="159"/>
+        <source>Only copy features in area of interest</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="236"/>
+        <location filename="qfield_sync.py" line="230"/>
         <source>&amp;QFieldSync</source>
         <translation>&amp;QFieldSync</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="221"/>
-        <source>Settings</source>
-        <translation>Configuración</translation>
-    </message>
-    <message>
-        <location filename="qfield_sync.py" line="201"/>
+        <location filename="qfield_sync.py" line="207"/>
         <source>Project Configuration</source>
         <translation>Configuración do Proxecto</translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="209"/>
+        <location filename="qfield_sync.py" line="195"/>
         <source>Package for QField</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="215"/>
+        <location filename="qfield_sync.py" line="201"/>
         <source>Synchronize from QField</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="qfield_sync.py" line="215"/>
+        <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QFieldSynchronizeBase</name>
     <message>
-        <location filename="synchronize_base_ui5.py" line="64"/>
+        <location filename="synchronize_dialog.ui" line="20"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the directory containing the&lt;/p&gt;&lt;p&gt;QField project file:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Seleccione o directorio que contén o&lt;/p&gt;&lt;p&gt;ficheiro de proxecto de QField:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="synchronize_base_ui5.py" line="65"/>
+        <location filename="synchronize_dialog.ui" line="35"/>
         <source>Browse</source>
         <translation>Buscar</translation>
     </message>
     <message>
-        <location filename="synchronize_base_ui5.py" line="66"/>
+        <location filename="synchronize_dialog.ui" line="47"/>
         <source>Progress</source>
         <translation>Progreso</translation>
     </message>
     <message>
-        <location filename="synchronize_base_ui5.py" line="67"/>
+        <location filename="synchronize_dialog.ui" line="53"/>
         <source>Total</source>
         <translation>Total</translation>
     </message>
     <message>
-        <location filename="synchronize_base_ui5.py" line="68"/>
+        <location filename="synchronize_dialog.ui" line="67"/>
         <source>Layer</source>
         <translation>Capa</translation>
     </message>
     <message>
-        <location filename="synchronize_base_ui5.py" line="63"/>
-        <source>Synchronize remote project</source>
+        <location filename="synchronize_dialog.ui" line="14"/>
+        <source>Synchronize project</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>SettingsDialog</name>
+    <name>SynchronizeDialog</name>
     <message>
-        <location filename="settings_dialog.py" line="46"/>
-        <source>Save</source>
-        <translation>Gardar</translation>
-    </message>
-</context>
-<context>
-    <name>configuration_dialog_base</name>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="140"/>
-        <source>Configure Project for QField synchronisation</source>
-        <translation>Configurar Proxecto para sincronización con QField</translation>
+        <location filename="synchronize_dialog.py" line="49"/>
+        <source>Synchronize</source>
+        <translation type="unfinished">Sincronizar</translation>
     </message>
     <message>
-        <location filename="config_dialog_base_ui5.py" line="141"/>
-        <source>Layers</source>
-        <translation>Capas</translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="150"/>
-        <source>Layer</source>
-        <translation>Capa</translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="145"/>
-        <source>Action</source>
-        <translation>Acción</translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="146"/>
-        <source>A base map is fully rendered to a raster image. Attributes from layers on a base map are no longer accessible.</source>
-        <translation>Un mapa base represéntase enteiramente como unha imaxe ráster. Os atributos das capas dun mapa base xa non estarán accesibles.</translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="147"/>
-        <source>Create base map</source>
-        <translation>Crear mapa base</translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="157"/>
-        <source>Single Layer</source>
-        <translation>Capa Única</translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="149"/>
-        <source>Map Theme</source>
-        <translation>Tema de Mapa</translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="158"/>
-        <source>Base map</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="151"/>
-        <source>Tile Size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="152"/>
-        <source>Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="153"/>
-        <source>1024</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="154"/>
-        <source>Map Units/Pixel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="155"/>
-        <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="156"/>
-        <source>100</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="160"/>
-        <source>Offline editing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="config_dialog_base_ui5.py" line="159"/>
-        <source>Only copy features in area of interest</source>
+        <location filename="synchronize_dialog.py" line="72"/>
+        <source>The project you imported does not seem to be an offline project</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
