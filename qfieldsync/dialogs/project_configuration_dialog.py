@@ -34,12 +34,13 @@ from ..utils.qt_utils import get_ui_class
 
 FORM_CLASS = get_ui_class('project_configuration_dialog')
 
+
 class ProjectConfigurationDialog(QDialog, FORM_CLASS):
     """
     Configuration dialog for QFieldSync on a particular project.
     """
 
-    def __init__(self, iface, parent):
+    def __init__(self, iface, parent=None):
         """Constructor."""
         super(ProjectConfigurationDialog, self).__init__(parent=parent)
         self.iface = iface

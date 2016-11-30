@@ -1,0 +1,35 @@
+language: python
+
+dist: trusty
+sudo: true
+
+python:
+  - 2.7
+
+virtualenv:
+  system_site_packages: true
+
+before_install:
+    - sudo apt-get -qq -y update
+
+install:
+  - printf "deb http://qgis.org/debian trusty main\ndeb-src http://qgis.org/debian trusty main" | sudo tee /etc/apt/sources.list.d/qgis.list
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 073D307A618E5811
+  - sudo apt-get update
+  - sudo apt-get install -y python-qgis python-nose pyqt4-dev-tools qgis
+  - pip install -r requirements.txt
+  - ./scripts/ci/install_qgis2compat.sh
+  - which qgis
+
+before_script:
+  - export QGIS_PREFIX_PATH=/usr
+  - export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`/qfieldsync:${PYTHONPATH}
+  - echo "PYTHONPATH:" ${PYTHONPATH}
+  - export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
+
+script:
+    - flake8 --jobs=1
+    - xvfb-run nose2
+
+after_success:
+    - scripts/ci/make_release.sh

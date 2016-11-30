@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from qfieldsync.core import ProjectConfiguration
-from qfieldsync.core.layer import *
+from qfieldsync.core import LayerSource
 from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
 from qgis.PyQt.QtCore import (
     pyqtSlot,
@@ -43,26 +43,18 @@ from qgis.gui import (
     QgsMessageBar
 )
 from ..utils.export_offline_utils import OfflineConverter
-from ..utils.file_utils import fileparts, get_full_parent_path, open_folder
+from ..utils.file_utils import fileparts, open_folder
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import get_ui_class
 from ..utils.qt_utils import make_folder_selector
 
-try:
-    from ..utils.usb import (
-        detect_devices,
-        connect_device,
-        push_file,
-        disconnect_device
-    )
-except:
-    pass
+import os
 
 FORM_CLASS = get_ui_class('package_dialog')
 
 
 class PackageDialog(QDialog, FORM_CLASS):
-    def __init__(self, iface, preferences, project, offline_editing, parent):
+    def __init__(self, iface, preferences, project, offline_editing, parent=None):
         """Constructor."""
         super(PackageDialog, self).__init__(parent=parent)
         self.setupUi(self)
@@ -110,7 +102,8 @@ class PackageDialog(QDialog, FORM_CLASS):
 
         export_folder = self.get_export_folder_from_dialog()
 
-        offline_convertor = OfflineConverter(self.project, export_folder, self.iface.mapCanvas().extent(), self.offline_editing)
+        offline_convertor = OfflineConverter(self.project, export_folder, self.iface.mapCanvas().extent(),
+                                             self.offline_editing)
 
         # progress connections
         offline_convertor.layerProgressUpdated.connect(self.update_total)
@@ -192,4 +185,4 @@ class PackageDialog(QDialog, FORM_CLASS):
     def show_warning(self, _, message):
         # Most messages from the offline editing plugin are not important enough to show in the message bar.
         # In case we find important ones in the future, we need to filter them.
-        QgsMessageLog.instance().logMessage(message,'QFieldSync')
+        QgsMessageLog.instance().logMessage(message, 'QFieldSync')

@@ -7,12 +7,12 @@
 from __future__ import print_function
 from future import standard_library
 
-standard_library.install_aliases()
-
 import sys
 import getpass
 import xmlrpc.client
 from optparse import OptionParser
+
+standard_library.install_aliases()
 
 # Configuration
 PROTOCOL = 'http'

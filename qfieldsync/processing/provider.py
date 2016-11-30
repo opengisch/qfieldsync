@@ -19,6 +19,9 @@
  ***************************************************************************/
 """
 
+from processing.core.AlgorithmProvider import AlgorithmProvider
+from .basemap import BasemapAlgorithm
+
 __author__ = 'Matthias Kuhn'
 __date__ = '2016-10-05'
 __copyright__ = '(C) 2016 by OPENGIS.ch'
@@ -27,13 +30,8 @@ __copyright__ = '(C) 2016 by OPENGIS.ch'
 
 __revision__ = '$Format:%H$'
 
-from processing.core.AlgorithmProvider import AlgorithmProvider
-from processing.core.ProcessingConfig import Setting, ProcessingConfig
-from .basemap import BasemapAlgorithm
-
 
 class QFieldProcessingProvider(AlgorithmProvider):
-
     def __init__(self):
         AlgorithmProvider.__init__(self)
 

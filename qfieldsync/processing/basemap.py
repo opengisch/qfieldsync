@@ -18,26 +18,16 @@
  *                                                                         *
  ***************************************************************************/
 """
-from processing.core.ProcessingLog import ProcessingLog
-
-__author__ = 'Matthias Kuhn'
-__date__ = '2016-10-05'
-__copyright__ = '(C) 2016 by OPENGIS.ch'
-
-# This will get replaced with a git SHA1 when you do a git archive
-
-__revision__ = '$Format:%H$'
 
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber, ParameterRaster
 from processing.core.outputs import OutputRaster
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
-from qgis.PyQt.QtGui import QImage, QPainter, QPixmap
-from qgis.PyQt.QtCore import QSize, QThread
+from qgis.PyQt.QtGui import QImage, QPainter
+from qgis.PyQt.QtCore import QSize
 from qgis.core import (
     QgsMapSettings,
-    QgsCoordinateReferenceSystem,
     QgsMapRendererCustomPainterJob,
     QgsRectangle,
     QgsProject
@@ -49,6 +39,15 @@ import os
 import tempfile
 import math
 
+__author__ = 'Matthias Kuhn'
+__date__ = '2016-10-05'
+__copyright__ = '(C) 2016 by OPENGIS.ch'
+
+# This will get replaced with a git SHA1 when you do a git archive
+
+__revision__ = '$Format:%H$'
+
+
 class BasemapAlgorithm(GeoAlgorithm):
     """
     """
@@ -57,11 +56,11 @@ class BasemapAlgorithm(GeoAlgorithm):
     # used when calling the algorithm from another algorithm, or when
     # calling from the QGIS console.
 
-    OUTPUT_LAYER =        'OUTPUT_LAYER'
-    MAP_THEME =           'MAP_THEME'
-    LAYER =               'LAYER'
-    EXTENT =              'EXTENT'
-    TILE_SIZE =           'TILE_SIZE'
+    OUTPUT_LAYER = 'OUTPUT_LAYER'
+    MAP_THEME = 'MAP_THEME'
+    LAYER = 'LAYER'
+    EXTENT = 'EXTENT'
+    TILE_SIZE = 'TILE_SIZE'
     MAP_UNITS_PER_PIXEL = 'MAP_UNITS_PER_PIXEL'
 
     def defineCharacteristics(self):
@@ -76,9 +75,14 @@ class BasemapAlgorithm(GeoAlgorithm):
         self.group = 'raster'
 
         # The parameters
-        self.addParameter(ParameterString(self.MAP_THEME, description=self.tr('Map theme to render.'), default=None, optional=True))
-        self.addParameter(ParameterRaster(self.LAYER, description=self.tr('Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.'), optional=True))
-        self.addParameter(ParameterExtent(self.EXTENT, description=self.tr('The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.')))
+        self.addParameter(
+            ParameterString(self.MAP_THEME, description=self.tr('Map theme to render.'), default=None, optional=True))
+        self.addParameter(ParameterRaster(self.LAYER, description=self.tr(
+            'Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not '
+            'set, the current map content will be rendered.'),
+            optional=True))
+        self.addParameter(ParameterExtent(self.EXTENT, description=self.tr(
+            'The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.')))
         self.addParameter(ParameterNumber(self.TILE_SIZE, self.tr('Tile size'), default=1024))
         self.addParameter(ParameterNumber(self.MAP_UNITS_PER_PIXEL, self.tr('Map units per pixel'), default=100))
 
@@ -100,7 +104,8 @@ class BasemapAlgorithm(GeoAlgorithm):
 
         output = self.getOutputValue(self.OUTPUT_LAYER)
 
-        tile_set = TileSet(map_theme, layer, extent, tile_size, mupp, output, qgis.utils.iface.mapCanvas().mapSettings())
+        tile_set = TileSet(map_theme, layer, extent, tile_size, mupp, output,
+                           qgis.utils.iface.mapCanvas().mapSettings())
         tile_set.render(progress)
 
 
@@ -108,6 +113,7 @@ class TileSet():
     """
     A set of tiles
     """
+
     def __init__(self, map_theme, layer, extent, tile_size, mupp, output, map_settings):
         """
 
@@ -154,10 +160,10 @@ class TileSet():
         self.settings.setFlag(QgsMapSettings.Antialiasing, True)
         self.settings.setFlag(QgsMapSettings.RenderMapTile, True)
 
-
         if QgsProject.instance().mapThemeCollection().hasMapTheme(map_theme):
             self.settings.setLayers(QgsProject.instance().mapThemeCollection().mapThemeVisibleLayers(map_theme))
-            self.settings.setLayerStyleOverrides(QgsProject.instance().mapThemeCollection().mapThemeStyleOverrides(map_theme))
+            self.settings.setLayerStyleOverrides(
+                QgsProject.instance().mapThemeCollection().mapThemeStyleOverrides(map_theme))
         elif layer:
             self.settings.setLayers([layer])
         else:
@@ -169,7 +175,6 @@ class TileSet():
                 cur_tile = x * self.y_tile_count + y
                 num_tiles = self.x_tile_count * self.y_tile_count
                 progress.setPercentage(int(cur_tile / num_tiles * 100))
-                # ProcessingLog.addToLog(ProcessingLog.LOG_INFO, 'Rendering tile {}, {} ({}/{})'.format(x, y, cur_tile, num_tiles))
                 self.renderTile(x, y)
 
     def renderTile(self, x, y):
@@ -195,7 +200,8 @@ class TileSet():
         self.image.save(tmpfile.name)
         src_ds = gdal.Open(tmpfile.name)
 
-        self.dataset.WriteRaster(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size, src_ds.ReadRaster(0, 0, self.tile_size, self.tile_size))
+        self.dataset.WriteRaster(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size,
+                                 src_ds.ReadRaster(0, 0, self.tile_size, self.tile_size))
 
     def getDriverForFile(self, filename):
         """

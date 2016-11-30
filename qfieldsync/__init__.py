@@ -29,6 +29,7 @@ import qgis.utils
 
 qgis2compat_min_version = '0.3.2'
 
+
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
     """Load QFieldSync class from file QFieldSync.
@@ -43,12 +44,12 @@ def classFactory(iface):  # pylint: disable=invalid-name
     def qgis2compat_version_check():
         if not qgis.utils.pluginMetadata('qgis2compat', 'version') >= qgis2compat_min_version:
             raise RuntimeError('The plugin {plugin_name} requires at least version {qgis2compat_min_version} of the '
-                               '`qgis2compat` plugin. Please update it with the plugin manager.'.format(
-                plugin_name=plugin_name, qgis2compat_min_version=qgis2compat_min_version))
+                               '`qgis2compat` plugin. Please update it with the plugin manager.'
+                               .format(plugin_name=plugin_name, qgis2compat_min_version=qgis2compat_min_version))
 
     try:
         # qgis.PyQt is available in QGIS >=2.14
-        from qgis.PyQt.QtCore import qVersion
+        from qgis.PyQt.QtCore import qVersion  # NOQA
         # qgis.utils.QGis is available in QGIS < 3
         if hasattr(qgis.utils, 'QGis'):
             import qgis2compat.apicompat
@@ -64,7 +65,7 @@ def classFactory(iface):  # pylint: disable=invalid-name
             import traceback
             traceback.print_exc()
             raise ImportError('The Plugin {} requires the `qgis2compat` plugin. Please install it with the plugin '
-                      'manager. For more information visit http://opengis.ch/qgis2compat'.format(plugin_name))
+                              'manager. For more information visit http://opengis.ch/qgis2compat'.format(plugin_name))
 
     from qfieldsync.qfield_sync import QFieldSync
     return QFieldSync(iface)

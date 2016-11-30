@@ -23,17 +23,13 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import os
-
 from qgis.PyQt.QtCore import pyqtSlot
-
 from qgis.PyQt.QtWidgets import QDialog
 
 from qfieldsync.utils.qt_utils import get_ui_class
+from qfieldsync.utils.qt_utils import make_folder_selector
 
 FORM_CLASS = get_ui_class('preferences_dialog')
-
-from qfieldsync.utils.qt_utils import make_folder_selector
 
 
 class PreferencesDialog(QDialog, FORM_CLASS):

@@ -24,9 +24,9 @@ from __future__ import absolute_import
 
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import (
-        QDialog,
-        QDialogButtonBox,
-        QPushButton
+    QDialog,
+    QDialogButtonBox,
+    QPushButton
 )
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
@@ -38,7 +38,7 @@ FORM_CLASS = get_ui_class('synchronize_dialog')
 
 
 class SynchronizeDialog(QDialog, FORM_CLASS):
-    def __init__(self, iface, qfield_preferences, offline_editing, parent):
+    def __init__(self, iface, qfield_preferences, offline_editing, parent=None):
         """Constructor.
         :type qfield_preferences: qfieldsync.core.Preferences
         """
@@ -50,7 +50,7 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
         self.push_btn.clicked.connect(self.start_synchronization)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
         self.qfieldDir.setText(qfield_preferences.import_directory)
-        self.qfieldDir_btn.clicked.connect(make_folder_selector(self.qfieldDir))
+        self.qfieldDir_button.clicked.connect(make_folder_selector(self.qfieldDir))
 
         self.offline_editing_done = False
 

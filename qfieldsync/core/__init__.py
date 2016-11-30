@@ -1,3 +1,3 @@
-from .layer import LayerSource
-from .project import ProjectConfiguration
-from .preferences import Preferences
+from .layer import LayerSource  # NOQA
+from .project import ProjectConfiguration  # NOQA
+from .preferences import Preferences  # NOQA

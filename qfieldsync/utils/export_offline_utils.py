@@ -69,9 +69,13 @@ class OfflineConverter(QObject):
             # Create the base map before layers are removed
             if self.project_configuration.create_base_map:
                 if self.project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
-                    self.createBaseMapLayer(None, self.project_configuration.base_map_layer, self.project_configuration.base_map_tile_size, self.project_configuration.base_map_mupp)
+                    self.createBaseMapLayer(None, self.project_configuration.base_map_layer,
+                                            self.project_configuration.base_map_tile_size,
+                                            self.project_configuration.base_map_mupp)
                 else:
-                    self.createBaseMapLayer(self.project_configuration.base_map_theme, None, self.project_configuration.base_map_tile_size, self.project_configuration.base_map_mupp)
+                    self.createBaseMapLayer(self.project_configuration.base_map_theme, None,
+                                            self.project_configuration.base_map_tile_size,
+                                            self.project_configuration.base_map_mupp)
 
             self.progressJob.emit(self.tr('Copying layers'))
             # Loop through all layers and copy/remove/offline them
@@ -99,7 +103,8 @@ class OfflineConverter(QObject):
             if self.__offline_layers:
                 offline_layer_ids = [l.id() for l in self.__offline_layers]
                 if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
-                                                                    offline_layer_ids, self.project_configuration.offline_copy_only_aoi):
+                                                                    offline_layer_ids,
+                                                                    self.project_configuration.offline_copy_only_aoi):
                     self.progressJob.emit(self.tr('Failure'))
                     raise Exception(self.tr("Error trying to convert layers to offline layers"))
 

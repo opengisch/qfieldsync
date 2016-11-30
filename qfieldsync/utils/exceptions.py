@@ -33,9 +33,7 @@ class QFieldSyncError(Exception):
 
 class NoProjectFoundError(QFieldSyncError):
 
-    def __init__(
-            self, message, exception=None, long_message=None, tag="QFieldSync"):
+    def __init__(self, message, exception=None, long_message=None, tag="QFieldSync"):
 
         # Call the base class constructor with the parameters it needs
-        super(NoProjectFoundError, self).__init__(
-                message, exception, long_message, tag)
+        super(NoProjectFoundError, self).__init__(message, exception, long_message, tag)

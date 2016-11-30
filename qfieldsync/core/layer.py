@@ -1,13 +1,9 @@
 import os
 import shutil
 
-from qgis.PyQt.QtXml import *
+from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
-    QgsMapLayerRegistry,
-    QgsProject,
-    QgsOfflineEditing,
-    QgsRasterLayer,
     QgsDataSourceUri,
     QgsMapLayer
 )
@@ -39,6 +35,7 @@ class SyncAction:
     """
     Enumeration of sync actions
     """
+
     # Make an offline editing copy
     def __init__(self):
         raise RuntimeError('Should only be used as enumeration')
@@ -133,10 +130,13 @@ class LayerSource(object):
     def warning(self):
         if self.layer.source().endswith('jp2', 'jpx'):
             return QCoreApplication.translate('DataSourceWarning',
-                                              'JPEG2000 layers are not supported by QField.<br>You can rasterize them as basemap.')
+                                              'JPEG2000 layers are not supported by QField.<br>You can rasterize '
+                                              'them as basemap.'
+                                              )
         if self.layer.source().endswith('ecw'):
             return QCoreApplication.translate('DataSourceWarning',
-                                              'ECW layers are not supported by QField.<br>You can rasterize them as basemap.')
+                                              'ECW layers are not supported by QField.<br>You can rasterize them '
+                                              'as basemap.')
         return None
 
     def copy(self, target_path):
@@ -159,8 +159,8 @@ class LayerSource(object):
             source_path, file_name = os.path.split(file_path)
             basename, extensions = get_file_extension_group(file_name)
             for ext in extensions:
-                    if os.path.exists(os.path.join(source_path, basename + ext)):
-                        shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
+                if os.path.exists(os.path.join(source_path, basename + ext)):
+                    shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
             self._change_data_source(os.path.join(target_path, file_name))
         # Spatialite files have a uri
         else:
@@ -170,9 +170,10 @@ class LayerSource(object):
                 basename, extensions = get_file_extension_group(file_name)
                 for ext in extensions:
                     if os.path.exists(os.path.join(source_path, basename + ext)):
-                        shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
+                        shutil.copy(os.path.join(source_path, basename + ext),
+                                    os.path.join(target_path, basename + ext))
                 uri.setDatabase(file_name)
-                self._change_data_source(os.path.join(target_path,uri.uri()))
+                self._change_data_source(os.path.join(target_path, uri.uri()))
 
     def _change_data_source(self, new_data_source):
         """

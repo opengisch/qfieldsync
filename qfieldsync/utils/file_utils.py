@@ -25,7 +25,7 @@ def get_children_with_extension(parent, specified_ext, count=1):
             res.append(os.path.join(parent, fn))
     if len(res) != count:
         raise QFieldSyncError(
-                "Expected {} children with extension {} under {}, got {}".format(
+            "Expected {} children with extension {} under {}, got {}".format(
                 count, specified_ext, parent, len(res)))
 
     return res
