@@ -26,37 +26,33 @@ from __future__ import print_function
 import os
 
 from qgis.PyQt.QtWidgets import (
-        QDialogButtonBox,
-        QPushButton,
-        QDialog
+    QDialogButtonBox,
+    QPushButton,
+    QDialog
 )
 
 from qfieldsync.utils.qt_utils import get_ui_class
 
-FORM_CLASS = get_ui_class('settings')
+FORM_CLASS = get_ui_class('preferences_dialog')
 
 from qfieldsync.utils.qt_utils import make_folder_selector
 
 
-class SettingsDialog(QDialog, FORM_CLASS):
-    def __init__(self, plugin_instance):
+class PreferencesDialog(QDialog, FORM_CLASS):
+    def __init__(self, preferences, parent=None):
         """Constructor."""
-        super(SettingsDialog, self).__init__(parent=None)
+        super(PreferencesDialog, self).__init__(parent=parent)
         self.setupUi(self)
+        self.preferences = preferences
         self.push_btn = QPushButton(self.tr('Save'))
-        self.plugin_instance = plugin_instance
         self.push_btn.clicked.connect(self.save_settings)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
-        import_folder = self.plugin_instance.get_import_folder()
-        export_folder = self.plugin_instance.get_export_folder()
-        self.importDir.setText(import_folder)
-        self.exportDir.setText(export_folder)
-        self.importDir_btn.clicked.connect(make_folder_selector(self.importDir))
-        self.exportDir_btn.clicked.connect(make_folder_selector(self.exportDir))
-
+        self.import_directory.setText(self.preferences.import_directory)
+        self.export_directory.setText(self.preferences.export_directory)
+        self.import_directory_button.clicked.connect(make_folder_selector(self.import_directory))
+        self.export_directory_button.clicked.connect(make_folder_selector(self.export_directory))
 
     def save_settings(self):
-        import_folder = self.importDir.text()
-        export_folder = self.exportDir.text()
-        self.plugin_instance.update_settings(import_folder, export_folder)
+        self.preferences.import_directory = self.import_directory.text()
+        self.preferences.export_directory = self.export_directory.text()
         self.close()

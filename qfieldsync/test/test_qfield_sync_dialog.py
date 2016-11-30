@@ -17,7 +17,7 @@ import unittest
 from qgis.PyQt.QtGui import QDialogButtonBox, QDialog
 from utilities import get_qgis_app
 
-from qfieldsync.dialogs.push_dialog import PushDialog
+from qfieldsync.dialogs.package_dialog import PackageDialog
 QGIS_APP = get_qgis_app()
 
 
@@ -26,7 +26,7 @@ class QFieldSyncDialogTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.dialog = PushDialog(None)
+        self.dialog = PackageDialog(None)
 
     def tearDown(self):
         """Runs after each test."""

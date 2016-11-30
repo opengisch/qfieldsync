@@ -22,6 +22,7 @@
 """
 from __future__ import absolute_import
 
+from qfieldsync.core import Preferences
 
 try:
     from builtins import object
@@ -41,11 +42,10 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsOfflineEditing, QgsProject
 
-from qfieldsync import config
-from qfieldsync.dialogs.push_dialog import PushDialog
-from qfieldsync.dialogs.settings_dialog import SettingsDialog
-from qfieldsync.dialogs.pull_dialog import PullDialog
-from qfieldsync.dialogs.config_dialog import ConfigDialog
+from qfieldsync.dialogs.package_dialog import PackageDialog
+from qfieldsync.dialogs.preferences_dialog import PreferencesDialog
+from qfieldsync.dialogs.synchronize_dialog import SynchronizeDialog
+from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
 
 # Core processing imports
 from processing.core.Processing import Processing
@@ -92,24 +92,14 @@ class QFieldSync(object):
         self.toolbar = self.iface.addToolBar(u'QFieldSync')
         self.toolbar.setObjectName(u'QFieldSync')
 
-        # initialize settings
-        self.export_folder = QSettings().value(config.EXPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
-        self.import_folder = QSettings().value(config.IMPORT_DIRECTORY_SETTING, os.path.expanduser("~"))
-        self.update_qgis_settings()
-
         # instance of the QgsOfflineEditing
         self.offline_editing = QgsOfflineEditing()
+        self.preferences = Preferences()
 
         QgsProject.instance().readProject.connect(self.update_button_enabled_status)
 
         # store warnings from last run
         self.last_action_warnings = []
-
-    def update_qgis_settings(self):
-        s = QSettings()
-        s.setValue(config.EXPORT_DIRECTORY_SETTING, self.export_folder)
-        s.setValue(config.IMPORT_DIRECTORY_SETTING, self.import_folder)
-        s.sync()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -202,30 +192,30 @@ class QFieldSync(object):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        self.add_action(
-            ':/plugins/qfieldsync/icon.png',
-            text=self.tr(u'Project Configuration'),
-            callback=self.configuration_dialog,
-            parent=self.iface.mainWindow(),
-            add_to_toolbar=False
-        )
-
         self.push_action = self.add_action(
             ':/plugins/qfieldsync/refresh.png',
             text=self.tr(u'Package for QField'),
-            callback=self.push_project,
+            callback=self.show_package_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
             ':/plugins/qfieldsync/refresh-reverse.png',
             text=self.tr(u'Synchronize from QField'),
-            callback=self.synchronize_qfield,
+            callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
             ':/plugins/qfieldsync/icon.png',
-            text=self.tr(u'Settings'),
-            callback=self.show_settings,
+            text=self.tr(u'Project Configuration'),
+            callback=self.show_project_configuration_dialog,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False
+        )
+
+        self.add_action(
+            ':/plugins/qfieldsync/icon.png',
+            text=self.tr(u'Preferences'),
+            callback=self.show_preferences_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
 
@@ -246,36 +236,23 @@ class QFieldSync(object):
         Processing.removeProvider(self.processing_provider)
         self.processing_provider = None
 
-    def show_settings(self):
-        dlg = SettingsDialog(self)
+    def show_preferences_dialog(self):
+        dlg = PreferencesDialog(self.preferences, self.iface.mainWindow())
         dlg.exec_()
 
-    def get_settings(self):
-        return {"import_folder": self.import_folder, "export_folder": self.export_folder}
-
-    def get_export_folder(self):
-        return self.get_settings()["export_folder"]
-
-    def get_import_folder(self):
-        return self.get_settings()["import_folder"]
-
-    def update_settings(self, import_folder, export_folder):
-        self.import_folder = import_folder
-        self.export_folder = export_folder
-        self.update_qgis_settings()
-
-    def synchronize_qfield(self):
+    def show_synchronize_dialog(self):
         """
         Synchronize from QField
         """
-        dlg = PullDialog(self.iface, self)
+        dlg = SynchronizeDialog(self.iface, self.preferences, self.offline_editing, self.iface.mainWindow())
         dlg.exec_()
 
-    def push_project(self):
+    def show_package_dialog(self):
         """
         Push to QField
         """
-        self.push_dlg = PushDialog(self.iface, self)
+        self.push_dlg = PackageDialog(self.iface, self.preferences, QgsProject.instance(), self.offline_editing,
+                                      self.iface.mainWindow())
         self.push_dlg.setAttribute(Qt.WA_DeleteOnClose)
         self.push_dlg.setWindowFlags(self.push_dlg.windowFlags() | Qt.Tool)
         self.push_dlg.show()
@@ -283,11 +260,11 @@ class QFieldSync(object):
         self.push_dlg.finished.connect(self.push_dialog_finished)
         self.update_button_enabled_status()
 
-    def configuration_dialog(self):
+    def show_project_configuration_dialog(self):
         """
         Show the project configuration dialog.
         """
-        dlg = ConfigDialog(self.iface, self.iface.mainWindow())
+        dlg = ProjectConfigurationDialog(self.iface, self.iface.mainWindow())
         dlg.exec_()
 
     def action_start(self):

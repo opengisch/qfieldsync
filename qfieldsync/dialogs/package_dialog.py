@@ -22,7 +22,7 @@
 """
 from qfieldsync.core import ProjectConfiguration
 from qfieldsync.core.layer import *
-from qfieldsync.dialogs.config_dialog import ConfigDialog
+from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
 from qgis.PyQt.QtCore import (
     pyqtSlot,
     Qt
@@ -60,18 +60,19 @@ try:
 except:
     pass
 
-FORM_CLASS = get_ui_class('push_dialog_base')
+FORM_CLASS = get_ui_class('package_dialog')
 
 
-class PushDialog(QDialog, FORM_CLASS):
-    def __init__(self, iface, plugin_instance):
+class PackageDialog(QDialog, FORM_CLASS):
+    def __init__(self, iface, preferences, project, offline_editing, parent):
         """Constructor."""
-        super(PushDialog, self).__init__(parent=None)
+        super(PackageDialog, self).__init__(parent=parent)
         self.setupUi(self)
+
         self.iface = iface
-        self.plugin_instance = plugin_instance
-        self.offline_editing = plugin_instance.offline_editing
-        self.project = QgsProject.instance()
+        self.offline_editing = offline_editing
+        self.project = project
+        self.qfield_preferences = preferences
         self.project_lbl.setText(get_project_title(self.project))
         self.push_btn = QPushButton(self.tr('Create'))
         self.push_btn.clicked.connect(self.push_project)
@@ -91,7 +92,7 @@ class PushDialog(QDialog, FORM_CLASS):
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
-        base_folder = self.plugin_instance.get_export_folder()
+        base_folder = self.qfield_preferences.export_directory
         project_fn = QgsProject.instance().fileName()
         export_folder_name = fileparts(project_fn)[1]
         export_folder_path = os.path.join(base_folder, export_folder_name)
@@ -132,16 +133,15 @@ class PushDialog(QDialog, FORM_CLASS):
         with a nice link to open the result folder.
         """
         export_folder = self.get_export_folder_from_dialog()
-        export_base_folder = get_full_parent_path(export_folder)
 
-        resultLabel = QLabel(self.tr(u'Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.').format(
+        result_label = QLabel(self.tr(u'Finished creating the project at {result_folder}. Please copy this folder to the device you want to work with.').format(
             result_folder=u'<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
-        resultLabel.setTextFormat(Qt.RichText)
-        resultLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        resultLabel.linkActivated.connect(lambda: open_folder(export_folder))
-        resultLabel.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
+        result_label.setTextFormat(Qt.RichText)
+        result_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        result_label.linkActivated.connect(lambda: open_folder(export_folder))
+        result_label.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
 
-        self.iface.messageBar().pushWidget(resultLabel, QgsMessageBar.INFO, 0)
+        self.iface.messageBar().pushWidget(result_label, QgsMessageBar.INFO, 0)
 
     def update_info_visibility(self):
         """
@@ -160,7 +160,7 @@ class PushDialog(QDialog, FORM_CLASS):
             self.informationStack.setCurrentWidget(self.progressPage)
 
     def show_settings(self):
-        dlg = ConfigDialog(self.iface, self.iface.mainWindow())
+        dlg = ProjectConfigurationDialog(self.iface, self.iface.mainWindow())
         dlg.exec_()
         self.update_info_visibility()
 

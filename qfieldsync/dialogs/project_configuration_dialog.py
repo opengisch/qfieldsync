@@ -32,16 +32,16 @@ from qgis.core import (
 )
 from ..utils.qt_utils import get_ui_class
 
-FORM_CLASS = get_ui_class('config_dialog_base')
+FORM_CLASS = get_ui_class('project_configuration_dialog')
 
-class ConfigDialog(QDialog, FORM_CLASS):
+class ProjectConfigurationDialog(QDialog, FORM_CLASS):
     """
     Configuration dialog for QFieldSync on a particular project.
     """
 
     def __init__(self, iface, parent):
         """Constructor."""
-        super(ConfigDialog, self).__init__(parent=parent)
+        super(ProjectConfigurationDialog, self).__init__(parent=parent)
         self.iface = iface
 
         self.accepted.connect(self.onAccepted)

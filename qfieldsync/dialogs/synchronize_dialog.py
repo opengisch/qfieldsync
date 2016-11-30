@@ -21,16 +21,12 @@
  ***************************************************************************/
 """
 from __future__ import absolute_import
-from __future__ import print_function
 
-from qgis.PyQt.QtCore import Qt, pyqtSlot
+from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import (
         QDialog,
         QDialogButtonBox,
-        QPushButton,
-        QMessageBox,
-        QApplication,
-        QMessageBox
+        QPushButton
 )
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
@@ -38,21 +34,22 @@ from qfieldsync.utils.file_utils import get_project_in_folder
 from qfieldsync.utils.qgis_utils import open_project
 from qfieldsync.utils.qt_utils import get_ui_class, make_folder_selector
 
-FORM_CLASS = get_ui_class('synchronize_base')
+FORM_CLASS = get_ui_class('synchronize_dialog')
 
 
-class PullDialog(QDialog, FORM_CLASS):
-    def __init__(self, iface, plugin_instance):
-        """Constructor."""
-        super(PullDialog, self).__init__(parent=None)
+class SynchronizeDialog(QDialog, FORM_CLASS):
+    def __init__(self, iface, qfield_preferences, offline_editing, parent):
+        """Constructor.
+        :type qfield_preferences: qfieldsync.core.Preferences
+        """
+        super(SynchronizeDialog, self).__init__(parent=parent)
         self.setupUi(self)
         self.iface = iface
-        self.plugin_instance = plugin_instance
-        self.offline_editing = plugin_instance.offline_editing
+        self.offline_editing = offline_editing
         self.push_btn = QPushButton(self.tr('Synchronize'))
         self.push_btn.clicked.connect(self.start_synchronization)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
-        self.qfieldDir.setText(plugin_instance.get_import_folder())
+        self.qfieldDir.setText(qfield_preferences.import_directory)
         self.qfieldDir_btn.clicked.connect(make_folder_selector(self.qfieldDir))
 
         self.offline_editing_done = False

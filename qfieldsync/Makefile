@@ -47,24 +47,13 @@ PY_FILES = \
         __init__.py
 
 UI_FILES = \
-        ui/config_dialog_base.ui \
-        ui/push_dialog_base.ui \
-        ui/settings.ui \
-        ui/synchronize_base.ui
+        ui/*.ui
 
 EXTRAS = icon.png metadata.txt
 
 COMPILED_RESOURCE_FILES = resources_rc4.py
 
-COMPILED_UI_FILES = \
-        ui/config_dialog_base_ui4.py \
-	ui/push_dialog_base_ui4.py \
-	ui/settings_ui4.py \
-	ui/synchronize_base_ui4.py \
-        ui/config_dialog_base_ui5.py \
-	ui/push_dialog_base_ui5.py \
-	ui/settings_ui5.py \
-	ui/synchronize_base_ui5.py
+COMPILED_UI_FILES = $(shell ls -1 ui/*.ui | sed 's/\(.*\)\.ui/\1_ui4.py\n\1_ui5.py/g' | tr '\n' ' ')
 
 PEP8EXCLUDE=pydev,resources_rc.py,conf.py,third_party,ui
 

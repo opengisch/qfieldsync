@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QFieldRemoteOptionsBase</class>
- <widget class="QDialog" name="QFieldRemoteOptionsBase">
+ <class>QFieldPreferencesBase</class>
+ <widget class="QDialog" name="QFieldPreferencesBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>QFieldSync settings</string>
+   <string>QFieldSync preferences</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -24,12 +24,12 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLineEdit" name="importDir"/>
+      <widget class="QLineEdit" name="import_directory"/>
      </item>
      <item>
-      <widget class="QPushButton" name="importDir_btn">
+      <widget class="QToolButton" name="import_directory_button">
        <property name="text">
-        <string>Browse</string>
+        <string>...</string>
        </property>
       </widget>
      </item>
@@ -45,12 +45,12 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLineEdit" name="exportDir"/>
+      <widget class="QLineEdit" name="export_directory"/>
      </item>
      <item>
-      <widget class="QPushButton" name="exportDir_btn">
+      <widget class="QToolButton" name="export_directory_button">
        <property name="text">
-        <string>Browse</string>
+        <string>...</string>
        </property>
       </widget>
      </item>
@@ -62,7 +62,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -73,7 +73,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>QFieldRemoteOptionsBase</receiver>
+   <receiver>QFieldPreferencesBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -89,7 +89,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>QFieldRemoteOptionsBase</receiver>
+   <receiver>QFieldPreferencesBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/config_dialog_base.ui'
+# Form implementation generated from reading ui file 'ui/project_configuration_dialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -8,13 +8,13 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_configuration_dialog_base(object):
-    def setupUi(self, configuration_dialog_base):
-        configuration_dialog_base.setObjectName("configuration_dialog_base")
-        configuration_dialog_base.resize(608, 510)
-        self.gridLayout = QtWidgets.QGridLayout(configuration_dialog_base)
+class Ui_QFieldProjectConfigurationBase(object):
+    def setupUi(self, QFieldProjectConfigurationBase):
+        QFieldProjectConfigurationBase.setObjectName("QFieldProjectConfigurationBase")
+        QFieldProjectConfigurationBase.resize(608, 510)
+        self.gridLayout = QtWidgets.QGridLayout(QFieldProjectConfigurationBase)
         self.gridLayout.setObjectName("gridLayout")
-        self.groupBox = QtWidgets.QGroupBox(configuration_dialog_base)
+        self.groupBox = QtWidgets.QGroupBox(QFieldProjectConfigurationBase)
         self.groupBox.setObjectName("groupBox")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.groupBox)
         self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -30,12 +30,12 @@ class Ui_configuration_dialog_base(object):
         self.layersTable.horizontalHeader().setStretchLastSection(True)
         self.gridLayout_2.addWidget(self.layersTable, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
-        self.buttonBox = QtWidgets.QDialogButtonBox(configuration_dialog_base)
+        self.buttonBox = QtWidgets.QDialogButtonBox(QFieldProjectConfigurationBase)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.gridLayout.addWidget(self.buttonBox, 3, 0, 1, 1)
-        self.tabWidget = QtWidgets.QTabWidget(configuration_dialog_base)
+        self.tabWidget = QtWidgets.QTabWidget(QFieldProjectConfigurationBase)
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
@@ -50,7 +50,7 @@ class Ui_configuration_dialog_base(object):
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.mapThemeRadioButton = QtWidgets.QRadioButton(self.createBaseMapGroupBox)
         self.mapThemeRadioButton.setObjectName("mapThemeRadioButton")
-        self.buttonGroup = QtWidgets.QButtonGroup(configuration_dialog_base)
+        self.buttonGroup = QtWidgets.QButtonGroup(QFieldProjectConfigurationBase)
         self.buttonGroup.setObjectName("buttonGroup")
         self.buttonGroup.addButton(self.mapThemeRadioButton)
         self.gridLayout_3.addWidget(self.mapThemeRadioButton, 0, 1, 1, 1)
@@ -129,34 +129,34 @@ class Ui_configuration_dialog_base(object):
         self.tabWidget.addTab(self.tab_2, "")
         self.gridLayout.addWidget(self.tabWidget, 1, 0, 1, 1)
 
-        self.retranslateUi(configuration_dialog_base)
+        self.retranslateUi(QFieldProjectConfigurationBase)
         self.tabWidget.setCurrentIndex(0)
-        self.buttonBox.accepted.connect(configuration_dialog_base.accept)
-        self.buttonBox.rejected.connect(configuration_dialog_base.reject)
-        QtCore.QMetaObject.connectSlotsByName(configuration_dialog_base)
+        self.buttonBox.accepted.connect(QFieldProjectConfigurationBase.accept)
+        self.buttonBox.rejected.connect(QFieldProjectConfigurationBase.reject)
+        QtCore.QMetaObject.connectSlotsByName(QFieldProjectConfigurationBase)
 
-    def retranslateUi(self, configuration_dialog_base):
+    def retranslateUi(self, QFieldProjectConfigurationBase):
         _translate = QtCore.QCoreApplication.translate
-        configuration_dialog_base.setWindowTitle(_translate("configuration_dialog_base", "Configure Project for QField synchronisation"))
-        self.groupBox.setTitle(_translate("configuration_dialog_base", "Layers"))
+        QFieldProjectConfigurationBase.setWindowTitle(_translate("QFieldProjectConfigurationBase", "Configure Project for QField synchronisation"))
+        self.groupBox.setTitle(_translate("QFieldProjectConfigurationBase", "Layers"))
         item = self.layersTable.horizontalHeaderItem(0)
-        item.setText(_translate("configuration_dialog_base", "Layer"))
+        item.setText(_translate("QFieldProjectConfigurationBase", "Layer"))
         item = self.layersTable.horizontalHeaderItem(1)
-        item.setText(_translate("configuration_dialog_base", "Action"))
-        self.createBaseMapGroupBox.setToolTip(_translate("configuration_dialog_base", "A base map is fully rendered to a raster image. Attributes from layers on a base map are no longer accessible."))
-        self.createBaseMapGroupBox.setTitle(_translate("configuration_dialog_base", "Create base map"))
-        self.mapThemeRadioButton.setText(_translate("configuration_dialog_base", "Map Theme"))
-        self.label.setText(_translate("configuration_dialog_base", "Map Theme"))
-        self.label_2.setText(_translate("configuration_dialog_base", "Layer"))
-        self.label_3.setText(_translate("configuration_dialog_base", "Tile Size"))
-        self.tileSize.setToolTip(_translate("configuration_dialog_base", "Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile."))
-        self.tileSize.setText(_translate("configuration_dialog_base", "1024"))
-        self.label_4.setText(_translate("configuration_dialog_base", "Map Units/Pixel"))
-        self.mapUnitsPerPixel.setToolTip(_translate("configuration_dialog_base", "This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer."))
-        self.mapUnitsPerPixel.setText(_translate("configuration_dialog_base", "100"))
-        self.singleLayerRadioButton.setText(_translate("configuration_dialog_base", "Single Layer"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("configuration_dialog_base", "Base map"))
-        self.onlyOfflineCopyFeaturesInAoi.setText(_translate("configuration_dialog_base", "Only copy features in area of interest"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("configuration_dialog_base", "Offline editing"))
+        item.setText(_translate("QFieldProjectConfigurationBase", "Action"))
+        self.createBaseMapGroupBox.setToolTip(_translate("QFieldProjectConfigurationBase", "A base map is fully rendered to a raster image. Attributes from layers on a base map are no longer accessible."))
+        self.createBaseMapGroupBox.setTitle(_translate("QFieldProjectConfigurationBase", "Create base map"))
+        self.mapThemeRadioButton.setText(_translate("QFieldProjectConfigurationBase", "Map Theme"))
+        self.label.setText(_translate("QFieldProjectConfigurationBase", "Map Theme"))
+        self.label_2.setText(_translate("QFieldProjectConfigurationBase", "Layer"))
+        self.label_3.setText(_translate("QFieldProjectConfigurationBase", "Tile Size"))
+        self.tileSize.setToolTip(_translate("QFieldProjectConfigurationBase", "Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile."))
+        self.tileSize.setText(_translate("QFieldProjectConfigurationBase", "1024"))
+        self.label_4.setText(_translate("QFieldProjectConfigurationBase", "Map Units/Pixel"))
+        self.mapUnitsPerPixel.setToolTip(_translate("QFieldProjectConfigurationBase", "This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer."))
+        self.mapUnitsPerPixel.setText(_translate("QFieldProjectConfigurationBase", "100"))
+        self.singleLayerRadioButton.setText(_translate("QFieldProjectConfigurationBase", "Single Layer"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("QFieldProjectConfigurationBase", "Base map"))
+        self.onlyOfflineCopyFeaturesInAoi.setText(_translate("QFieldProjectConfigurationBase", "Only copy features in area of interest"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("QFieldProjectConfigurationBase", "Offline editing"))
 
 from qgis.gui import QgsMapLayerComboBox

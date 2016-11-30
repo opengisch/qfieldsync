@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/synchronize_base.ui'
+# Form implementation generated from reading ui file 'ui/synchronize_dialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -60,7 +60,7 @@ class Ui_QFieldSynchronizeBase(object):
 
     def retranslateUi(self, QFieldSynchronizeBase):
         _translate = QtCore.QCoreApplication.translate
-        QFieldSynchronizeBase.setWindowTitle(_translate("QFieldSynchronizeBase", "Synchronize remote project"))
+        QFieldSynchronizeBase.setWindowTitle(_translate("QFieldSynchronizeBase", "Synchronize project"))
         self.label.setText(_translate("QFieldSynchronizeBase", "<html><head/><body><p>Select the directory containing the</p><p>QField project file:</p></body></html>"))
         self.qfieldDir_btn.setText(_translate("QFieldSynchronizeBase", "Browse"))
         self.progress_group.setTitle(_translate("QFieldSynchronizeBase", "Progress"))

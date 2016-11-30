@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/push_dialog_base.ui'
+# Form implementation generated from reading ui file 'ui/package_dialog.ui'
 #
 # Created by: PyQt4 UI code generator 4.11.4
 #
@@ -22,13 +22,13 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_QFieldPushDialogBase(object):
-    def setupUi(self, QFieldPushDialogBase):
-        QFieldPushDialogBase.setObjectName(_fromUtf8("QFieldPushDialogBase"))
-        QFieldPushDialogBase.resize(650, 638)
-        self.gridLayout_2 = QtGui.QGridLayout(QFieldPushDialogBase)
+class Ui_QFieldPackageDialogBase(object):
+    def setupUi(self, QFieldPackageDialogBase):
+        QFieldPackageDialogBase.setObjectName(_fromUtf8("QFieldPackageDialogBase"))
+        QFieldPackageDialogBase.resize(650, 638)
+        self.gridLayout_2 = QtGui.QGridLayout(QFieldPackageDialogBase)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
-        self.informationStack = QtGui.QStackedWidget(QFieldPushDialogBase)
+        self.informationStack = QtGui.QStackedWidget(QFieldPackageDialogBase)
         self.informationStack.setObjectName(_fromUtf8("informationStack"))
         self.progressPage = QtGui.QWidget()
         self.progressPage.setObjectName(_fromUtf8("progressPage"))
@@ -110,7 +110,7 @@ class Ui_QFieldPushDialogBase(object):
         self.gridLayout_4.addWidget(self.groupBox_2, 0, 0, 1, 1)
         self.informationStack.addWidget(self.selectExtentPage)
         self.gridLayout_2.addWidget(self.informationStack, 2, 0, 1, 2)
-        self.groupBox = QtGui.QGroupBox(QFieldPushDialogBase)
+        self.groupBox = QtGui.QGroupBox(QFieldPackageDialogBase)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.gridLayout = QtGui.QGridLayout(self.groupBox)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
@@ -121,11 +121,11 @@ class Ui_QFieldPushDialogBase(object):
         self.manualDir_btn.setObjectName(_fromUtf8("manualDir_btn"))
         self.gridLayout.addWidget(self.manualDir_btn, 0, 1, 1, 1)
         self.gridLayout_2.addWidget(self.groupBox, 1, 0, 1, 2)
-        self.label_2 = QtGui.QLabel(QFieldPushDialogBase)
+        self.label_2 = QtGui.QLabel(QFieldPackageDialogBase)
         self.label_2.setTextFormat(QtCore.Qt.RichText)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout_2.addWidget(self.label_2, 0, 0, 1, 1)
-        self.project_lbl = QtGui.QLabel(QFieldPushDialogBase)
+        self.project_lbl = QtGui.QLabel(QFieldPackageDialogBase)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -134,12 +134,12 @@ class Ui_QFieldPushDialogBase(object):
         self.project_lbl.setText(_fromUtf8(""))
         self.project_lbl.setObjectName(_fromUtf8("project_lbl"))
         self.gridLayout_2.addWidget(self.project_lbl, 0, 1, 1, 1)
-        self.button_box = QtGui.QDialogButtonBox(QFieldPushDialogBase)
+        self.button_box = QtGui.QDialogButtonBox(QFieldPackageDialogBase)
         self.button_box.setOrientation(QtCore.Qt.Horizontal)
         self.button_box.setStandardButtons(QtGui.QDialogButtonBox.Close)
         self.button_box.setObjectName(_fromUtf8("button_box"))
         self.gridLayout_2.addWidget(self.button_box, 4, 0, 1, 2)
-        self.infoGroupBox = QtGui.QGroupBox(QFieldPushDialogBase)
+        self.infoGroupBox = QtGui.QGroupBox(QFieldPackageDialogBase)
         self.infoGroupBox.setObjectName(_fromUtf8("infoGroupBox"))
         self.gridLayout_8 = QtGui.QGridLayout(self.infoGroupBox)
         self.gridLayout_8.setObjectName(_fromUtf8("gridLayout_8"))
@@ -148,22 +148,22 @@ class Ui_QFieldPushDialogBase(object):
         self.gridLayout_8.addWidget(self.infoLabel, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.infoGroupBox, 3, 0, 1, 2)
 
-        self.retranslateUi(QFieldPushDialogBase)
+        self.retranslateUi(QFieldPackageDialogBase)
         self.informationStack.setCurrentIndex(1)
-        QtCore.QObject.connect(self.button_box, QtCore.SIGNAL(_fromUtf8("accepted()")), QFieldPushDialogBase.accept)
-        QtCore.QObject.connect(self.button_box, QtCore.SIGNAL(_fromUtf8("rejected()")), QFieldPushDialogBase.reject)
-        QtCore.QMetaObject.connectSlotsByName(QFieldPushDialogBase)
+        QtCore.QObject.connect(self.button_box, QtCore.SIGNAL(_fromUtf8("accepted()")), QFieldPackageDialogBase.accept)
+        QtCore.QObject.connect(self.button_box, QtCore.SIGNAL(_fromUtf8("rejected()")), QFieldPackageDialogBase.reject)
+        QtCore.QMetaObject.connectSlotsByName(QFieldPackageDialogBase)
 
-    def retranslateUi(self, QFieldPushDialogBase):
-        QFieldPushDialogBase.setWindowTitle(_translate("QFieldPushDialogBase", "Prepare project for QField", None))
-        self.progress_group.setTitle(_translate("QFieldPushDialogBase", "Progress", None))
-        self.label_11.setText(_translate("QFieldPushDialogBase", "Total", None))
-        self.statusLabel.setText(_translate("QFieldPushDialogBase", "Layer", None))
-        self.groupBox_2.setTitle(_translate("QFieldPushDialogBase", "Select extent", None))
-        self.label_3.setText(_translate("QFieldPushDialogBase", "<html><head/><body><p>The main map canvas<br/>can be panned and<br/>zoomed as usual<br/>while this window is<br/>open.<br/>Try it!</p></body></html>", None))
-        self.groupBox.setTitle(_translate("QFieldPushDialogBase", "Export Directory", None))
-        self.manualDir_btn.setText(_translate("QFieldPushDialogBase", "...", None))
-        self.label_2.setText(_translate("QFieldPushDialogBase", "<html><head/><body><p><span style=\" font-weight:600;\">Project:</span></p></body></html>", None))
-        self.infoGroupBox.setTitle(_translate("QFieldPushDialogBase", "Information", None))
-        self.infoLabel.setText(_translate("QFieldPushDialogBase", "Some layers in this project have not yet been configured. <a href=\"configuration\">Configure project now</a>.", None))
+    def retranslateUi(self, QFieldPackageDialogBase):
+        QFieldPackageDialogBase.setWindowTitle(_translate("QFieldPackageDialogBase", "Package project for QField", None))
+        self.progress_group.setTitle(_translate("QFieldPackageDialogBase", "Progress", None))
+        self.label_11.setText(_translate("QFieldPackageDialogBase", "Total", None))
+        self.statusLabel.setText(_translate("QFieldPackageDialogBase", "Layer", None))
+        self.groupBox_2.setTitle(_translate("QFieldPackageDialogBase", "Select extent", None))
+        self.label_3.setText(_translate("QFieldPackageDialogBase", "<html><head/><body><p>The main map canvas<br/>can be panned and<br/>zoomed as usual<br/>while this window is<br/>open.<br/>Try it!</p></body></html>", None))
+        self.groupBox.setTitle(_translate("QFieldPackageDialogBase", "Export Directory", None))
+        self.manualDir_btn.setText(_translate("QFieldPackageDialogBase", "...", None))
+        self.label_2.setText(_translate("QFieldPackageDialogBase", "<html><head/><body><p><span style=\" font-weight:600;\">Project:</span></p></body></html>", None))
+        self.infoGroupBox.setTitle(_translate("QFieldPackageDialogBase", "Information", None))
+        self.infoLabel.setText(_translate("QFieldPackageDialogBase", "Some layers in this project have not yet been configured. <a href=\"configuration\">Configure project now</a>.", None))
 

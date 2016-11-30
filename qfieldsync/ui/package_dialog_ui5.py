@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/push_dialog_base.ui'
+# Form implementation generated from reading ui file 'ui/package_dialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -8,13 +8,13 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_QFieldPushDialogBase(object):
-    def setupUi(self, QFieldPushDialogBase):
-        QFieldPushDialogBase.setObjectName("QFieldPushDialogBase")
-        QFieldPushDialogBase.resize(650, 638)
-        self.gridLayout_2 = QtWidgets.QGridLayout(QFieldPushDialogBase)
+class Ui_QFieldPackageDialogBase(object):
+    def setupUi(self, QFieldPackageDialogBase):
+        QFieldPackageDialogBase.setObjectName("QFieldPackageDialogBase")
+        QFieldPackageDialogBase.resize(650, 638)
+        self.gridLayout_2 = QtWidgets.QGridLayout(QFieldPackageDialogBase)
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.informationStack = QtWidgets.QStackedWidget(QFieldPushDialogBase)
+        self.informationStack = QtWidgets.QStackedWidget(QFieldPackageDialogBase)
         self.informationStack.setObjectName("informationStack")
         self.progressPage = QtWidgets.QWidget()
         self.progressPage.setObjectName("progressPage")
@@ -97,7 +97,7 @@ class Ui_QFieldPushDialogBase(object):
         self.gridLayout_4.addWidget(self.groupBox_2, 0, 0, 1, 1)
         self.informationStack.addWidget(self.selectExtentPage)
         self.gridLayout_2.addWidget(self.informationStack, 2, 0, 1, 2)
-        self.groupBox = QtWidgets.QGroupBox(QFieldPushDialogBase)
+        self.groupBox = QtWidgets.QGroupBox(QFieldPackageDialogBase)
         self.groupBox.setObjectName("groupBox")
         self.gridLayout = QtWidgets.QGridLayout(self.groupBox)
         self.gridLayout.setObjectName("gridLayout")
@@ -108,11 +108,11 @@ class Ui_QFieldPushDialogBase(object):
         self.manualDir_btn.setObjectName("manualDir_btn")
         self.gridLayout.addWidget(self.manualDir_btn, 0, 1, 1, 1)
         self.gridLayout_2.addWidget(self.groupBox, 1, 0, 1, 2)
-        self.label_2 = QtWidgets.QLabel(QFieldPushDialogBase)
+        self.label_2 = QtWidgets.QLabel(QFieldPackageDialogBase)
         self.label_2.setTextFormat(QtCore.Qt.RichText)
         self.label_2.setObjectName("label_2")
         self.gridLayout_2.addWidget(self.label_2, 0, 0, 1, 1)
-        self.project_lbl = QtWidgets.QLabel(QFieldPushDialogBase)
+        self.project_lbl = QtWidgets.QLabel(QFieldPackageDialogBase)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -121,12 +121,12 @@ class Ui_QFieldPushDialogBase(object):
         self.project_lbl.setText("")
         self.project_lbl.setObjectName("project_lbl")
         self.gridLayout_2.addWidget(self.project_lbl, 0, 1, 1, 1)
-        self.button_box = QtWidgets.QDialogButtonBox(QFieldPushDialogBase)
+        self.button_box = QtWidgets.QDialogButtonBox(QFieldPackageDialogBase)
         self.button_box.setOrientation(QtCore.Qt.Horizontal)
         self.button_box.setStandardButtons(QtWidgets.QDialogButtonBox.Close)
         self.button_box.setObjectName("button_box")
         self.gridLayout_2.addWidget(self.button_box, 4, 0, 1, 2)
-        self.infoGroupBox = QtWidgets.QGroupBox(QFieldPushDialogBase)
+        self.infoGroupBox = QtWidgets.QGroupBox(QFieldPackageDialogBase)
         self.infoGroupBox.setObjectName("infoGroupBox")
         self.gridLayout_8 = QtWidgets.QGridLayout(self.infoGroupBox)
         self.gridLayout_8.setObjectName("gridLayout_8")
@@ -135,23 +135,23 @@ class Ui_QFieldPushDialogBase(object):
         self.gridLayout_8.addWidget(self.infoLabel, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.infoGroupBox, 3, 0, 1, 2)
 
-        self.retranslateUi(QFieldPushDialogBase)
+        self.retranslateUi(QFieldPackageDialogBase)
         self.informationStack.setCurrentIndex(1)
-        self.button_box.accepted.connect(QFieldPushDialogBase.accept)
-        self.button_box.rejected.connect(QFieldPushDialogBase.reject)
-        QtCore.QMetaObject.connectSlotsByName(QFieldPushDialogBase)
+        self.button_box.accepted.connect(QFieldPackageDialogBase.accept)
+        self.button_box.rejected.connect(QFieldPackageDialogBase.reject)
+        QtCore.QMetaObject.connectSlotsByName(QFieldPackageDialogBase)
 
-    def retranslateUi(self, QFieldPushDialogBase):
+    def retranslateUi(self, QFieldPackageDialogBase):
         _translate = QtCore.QCoreApplication.translate
-        QFieldPushDialogBase.setWindowTitle(_translate("QFieldPushDialogBase", "Prepare project for QField"))
-        self.progress_group.setTitle(_translate("QFieldPushDialogBase", "Progress"))
-        self.label_11.setText(_translate("QFieldPushDialogBase", "Total"))
-        self.statusLabel.setText(_translate("QFieldPushDialogBase", "Layer"))
-        self.groupBox_2.setTitle(_translate("QFieldPushDialogBase", "Select extent"))
-        self.label_3.setText(_translate("QFieldPushDialogBase", "<html><head/><body><p>The main map canvas<br/>can be panned and<br/>zoomed as usual<br/>while this window is<br/>open.<br/>Try it!</p></body></html>"))
-        self.groupBox.setTitle(_translate("QFieldPushDialogBase", "Export Directory"))
-        self.manualDir_btn.setText(_translate("QFieldPushDialogBase", "..."))
-        self.label_2.setText(_translate("QFieldPushDialogBase", "<html><head/><body><p><span style=\" font-weight:600;\">Project:</span></p></body></html>"))
-        self.infoGroupBox.setTitle(_translate("QFieldPushDialogBase", "Information"))
-        self.infoLabel.setText(_translate("QFieldPushDialogBase", "Some layers in this project have not yet been configured. <a href=\"configuration\">Configure project now</a>."))
+        QFieldPackageDialogBase.setWindowTitle(_translate("QFieldPackageDialogBase", "Package project for QField"))
+        self.progress_group.setTitle(_translate("QFieldPackageDialogBase", "Progress"))
+        self.label_11.setText(_translate("QFieldPackageDialogBase", "Total"))
+        self.statusLabel.setText(_translate("QFieldPackageDialogBase", "Layer"))
+        self.groupBox_2.setTitle(_translate("QFieldPackageDialogBase", "Select extent"))
+        self.label_3.setText(_translate("QFieldPackageDialogBase", "<html><head/><body><p>The main map canvas<br/>can be panned and<br/>zoomed as usual<br/>while this window is<br/>open.<br/>Try it!</p></body></html>"))
+        self.groupBox.setTitle(_translate("QFieldPackageDialogBase", "Export Directory"))
+        self.manualDir_btn.setText(_translate("QFieldPackageDialogBase", "..."))
+        self.label_2.setText(_translate("QFieldPackageDialogBase", "<html><head/><body><p><span style=\" font-weight:600;\">Project:</span></p></body></html>"))
+        self.infoGroupBox.setTitle(_translate("QFieldPackageDialogBase", "Information"))
+        self.infoLabel.setText(_translate("QFieldPackageDialogBase", "Some layers in this project have not yet been configured. <a href=\"configuration\">Configure project now</a>."))
 
