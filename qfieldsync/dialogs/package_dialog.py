@@ -42,9 +42,7 @@ from qgis.core import (
 from qgis.gui import (
     QgsMessageBar
 )
-from ..utils.export_offline_utils import (
-    OfflineConverter
-)
+from ..utils.export_offline_utils import OfflineConverter
 from ..utils.file_utils import fileparts, get_full_parent_path, open_folder
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import get_ui_class
@@ -75,7 +73,7 @@ class PackageDialog(QDialog, FORM_CLASS):
         self.qfield_preferences = preferences
         self.project_lbl.setText(get_project_title(self.project))
         self.push_btn = QPushButton(self.tr('Create'))
-        self.push_btn.clicked.connect(self.push_project)
+        self.push_btn.clicked.connect(self.package_project)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
         self.iface.mapCanvas().extentsChanged.connect(self.extentChanged)
         self.extentChanged()
@@ -107,9 +105,8 @@ class PackageDialog(QDialog, FORM_CLASS):
         # manual
         return self.manualDir.text()
 
-    def push_project(self):
+    def package_project(self):
         self.informationStack.setCurrentWidget(self.progressPage)
-        self.plugin_instance.action_start()
 
         export_folder = self.get_export_folder_from_dialog()
 

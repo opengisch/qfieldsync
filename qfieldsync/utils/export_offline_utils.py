@@ -59,7 +59,7 @@ class OfflineConverter(QObject):
 
         try:
             if not os.path.exists(self.export_folder):
-                os.mkdir(self.export_folder)
+                os.makedirs(self.export_folder)
 
             QApplication.setOverrideCursor(Qt.WaitCursor)
 

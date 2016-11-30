@@ -25,4 +25,5 @@ class Preferences(object):
 
     @import_directory.setter
     def import_directory(self, value):
+        print('setting new directory import')
         QSettings().setValue(self.__IMPORT_DIRECTORY_SETTING, value)
