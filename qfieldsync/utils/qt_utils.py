@@ -10,7 +10,7 @@ def selectFolder(line_edit_widget):
 
 
 def make_folder_selector(widget):
-    return partial(selectFolder, lineEditWidget=widget)
+    return partial(selectFolder, line_edit_widget=widget)
 
 
 def get_ui_class(ui_file):
