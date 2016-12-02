@@ -34,7 +34,7 @@ from qgis.core import (
 )
 
 import qgis
-import gdal
+import osgeo.gdal
 import os
 import tempfile
 import math
@@ -195,13 +195,12 @@ class TileSet():
         job.renderSynchronously()
         painter.end()
 
-        tmpfile = tempfile.NamedTemporaryFile(suffix='.png')
+        with tempfile.NamedTemporaryFile(suffix='.png') as tmpfile:
+            self.image.save(tmpfile.name)
+            src_ds = osgeo.gdal.Open(tmpfile.name)
 
-        self.image.save(tmpfile.name)
-        src_ds = gdal.Open(tmpfile.name)
-
-        self.dataset.WriteRaster(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size,
-                                 src_ds.ReadRaster(0, 0, self.tile_size, self.tile_size))
+            self.dataset.WriteRaster(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size,
+                                     src_ds.ReadRaster(0, 0, self.tile_size, self.tile_size))
 
     def getDriverForFile(self, filename):
         """
@@ -209,7 +208,7 @@ class TileSet():
         """
         _, extension = os.path.splitext(filename)
 
-        for i in range(gdal.GetDriverCount()):
-            driver = gdal.GetDriver(i)
+        for i in range(osgeo.gdal.GetDriverCount()):
+            driver = osgeo.gdal.GetDriver(i)
             if driver.GetMetadataItem('DMD_EXTENSION') == extension[1:]:
                 return driver
