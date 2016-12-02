@@ -23,6 +23,7 @@ from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber, ParameterRaster
 from processing.core.outputs import OutputRaster
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
+from processing.core.ProcessingLog import ProcessingLog
 
 from qgis.PyQt.QtGui import QImage, QPainter
 from qgis.PyQt.QtCore import QSize
@@ -103,6 +104,9 @@ class BasemapAlgorithm(GeoAlgorithm):
         mupp = self.getParameterValue(self.MAP_UNITS_PER_PIXEL)
 
         output = self.getOutputValue(self.OUTPUT_LAYER)
+
+        # This probably affects the whole system but it's a lot nicer
+        osgeo.gdal.UseExceptions()
 
         tile_set = TileSet(map_theme, layer, extent, tile_size, mupp, output,
                            qgis.utils.iface.mapCanvas().mapSettings())
@@ -196,7 +200,10 @@ class TileSet():
         painter.end()
 
         with tempfile.NamedTemporaryFile(suffix='.png') as tmpfile:
-            self.image.save(tmpfile.name)
+            save_result = self.image.save(tmpfile.name)
+
+            ProcessingLog.addToLog('qfieldsync', u'Saving to image {}, result: {}'.format(tmpfile, save_result))
+
             src_ds = osgeo.gdal.Open(tmpfile.name)
 
             self.dataset.WriteRaster(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size,
