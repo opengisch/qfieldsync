@@ -96,8 +96,8 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(self.project_configuration.base_map_theme))
         layer = QgsMapLayerRegistry.instance().mapLayer(self.project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
-        self.mapUnitsPerPixel.setText(str(self.project_configuration.base_map_tile_size))
-        self.tileSize.setText(str(self.project_configuration.base_map_mupp))
+        self.mapUnitsPerPixel.setText(str(self.project_configuration.base_map_mupp))
+        self.tileSize.setText(str(self.project_configuration.base_map_tile_size))
         self.onlyOfflineCopyFeaturesInAoi.setChecked(self.project_configuration.offline_copy_only_aoi)
 
     def onAccepted(self):
