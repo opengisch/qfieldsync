@@ -31,7 +31,7 @@ from qgis.PyQt.QtCore import (
     Qt,
     QObject,
     pyqtSignal,
-    QTimer
+    QCoreApplication
 )
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (
@@ -132,12 +132,9 @@ class OfflineConverter(QObject):
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(QFileInfo(project_path))
         finally:
-            def reload_original_project():
-                QgsProject.instance().read(QFileInfo(backup_project_path))
-                QgsProject.instance().setFileName(original_project_path)
-
-            # Calling this directly crashes QGIS 2.18 when loading WMS layers
-            QTimer.singleShot(100, lambda: reload_original_project())
+            QCoreApplication.processEvents()
+            QgsProject.instance().read(QFileInfo(backup_project_path))
+            QgsProject.instance().setFileName(original_project_path)
             QApplication.restoreOverrideCursor()
 
         self.progressJob.emit(self.tr('Finished'))
