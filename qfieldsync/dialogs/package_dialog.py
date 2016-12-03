@@ -20,8 +20,13 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qfieldsync.core import ProjectConfiguration
-from qfieldsync.core import LayerSource
+import os
+
+from qfieldsync.core import (
+    LayerSource,
+    ProjectConfiguration,
+    OfflineConverter
+)
 from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
 from qgis.PyQt.QtCore import (
     pyqtSlot,
@@ -42,13 +47,10 @@ from qgis.core import (
 from qgis.gui import (
     QgsMessageBar
 )
-from ..utils.export_offline_utils import OfflineConverter
 from ..utils.file_utils import fileparts, open_folder
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import get_ui_class
 from ..utils.qt_utils import make_folder_selector
-
-import os
 
 FORM_CLASS = get_ui_class('package_dialog')
 
@@ -67,8 +69,8 @@ class PackageDialog(QDialog, FORM_CLASS):
         self.push_btn = QPushButton(self.tr('Create'))
         self.push_btn.clicked.connect(self.package_project)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
-        self.iface.mapCanvas().extentsChanged.connect(self.extentChanged)
-        self.extentChanged()
+        self.iface.mapCanvas().extentsChanged.connect(self.extent_changed)
+        self.extent_changed()
 
         self.devices = None
         # self.refresh_devices()
@@ -106,10 +108,8 @@ class PackageDialog(QDialog, FORM_CLASS):
                                              self.offline_editing)
 
         # progress connections
-        offline_convertor.layerProgressUpdated.connect(self.update_total)
-        offline_convertor.progressModeSet.connect(self.update_mode)
-        offline_convertor.progressUpdated.connect(self.update_value)
-        offline_convertor.progressJob.connect(self.update_job_status)
+        offline_convertor.total_progress_updated.connect(self.update_total)
+        offline_convertor.task_progress_updated.connect(self.update_task)
 
         offline_convertor.convert()
         self.do_post_offline_convert_action()
@@ -155,26 +155,19 @@ class PackageDialog(QDialog, FORM_CLASS):
         dlg.exec_()
         self.update_info_visibility()
 
-    @pyqtSlot(int, int)
-    def update_total(self, current, layer_count):
+    @pyqtSlot(int, int, str)
+    def update_total(self, current, layer_count, message):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
+        self.statusLabel.setText(message)
 
-    @pyqtSlot(int)
-    def update_value(self, progress):
+    @pyqtSlot(int, int)
+    def update_task(self, progress, max_progress):
+        self.layerProgressBar.setMaximum(max_progress)
         self.layerProgressBar.setValue(progress)
 
-    @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
-    def update_mode(self, _, mode_count):
-        self.layerProgressBar.setMaximum(mode_count)
-        self.layerProgressBar.setValue(0)
-
-    @pyqtSlot(str)
-    def update_job_status(self, status):
-        self.statusLabel.setText(status)
-
     @pyqtSlot()
-    def extentChanged(self):
+    def extent_changed(self):
         extent = self.iface.mapCanvas().extent()
         self.xMinLabel.setText(str(extent.xMinimum()))
         self.xMaxLabel.setText(str(extent.xMaximum()))

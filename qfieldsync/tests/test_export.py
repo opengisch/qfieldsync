@@ -21,15 +21,14 @@
 
 import os
 import shutil
-
-from qfieldsync.tests.utilities import test_data_folder
-from qgis.testing import start_app, unittest
-from qgis.testing.mocked import get_iface
-from qgis.core import QgsProject, QgsRectangle, QgsOfflineEditing, QgsMapLayerRegistry, QgsMessageLog
-from qgis.PyQt.QtCore import QFileInfo, QCoreApplication
 import tempfile
 
-from qfieldsync.utils.export_offline_utils import OfflineConverter
+from qfieldsync.core.offline_converter import OfflineConverter
+from qfieldsync.tests.utilities import test_data_folder
+from qgis.PyQt.QtCore import QFileInfo
+from qgis.core import QgsProject, QgsRectangle, QgsOfflineEditing
+from qgis.testing import start_app, unittest
+from qgis.testing.mocked import get_iface
 
 start_app()
 

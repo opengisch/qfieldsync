@@ -31,36 +31,39 @@ from qgis.PyQt.QtCore import (
     Qt,
     QObject,
     pyqtSignal,
+    pyqtSlot,
     QCoreApplication
 )
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (
     QgsProject,
     QgsMapLayerRegistry,
-    QgsRasterLayer
+    QgsRasterLayer,
+    QgsCubicRasterResampler,
+    QgsBilinearRasterResampler
 )
 
 
 class OfflineConverter(QObject):
     progressStopped = pyqtSignal()
-    layerProgressUpdated = pyqtSignal(int, int)
-    progressModeSet = pyqtSignal('QgsOfflineEditing::ProgressMode', int)
-    progressUpdated = pyqtSignal(int)
-    progressJob = pyqtSignal(str)
-    __offline_layers = list()
-    __convertor_progress = None  # for processing feedback
+    task_progress_updated = pyqtSignal(int, int)
+    total_progress_updated = pyqtSignal(int, int, str)
 
     def __init__(self, project, export_folder, extent, offline_editing):
         super(OfflineConverter, self).__init__(parent=None)
+        self.__max_task_progress = 0
+        self.__offline_layers = list()
+        self.__convertor_progress = None  # for processing feedback
+        self.__layers = list()
+
         self.export_folder = export_folder
         self.extent = extent
         self.offline_editing = offline_editing
         self.project_configuration = ProjectConfiguration(project)
 
-        offline_editing.progressStopped.connect(self.progressStopped)
-        offline_editing.layerProgressUpdated.connect(self.onLayerProgressUpdated)
-        offline_editing.progressModeSet.connect(self.progressModeSet)
-        offline_editing.progressUpdated.connect(self.progressUpdated)
+        offline_editing.layerProgressUpdated.connect(self.on_offline_editing_next_layer)
+        offline_editing.progressModeSet.connect(self.on_offline_editing_max_changed)
+        offline_editing.progressUpdated.connect(self.offline_editing_task_progress)
 
     def convert(self):
         """
@@ -84,9 +87,10 @@ class OfflineConverter(QObject):
 
             QApplication.setOverrideCursor(Qt.WaitCursor)
 
-            layers = QgsMapLayerRegistry.instance().mapLayers().values()
+            self.__offline_layers = list()
+            self.__layers = QgsMapLayerRegistry.instance().mapLayers().values()
 
-            self.progressJob.emit(self.tr('Creating base map'))
+            self.total_progress_updated.emit(0, 1, self.tr('Creating base map'))
             # Create the base map before layers are removed
             if self.project_configuration.create_base_map:
                 if self.project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
@@ -98,10 +102,10 @@ class OfflineConverter(QObject):
                                             self.project_configuration.base_map_tile_size,
                                             self.project_configuration.base_map_mupp)
 
-            self.progressJob.emit(self.tr('Copying layers'))
             # Loop through all layers and copy/remove/offline them
-            self.__offline_layers = list()
-            for layer in layers:
+            for current_layer_index, layer in enumerate(self.__layers):
+                self.total_progress_updated.emit(current_layer_index - len(self.__offline_layers), len(self.__layers),
+                                                 self.tr('Copying layers'))
                 layer_source = LayerSource(layer)
 
                 if layer_source.action == SyncAction.OFFLINE:
@@ -118,7 +122,6 @@ class OfflineConverter(QObject):
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             QgsProject.instance().write(QFileInfo(project_path))
 
-            self.progressJob.emit(self.tr('Copying offline layers'))
             # Run the offline plugin
             spatialite_filename = "data.sqlite"
             if self.__offline_layers:
@@ -126,18 +129,18 @@ class OfflineConverter(QObject):
                 if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
                                                                     offline_layer_ids,
                                                                     self.project_configuration.offline_copy_only_aoi):
-                    self.progressJob.emit(self.tr('Failure'))
                     raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(QFileInfo(project_path))
         finally:
+            # We need to let the app handle events before loading the next project or QGIS will crash with rasters
             QCoreApplication.processEvents()
             QgsProject.instance().read(QFileInfo(backup_project_path))
             QgsProject.instance().setFileName(original_project_path)
             QApplication.restoreOverrideCursor()
 
-        self.progressJob.emit(self.tr('Finished'))
+        self.total_progress_updated.emit(100, 100, self.tr('Finished'))
 
     def createBaseMapLayer(self, map_theme, layer, tile_size, map_units_per_pixel):
         """
@@ -165,17 +168,27 @@ class OfflineConverter(QObject):
 
         out = alg.outputs[0]
         new_layer = QgsRasterLayer(out.value, self.tr('Basemap'))
+
+        resample_filter = new_layer.resampleFilter()
+        resample_filter.setZoomedInResampler(QgsCubicRasterResampler())
+        resample_filter.setZoomedOutResampler(QgsBilinearRasterResampler())
         QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
         layer_tree = QgsProject.instance().layerTreeRoot()
         layer_tree.insertLayer(len(layer_tree.children()), new_layer)
 
-    def onLayerProgressUpdated(self, layer_index, layer_count):
-        print(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(
+    @pyqtSlot(int, int)
+    def on_offline_editing_next_layer(self, layer_index, layer_count):
+        self.total_progress_updated.emit(layer_index, layer_count, self.tr(u'Packaging layer {layer_name}'.format(
             layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
             layer_count=layer_count)))
-        self.progressJob.emit(self.tr('Preparing layer {layer_name} ({layer_index}/{layer_count})'.format(
-            layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
-            layer_count=layer_count)))
+
+    @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
+    def on_offline_editing_max_changed(self, _, mode_count):
+        self.__max_task_progress = mode_count
+
+    @pyqtSlot(int)
+    def offline_editing_task_progress(self, progress):
+        self.task_progress_updated.emit(progress, self.__max_task_progress)
 
     def convertorProcessingProgress(self):
         """
@@ -184,7 +197,7 @@ class OfflineConverter(QObject):
         """
 
         class ConverterProgress(QObject):
-            progressUpdated = pyqtSignal(int, int)
+            progress_updated = pyqtSignal(int, int)
 
             def __init__(self):
                 QObject.__init__(self)
@@ -196,7 +209,8 @@ class OfflineConverter(QObject):
                 pass
 
             def setPercentage(self, i):
-                self.progressUpdated.emit(i, 100)
+                self.progress_updated.emit(i, 100)
+                QCoreApplication.processEvents()
 
             def setInfo(self, msg):
                 pass
@@ -215,6 +229,6 @@ class OfflineConverter(QObject):
 
         if not self.__convertor_progress:
             self.__convertor_progress = ConverterProgress()
-            self.__convertor_progress.progressUpdated.connect(self.layerProgressUpdated)
+            self.__convertor_progress.progress_updated.connect(self.task_progress_updated)
 
         return self.__convertor_progress

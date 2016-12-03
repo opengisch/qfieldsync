@@ -23,7 +23,6 @@ from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber, ParameterRaster
 from processing.core.outputs import OutputRaster
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
-from processing.core.ProcessingLog import ProcessingLog
 
 from qgis.PyQt.QtGui import QImage, QPainter
 from qgis.PyQt.QtCore import QSize
@@ -178,7 +177,7 @@ class TileSet():
             for y in range(self.y_tile_count):
                 cur_tile = x * self.y_tile_count + y
                 num_tiles = self.x_tile_count * self.y_tile_count
-                progress.setPercentage(cur_tile  * 100 / num_tiles)
+                progress.setPercentage(cur_tile * 100 / num_tiles)
                 self.renderTile(x, y)
 
     def renderTile(self, x, y):
