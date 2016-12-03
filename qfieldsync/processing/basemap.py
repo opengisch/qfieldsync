@@ -138,7 +138,7 @@ class TileSet():
         driver = self.getDriverForFile(output)
 
         if not driver:
-            raise GeoAlgorithmExecutionException('Could not load GDAL driver for file {}'.format(output))
+            raise GeoAlgorithmExecutionException(u'Could not load GDAL driver for file {}'.format(output))
 
         crs = map_settings.destinationCrs()
 
@@ -178,7 +178,7 @@ class TileSet():
             for y in range(self.y_tile_count):
                 cur_tile = x * self.y_tile_count + y
                 num_tiles = self.x_tile_count * self.y_tile_count
-                progress.setPercentage(int(cur_tile / num_tiles * 100))
+                progress.setPercentage(cur_tile  * 100 / num_tiles)
                 self.renderTile(x, y)
 
     def renderTile(self, x, y):
@@ -200,9 +200,7 @@ class TileSet():
         painter.end()
 
         with tempfile.NamedTemporaryFile(suffix='.png') as tmpfile:
-            save_result = self.image.save(tmpfile.name)
-
-            ProcessingLog.addToLog('qfieldsync', u'Saving to image {}, result: {}'.format(tmpfile, save_result))
+            self.image.save(tmpfile.name)
 
             src_ds = osgeo.gdal.Open(tmpfile.name)
 
