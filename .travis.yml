@@ -1,34 +1,31 @@
 language: python
-
 dist: trusty
 sudo: true
-
 python:
-  - 2.7
-
+- 2.7
 virtualenv:
   system_site_packages: true
-
 before_install:
-    - sudo apt-get -qq -y update
-
+- sudo apt-get -qq -y update
 install:
-  - printf "deb http://qgis.org/debian trusty main\ndeb-src http://qgis.org/debian trusty main" | sudo tee /etc/apt/sources.list.d/qgis.list
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 073D307A618E5811
-  - sudo apt-get update
-  - sudo apt-get install -y python-qgis python-nose pyqt4-dev-tools qgis
-  - pip install -r requirements.txt
-  - ./scripts/ci/install_qgis2compat.sh
-
+- printf "deb http://qgis.org/debian trusty main\ndeb-src http://qgis.org/debian trusty
+  main" | sudo tee /etc/apt/sources.list.d/qgis.list
+- sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 073D307A618E5811
+- sudo apt-get update
+- sudo apt-get install -y python-qgis python-nose pyqt4-dev-tools qgis
+- pip install -r requirements.txt
+- "./scripts/ci/install_qgis2compat.sh"
 before_script:
-  - export QGIS_PREFIX_PATH=/usr
-  - export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`/qfieldsync:${PYTHONPATH}
-  - echo "PYTHONPATH:" ${PYTHONPATH}
-  - export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
-
+- export QGIS_PREFIX_PATH=/usr
+- export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`/qfieldsync:${PYTHONPATH}
+- echo "PYTHONPATH:" ${PYTHONPATH}
+- export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
 script:
-    - flake8 --jobs=1
-    - xvfb-run nose2
-
+- flake8 --jobs=1
+- xvfb-run nose2
 after_success:
-    - scripts/ci/make_release.sh
+- scripts/ci/make_release.sh
+
+env:
+  matrix:
+    secure: XEdfiLezSXWEqmdPulQmZlnUr24aMopxlvXWCe9kIGmZeEOBNgDymq2kam6pi9pYWZb9YkQzH37Y8jxuLsDV9tGVthF01pI+/CT0yC0U9uyyutMW6Lr2nhO9BqKj6nVQVnT73xZfE+OKZLFijXIs37mhvEYFVKZJ1A3lDwPlUlkDlMcLZ/9PZcyvRhps2/upOdiiJNy3yswe3zVWJ2Qx2p+X9lkaHYXKCwhcwM8TxEECCnjE/vkSN6aQusb/WL1MSO7gkUdHTHgJgOPaKmbzgystJvntUnpqxLGv8rTnA2h5w0Aq1OM/R8rRxt4dXDEKmUsbZVm745IpPgl1cxRVcid+s7mIRh+nY5CBawqjG/iRm37Da2rjKC8HMN+D6YkAkntI076nWRZFz1AXwBnJCdANtY1jAgmNEp69MWsIC+BspehTKJTBDbkrE+DCWSMNg2aqjy4WCXB2OgD6qHeWrV1g5kCVDgw2kcBMjZUJptHSxxUGEwNVnIcs1PzrRePwvCr+wwV0T6VSb8+HVraX3i13muXlf4IxxgbHrr6p6JfV/6IS1upO9T/+SahZaG6oa/mMWJwEbiCzlLxhfTZDo7B2u2/Vk5vkHwXrJJxRQjCg8/CvuqFrFBt6dIq8+kUpsu7LL1GsomvhUJrjJIaQ5vU1BN+t/r01nCxrq1es08Q=
