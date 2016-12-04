@@ -1,35 +1,35 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="ro" version="2.0">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="fi" version="2.0">
 <context>
     <name>BasemapAlgorithm</name>
     <message>
         <location filename="basemap.py" line="86"/>
         <source>Tile size</source>
-        <translation>Dimensiunea plăcuței</translation>
+        <translation>Kuvakkeen koko</translation>
     </message>
     <message>
         <location filename="basemap.py" line="87"/>
         <source>Map units per pixel</source>
-        <translation>Unități de hartă per pixel</translation>
+        <translation>Karttayksiköt per pikseli</translation>
     </message>
     <message>
         <location filename="basemap.py" line="90"/>
         <source>Output layer</source>
-        <translation>Strat de ieșire</translation>
+        <translation>Tulostaso</translation>
     </message>
     <message>
         <location filename="basemap.py" line="78"/>
         <source>Map theme to render.</source>
-        <translation>Tema hărții de randat.</translation>
+        <translation>Karttateema hahmottamiseen.</translation>
     </message>
     <message>
         <location filename="basemap.py" line="80"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
-        <translation>Stratul de randat. Se va utiliza numai în cazul în care tema hărții nu este setată. Atunci când, atât tema hărții, cât și stratul nu sunt setate, va fi randat conținutul hărții curente.</translation>
+        <translation>Hahmotettava taso. Käytetään ainoastaan jos kartan teemaa ei ole asetettu. Jos kumpaakaan, kartan teemaa tai tasoa, ei ole asetettu, nykyisen kartan sisältö hahmotetaan.</translation>
     </message>
     <message>
         <location filename="basemap.py" line="84"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
-        <translation>Extinderea minimă de randat. Va fi extinsă în mod automat, pentru a fi un multiplu al dimensiunilor plăcuțelor.</translation>
+        <translation>Minimi laajuus hahmotettavaksi. Laajennetaan sisäisesti useiden kuvakkeiden kokoon.</translation>
     </message>
 </context>
 <context>
@@ -37,12 +37,12 @@
     <message>
         <location filename="layer.py" line="132"/>
         <source>JPEG2000 layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation>Straturile JPEG2000 nu sunt acceptate de către QField.&lt;br&gt;Le puteți rasteriza ca hartă de bază.</translation>
+        <translation>QField ei tue JPEG2000 tasoja.&lt;br&gt;Voit rasteroida ne peruskartoiksi.</translation>
     </message>
     <message>
         <location filename="layer.py" line="137"/>
         <source>ECW layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation>Straturile ECW nu sunt acceptate de către QField.&lt;br&gt;Le puteți rasteriza ca hartă de bază.</translation>
+        <translation>QField ei tue ECW tasoja.&lt;br&gt;Voit rasteroida ne peruskartoiksi.</translation>
     </message>
 </context>
 <context>
@@ -50,22 +50,22 @@
     <message>
         <location filename="layer.py" line="107"/>
         <source>copy</source>
-        <translation>copiere</translation>
+        <translation>kopio</translation>
     </message>
     <message>
         <location filename="layer.py" line="109"/>
         <source>no action</source>
-        <translation>fără acțiune</translation>
+        <translation>ei toimintoa</translation>
     </message>
     <message>
         <location filename="layer.py" line="112"/>
         <source>offline editing</source>
-        <translation>editare offline</translation>
+        <translation>offline muokkaus</translation>
     </message>
     <message>
         <location filename="layer.py" line="114"/>
         <source>remove</source>
-        <translation>eliminare</translation>
+        <translation>poista</translation>
     </message>
 </context>
 <context>
@@ -73,27 +73,27 @@
     <message>
         <location filename="offline_converter.py" line="93"/>
         <source>Creating base map</source>
-        <translation>Creare hartă de bază</translation>
+        <translation>Luodaan peruskarttaa</translation>
     </message>
     <message>
         <location filename="offline_converter.py" line="107"/>
         <source>Copying layers</source>
-        <translation>Copiere straturi</translation>
+        <translation>Kopioidaan tasoja</translation>
     </message>
     <message>
         <location filename="offline_converter.py" line="132"/>
         <source>Error trying to convert layers to offline layers</source>
-        <translation>A apărut o eroare în încercarea de a converti straturi în straturi offline</translation>
+        <translation>Virhe yritettäessä muuntaa tasot offline tasoiksi</translation>
     </message>
     <message>
         <location filename="offline_converter.py" line="143"/>
         <source>Finished</source>
-        <translation>Definitivat</translation>
+        <translation>Päättynyt</translation>
     </message>
     <message>
         <location filename="offline_converter.py" line="170"/>
         <source>Basemap</source>
-        <translation>Hartă de bază</translation>
+        <translation>Peruskartta</translation>
     </message>
     <message>
         <location filename="offline_converter.py" line="181"/>
@@ -106,12 +106,12 @@
     <message>
         <location filename="package_dialog.py" line="69"/>
         <source>Create</source>
-        <translation>Creare</translation>
+        <translation>Luo</translation>
     </message>
     <message>
         <location filename="package_dialog.py" line="127"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to your QField device.</source>
-        <translation>S-a încheiat crearea proiectului în {result_folder}. Vă rugăm să copiați acest dosar pe dispozitivul pe care se află QField.</translation>
+        <translation>Projektin hakemistossa {result_folder} luonti päättynyt. Ole hyvä ja kopio tämä hakemisto QField laitteeseesi.</translation>
     </message>
 </context>
 <context>
@@ -119,37 +119,37 @@
     <message>
         <location filename="package_dialog.ui" line="14"/>
         <source>Package project for QField</source>
-        <translation>Împachetare proiect pentru QField</translation>
+        <translation>Paketoi projekti QFieldille</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="39"/>
         <source>Progress</source>
-        <translation>Progres</translation>
+        <translation>Edistyminen</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="45"/>
         <source>Total</source>
-        <translation>Total</translation>
+        <translation>Yhteensä</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="59"/>
         <source>Layer</source>
-        <translation>Strat</translation>
+        <translation>Taso</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="92"/>
         <source>Select extent</source>
-        <translation>Selectare extindere</translation>
+        <translation>Valitse laajuus</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Canevasul hărții principale&lt;br/&gt;poate fi deplasat și&lt;br/&gt;transfocat ca de obicei&lt;br/&gt;atât timp cât această fereastră este&lt;br/&gt;deschisă.&lt;br/&gt;Încercați!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Karttapohjaa&lt;br/&gt;voidaan panoroida ja&lt;br/&gt;zoomata kun tavallisesti&lt;br/&gt;kun tämä ikkuna on&lt;br/&gt;avoinna.&lt;br/&gt;Kokeile sitä!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="185"/>
         <source>Export Directory</source>
-        <translation>Directorul de Export</translation>
+        <translation>Lataus (vienti) hakemisto</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="194"/>
@@ -159,17 +159,17 @@
     <message>
         <location filename="package_dialog.ui" line="204"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Project:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Proiect:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Projekti:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="237"/>
         <source>Information</source>
-        <translation>Informaţii</translation>
+        <translation>Tiedot</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="243"/>
         <source>Some layers in this project have not yet been configured. &lt;a href=&quot;configuration&quot;&gt;Configure project now&lt;/a&gt;.</source>
-        <translation>Anumite straturi ale proiectului nu au fost configurate încă. &lt;a href=&quot;configuration&quot;&gt; Configurați proiectul acum&lt;/a&gt;.</translation>
+        <translation>Eräitä tasoja tässä projektissa ei ole konfiguroitu vielä. &lt;a href=&quot;configuration&quot;&gt;Konfiguroi projekti nyt&lt;/a&gt;.</translation>
     </message>
 </context>
 <context>
@@ -177,12 +177,12 @@
     <message>
         <location filename="preferences_dialog_ui5.py" line="54"/>
         <source>QFieldSync preferences</source>
-        <translation>Preferințe QFieldSync</translation>
+        <translation>QFieldSync asetukset</translation>
     </message>
     <message>
         <location filename="preferences_dialog_ui5.py" line="55"/>
         <source>Default Import Directory</source>
-        <translation>Directorul Implicit de Import</translation>
+        <translation>Oletus lataushakemisto (tuonti)</translation>
     </message>
     <message>
         <location filename="preferences_dialog_ui5.py" line="58"/>
@@ -192,7 +192,7 @@
     <message>
         <location filename="preferences_dialog_ui5.py" line="57"/>
         <source>Default Export Directory</source>
-        <translation>Directorul Implicit de Export</translation>
+        <translation>Oletus lataushakemisto (vienti)</translation>
     </message>
 </context>
 <context>
@@ -200,52 +200,52 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="140"/>
         <source>Configure Project for QField synchronisation</source>
-        <translation>Configurare Proiect pentru sincronizarea QField</translation>
+        <translation>Konfiguroi projekti QField synkronointia varten</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="141"/>
         <source>Layers</source>
-        <translation>Straturi</translation>
+        <translation>Tasot</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="150"/>
         <source>Layer</source>
-        <translation>Strat</translation>
+        <translation>Taso</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="145"/>
         <source>Action</source>
-        <translation>Acțiune</translation>
+        <translation>Toiminto</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="158"/>
         <source>Base map</source>
-        <translation>Hartă de bază</translation>
+        <translation>Peruskartta</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="146"/>
         <source>A base map is fully rendered to a raster image. Attributes from layers on a base map are no longer accessible.</source>
-        <translation>O harta de bază este randată complet într-o imagine raster. Între-o hartă de bază nu mai sunt accesibile atributele straturilor.</translation>
+        <translation>Peruskartta on täysin hahmotettu rasterikuvaksi. Peruskartan tasojen attribuutit eivät enää ole käytettävissä.</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="147"/>
         <source>Create base map</source>
-        <translation>Creare hartă de bază</translation>
+        <translation>Luo peruskartta</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="149"/>
         <source>Map Theme</source>
-        <translation>Tema Hărții</translation>
+        <translation>Karttateema</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="151"/>
         <source>Tile Size</source>
-        <translation>Dimensiunea Plăcuței</translation>
+        <translation>Kuvakkeen koko</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="152"/>
         <source>Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile.</source>
-        <translation>Randarea va avea loc în plăcuțe. Acest număr determină lățimea și înălțimea (în pixeli) care vor fi randate per plăcuță..</translation>
+        <translation>Hahmottaminen tapahtuu kuvakkeittain. Tämä numero määrittää leveyden ja korkeyden (pikseleinä)  joihin kukin kuvake hahmotetaan.</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="153"/>
@@ -255,12 +255,12 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="154"/>
         <source>Map Units/Pixel</source>
-        <translation>Unități de Hartă/Pixel</translation>
+        <translation>Karttayksikkö/pikseli</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="155"/>
         <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
-        <translation>Acest lucru determină rezoluția spațială a imaginii hărții rezultate. Depinde de CRS-ul canevasului hărții. Pentru unități de hartă în [m], o valoare de 1 indică faptul că fiecare pixel acoperă o suprafață de 1x1 m, iar o valoare de 1000 echivalează cu 1 pixel pe un kilometru pătrat.</translation>
+        <translation>Tämä määrittelee tuloskartan imagen spatiaalisen resoluution. Se riippuu karttapohjan koordinaattijärjestelmästä. Karttayksiköille [m], arvo 1 tarkoittaa yhden pikselin tarkoittavan aluetta 1x1m, arvo 1000 tarkoittaa 1 pikselin esittävän neliökilometriä.</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="156"/>
@@ -270,17 +270,17 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="157"/>
         <source>Single Layer</source>
-        <translation>Strat Singular</translation>
+        <translation>Yksittäinen taso</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="160"/>
         <source>Offline editing</source>
-        <translation>Editare offline</translation>
+        <translation>Offline muokkaus</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="159"/>
         <source>Only copy features in area of interest</source>
-        <translation>Se copie doar entitățile din zona de interes</translation>
+        <translation>Kopioi ominaisuudet ainoastaan kiinnostuksesi alueelta</translation>
     </message>
 </context>
 <context>
@@ -293,22 +293,22 @@
     <message>
         <location filename="qfield_sync.py" line="208"/>
         <source>Project Configuration</source>
-        <translation>Configurare Proiect</translation>
+        <translation>Projektin konfiguraatio</translation>
     </message>
     <message>
         <location filename="qfield_sync.py" line="196"/>
         <source>Package for QField</source>
-        <translation>Pachet pentru QField</translation>
+        <translation>Paketti QFieldiin</translation>
     </message>
     <message>
         <location filename="qfield_sync.py" line="202"/>
         <source>Synchronize from QField</source>
-        <translation>Sincronizare din QField</translation>
+        <translation>Synkronoi QFieldistä</translation>
     </message>
     <message>
         <location filename="qfield_sync.py" line="216"/>
         <source>Preferences</source>
-        <translation>Preferințe</translation>
+        <translation>Asetukset</translation>
     </message>
 </context>
 <context>
@@ -316,22 +316,22 @@
     <message>
         <location filename="synchronize_dialog.ui" line="47"/>
         <source>Progress</source>
-        <translation>Progres</translation>
+        <translation>Edistyminen</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="53"/>
         <source>Total</source>
-        <translation>Total</translation>
+        <translation>Yhteensä</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="67"/>
         <source>Layer</source>
-        <translation>Strat</translation>
+        <translation>Taso</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="14"/>
         <source>Synchronize project</source>
-        <translation>Sincronizare proiect</translation>
+        <translation>Synkronoi projekti</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="20"/>
@@ -349,12 +349,12 @@
     <message>
         <location filename="synchronize_dialog.py" line="49"/>
         <source>Synchronize</source>
-        <translation>Sincronizare</translation>
+        <translation>Synkronoi</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.py" line="71"/>
         <source>The project you imported does not seem to be an offline project</source>
-        <translation>Proiectul importat nu pare a fi un proiect offline</translation>
+        <translation>Projekti jonka latasit ei näytä olevan offline projekti</translation>
     </message>
 </context>
 </TS>

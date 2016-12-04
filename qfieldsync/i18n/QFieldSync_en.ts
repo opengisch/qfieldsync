@@ -1,32 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS><TS version="2.0">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="test_translations.py" line="48"/>
-        <source>Good morning</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>BasemapAlgorithm</name>
     <message>
-        <location filename="basemap.py" line="82"/>
+        <location filename="basemap.py" line="86"/>
         <source>Tile size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="basemap.py" line="83"/>
+        <location filename="basemap.py" line="87"/>
         <source>Map units per pixel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="basemap.py" line="86"/>
+        <location filename="basemap.py" line="90"/>
         <source>Output layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="basemap.py" line="79"/>
+        <location filename="basemap.py" line="78"/>
         <source>Map theme to render.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -36,7 +28,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="basemap.py" line="81"/>
+        <location filename="basemap.py" line="84"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -44,12 +36,12 @@
 <context>
     <name>DataSourceWarning</name>
     <message>
-        <location filename="layer.py" line="135"/>
+        <location filename="layer.py" line="132"/>
         <source>JPEG2000 layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="layer.py" line="138"/>
+        <location filename="layer.py" line="137"/>
         <source>ECW layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -57,22 +49,22 @@
 <context>
     <name>LayerAction</name>
     <message>
-        <location filename="layer.py" line="110"/>
+        <location filename="layer.py" line="107"/>
         <source>copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="layer.py" line="112"/>
+        <location filename="layer.py" line="109"/>
         <source>no action</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="layer.py" line="115"/>
+        <location filename="layer.py" line="112"/>
         <source>offline editing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="layer.py" line="117"/>
+        <location filename="layer.py" line="114"/>
         <source>remove</source>
         <translation type="unfinished"></translation>
     </message>
@@ -80,55 +72,45 @@
 <context>
     <name>OfflineConverter</name>
     <message>
-        <location filename="export_offline_utils.py" line="68"/>
+        <location filename="offline_converter.py" line="93"/>
         <source>Creating base map</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="export_offline_utils.py" line="76"/>
+        <location filename="offline_converter.py" line="107"/>
         <source>Copying layers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="export_offline_utils.py" line="96"/>
-        <source>Copying offline layers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="export_offline_utils.py" line="103"/>
-        <source>Failure</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="export_offline_utils.py" line="104"/>
+        <location filename="offline_converter.py" line="132"/>
         <source>Error trying to convert layers to offline layers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="export_offline_utils.py" line="117"/>
+        <location filename="offline_converter.py" line="143"/>
         <source>Finished</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="export_offline_utils.py" line="144"/>
+        <location filename="offline_converter.py" line="170"/>
         <source>Basemap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="export_offline_utils.py" line="153"/>
-        <source>Preparing layer {layer_name} ({layer_index}/{layer_count})</source>
+        <location filename="offline_converter.py" line="181"/>
+        <source>Packaging layer {layer_name}</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>PackageDialog</name>
     <message>
-        <location filename="package_dialog.py" line="75"/>
+        <location filename="package_dialog.py" line="69"/>
         <source>Create</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="package_dialog.py" line="134"/>
+        <location filename="package_dialog.py" line="127"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to your QField device.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -305,43 +287,33 @@
 <context>
     <name>QFieldSync</name>
     <message>
-        <location filename="qfield_sync.py" line="230"/>
+        <location filename="qfield_sync.py" line="231"/>
         <source>&amp;QFieldSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="207"/>
+        <location filename="qfield_sync.py" line="208"/>
         <source>Project Configuration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="195"/>
+        <location filename="qfield_sync.py" line="196"/>
         <source>Package for QField</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="201"/>
+        <location filename="qfield_sync.py" line="202"/>
         <source>Synchronize from QField</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="215"/>
+        <location filename="qfield_sync.py" line="216"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QFieldSynchronizeBase</name>
-    <message>
-        <location filename="synchronize_dialog.ui" line="20"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the directory containing the&lt;/p&gt;&lt;p&gt;QField project file:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="synchronize_dialog.ui" line="35"/>
-        <source>Browse</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="synchronize_dialog.ui" line="47"/>
         <source>Progress</source>
@@ -362,6 +334,16 @@
         <source>Synchronize project</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="synchronize_dialog.ui" line="20"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the QField project folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="synchronize_dialog.ui" line="35"/>
+        <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SynchronizeDialog</name>
@@ -371,7 +353,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="synchronize_dialog.py" line="72"/>
+        <location filename="synchronize_dialog.py" line="71"/>
         <source>The project you imported does not seem to be an offline project</source>
         <translation type="unfinished"></translation>
     </message>
