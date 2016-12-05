@@ -28,7 +28,8 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.core import (
     QgsMapLayerRegistry,
-    QgsProject
+    QgsProject,
+    QgsMapLayerProxyModel
 )
 from ..utils.qt_utils import get_ui_class
 
@@ -47,6 +48,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
 
         self.accepted.connect(self.onAccepted)
         self.project = QgsProject.instance()
+        self.__project_configuration = ProjectConfiguration(self.project)
 
         self.setupUi(self)
 
@@ -85,20 +87,22 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         for theme in self.project.mapThemeCollection().mapThemes():
             self.mapThemeComboBox.addItem(theme)
 
-        self.project_configuration = ProjectConfiguration(self.project)
-        self.createBaseMapGroupBox.setChecked(self.project_configuration.create_base_map)
+        self.layerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
 
-        if self.project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
+        self.__project_configuration = ProjectConfiguration(self.project)
+        self.createBaseMapGroupBox.setChecked(self.__project_configuration.create_base_map)
+
+        if self.__project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
             self.singleLayerRadioButton.setChecked(True)
         else:
             self.mapThemeRadioButton.setChecked(True)
 
-        self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(self.project_configuration.base_map_theme))
-        layer = QgsMapLayerRegistry.instance().mapLayer(self.project_configuration.base_map_layer)
+        self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme))
+        layer = QgsMapLayerRegistry.instance().mapLayer(self.__project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
-        self.mapUnitsPerPixel.setText(str(self.project_configuration.base_map_mupp))
-        self.tileSize.setText(str(self.project_configuration.base_map_tile_size))
-        self.onlyOfflineCopyFeaturesInAoi.setChecked(self.project_configuration.offline_copy_only_aoi)
+        self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
+        self.tileSize.setText(str(self.__project_configuration.base_map_tile_size))
+        self.onlyOfflineCopyFeaturesInAoi.setChecked(self.__project_configuration.offline_copy_only_aoi)
 
     def onAccepted(self):
         """
@@ -116,21 +120,21 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
 
             layer_source.apply()
 
-        self.project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
-        self.project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
+        self.__project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
+        self.__project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
         try:
-            self.project_configuration.base_map_layer = self.layerComboBox.currentLayer().id()
+            self.__project_configuration.base_map_layer = self.layerComboBox.currentLayer().id()
         except AttributeError:
             pass
         if self.singleLayerRadioButton.isChecked():
-            self.project_configuration.base_map_type = ProjectProperties.BaseMapType.SINGLE_LAYER
+            self.__project_configuration.base_map_type = ProjectProperties.BaseMapType.SINGLE_LAYER
         else:
-            self.project_configuration.base_map_type = ProjectProperties.BaseMapType.MAP_THEME
+            self.__project_configuration.base_map_type = ProjectProperties.BaseMapType.MAP_THEME
 
-        self.project_configuration.base_map_mupp = float(self.mapUnitsPerPixel.text())
-        self.project_configuration.base_map_tile_size = int(self.tileSize.text())
+        self.__project_configuration.base_map_mupp = float(self.mapUnitsPerPixel.text())
+        self.__project_configuration.base_map_tile_size = int(self.tileSize.text())
 
-        self.project_configuration.offline_copy_only_aoi = self.onlyOfflineCopyFeaturesInAoi.isChecked()
+        self.__project_configuration.offline_copy_only_aoi = self.onlyOfflineCopyFeaturesInAoi.isChecked()
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():
