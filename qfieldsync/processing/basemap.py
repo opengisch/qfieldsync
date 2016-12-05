@@ -23,6 +23,7 @@ from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber, ParameterRaster
 from processing.core.outputs import OutputRaster
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
+from qfieldsync.core import Preferences
 
 from qgis.PyQt.QtGui import QImage, QPainter
 from qgis.PyQt.QtCore import QSize
@@ -198,7 +199,10 @@ class TileSet():
         job.renderSynchronously()
         painter.end()
 
-        with tempfile.NamedTemporaryFile(suffix='.png') as tmpfile:
+        temp_folder = Preferences().temporary_files_directory
+        with tempfile.NamedTemporaryFile(suffix='.png',
+                                         dir=temp_folder,
+                                         delete=temp_folder is None) as tmpfile:
             self.image.save(tmpfile.name)
 
             src_ds = osgeo.gdal.Open(tmpfile.name)

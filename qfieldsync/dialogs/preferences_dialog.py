@@ -44,6 +44,7 @@ class PreferencesDialog(QDialog, FORM_CLASS):
         self.export_directory.setText(self.preferences.export_directory)
         self.import_directory_button.clicked.connect(make_folder_selector(self.import_directory))
         self.export_directory_button.clicked.connect(make_folder_selector(self.export_directory))
+        self.temporary_files_directory_button.clicked.connect(make_folder_selector(self.temporary_files_directory))
 
         self.accepted.connect(self.save_settings)
 
@@ -51,4 +52,5 @@ class PreferencesDialog(QDialog, FORM_CLASS):
     def save_settings(self):
         self.preferences.import_directory = self.import_directory.text()
         self.preferences.export_directory = self.export_directory.text()
+        self.preferences.temporary_files_directory = self.temporary_files_directory.text()
         self.close()

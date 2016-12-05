@@ -19,16 +19,16 @@ email=info@opengis.ch
 # Recommended items:
 
 changelog=
-Release 0.8.17
---------------
-* Allow using raster layers as basemap
+    Release 0.8.17
+    --------------
+    * Allow using raster layers as basemap
 
-Initial release
----------------
-* Allow syncing from QField to QGIS
-* Use qgis2compat plugin
-* Show syncing errors
-* Allow syncing from QGIS to QField
+    Initial release
+    ---------------
+    * Allow syncing from QField to QGIS
+    * Use qgis2compat plugin
+    * Show syncing errors
+    * Allow syncing from QGIS to QField
 
 # Tags are comma separated with spaces allowed
 tags=QField, Android, Synchronization, Offline, qfieldsync

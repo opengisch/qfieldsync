@@ -10,6 +10,7 @@ MSG_DURATION_SECS = 10
 class Preferences(object):
     __EXPORT_DIRECTORY_SETTING = "QFieldSync/exportDirectory"
     __IMPORT_DIRECTORY_SETTING = "QFieldSync/importDirectory"
+    __TEMP_DIRECTORY_SETTING = "QFieldSync/tempDirectory"
 
     @property
     def export_directory(self):
@@ -25,5 +26,15 @@ class Preferences(object):
 
     @import_directory.setter
     def import_directory(self, value):
-        print('setting new directory import')
         QSettings().setValue(self.__IMPORT_DIRECTORY_SETTING, value)
+
+    @property
+    def temporary_files_directory(self):
+        return QSettings().value(self.__TEMP_DIRECTORY_SETTING)
+
+    @temporary_files_directory.setter
+    def temporary_files_directory(self, value):
+        if value:
+            QSettings().setValue(self.__TEMP_DIRECTORY_SETTING, value)
+        else:
+            QSettings().setValue(self.__TEMP_DIRECTORY_SETTING, None)
