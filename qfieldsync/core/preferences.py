@@ -38,4 +38,3 @@ class Preferences(object):
             QSettings().setValue(self.__TEMP_DIRECTORY_SETTING, value)
         else:
             QSettings().setValue(self.__TEMP_DIRECTORY_SETTING, None)
-
