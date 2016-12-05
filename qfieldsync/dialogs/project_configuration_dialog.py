@@ -97,7 +97,8 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         else:
             self.mapThemeRadioButton.setChecked(True)
 
-        self.mapThemeComboBox.setCurrentIndex(self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme))
+        self.mapThemeComboBox.setCurrentIndex(
+            self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme))
         layer = QgsMapLayerRegistry.instance().mapLayer(self.__project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
         self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
