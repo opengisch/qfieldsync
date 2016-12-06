@@ -23,7 +23,6 @@ from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber, ParameterRaster
 from processing.core.outputs import OutputRaster
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
-from qfieldsync.core import Preferences
 
 from qgis.PyQt.QtGui import QImage, QPainter
 from qgis.PyQt.QtCore import QSize
@@ -198,7 +197,6 @@ class TileSet():
         job = QgsMapRendererCustomPainterJob(self.settings, painter)
         job.renderSynchronously()
         painter.end()
-
 
         # Needs not to be deleted or Windows will kill it too early...
         tmpfile = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
