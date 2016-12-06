@@ -199,16 +199,19 @@ class TileSet():
         job.renderSynchronously()
         painter.end()
 
-        temp_folder = Preferences().temporary_files_directory
-        with tempfile.NamedTemporaryFile(suffix='.png',
-                                         dir=temp_folder,
-                                         delete=temp_folder is None) as tmpfile:
+
+        # Needs not to be deleted or Windows will kill it too early...
+        tmpfile = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        try:
             self.image.save(tmpfile.name)
 
             src_ds = osgeo.gdal.Open(tmpfile.name)
 
             self.dataset.WriteRaster(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size,
                                      src_ds.ReadRaster(0, 0, self.tile_size, self.tile_size))
+        finally:
+            tmpfile.close()
+            os.unlink(tmpfile.name)
 
     def getDriverForFile(self, filename):
         """

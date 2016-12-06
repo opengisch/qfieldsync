@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_QFieldPreferencesBase(object):
     def setupUi(self, QFieldPreferencesBase):
         QFieldPreferencesBase.setObjectName(_fromUtf8("QFieldPreferencesBase"))
-        QFieldPreferencesBase.resize(481, 299)
+        QFieldPreferencesBase.resize(285, 190)
         self.verticalLayout = QtGui.QVBoxLayout(QFieldPreferencesBase)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label_3 = QtGui.QLabel(QFieldPreferencesBase)
@@ -52,18 +52,6 @@ class Ui_QFieldPreferencesBase(object):
         self.export_directory_button.setObjectName(_fromUtf8("export_directory_button"))
         self.horizontalLayout.addWidget(self.export_directory_button)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.label_2 = QtGui.QLabel(QFieldPreferencesBase)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.verticalLayout.addWidget(self.label_2)
-        self.horizontalLayout_3 = QtGui.QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.temporary_files_directory = QtGui.QLineEdit(QFieldPreferencesBase)
-        self.temporary_files_directory.setObjectName(_fromUtf8("temporary_files_directory"))
-        self.horizontalLayout_3.addWidget(self.temporary_files_directory)
-        self.temporary_files_directory_button = QtGui.QToolButton(QFieldPreferencesBase)
-        self.temporary_files_directory_button.setObjectName(_fromUtf8("temporary_files_directory_button"))
-        self.horizontalLayout_3.addWidget(self.temporary_files_directory_button)
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.button_box = QtGui.QDialogButtonBox(QFieldPreferencesBase)
         self.button_box.setOrientation(QtCore.Qt.Horizontal)
         self.button_box.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
@@ -77,11 +65,8 @@ class Ui_QFieldPreferencesBase(object):
 
     def retranslateUi(self, QFieldPreferencesBase):
         QFieldPreferencesBase.setWindowTitle(_translate("QFieldPreferencesBase", "QFieldSync preferences", None))
-        self.label_3.setText(_translate("QFieldPreferencesBase", "Default import directory", None))
+        self.label_3.setText(_translate("QFieldPreferencesBase", "Default Import Directory", None))
         self.import_directory_button.setText(_translate("QFieldPreferencesBase", "...", None))
-        self.label.setText(_translate("QFieldPreferencesBase", "Default export directory", None))
+        self.label.setText(_translate("QFieldPreferencesBase", "Default Export Directory", None))
         self.export_directory_button.setText(_translate("QFieldPreferencesBase", "...", None))
-        self.label_2.setText(_translate("QFieldPreferencesBase", "Temporary files directory", None))
-        self.temporary_files_directory.setPlaceholderText(_translate("QFieldPreferencesBase", "[Leave empty to let QFieldSync choose one for you]", None))
-        self.temporary_files_directory_button.setText(_translate("QFieldPreferencesBase", "...", None))
 
