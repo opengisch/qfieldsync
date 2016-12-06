@@ -10,8 +10,11 @@ if [ "$METADATA_VERSION" != "${TRAVIS_TAG}" ]; then
   exit -1
 fi
 
-pushd qfieldsync
-make package VERSION=${TRAVIS_TAG}
-popd
+# PLUGIN_NAME=$(echo $TRAVIS_REPO_SLUG | cut -d'/' -f 2)
+PLUGIN_NAME=qfieldsync
 
-./scripts/plugin_upload.py -u "${OSGEO_USERNAME}" -w "${OSGEO_PASSWORD}" qfieldsync/qfieldsync.zip
+echo -e " \e[33mExporting plugin version ${TRAVIS_TAG} from folder ${PLUGIN_NAME}"
+git archive --prefix=${PLUGIN_NAME}/ -o package.zip ${TRAVIS_TAG}:${PLUGIN_NAME}
+
+echo -e " \e[33mUploading plugin as ${OSGEO_USERNAME}"
+./scripts/plugin_upload.py -u "${OSGEO_USERNAME}" -w "${OSGEO_PASSWORD}" package.zip

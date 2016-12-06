@@ -118,6 +118,7 @@ ENV/
 .idea/tasks.xml
 .idea/dictionaries
 /qfieldsync/qfieldsync.zip
+/package.zip
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
 

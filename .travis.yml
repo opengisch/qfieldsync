@@ -30,5 +30,6 @@ env:
   global:
     - OSGEO_USERNAME=mkuhn
     # Inject OSGEO_PASSWORD matching the OSGEO_USERNAME
-    # Generate with `travis encrypt OSGEO_PASSWORD='Your super secret password!'`
-    - secure: az6wOL9x75dW3n/h/+8T/6yq2di7AjLF/GKtGE1pdRDa8qVbN0xMhSdewP3BXtisUIktPrzgYmNZFjMKf/0owSPcZQ4cAOZhqACOnmz+occ7N3JeCaI92eHy2XR9d/kKOgmu1uUREc32lV9Umw/4fj2FEKNwliZ7eK8PrUa6aLkw9ffret+V8jxsaQCOHqLtGd7n2MN28dihaTuabj8JWZPe5Oab/ZnfUuisdoxtof0eCSqmfN9w8hIm4njIc1dzOG0Na1q/5lK3TLMd0GMAp6eNgT1oBW8l3onPwI06a8MyU/CVP4x/lH0Do+Icnwgcql/TcavP0jQkmflsR/sPPfbNjf7Kz8bMzO1bM/oM7+njBF3VVynVq8Auy4RJ+g/PJXDYEBcnFvswjOiA51z8ONWK/+lPcCVVfR8z+rhcmqkbb8ru04syMZtNMORdKaM6/1aPhCEUOouJpqIJ7vYpQZqDvlt2YaqvUO/LZ3IHrai896ih2QoupS5Wk+wBbg6DksQG4spUWrJ5ePzykgQh567K2dTJvstGwfBSrTDTWRLfvdMbg4YrNA6UFc4gu0gD51I+0NLn9H7XDHEv1RhSY7GS2qZ+sXTbnMgg+XTzFV/FbhfNDIrmM8gNcfG9jrlacn/+xOZYsBTWsXvq26qausXK6RpYsUYfBn5c6UvqQBQ=
+    # Generate with the following command for proper special characters support
+    #     travis encrypt OSGEO_PASSWORD=\''Your super secret password!'\'
+    - secure: "bYNQfxCT3n7D6fj4hf/FZTJ7chMrah1maVHdlgIY5/f/S7IETL7TXSvxS8oRid5eeIACab560xQTK9uEKFdiOAAzNk3Y9GoauAlATtpRD3NCk7guqMhJgRmpTtkAuZ0FcYHOwGLNQQBlMmYf71Ys2/i4oNAH+7A14G6eQfGeiHVpOBxjhKfa/Z/PLGNDA4hbLhcRA2wQcGiWc6t3xiO4ln+jl/h1pUMbaFfYu3SCqiIRYtztMkgoQZGUSp7NB13YC2xzB8MO1Qy1/xNNioisxz9dgpEdLpuByjdqVfT+bBsm0M6XlPzxPFDUWrFzMefZqJlpXDgWUzYq6A+LP7d9+1fl1HE4PY+5M1nt0xWUlvRsJhcC/2gaOs/GpJiffm3vJgvJhuSxr23jJQcd5ZfjYVxFnXHvFFLjCqgIF/V0TBlOroNJ00hQerlAHkz5JTnXHJpsxCe74FCBUsrQMg/++HRTVANLtlUGp2OtYoeY6CYmcla5LEAI5mcB1xnoa9/GfjWMhIyJT5noGBeaACdqPdEgajDgnfa/UpfknRJJ7rFkHmH0ND6m20Kjma6LKZgPgkaqEMcHqUSNv5BbpB2f42jTSR+RUJNez7EfnG/VMeL5UKbL42gkKG+zRvAG5q2G3th9xP+WBLcFH3EBlhzjIGd9k7ceJr1xLDpXYR+o/h0="
