@@ -4,13 +4,5 @@ host = https://www.transifex.com
 [qfieldsync.QFieldSync]
 source_file = i18n/QFieldSync_en.ts
 source_lang = en
-trans.de = i18n/QFieldSync_de.ts
-trans.ro = i18n/QFieldSync_ro.ts
-trans.gl = i18n/QFieldSync_gl.ts
-trans.fr = i18n/QFieldSync_fr.ts
-trans.fi = i18n/QFieldSync_fi.ts
-trans.hu = i18n/QFieldSync_hu.ts
-trans.gl = i18n/QFieldSync_gl.ts
-trans.it = i18n/QFieldSync_it.ts
-trans.es = i18n/QFieldSync_es.ts
+file_filter = i18n/QFieldSync_<lang>.ts
 type = QT

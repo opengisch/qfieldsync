@@ -3,32 +3,32 @@
 <context>
     <name>BasemapAlgorithm</name>
     <message>
-        <location filename="basemap.py" line="86"/>
+        <location filename="basemap.py" line="87"/>
         <source>Tile size</source>
         <translation>Tamaño do mosaico</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="87"/>
+        <location filename="basemap.py" line="88"/>
         <source>Map units per pixel</source>
         <translation>Unidades de mapa por píxel</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="90"/>
+        <location filename="basemap.py" line="91"/>
         <source>Output layer</source>
         <translation>Capa de saída</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="78"/>
+        <location filename="basemap.py" line="79"/>
         <source>Map theme to render.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="basemap.py" line="80"/>
+        <location filename="basemap.py" line="81"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="basemap.py" line="84"/>
+        <location filename="basemap.py" line="85"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
         <translation type="unfinished"></translation>
     </message>

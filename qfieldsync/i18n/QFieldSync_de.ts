@@ -3,32 +3,32 @@
 <context>
     <name>BasemapAlgorithm</name>
     <message>
-        <location filename="basemap.py" line="86"/>
+        <location filename="basemap.py" line="87"/>
         <source>Tile size</source>
         <translation>Kachelgrösse</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="87"/>
+        <location filename="basemap.py" line="88"/>
         <source>Map units per pixel</source>
         <translation>Karteneinheiten pro Pixel</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="90"/>
+        <location filename="basemap.py" line="91"/>
         <source>Output layer</source>
         <translation>Ausgabelayer</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="78"/>
+        <location filename="basemap.py" line="79"/>
         <source>Map theme to render.</source>
         <translation>Darzustellendes Kartenthema.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="80"/>
+        <location filename="basemap.py" line="81"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
         <translation>Darzustellender Layer. Wird nur benutzt, falls das Kartenthema nicht gesetzt ist. Falls beide (Kartenthema und Layer) nicht gesetzt sind, wird die momentan sichtbare Karte dargestellt.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="84"/>
+        <location filename="basemap.py" line="85"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
         <translation>Der minimale Bereich der gezeichnet werden soll. Wird intern auf ein Vielfaches der Kachelgrösse ausgedehnt.</translation>
     </message>
@@ -99,7 +99,7 @@
     <message>
         <location filename="offline_converter.py" line="181"/>
         <source>Packaging layer {layer_name}</source>
-        <translation type="unfinished"></translation>
+        <translation>Layer wird verpackt {layer_name}</translation>
     </message>
 </context>
 <context>
@@ -337,12 +337,12 @@
     <message>
         <location filename="synchronize_dialog.ui" line="20"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the QField project folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Den QField Projektordner auswählen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="35"/>
         <source>...</source>
-        <translation type="unfinished">...</translation>
+        <translation>...</translation>
     </message>
 </context>
 <context>

@@ -3,32 +3,32 @@
 <context>
     <name>BasemapAlgorithm</name>
     <message>
-        <location filename="basemap.py" line="86"/>
+        <location filename="basemap.py" line="87"/>
         <source>Tile size</source>
         <translation>Taille de tuile</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="87"/>
+        <location filename="basemap.py" line="88"/>
         <source>Map units per pixel</source>
         <translation>Unités de carte par pixel</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="90"/>
+        <location filename="basemap.py" line="91"/>
         <source>Output layer</source>
         <translation>Couche de sortie</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="78"/>
+        <location filename="basemap.py" line="79"/>
         <source>Map theme to render.</source>
         <translation>Rendu depuis un réglage de visibilité.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="80"/>
+        <location filename="basemap.py" line="81"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
         <translation>Rendu depuis une couche. Cette couche sera utilisé si aucun réglage de visibilité n&apos;est paramétré. Si le réglage de visibilité et la couche ne sont pas choisi, la carte actuelle sera utilisé.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="84"/>
+        <location filename="basemap.py" line="85"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
         <translation>La taille mininimale du rendu. Cette mesure sera ajusté par le logiciel pour être un multiple de la taille de tuile.</translation>
     </message>
