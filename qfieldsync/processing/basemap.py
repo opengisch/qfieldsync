@@ -207,6 +207,7 @@ class TileSet():
 
             self.dataset.WriteRaster(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size,
                                      src_ds.ReadRaster(0, 0, self.tile_size, self.tile_size))
+            del src_ds
         finally:
             tmpfile.close()
             os.unlink(tmpfile.name)
