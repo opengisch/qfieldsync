@@ -63,13 +63,19 @@ class QFieldProcessingProvider(AlgorithmProvider):
         AlgorithmProvider.unload(self)
         # ProcessingConfig.removeSetting(QFieldProcessingProvider.MY_DUMMY_SETTING)
 
-    def getName(self):
+    def name(self):
         """This is the name that will appear on the toolbox group.
 
         It is also used to create the command line name of all the
         algorithms from this provider.
         """
         return 'QFieldSync'
+
+    def id(self):
+        return 'qfieldsync'
+
+    def getName(self):
+        return self.name()
 
     def getDescription(self):
         """This is the provired full name.
