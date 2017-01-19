@@ -27,7 +27,6 @@ import processing
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties, ProjectConfiguration
 from qgis.PyQt.QtCore import (
-    QFileInfo,
     Qt,
     QObject,
     pyqtSignal,
@@ -37,7 +36,6 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (
     QgsProject,
-    QgsMapLayerRegistry,
     QgsRasterLayer,
     QgsCubicRasterResampler,
     QgsBilinearRasterResampler
@@ -73,13 +71,15 @@ class OfflineConverter(QObject):
         :param export_folder:   The folder to export to
         """
 
-        original_project_path = QgsProject.instance().fileName()
+        project = QgsProject.instance()
+
+        original_project_path = project.fileName()
         project_filename, _ = os.path.splitext(os.path.basename(original_project_path))
 
         # Write a backup of the current project to a temporary file
         project_backup_folder = tempfile.mkdtemp()
         backup_project_path = os.path.join(project_backup_folder, project_filename + '.qgs')
-        QgsProject.instance().write(QFileInfo(backup_project_path))
+        QgsProject.instance().write(backup_project_path)
 
         try:
             if not os.path.exists(self.export_folder):
@@ -88,7 +88,7 @@ class OfflineConverter(QObject):
             QApplication.setOverrideCursor(Qt.WaitCursor)
 
             self.__offline_layers = list()
-            self.__layers = QgsMapLayerRegistry.instance().mapLayers().values()
+            self.__layers = project.mapLayers().values()
 
             self.total_progress_updated.emit(0, 1, self.tr('Creating base map'))
             # Create the base map before layers are removed
@@ -115,12 +115,12 @@ class OfflineConverter(QObject):
                 elif layer_source.action == SyncAction.NO_ACTION:
                     layer_source.copy(self.export_folder)
                 elif layer_source.action == SyncAction.REMOVE:
-                    QgsMapLayerRegistry.instance().removeMapLayer(layer)
+                    project.removeMapLayer(layer)
 
             project_path = os.path.join(self.export_folder, project_filename + "_qfield.qgs")
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
-            QgsProject.instance().write(QFileInfo(project_path))
+            QgsProject.instance().write(project_path)
 
             # Run the offline plugin
             spatialite_filename = "data.sqlite"
@@ -132,11 +132,11 @@ class OfflineConverter(QObject):
                     raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             # Now we have a project state which can be saved as offline project
-            QgsProject.instance().write(QFileInfo(project_path))
+            QgsProject.instance().write(project_path)
         finally:
             # We need to let the app handle events before loading the next project or QGIS will crash with rasters
             QCoreApplication.processEvents()
-            QgsProject.instance().read(QFileInfo(backup_project_path))
+            QgsProject.instance().read(backup_project_path)
             QgsProject.instance().setFileName(original_project_path)
             QApplication.restoreOverrideCursor()
 
@@ -172,7 +172,7 @@ class OfflineConverter(QObject):
         resample_filter = new_layer.resampleFilter()
         resample_filter.setZoomedInResampler(QgsCubicRasterResampler())
         resample_filter.setZoomedOutResampler(QgsBilinearRasterResampler())
-        QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
+        self.project_configuration.project.addMapLayer(new_layer, False)
         layer_tree = QgsProject.instance().layerTreeRoot()
         layer_tree.insertLayer(len(layer_tree.children()), new_layer)
 

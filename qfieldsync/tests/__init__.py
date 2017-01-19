@@ -38,4 +38,4 @@ def debug_log_message(message, tag, level):
     print('{}({}): {}'.format(tag, level, message))
 
 
-QgsMessageLog.instance().messageReceived.connect(debug_log_message)
+QgsApplication.instance().messageLog().messageReceived.connect(debug_log_message)

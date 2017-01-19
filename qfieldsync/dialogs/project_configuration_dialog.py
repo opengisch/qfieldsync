@@ -27,7 +27,6 @@ from qgis.PyQt.QtWidgets import (
     QComboBox
 )
 from qgis.core import (
-    QgsMapLayerRegistry,
     QgsProject,
     QgsMapLayerProxyModel
 )
@@ -62,7 +61,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         """
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+        for layer in self.project.mapLayers().values():
             layer_source = LayerSource(layer)
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
@@ -99,7 +98,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
 
         self.mapThemeComboBox.setCurrentIndex(
             self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme))
-        layer = QgsMapLayerRegistry.instance().mapLayer(self.__project_configuration.base_map_layer)
+        layer = self.project.mapLayer(self.__project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
         self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
         self.tileSize.setText(str(self.__project_configuration.base_map_tile_size))
