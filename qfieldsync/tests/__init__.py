@@ -31,7 +31,7 @@ try:
 except ImportError:
     pass
 
-from qgis.core import QgsMessageLog
+from qgis.core import QgsApplication
 
 
 def debug_log_message(message, tag, level):
