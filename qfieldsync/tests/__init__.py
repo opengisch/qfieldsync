@@ -30,12 +30,3 @@ try:
     import qgis2compat.apicompat  # NOQA
 except ImportError:
     pass
-
-from qgis.core import QgsApplication
-
-
-def debug_log_message(message, tag, level):
-    print('{}({}): {}'.format(tag, level, message))
-
-
-QgsApplication.instance().messageLog().messageReceived.connect(debug_log_message)
