@@ -136,6 +136,8 @@ class OfflineConverter(QObject):
         finally:
             # We need to let the app handle events before loading the next project or QGIS will crash with rasters
             QCoreApplication.processEvents()
+            QgsProject.instance().clear()
+            QCoreApplication.processEvents()
             QgsProject.instance().read(backup_project_path)
             QgsProject.instance().setFileName(original_project_path)
             QApplication.restoreOverrideCursor()
