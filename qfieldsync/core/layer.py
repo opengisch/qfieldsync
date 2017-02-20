@@ -172,8 +172,8 @@ class LayerSource(object):
                     if os.path.exists(os.path.join(source_path, basename + ext)):
                         shutil.copy(os.path.join(source_path, basename + ext),
                                     os.path.join(target_path, basename + ext))
-                uri.setDatabase(file_name)
-                self._change_data_source(os.path.join(target_path, uri.uri()))
+                uri.setDatabase(os.path.join(target_path, file_name))
+                self._change_data_source(uri.uri())
 
     def _change_data_source(self, new_data_source):
         """
