@@ -10,7 +10,7 @@
 name=QField Sync
 qgisMinimumVersion=2.8
 description=Sync your projects to QField
-version=0.9.3
+version=1.0.0
 author=OPENGIS.ch
 email=info@opengis.ch
 
@@ -19,6 +19,10 @@ email=info@opengis.ch
 # Recommended items:
 
 changelog=
+    Release 1.0.0
+    -------------
+    * Fix synchronisation and add translations
+
     Release 0.9.3
     --------------
     * Allow taking offline copies of spatialite databases
@@ -55,7 +59,7 @@ repository=https://github.com/opengisch/QFieldSync
 category=Plugins
 icon=resources/icon.png
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
