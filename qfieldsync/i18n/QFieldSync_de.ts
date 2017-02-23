@@ -3,32 +3,32 @@
 <context>
     <name>BasemapAlgorithm</name>
     <message>
-        <location filename="basemap.py" line="87"/>
+        <location filename="basemap.py" line="86"/>
         <source>Tile size</source>
         <translation>Kachelgrösse</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="88"/>
+        <location filename="basemap.py" line="87"/>
         <source>Map units per pixel</source>
         <translation>Karteneinheiten pro Pixel</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="91"/>
+        <location filename="basemap.py" line="90"/>
         <source>Output layer</source>
         <translation>Ausgabelayer</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="79"/>
+        <location filename="basemap.py" line="78"/>
         <source>Map theme to render.</source>
         <translation>Darzustellendes Kartenthema.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="81"/>
+        <location filename="basemap.py" line="80"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
         <translation>Darzustellender Layer. Wird nur benutzt, falls das Kartenthema nicht gesetzt ist. Falls beide (Kartenthema und Layer) nicht gesetzt sind, wird die momentan sichtbare Karte dargestellt.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="85"/>
+        <location filename="basemap.py" line="84"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
         <translation>Der minimale Bereich der gezeichnet werden soll. Wird intern auf ein Vielfaches der Kachelgrösse ausgedehnt.</translation>
     </message>
@@ -87,17 +87,17 @@
         <translation>Error beim Versuch, Layer zu Offlinelayer zu konvertieren</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="143"/>
+        <location filename="offline_converter.py" line="145"/>
         <source>Finished</source>
         <translation>Beendet</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="170"/>
+        <location filename="offline_converter.py" line="172"/>
         <source>Basemap</source>
         <translation>Basiskarte</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="181"/>
+        <location filename="offline_converter.py" line="183"/>
         <source>Packaging layer {layer_name}</source>
         <translation>Layer wird verpackt {layer_name}</translation>
     </message>
@@ -105,12 +105,12 @@
 <context>
     <name>PackageDialog</name>
     <message>
-        <location filename="package_dialog.py" line="69"/>
+        <location filename="package_dialog.py" line="68"/>
         <source>Create</source>
         <translation>Erstellen</translation>
     </message>
     <message>
-        <location filename="package_dialog.py" line="127"/>
+        <location filename="package_dialog.py" line="126"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to your QField device.</source>
         <translation>Das Projekt wurde in {result_folder} erstellt und kann jetzt auf das QField Gerät kopiert werden.</translation>
     </message>

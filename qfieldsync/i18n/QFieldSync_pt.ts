@@ -3,21 +3,6 @@
 <context>
     <name>BasemapAlgorithm</name>
     <message>
-        <location filename="basemap.py" line="86"/>
-        <source>Tile size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="basemap.py" line="87"/>
-        <source>Map units per pixel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="basemap.py" line="90"/>
-        <source>Output layer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="basemap.py" line="78"/>
         <source>Map theme to render.</source>
         <translation type="unfinished"></translation>
@@ -30,6 +15,21 @@
     <message>
         <location filename="basemap.py" line="84"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="basemap.py" line="86"/>
+        <source>Tile size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="basemap.py" line="87"/>
+        <source>Map units per pixel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="basemap.py" line="90"/>
+        <source>Output layer</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -292,11 +292,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qfield_sync.py" line="208"/>
-        <source>Project Configuration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="qfield_sync.py" line="196"/>
         <source>Package for QField</source>
         <translation type="unfinished"></translation>
@@ -307,6 +302,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="qfield_sync.py" line="208"/>
+        <source>Project Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="qfield_sync.py" line="216"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
@@ -314,21 +314,6 @@
 </context>
 <context>
     <name>QFieldSynchronizeBase</name>
-    <message>
-        <location filename="synchronize_dialog.ui" line="47"/>
-        <source>Progress</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="synchronize_dialog.ui" line="53"/>
-        <source>Total</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="synchronize_dialog.ui" line="67"/>
-        <source>Layer</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="synchronize_dialog.ui" line="14"/>
         <source>Synchronize project</source>
@@ -342,6 +327,21 @@
     <message>
         <location filename="synchronize_dialog.ui" line="35"/>
         <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="synchronize_dialog.ui" line="47"/>
+        <source>Progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="synchronize_dialog.ui" line="53"/>
+        <source>Total</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="synchronize_dialog.ui" line="67"/>
+        <source>Layer</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -1,4 +1,5 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="hu" version="2.0">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS><TS version="2.0" language="hu" sourcelanguage="">
 <context>
     <name>BasemapAlgorithm</name>
     <message>
@@ -24,12 +25,12 @@
     <message>
         <location filename="basemap.py" line="80"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
-        <translation type="unfinished"/>
+        <translation>Rajzolandó réteg. Csak akkor használjuk, ha a térkép témát nem állították be. Ha a térkép téma és a réteg téma sincs beállítva, akkor az aktuális térkép tartalom jelenik meg.</translation>
     </message>
     <message>
         <location filename="basemap.py" line="84"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
-        <translation type="unfinished"/>
+        <translation>A minimum kirajzolandó terjedelem. Kiterjesztik automatikusan, hogy a csempe méret többszöröse legyen.</translation>
     </message>
 </context>
 <context>
@@ -86,30 +87,30 @@
         <translation>Hiba a rétegek offline réteggé konvertálása közben</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="143"/>
+        <location filename="offline_converter.py" line="145"/>
         <source>Finished</source>
         <translation>Befejeztem</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="170"/>
+        <location filename="offline_converter.py" line="172"/>
         <source>Basemap</source>
         <translation>Alaptérkép</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="181"/>
+        <location filename="offline_converter.py" line="183"/>
         <source>Packaging layer {layer_name}</source>
-        <translation type="unfinished"/>
+        <translation>Réteg összecsomagolás {layer_name}</translation>
     </message>
 </context>
 <context>
     <name>PackageDialog</name>
     <message>
-        <location filename="package_dialog.py" line="69"/>
+        <location filename="package_dialog.py" line="68"/>
         <source>Create</source>
         <translation>Létrehozás</translation>
     </message>
     <message>
-        <location filename="package_dialog.py" line="127"/>
+        <location filename="package_dialog.py" line="126"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to your QField device.</source>
         <translation>A projekt létrehozását befejeztem {result_folder} mappában. Kérjük másolja ezt a mappát a QField eszközére.</translation>
     </message>
@@ -119,7 +120,7 @@
     <message>
         <location filename="package_dialog.ui" line="14"/>
         <source>Package project for QField</source>
-        <translation type="unfinished"/>
+        <translation>Projekt összecsomagolása QField-hez</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="39"/>
@@ -139,12 +140,12 @@
     <message>
         <location filename="package_dialog.ui" line="92"/>
         <source>Select extent</source>
-        <translation type="unfinished"/>
+        <translation>Terjedelem kiválasztás</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A fő térképvásznat&lt;br/&gt;tologathatod és nagyíthatod&lt;br/&gt;a szokásos módon&lt;br/&gt;miközben ez az ablak&lt;br/&gt;nyitva van.&lt;br/&gt;Próbáld ki!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="185"/>
@@ -177,7 +178,7 @@
     <message>
         <location filename="preferences_dialog_ui5.py" line="54"/>
         <source>QFieldSync preferences</source>
-        <translation type="unfinished"/>
+        <translation>QFieldSync preferenciák</translation>
     </message>
     <message>
         <location filename="preferences_dialog_ui5.py" line="55"/>
@@ -225,7 +226,7 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="146"/>
         <source>A base map is fully rendered to a raster image. Attributes from layers on a base map are no longer accessible.</source>
-        <translation type="unfinished"/>
+        <translation>A alaptérképet raszter képpé alakítjuk át. Az alaptérképen szereplő rétegekre az attribútumok többet nem érhetők el.</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="147"/>
@@ -260,7 +261,7 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="155"/>
         <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
-        <translation type="unfinished"/>
+        <translation>Ez határozza meg a készülő kép térbeli felbontását. Ez függ a térkép vászon koordinátarendszerétől. Méteres [m] térképi egységek esetén az 1 érték azt jelenti, hogy minden pixel 1x1 m-es területet fed, az 1000 érték 1 pixel/négyzetkilométer.</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="156"/>
@@ -280,7 +281,7 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="159"/>
         <source>Only copy features in area of interest</source>
-        <translation type="unfinished"/>
+        <translation>Csak az érdekes területre eső elemek másolása</translation>
     </message>
 </context>
 <context>
@@ -308,7 +309,7 @@
     <message>
         <location filename="qfield_sync.py" line="216"/>
         <source>Preferences</source>
-        <translation type="unfinished"/>
+        <translation>Preferenciák</translation>
     </message>
 </context>
 <context>
@@ -336,12 +337,12 @@
     <message>
         <location filename="synchronize_dialog.ui" line="20"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the QField project folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Válaszd ki a QField projekt mappát&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="35"/>
         <source>...</source>
-        <translation type="unfinished"/>
+        <translation>...</translation>
     </message>
 </context>
 <context>

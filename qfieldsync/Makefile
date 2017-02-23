@@ -24,7 +24,7 @@
 
 
 #Add iso code for any locales you want to support here (space separated)
-LOCALES = en de gl fr
+LOCALES = en de gl fr fi hu ro pt
 
 # If locales are enabled, set the name of the lrelease binary on your system. If
 # you have trouble compiling the translations, you may have to specify the full path to
@@ -181,7 +181,7 @@ transcompile: transifex_sync
 	@echo "Compiled translation files to .qm files."
 	@echo "----------------------------------------"
 	@chmod +x scripts/compile-strings.sh
-	@scripts/compile-strings.sh $(LRELEASE) $(LOCALES)
+	@scripts/compile-strings.sh $(LRELEASE) "$(LOCALES)"
 
 transclean:
 	@echo

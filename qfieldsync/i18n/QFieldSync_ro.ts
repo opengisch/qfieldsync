@@ -1,4 +1,5 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="ro" version="2.0">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS><TS version="2.0" language="ro" sourcelanguage="">
 <context>
     <name>BasemapAlgorithm</name>
     <message>
@@ -86,30 +87,30 @@
         <translation>A apărut o eroare în încercarea de a converti straturi în straturi offline</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="143"/>
+        <location filename="offline_converter.py" line="145"/>
         <source>Finished</source>
         <translation>Definitivat</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="170"/>
+        <location filename="offline_converter.py" line="172"/>
         <source>Basemap</source>
         <translation>Hartă de bază</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="181"/>
+        <location filename="offline_converter.py" line="183"/>
         <source>Packaging layer {layer_name}</source>
-        <translation type="unfinished"/>
+        <translation>Stratul de împachetare {layer_name}</translation>
     </message>
 </context>
 <context>
     <name>PackageDialog</name>
     <message>
-        <location filename="package_dialog.py" line="69"/>
+        <location filename="package_dialog.py" line="68"/>
         <source>Create</source>
         <translation>Creare</translation>
     </message>
     <message>
-        <location filename="package_dialog.py" line="127"/>
+        <location filename="package_dialog.py" line="126"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to your QField device.</source>
         <translation>S-a încheiat crearea proiectului în {result_folder}. Vă rugăm să copiați acest dosar pe dispozitivul pe care se află QField.</translation>
     </message>
@@ -336,12 +337,12 @@
     <message>
         <location filename="synchronize_dialog.ui" line="20"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the QField project folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selectați folderul proiectului QField&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="35"/>
         <source>...</source>
-        <translation type="unfinished"/>
+        <translation>...</translation>
     </message>
 </context>
 <context>

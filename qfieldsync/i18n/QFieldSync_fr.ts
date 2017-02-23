@@ -3,34 +3,34 @@
 <context>
     <name>BasemapAlgorithm</name>
     <message>
-        <location filename="basemap.py" line="87"/>
+        <location filename="basemap.py" line="86"/>
         <source>Tile size</source>
         <translation>Taille de tuile</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="88"/>
+        <location filename="basemap.py" line="87"/>
         <source>Map units per pixel</source>
         <translation>Unités de carte par pixel</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="91"/>
+        <location filename="basemap.py" line="90"/>
         <source>Output layer</source>
         <translation>Couche de sortie</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="79"/>
+        <location filename="basemap.py" line="78"/>
         <source>Map theme to render.</source>
         <translation>Rendu depuis un réglage de visibilité.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="81"/>
+        <location filename="basemap.py" line="80"/>
         <source>Layer to render. Will only be used if the map theme is not set. If both, map theme and layer are not set, the current map content will be rendered.</source>
-        <translation>Rendu depuis une couche. Cette couche sera utilisé si aucun réglage de visibilité n&apos;est paramétré. Si le réglage de visibilité et la couche ne sont pas choisi, la carte actuelle sera utilisé.</translation>
+        <translation>Rendu depuis une couche. Cette couche sera utilisée si aucun réglage de visibilité n&apos;est paramétré. Si le réglage de visibilité et la couche ne sont pas choisis, la carte actuelle sera utilisée.</translation>
     </message>
     <message>
-        <location filename="basemap.py" line="85"/>
+        <location filename="basemap.py" line="84"/>
         <source>The minimum extent to render. Will internally be extended to be a multiple of the tile sizes.</source>
-        <translation>La taille mininimale du rendu. Cette mesure sera ajusté par le logiciel pour être un multiple de la taille de tuile.</translation>
+        <translation>La taille minimale du rendu. Cette mesure sera ajustée par le logiciel pour être un multiple de la taille de tuile.</translation>
     </message>
 </context>
 <context>
@@ -38,12 +38,12 @@
     <message>
         <location filename="layer.py" line="132"/>
         <source>JPEG2000 layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation>Les couches JPEG2000 ne sont pas utilisables dans QField. &lt;br&gt; Vous pouvez les rasterizer en tant que fond de carte.</translation>
+        <translation>Les couches JPEG2000 ne sont pas utilisables dans QField. &lt;br&gt; Vous pouvez les rastériser en tant que fond de carte.</translation>
     </message>
     <message>
         <location filename="layer.py" line="137"/>
         <source>ECW layers are not supported by QField.&lt;br&gt;You can rasterize them as basemap.</source>
-        <translation>Les couches ECW ne sont pas utilisables dans QField. &lt;br&gt; Vous pouvez les rasterizer en tant que fond de carte.</translation>
+        <translation>Les couches ECW ne sont pas utilisables dans QField. &lt;br&gt; Vous pouvez les rastériser en tant que fond de carte.</translation>
     </message>
 </context>
 <context>
@@ -87,32 +87,32 @@
         <translation>Erreur lors de la conversion de couche en couche &apos;hors-ligne&apos;</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="143"/>
+        <location filename="offline_converter.py" line="145"/>
         <source>Finished</source>
         <translation>Terminé</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="170"/>
+        <location filename="offline_converter.py" line="172"/>
         <source>Basemap</source>
-        <translation>Fonde de carte</translation>
+        <translation>Fond de carte</translation>
     </message>
     <message>
-        <location filename="offline_converter.py" line="181"/>
+        <location filename="offline_converter.py" line="183"/>
         <source>Packaging layer {layer_name}</source>
-        <translation type="unfinished"></translation>
+        <translation>Couche packaging {layer_name}</translation>
     </message>
 </context>
 <context>
     <name>PackageDialog</name>
     <message>
-        <location filename="package_dialog.py" line="69"/>
+        <location filename="package_dialog.py" line="68"/>
         <source>Create</source>
         <translation>Créer</translation>
     </message>
     <message>
-        <location filename="package_dialog.py" line="127"/>
+        <location filename="package_dialog.py" line="126"/>
         <source>Finished creating the project at {result_folder}. Please copy this folder to your QField device.</source>
-        <translation type="unfinished"></translation>
+        <translation>La création du projet est terminée. Le dossier est visible ici : {result_folder}. Copiez ce dossier sur l&apos;appareil avec lequel vous souhaitez travailler.</translation>
     </message>
 </context>
 <context>
@@ -120,7 +120,7 @@
     <message>
         <location filename="package_dialog.ui" line="14"/>
         <source>Package project for QField</source>
-        <translation type="unfinished"></translation>
+        <translation>Projet package pour QField</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="39"/>
@@ -145,7 +145,7 @@
     <message>
         <location filename="package_dialog.ui" line="159"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The main map canvas&lt;br/&gt;can be panned and&lt;br/&gt;zoomed as usual&lt;br/&gt;while this window is&lt;br/&gt;open.&lt;br/&gt;Try it!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Le canevas de carte principale&lt;br/&gt;peut être déplacé et&lt;br/&gt;zoomé comme d&apos;habitude&lt;br/&gt;lorsque cette fenêtre est&lt;br/&gt;ouverte.&lt;br/&gt;Essayez !&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="185"/>
@@ -160,7 +160,7 @@
     <message>
         <location filename="package_dialog.ui" line="204"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Project:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Projet:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="package_dialog.ui" line="237"/>
@@ -170,7 +170,7 @@
     <message>
         <location filename="package_dialog.ui" line="243"/>
         <source>Some layers in this project have not yet been configured. &lt;a href=&quot;configuration&quot;&gt;Configure project now&lt;/a&gt;.</source>
-        <translation>Certaines couches dans ce projet n&apos;ont pas encore été configuré. &lt;a href=&quot;configuration&quot;&gt;Configurez votre projet&lt;/a&gt;.</translation>
+        <translation>Certaines couches dans ce projet n&apos;ont pas encore été configurées. &lt;a href=&quot;configuration&quot;&gt;Configurez votre projet maintenant&lt;/a&gt;.</translation>
     </message>
 </context>
 <context>
@@ -261,7 +261,8 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="155"/>
         <source>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</source>
-        <translation>Cette valeur défini la résolution spatiale du resultat. Cela dépend de l&apos;unité de carte défini par le SCR. Si l&apos;unité de carte est le [m], pour une valeur de 1 chaque pixel couvrira 1x1m, pour une valeur de 1000 chaque pixel couvrira 1000x1000m.</translation>
+        <translation>Cette valeur définit la résolution spatiale du résultat. Cela dépend du SCR du canevas.
+Si l’unité de la carte est le mètre, une valeur de 1 signifie que chaque pixel couvrira une surface de 1x1 m, une valeur de 1000 signifie qu&apos;un pixel couvrira 1 km².</translation>
     </message>
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="156"/>
@@ -281,7 +282,7 @@
     <message>
         <location filename="project_configuration_dialog_ui5.py" line="159"/>
         <source>Only copy features in area of interest</source>
-        <translation>Copier uniquement les entités dans la zone d&apos;intéret</translation>
+        <translation>Copier uniquement les entités dans la zone d’intérêt</translation>
     </message>
 </context>
 <context>
@@ -299,7 +300,7 @@
     <message>
         <location filename="qfield_sync.py" line="196"/>
         <source>Package for QField</source>
-        <translation>Packages pour QField</translation>
+        <translation>Paquet pour QField</translation>
     </message>
     <message>
         <location filename="qfield_sync.py" line="202"/>
@@ -309,7 +310,7 @@
     <message>
         <location filename="qfield_sync.py" line="216"/>
         <source>Preferences</source>
-        <translation>Paramètres de QFieldSync</translation>
+        <translation>Préférences</translation>
     </message>
 </context>
 <context>
@@ -332,17 +333,17 @@
     <message>
         <location filename="synchronize_dialog.ui" line="14"/>
         <source>Synchronize project</source>
-        <translation type="unfinished"></translation>
+        <translation>Synchroniser le projet</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="20"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the QField project folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sélectionner le répertoire de project QField&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="synchronize_dialog.ui" line="35"/>
         <source>...</source>
-        <translation type="unfinished">...</translation>
+        <translation>...</translation>
     </message>
 </context>
 <context>
@@ -355,7 +356,7 @@
     <message>
         <location filename="synchronize_dialog.py" line="71"/>
         <source>The project you imported does not seem to be an offline project</source>
-        <translation>Le projet que vous avez importé n&apos;est pas un projet &apos;hors-ligne&apos;</translation>
+        <translation>Le projet que vous avez importé ne semble pas être un projet &apos;hors-ligne&apos;</translation>
     </message>
 </context>
 </TS>
