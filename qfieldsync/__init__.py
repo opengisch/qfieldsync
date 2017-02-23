@@ -27,7 +27,7 @@ from __future__ import absolute_import
 import os
 import qgis.utils
 
-qgis2compat_min_version = '0.4.2'
+qgis2compat_min_version = '0.4.3'
 
 
 # noinspection PyPep8Naming
