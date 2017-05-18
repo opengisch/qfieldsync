@@ -116,7 +116,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
             old_action = layer_source.action
             layer_source.action = cbx.itemData(cbx.currentIndex())
             if layer_source.action != old_action:
-                self.project.setDirty()
+                self.project.setDirty(True)
 
             layer_source.apply()
 
