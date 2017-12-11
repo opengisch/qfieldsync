@@ -36,20 +36,18 @@ LRELEASE = lrelease-qt5
 # translation
 SOURCES = \
 	__init__.py \
-	qfield_sync.py \
-	qfield_sync_dialog.py
+	qfield_sync.py
 
 PLUGINNAME = qfieldsync
 
 PY_FILES = \
         qfield_sync.py \
-        qfield_sync_dialog.py \
         __init__.py
 
 UI_FILES = \
         ui/*.ui
 
-EXTRAS = icon.png metadata.txt
+EXTRAS = resources core dialogs processing utils metadata.txt
 
 COMPILED_RESOURCE_FILES = resources_rc4.py
 
@@ -119,12 +117,16 @@ deploy: compile doc transcompile
 	# The deploy  target only works on unix like operating system where
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
+	rm -rf $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
 	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	cp -vf $(COMPILED_UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
+	cp -vf ui/__init__.py $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
+	cp -vfr $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
+	# cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
 
 # The dclean target removes compiled python files from plugin directory
 # also deletes any .git entry
