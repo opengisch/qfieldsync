@@ -36,24 +36,20 @@ LRELEASE = lrelease-qt5
 # translation
 SOURCES = \
 	__init__.py \
-	qfield_sync.py \
-	qfield_sync_dialog.py
+	qfield_sync.py
 
 PLUGINNAME = qfieldsync
 
 PY_FILES = \
         qfield_sync.py \
-        qfield_sync_dialog.py \
         __init__.py
 
 UI_FILES = \
         ui/*.ui
 
-EXTRAS = icon.png metadata.txt
+EXTRAS = resources core dialogs processing utils metadata.txt
 
 COMPILED_RESOURCE_FILES = resources_rc4.py
-
-COMPILED_UI_FILES = $(shell ls -1 ui/*.ui | sed 's/\(.*\)\.ui/\1_ui4.py\n\1_ui5.py/g' | tr '\n' ' ')
 
 PEP8EXCLUDE=pydev,resources_rc.py,conf.py,third_party,ui
 
@@ -62,11 +58,21 @@ PEP8EXCLUDE=pydev,resources_rc.py,conf.py,third_party,ui
 # Normally you would not need to edit below here
 #################################################
 
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
+  SED = 'gsed'
+  QTPYTHONPATH=/usr/local/lib/qt-4/python2.7/site-packages
+else
+  SED = 'sed'
+endif
+
+COMPILED_UI_FILES = $(shell ls -1 ui/*.ui | $(SED) 's/\(.*\)\.ui/\1_ui4.py\n\1_ui5.py/g' | tr '\n' ' ')
+
 HELP = help/build/html
 
 PLUGIN_UPLOAD = $(c)./../scripts/plugin_upload.py
 
-RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | sed 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
+RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | $(SED) 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
 
 QGISDIR=.qgis2
 
@@ -79,7 +85,7 @@ compile: $(COMPILED_RESOURCE_FILES) $(COMPILED_UI_FILES)
 	pyrcc5 -o $*_rc5.py  $<
 
 ui/%_ui4.py ui/%_ui5.py : ui/%.ui $(UI_FILES)
-	pyuic4 -o ui/$*_ui4.py  $<
+	PYTHONPATH=$(QTPYTHONPATH):$(PYTHONPATH) pyuic4 -o ui/$*_ui4.py  $<
 	pyuic5 -o ui/$*_ui5.py  $<
 
 %.qm : %.ts
@@ -111,12 +117,16 @@ deploy: compile doc transcompile
 	# The deploy  target only works on unix like operating system where
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
+	rm -rf $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
 	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	cp -vf $(COMPILED_UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
+	cp -vf ui/__init__.py $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
+	cp -vfr $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
+	# cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
 
 # The dclean target removes compiled python files from plugin directory
 # also deletes any .git entry

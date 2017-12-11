@@ -12,7 +12,7 @@ install:
   main" | sudo tee /etc/apt/sources.list.d/qgis.list
 - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 073D307A618E5811
 - sudo apt-get update
-- sudo apt-get install -y python-qgis python-nose pyqt4-dev-tools qgis
+- sudo apt-get install -y --allow-unauthenticated python-qgis python-nose pyqt4-dev-tools qgis
 - pip install -r requirements.txt
 - "./scripts/ci/install_qgis2compat.sh"
 before_script:
