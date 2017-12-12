@@ -29,6 +29,7 @@ from qfieldsync.core import (
 )
 from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
 from qgis.PyQt.QtCore import (
+    QCoreApplication,
     pyqtSlot,
     Qt
 )
@@ -159,6 +160,7 @@ class PackageDialog(QDialog, FORM_CLASS):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
         self.statusLabel.setText(message)
+        QCoreApplication.processEvents()
 
     @pyqtSlot(int, int)
     def update_task(self, progress, max_progress):
