@@ -50,7 +50,7 @@ class OfflineConverterTest(unittest.TestCase):
         project = self.load_project(os.path.join(source_folder, 'simple_project', 'project.qgs'))
         extent = QgsRectangle()
         offline_editing = QgsOfflineEditing()
-        offline_converter = OfflineConverter(project, export_folder, extent, offline_editing)
+        offline_converter = OfflineConverter(self.iface, project, export_folder, extent, offline_editing)
         offline_converter.convert()
 
         files = os.listdir(export_folder)

@@ -104,8 +104,8 @@ class PackageDialog(QDialog, FORM_CLASS):
 
         export_folder = self.get_export_folder_from_dialog()
 
-        offline_convertor = OfflineConverter(self.project, export_folder, self.iface.mapCanvas().extent(),
-                                             self.offline_editing)
+        offline_convertor = OfflineConverter(self.iface, self.project, export_folder,
+                                             self.iface.mapCanvas().extent(), self.offline_editing)
 
         # progress connections
         offline_convertor.total_progress_updated.connect(self.update_total)
