@@ -10,7 +10,7 @@ before_install:
 install:
 - printf "deb http://qgis.org/debian trusty main\ndeb-src http://qgis.org/debian trusty
   main" | sudo tee /etc/apt/sources.list.d/qgis.list
-- sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 073D307A618E5811
+- sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key CAEB3DC3BDF7FB45
 - sudo apt-get update
 - sudo apt-get install -y --allow-unauthenticated python-qgis python-nose pyqt4-dev-tools qgis
 - pip install -r requirements.txt
