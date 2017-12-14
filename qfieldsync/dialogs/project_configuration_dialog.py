@@ -18,13 +18,16 @@
  ***************************************************************************/
 """
 from qfieldsync.core import ProjectConfiguration
-from qfieldsync.core.layer import LayerSource
+from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QTableWidgetItem,
-    QComboBox
+    QToolButton,
+    QComboBox,
+    QMenu,
+    QAction
 )
 from qgis.core import (
     QgsProject,
@@ -53,6 +56,17 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         self.__project_configuration = ProjectConfiguration(self.project)
 
         self.setupUi(self)
+
+        self.remove_menu = QMenu(self)
+        self.remove_all_action = QAction("remove all layers", self.remove_menu)
+        self.remove_all_action.triggered.connect(self.remove_all_layers)
+        self.remove_menu.addAction(self.remove_all_action)
+        self.remove_hidden_action = QAction("remove hidden layers", self.remove_menu)
+        self.remove_hidden_action.triggered.connect(self.remove_hidden_layers)
+        self.remove_menu.addAction(self.remove_hidden_action)
+        self.removeButton.setMenu(self.remove_menu)
+        self.removeButton.setAutoRaise(True)
+        self.removeButton.setPopupMode(QToolButton.InstantPopup)
 
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
         self.unsupportedLayersList = list()
@@ -161,3 +175,33 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
             self.baseMapTypeStack.setCurrentWidget(self.singleLayerPage)
         else:
             self.baseMapTypeStack.setCurrentWidget(self.mapThemePage)
+
+    def remove_all_layers(self):
+        """
+        Remove all layers
+        """
+        for i in range(self.layersTable.rowCount()):
+            item = self.layersTable.item(i, 0)
+            layer_source = item.data(Qt.UserRole)
+            old_action = layer_source.action
+            layer_source.action = SyncAction.REMOVE
+            if layer_source.action != old_action:
+                self.project.setDirty(True)
+            layer_source.apply()
+        self.reloadProject()
+
+    def remove_hidden_layers(self):
+        """
+        Remove hidden layers
+        """
+        root = QgsProject.instance().layerTreeRoot()
+        for layer in QgsProject.instance().mapLayers().values():
+            node = root.findLayer(layer.id())
+            if node and not node.isVisible():
+                layer_source = LayerSource(layer)
+                old_action = layer_source.action
+                layer_source.action = SyncAction.REMOVE
+                if layer_source.action != old_action:
+                    self.project.setDirty(True)
+                layer_source.apply()
+        self.reloadProject()

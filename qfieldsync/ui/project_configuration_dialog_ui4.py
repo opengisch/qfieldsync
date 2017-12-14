@@ -33,6 +33,17 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.gridLayout_2 = QtGui.QGridLayout(self.groupBox)
         self.gridLayout_2.setMargin(0)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.removeButton = QtGui.QToolButton(self.groupBox)
+        self.removeButton.setText(_fromUtf8(""))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/qfieldsync/visibility.svg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.removeButton.setIcon(icon)
+        self.removeButton.setPopupMode(QtGui.QToolButton.InstantPopup)
+        self.removeButton.setAutoRaise(True)
+        self.removeButton.setObjectName(_fromUtf8("removeButton"))
+        self.gridLayout_2.addWidget(self.removeButton, 1, 1, 1, 1)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout_2.addItem(spacerItem, 1, 0, 1, 1)
         self.layersTable = QtGui.QTableWidget(self.groupBox)
         self.layersTable.setObjectName(_fromUtf8("layersTable"))
         self.layersTable.setColumnCount(2)
@@ -42,7 +53,7 @@ class Ui_QFieldProjectConfigurationBase(object):
         item = QtGui.QTableWidgetItem()
         self.layersTable.setHorizontalHeaderItem(1, item)
         self.layersTable.horizontalHeader().setStretchLastSection(True)
-        self.gridLayout_2.addWidget(self.layersTable, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.layersTable, 2, 0, 1, 2)
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
         self.buttonBox = QtGui.QDialogButtonBox(QFieldProjectConfigurationBase)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -105,7 +116,7 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.label_2 = QtGui.QLabel(self.singleLayerPage)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.label_2)
-        self.layerComboBox = QgsMapLayerComboBox(self.singleLayerPage)
+        self.layerComboBox = gui.QgsMapLayerComboBox(self.singleLayerPage)
         self.layerComboBox.setObjectName(_fromUtf8("layerComboBox"))
         self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.layerComboBox)
         self.baseMapTypeStack.addWidget(self.singleLayerPage)
@@ -155,6 +166,7 @@ class Ui_QFieldProjectConfigurationBase(object):
     def retranslateUi(self, QFieldProjectConfigurationBase):
         QFieldProjectConfigurationBase.setWindowTitle(_translate("QFieldProjectConfigurationBase", "Configure Project for QField synchronisation", None))
         self.groupBox.setTitle(_translate("QFieldProjectConfigurationBase", "Layers", None))
+        self.removeButton.setToolTip(_translate("QFieldProjectConfigurationBase", "Remove layers", None))
         item = self.layersTable.horizontalHeaderItem(0)
         item.setText(_translate("QFieldProjectConfigurationBase", "Layer", None))
         item = self.layersTable.horizontalHeaderItem(1)
@@ -176,4 +188,5 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("QFieldProjectConfigurationBase", "Offline editing", None))
         self.unsupportedLayers.setText(_translate("QFieldProjectConfigurationBase", "Unsupported layers", None))
 
-from qgis.gui import QgsMapLayerComboBox
+from qgis import gui
+from . import resources_rc
