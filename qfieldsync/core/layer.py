@@ -49,6 +49,9 @@ class SyncAction:
     # - the file(s) will be copied
     NO_ACTION = "no_action"
 
+    # Keep already copied data or files if existent
+    KEEP_EXISTENT = 'keep_existent'
+
     # remove from the project
     REMOVE = "remove"
 
@@ -105,6 +108,7 @@ class LayerSource(object):
 
         if self.is_file:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'copy')))
+            actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'copy if missing')))
         else:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'no action')))
 
@@ -139,12 +143,13 @@ class LayerSource(object):
                                               'as basemap.')
         return None
 
-    def copy(self, target_path):
+    def copy(self, target_path, keep_existent=False):
         """
         Copy a layer to a new path and adjust its datasource.
 
         :param layer: The layer to copy
         :param target_path: A path to a folder into which the data will be copied
+        :param keep_existent: if True and target file already exists, keep it as it is
         """
         if not self.is_file:
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
@@ -159,8 +164,10 @@ class LayerSource(object):
             source_path, file_name = os.path.split(file_path)
             basename, extensions = get_file_extension_group(file_name)
             for ext in extensions:
-                if os.path.exists(os.path.join(source_path, basename + ext)):
-                    shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
+                dest_file = os.path.join(target_path, basename + ext)
+                if os.path.exists(os.path.join(source_path, basename + ext)) and \
+                        (keep_existent is False or not os.path.isfile(dest_file)):
+                    shutil.copy(os.path.join(source_path, basename + ext), dest_file)
             self._change_data_source(os.path.join(target_path, file_name))
         # Spatialite files have a uri
         else:
@@ -169,9 +176,11 @@ class LayerSource(object):
                 source_path, file_name = os.path.split(file_path)
                 basename, extensions = get_file_extension_group(file_name)
                 for ext in extensions:
-                    if os.path.exists(os.path.join(source_path, basename + ext)):
+                    dest_file = os.path.join(target_path, basename + ext)
+                    if os.path.exists(os.path.join(source_path, basename + ext)) and \
+                            (keep_existent is False or not os.path.isfile(dest_file)):
                         shutil.copy(os.path.join(source_path, basename + ext),
-                                    os.path.join(target_path, basename + ext))
+                                    dest_file)
                 uri.setDatabase(os.path.join(target_path, file_name))
                 self._change_data_source(uri.uri())
 
