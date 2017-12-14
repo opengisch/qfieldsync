@@ -47,8 +47,9 @@ class OfflineConverter(QObject):
     task_progress_updated = pyqtSignal(int, int)
     total_progress_updated = pyqtSignal(int, int, str)
 
-    def __init__(self, project, export_folder, extent, offline_editing):
+    def __init__(self, iface, project, export_folder, extent, offline_editing):
         super(OfflineConverter, self).__init__(parent=None)
+        self.__iface = iface
         self.__max_task_progress = 0
         self.__offline_layers = list()
         self.__convertor_progress = None  # for processing feedback
@@ -138,7 +139,7 @@ class OfflineConverter(QObject):
         finally:
             # We need to let the app handle events before loading the next project or QGIS will crash with rasters
             QCoreApplication.processEvents()
-            QgsProject.instance().clear()
+            self.__iface.newProject()
             QCoreApplication.processEvents()
             QgsProject.instance().read(backup_project_path)
             QgsProject.instance().setFileName(original_project_path)
