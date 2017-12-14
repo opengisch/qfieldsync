@@ -57,16 +57,23 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
 
         self.setupUi(self)
 
-        self.remove_menu = QMenu(self)
-        self.remove_all_action = QAction("remove all layers", self.remove_menu)
-        self.remove_all_action.triggered.connect(self.remove_all_layers)
-        self.remove_menu.addAction(self.remove_all_action)
-        self.remove_hidden_action = QAction("remove hidden layers", self.remove_menu)
-        self.remove_hidden_action.triggered.connect(self.remove_hidden_layers)
-        self.remove_menu.addAction(self.remove_hidden_action)
-        self.removeButton.setMenu(self.remove_menu)
-        self.removeButton.setAutoRaise(True)
-        self.removeButton.setPopupMode(QToolButton.InstantPopup)
+        self.toggle_menu = QMenu(self)
+        self.remove_all_action = QAction(self.tr("remove all layers"), self.toggle_menu)
+        self.toggle_menu.addAction(self.remove_all_action)
+        self.remove_hidden_action = QAction(self.tr("remove hidden layers"), self.toggle_menu)
+        self.toggle_menu.addAction(self.remove_hidden_action)
+        self.add_all_copy_action = QAction(self.tr("add all layers"), self.toggle_menu)
+        self.toggle_menu.addAction(self.add_all_copy_action)
+        self.add_visible_copy_action = QAction(self.tr("add visible layers"), self.toggle_menu)
+        self.toggle_menu.addAction(self.add_visible_copy_action)
+        self.add_all_offline_action = QAction(self.tr("add all vector layers as offline"), self.toggle_menu)
+        self.toggle_menu.addAction(self.add_all_offline_action)
+        self.add_visible_offline_action = QAction(self.tr("add visible vector layers as offline"), self.toggle_menu)
+        self.toggle_menu.addAction(self.add_visible_offline_action)
+        self.multipleToggleButton.setMenu(self.toggle_menu)
+        self.multipleToggleButton.setAutoRaise(True)
+        self.multipleToggleButton.setPopupMode(QToolButton.InstantPopup)
+        self.toggle_menu.triggered.connect(self.toggle_menu_triggered)
 
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
         self.unsupportedLayersList = list()
@@ -176,32 +183,43 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         else:
             self.baseMapTypeStack.setCurrentWidget(self.mapThemePage)
 
-    def remove_all_layers(self):
+    def toggle_menu_triggered(self, action):
         """
-        Remove all layers
+        Toggles usae of layers
+        :param action: the menu action that triggered this
         """
-        for i in range(self.layersTable.rowCount()):
-            item = self.layersTable.item(i, 0)
-            layer_source = item.data(Qt.UserRole)
-            old_action = layer_source.action
-            layer_source.action = SyncAction.REMOVE
-            if layer_source.action != old_action:
-                self.project.setDirty(True)
-            layer_source.apply()
-        self.reloadProject()
+        sync_action = SyncAction.NO_ACTION
+        if action in (self.remove_hidden_action, self.remove_all_action):
+            sync_action = SyncAction.REMOVE
+        elif action in (self.add_all_offline_action, self.add_visible_offline_action):
+            sync_action = SyncAction.OFFLINE
 
-    def remove_hidden_layers(self):
-        """
-        Remove hidden layers
-        """
-        root = QgsProject.instance().layerTreeRoot()
-        for layer in QgsProject.instance().mapLayers().values():
-            node = root.findLayer(layer.id())
-            if node and not node.isVisible():
-                layer_source = LayerSource(layer)
+        # all layers
+        if action in (self.remove_all_action, self.add_all_copy_action, self.add_all_offline_action):
+            for i in range(self.layersTable.rowCount()):
+                item = self.layersTable.item(i, 0)
+                layer_source = item.data(Qt.UserRole)
                 old_action = layer_source.action
-                layer_source.action = SyncAction.REMOVE
-                if layer_source.action != old_action:
-                    self.project.setDirty(True)
-                layer_source.apply()
+                available_actions, _ = zip(*layer_source.available_actions)
+                if sync_action in available_actions:
+                    layer_source.action = sync_action
+                    if layer_source.action != old_action:
+                        self.project.setDirty(True)
+                    layer_source.apply()
+        # based on visibility
+        elif action in (self.remove_hidden_action, self.add_visible_copy_action, self.add_visible_offline_action):
+            visible = Qt.UnChecked if action == self.remove_hidden_action else Qt.Checked
+            root = QgsProject.instance().layerTreeRoot()
+            for layer in QgsProject.instance().mapLayers().values():
+                node = root.findLayer(layer.id())
+                if node and node.isVisible() == visible:
+                    layer_source = LayerSource(layer)
+                    old_action = layer_source.action
+                    available_actions, _ = zip(*layer_source.available_actions)
+                    if sync_action in available_actions:
+                        layer_source.action = sync_action
+                        if layer_source.action != old_action:
+                            self.project.setDirty(True)
+                        layer_source.apply()
+
         self.reloadProject()
