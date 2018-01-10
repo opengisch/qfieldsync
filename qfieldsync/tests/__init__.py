@@ -24,9 +24,3 @@ import pkgutil
 
 import qgis  # pylint: disable=W0611  # NOQA
 import qfieldsync
-
-# On travis, the qgis2compat module is copied into the sourcetree, if it's present, just laod it
-try:
-    import qgis2compat.apicompat  # NOQA
-except ImportError:
-    pass
