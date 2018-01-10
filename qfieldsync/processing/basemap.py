@@ -19,6 +19,9 @@
  ***************************************************************************/
 """
 
+from builtins import str
+from builtins import range
+from builtins import object
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import ParameterExtent, ParameterString, ParameterNumber, ParameterRaster
 from processing.core.outputs import OutputRaster
@@ -112,7 +115,7 @@ class BasemapAlgorithm(GeoAlgorithm):
         tile_set.render(progress)
 
 
-class TileSet():
+class TileSet(object):
     """
     A set of tiles
     """

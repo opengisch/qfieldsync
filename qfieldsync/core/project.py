@@ -1,4 +1,5 @@
-class ProjectProperties:
+from builtins import object
+class ProjectProperties(object):
     def __init__(self):
         raise RuntimeError('This object holds only project property static variables')
 
@@ -10,7 +11,7 @@ class ProjectProperties:
     BASE_MAP_MUPP = '/baseMapMupp'
     OFFLINE_COPY_ONLY_AOI = '/offlineCopyOnlyAoi'
 
-    class BaseMapType:
+    class BaseMapType(object):
         def __init__(self):
             raise RuntimeError('This object holds only project property static variables')
 

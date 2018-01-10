@@ -1,3 +1,4 @@
+from builtins import object
 import os
 import shutil
 
@@ -31,7 +32,7 @@ def get_file_extension_group(filename):
     return basename, [ext]
 
 
-class SyncAction:
+class SyncAction(object):
     """
     Enumeration of sync actions
     """

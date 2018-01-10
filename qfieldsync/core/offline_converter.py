@@ -88,7 +88,7 @@ class OfflineConverter(QObject):
             QApplication.setOverrideCursor(Qt.WaitCursor)
 
             self.__offline_layers = list()
-            self.__layers = project.mapLayers().values()
+            self.__layers = list(project.mapLayers().values())
 
             self.total_progress_updated.emit(0, 1, self.tr('Creating base map'))
             # Create the base map before layers are removed

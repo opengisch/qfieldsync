@@ -17,6 +17,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+from builtins import str
+from builtins import range
 from qfieldsync.core import ProjectConfiguration
 from qfieldsync.core.layer import LayerSource
 from qfieldsync.core.project import ProjectProperties
@@ -61,7 +63,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         """
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        for layer in self.project.mapLayers().values():
+        for layer in list(self.project.mapLayers().values()):
             layer_source = LayerSource(layer)
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)

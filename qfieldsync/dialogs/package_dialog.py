@@ -20,6 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+from builtins import str
 import os
 
 from qfieldsync.core import (
@@ -138,7 +139,7 @@ class PackageDialog(QDialog, FORM_CLASS):
         Show the info label if there are unconfigured layers
         """
         self.infoGroupBox.hide()
-        for layer in self.project.mapLayers().values():
+        for layer in list(self.project.mapLayers().values()):
             if not LayerSource(layer).is_configured:
                 self.infoGroupBox.show()
 
