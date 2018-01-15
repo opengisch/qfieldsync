@@ -28,6 +28,9 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.core import (
     QgsProject,
+    QgsMapLayerRegistry
+)
+from qgis.gui import (
     QgsMapLayerProxyModel
 )
 from ..utils.qt_utils import get_ui_class
@@ -61,7 +64,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         """
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        for layer in self.project.mapLayers().values():
+        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
             layer_source = LayerSource(layer)
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
@@ -83,7 +86,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         self.layersTable.setSortingEnabled(True)
 
         # Load Map Themes
-        for theme in self.project.mapThemeCollection().mapThemes():
+        for theme in self.project.visibilityPresetCollection().presets():
             self.mapThemeComboBox.addItem(theme)
 
         self.layerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
@@ -98,7 +101,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
 
         self.mapThemeComboBox.setCurrentIndex(
             self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme))
-        layer = self.project.mapLayer(self.__project_configuration.base_map_layer)
+        layer = QgsMapLayerRegistry.instance().mapLayer(self.__project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
         self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
         self.tileSize.setText(str(self.__project_configuration.base_map_tile_size))

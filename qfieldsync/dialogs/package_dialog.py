@@ -41,7 +41,8 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.core import (
     QgsProject,
-    QgsApplication
+    QgsApplication,
+    QgsMapLayerRegistry
 )
 from qgis.gui import (
     QgsMessageBar
@@ -138,7 +139,7 @@ class PackageDialog(QDialog, FORM_CLASS):
         Show the info label if there are unconfigured layers
         """
         self.infoGroupBox.hide()
-        for layer in self.project.mapLayers().values():
+        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
             if not LayerSource(layer).is_configured:
                 self.infoGroupBox.show()
 

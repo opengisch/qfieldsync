@@ -4,7 +4,7 @@ import shutil
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
-    QgsDataSourceUri,
+    QgsDataSourceURI,
     QgsMapLayer
 )
 
@@ -94,7 +94,7 @@ class LayerSource(object):
     def is_file(self):
         if os.path.isfile(self.layer.source()):
             return True
-        elif os.path.isfile(QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).database()):
+        elif os.path.isfile(QgsDataSourceURI(self.layer.dataProvider().dataSourceUri()).database()):
             return True
         else:
             return False
@@ -153,7 +153,7 @@ class LayerSource(object):
         # Shapefiles... have the path in the source
         file_path = self.layer.source()
         # Spatialite have the path in the table part of the uri
-        uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
+        uri = QgsDataSourceURI(self.layer.dataProvider().dataSourceUri())
 
         if os.path.isfile(file_path):
             source_path, file_name = os.path.split(file_path)
@@ -182,7 +182,7 @@ class LayerSource(object):
         document = QDomDocument("style")
         map_layers_element = document.createElement("maplayers")
         map_layer_element = document.createElement("maplayer")
-        self.layer.writeLayerXml(map_layer_element, document)
+        self.layer.writeLayerXML(map_layer_element, document)
 
         # modify DOM element with new layer reference
         map_layer_element.firstChildElement("datasource").firstChild().setNodeValue(new_data_source)
@@ -190,5 +190,5 @@ class LayerSource(object):
         document.appendChild(map_layers_element)
 
         # reload layer definition
-        self.layer.readLayerXml(map_layer_element)
+        self.layer.readLayerXML(map_layer_element)
         self.layer.reload()
