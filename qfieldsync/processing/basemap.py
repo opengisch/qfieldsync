@@ -163,10 +163,10 @@ class TileSet():
         self.settings.setFlag(QgsMapSettings.Antialiasing, True)
         self.settings.setFlag(QgsMapSettings.RenderMapTile, True)
 
-        if QgsProject.instance().mapThemeCollection().hasMapTheme(map_theme):
-            self.settings.setLayers(QgsProject.instance().mapThemeCollection().mapThemeVisibleLayers(map_theme))
+        if QgsProject.instance().visibilityPresetCollection().hasPreset(map_theme):
+            self.settings.setLayers(QgsProject.instance().visibilityPresetCollection().presetVisibleLayers(map_theme))
             self.settings.setLayerStyleOverrides(
-                QgsProject.instance().mapThemeCollection().mapThemeStyleOverrides(map_theme))
+                QgsProject.instance().visibilityPresetCollection().presetStyleOverrides(map_theme))
         elif layer:
             self.settings.setLayers([layer])
         else:
