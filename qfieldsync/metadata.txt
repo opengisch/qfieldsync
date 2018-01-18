@@ -19,6 +19,10 @@ email=info@opengis.ch
 # Recommended items:
 
 changelog=
+    Release 1.1.0
+    -------------
+    * Drop dependency on qgis2compat
+
     Release 1.0.0
     -------------
     * Fix synchronisation and add translations
@@ -59,7 +63,7 @@ repository=https://github.com/opengisch/QFieldSync
 category=Plugins
 icon=resources/icon.png
 # experimental flag
-experimental=False
+experimental=True
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
