@@ -42,7 +42,6 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.core import (
     QgsProject,
-    QgsApplication,
     QgsMapLayerRegistry,
     QgsMessageLog
 )
