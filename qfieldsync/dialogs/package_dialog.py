@@ -43,7 +43,8 @@ from qgis.PyQt.QtWidgets import (
 from qgis.core import (
     QgsProject,
     QgsApplication,
-    QgsMapLayerRegistry
+    QgsMapLayerRegistry,
+    QgsMessageLog
 )
 from qgis.gui import (
     QgsMessageBar
@@ -180,4 +181,4 @@ class PackageDialog(QDialog, FORM_CLASS):
     def show_warning(self, _, message):
         # Most messages from the offline editing plugin are not important enough to show in the message bar.
         # In case we find important ones in the future, we need to filter them.
-        QgsApplication.instance().messageLog().logMessage(message, 'QFieldSync')
+        QgsMessageLog.instance().logMessage(message, 'QFieldSync')

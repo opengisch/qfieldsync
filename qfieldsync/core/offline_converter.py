@@ -179,7 +179,7 @@ class OfflineConverter(QObject):
         resample_filter = new_layer.resampleFilter()
         resample_filter.setZoomedInResampler(QgsCubicRasterResampler())
         resample_filter.setZoomedOutResampler(QgsBilinearRasterResampler())
-        self.project_configuration.project.addMapLayer(new_layer, False)
+        QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
         layer_tree = QgsProject.instance().layerTreeRoot()
         layer_tree.insertLayer(len(layer_tree.children()), new_layer)
 
