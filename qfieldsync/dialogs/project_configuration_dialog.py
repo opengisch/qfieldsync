@@ -55,6 +55,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         self.setupUi(self)
 
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
+        self.unsupportedLayersList = list()
 
         self.reloadProject()
 
@@ -62,10 +63,13 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         """
         Load all layers from the map layer registry into the table.
         """
+        self.unsupportedLayersList = list()
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
         for layer in QgsMapLayerRegistry.instance().mapLayers().values():
             layer_source = LayerSource(layer)
+            if not layer_source.is_supported:
+                self.unsupportedLayersList.append(layer_source)
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer.name())
@@ -106,6 +110,19 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
         self.tileSize.setText(str(self.__project_configuration.base_map_tile_size))
         self.onlyOfflineCopyFeaturesInAoi.setChecked(self.__project_configuration.offline_copy_only_aoi)
+
+        if self.unsupportedLayersList:
+            self.unsupportedLayers.setVisible(True)
+
+            unsupportedLayersText = '<b>{}</b><br>'.format(self.tr('Warning'))
+            unsupportedLayersText += self.tr("There are unsupported layers in your project. They will not be available on QField.")
+
+            unsupportedLayersText += '<ul>'
+            for layer in self.unsupportedLayersList:
+                unsupportedLayersText += '<li>' + '<b>' + layer.name + ':</b> ' + layer.warning
+            unsupportedLayersText += '<ul>'
+
+            self.unsupportedLayers.setText(unsupportedLayersText)
 
     def onAccepted(self):
         """

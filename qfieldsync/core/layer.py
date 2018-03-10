@@ -97,6 +97,8 @@ class LayerSource(object):
     def is_file(self):
         if os.path.isfile(self.layer.source()):
             return True
+        elif not self._has_data_provider():
+            return False
         elif os.path.isfile(QgsDataSourceURI(self.layer.dataProvider().dataSourceUri()).database()):
             return True
         else:
@@ -127,20 +129,25 @@ class LayerSource(object):
         # ecw raster
         elif self.layer.source().endswith('ecw'):
             return False
+        elif not self._has_data_provider():
+            return False
         else:
             return True
 
     @property
     def warning(self):
-        if self.layer.source().endswith('jp2', 'jpx'):
+        if self.layer.source().endswith('jp2') or self.layer.source().endswith('jpx'):
             return QCoreApplication.translate('DataSourceWarning',
                                               'JPEG2000 layers are not supported by QField.<br>You can rasterize '
                                               'them as basemap.'
                                               )
-        if self.layer.source().endswith('ecw'):
+        elif self.layer.source().endswith('ecw'):
             return QCoreApplication.translate('DataSourceWarning',
                                               'ECW layers are not supported by QField.<br>You can rasterize them '
                                               'as basemap.')
+        elif not self._has_data_provider():
+            return QCoreApplication.translate('DataSourceWarning', 'Plugin layers are not supported by QField.<br>'
+                                              'Use the basemap functionality or the XYZ provider.')
         return None
 
     def copy(self, target_path, keep_existent=False):
@@ -201,3 +208,10 @@ class LayerSource(object):
         # reload layer definition
         self.layer.readLayerXML(map_layer_element)
         self.layer.reload()
+
+    def _has_data_provider(self):
+        return hasattr(self.layer, 'dataProvider') # Plugin layers do not have a dataProvider (See #62)
+
+    @property
+    def name(self):
+        return self.layer.name()
