@@ -114,15 +114,15 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         if self.unsupportedLayersList:
             self.unsupportedLayers.setVisible(True)
 
-            unsupportedLayersText = '<b>{}</b><br>'.format(self.tr('Warning'))
-            unsupportedLayersText += self.tr("There are unsupported layers in your project. They will not be available on QField.")
+            unsuppoerted_layers_text = '<b>{}</b><br>'.format(self.tr('Warning'))
+            unsuppoerted_layers_text += self.tr("There are unsupported layers in your project. They will not be available on QField.")
 
-            unsupportedLayersText += '<ul>'
+            unsuppoerted_layers_text += '<ul>'
             for layer in self.unsupportedLayersList:
-                unsupportedLayersText += '<li>' + '<b>' + layer.name + ':</b> ' + layer.warning
-            unsupportedLayersText += '<ul>'
+                unsuppoerted_layers_text += '<li>' + '<b>' + layer.name + ':</b> ' + layer.warning
+            unsuppoerted_layers_text += '<ul>'
 
-            self.unsupportedLayers.setText(unsupportedLayersText)
+            self.unsupportedLayers.setText(unsuppoerted_layers_text)
 
     def onAccepted(self):
         """
