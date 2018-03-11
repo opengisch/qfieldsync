@@ -61,9 +61,14 @@ PEP8EXCLUDE=pydev,resources_rc.py,conf.py,third_party,ui
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
   SED = 'gsed'
-  QTPYTHONPATH=/usr/local/lib/qt-4/python2.7/site-packages
+  GREP = 'ggrep'
+  PYQT=/usr/local/lib/qt-4/python2.7/site-packages
+  PYQGIS=/usr/local/Cellar/qgis2/2.18.14/QGIS.app/Contents/Resources/python/
+  PYTHONPATH2=$(PYQGIS):$(PYQT)
+  PYTHONPATH3=/usr/local/Cellar/qgis3-dev/2.99/lib/python3.6/site-packages
 else
   SED = 'sed'
+  GREP = 'grep'
 endif
 
 COMPILED_UI_FILES = $(shell ls -1 ui/*.ui | $(SED) 's/\(.*\)\.ui/\1_ui4.py\n\1_ui5.py/g' | tr '\n' ' ')
@@ -72,7 +77,7 @@ HELP = help/build/html
 
 PLUGIN_UPLOAD = $(c)./../scripts/plugin_upload.py
 
-RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | $(SED) 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
+RESOURCE_SRC=$(shell $(GREP) '^ *<file' resources.qrc | $(SED) 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
 
 QGISDIR=.qgis2
 
@@ -85,7 +90,7 @@ compile: $(COMPILED_RESOURCE_FILES) $(COMPILED_UI_FILES)
 	pyrcc5 -o $*_rc5.py  $<
 
 ui/%_ui4.py ui/%_ui5.py : ui/%.ui $(UI_FILES)
-	PYTHONPATH=$(QTPYTHONPATH):$(PYTHONPATH) pyuic4 -o ui/$*_ui4.py  $<
+	PYTHONPATH=$(PYTHONPATH2):$(PYTHONPATH) python2 -m qgis.PyQt.uic.pyuic --from-imports -o ui/$*_ui4.py $<
 	pyuic5 -o ui/$*_ui5.py  $<
 
 %.qm : %.ts
@@ -124,6 +129,7 @@ deploy: compile doc transcompile
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(COMPILED_UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
 	cp -vf ui/__init__.py $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
+	cp -vf ui/resources_rc.py $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/ui
 	cp -vfr $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	# cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
