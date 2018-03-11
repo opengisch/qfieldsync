@@ -22,8 +22,6 @@
 import os
 import tempfile
 
-from processing.gui.AlgorithmExecutor import execute
-
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties, ProjectConfiguration
 from qgis.PyQt.QtCore import (
@@ -38,7 +36,10 @@ from qgis.core import (
     QgsProject,
     QgsRasterLayer,
     QgsCubicRasterResampler,
-    QgsBilinearRasterResampler
+    QgsBilinearRasterResampler,
+    QgsApplication,
+    QgsProcessingFeedback,
+    QgsProcessingContext
 )
 
 
@@ -158,7 +159,7 @@ class OfflineConverter(QObject):
         extent_string = '{},{},{},{}'.format(self.extent.xMinimum(), self.extent.xMaximum(), self.extent.yMinimum(),
                                              self.extent.yMaximum())
 
-        alg = QgsApplication.processingRegistry().createAlgorithmById('qgis:rasterize')
+        alg = QgsApplication.instance().processingRegistry().createAlgorithmById('qgis:rasterize')
 
         params = {
             'EXTENT': extent_string,
@@ -170,13 +171,14 @@ class OfflineConverter(QObject):
 
             'OUTPUT': os.path.join(self.export_folder, 'basemap.gpkg')
         }
-        feedback = None # TODO!!
-        context = context = dataobjects.createContext(feedback)
-        alg.run(params, context, feedback)
 
-        out = alg.outputs[0]
+        feedback = QgsProcessingFeedback()
+        context = QgsProcessingContext()
+        context.setProject(QgsProject.instance())
 
-        new_layer = QgsRasterLayer(out.value, self.tr('Basemap'))
+        results, ok = alg.run(params, context, feedback)
+
+        new_layer = QgsRasterLayer(results['OUTPUT'], self.tr('Basemap'))
 
         resample_filter = new_layer.resampleFilter()
         resample_filter.setZoomedInResampler(QgsCubicRasterResampler())
