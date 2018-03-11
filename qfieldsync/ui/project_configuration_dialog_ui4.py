@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/project_configuration_dialog.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created by: PyQt4 UI code generator 4.12.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_QFieldProjectConfigurationBase(object):
     def setupUi(self, QFieldProjectConfigurationBase):
         QFieldProjectConfigurationBase.setObjectName(_fromUtf8("QFieldProjectConfigurationBase"))
-        QFieldProjectConfigurationBase.resize(608, 510)
+        QFieldProjectConfigurationBase.resize(543, 510)
         self.gridLayout = QtGui.QGridLayout(QFieldProjectConfigurationBase)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.groupBox = QtGui.QGroupBox(QFieldProjectConfigurationBase)
@@ -48,12 +48,13 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.gridLayout.addWidget(self.buttonBox, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.buttonBox, 4, 0, 1, 1)
         self.tabWidget = QtGui.QTabWidget(QFieldProjectConfigurationBase)
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("tab"))
         self.gridLayout_4 = QtGui.QGridLayout(self.tab)
+        self.gridLayout_4.setMargin(0)
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
         self.createBaseMapGroupBox = QtGui.QGroupBox(self.tab)
         self.createBaseMapGroupBox.setCheckable(True)
@@ -99,6 +100,7 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.singleLayerPage.setSizePolicy(sizePolicy)
         self.singleLayerPage.setObjectName(_fromUtf8("singleLayerPage"))
         self.formLayout = QtGui.QFormLayout(self.singleLayerPage)
+        self.formLayout.setMargin(0)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.label_2 = QtGui.QLabel(self.singleLayerPage)
         self.label_2.setObjectName(_fromUtf8("label_2"))
@@ -127,18 +129,22 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.buttonGroup.addButton(self.singleLayerRadioButton)
         self.gridLayout_3.addWidget(self.singleLayerRadioButton, 0, 0, 1, 1)
         self.gridLayout_4.addWidget(self.createBaseMapGroupBox, 0, 0, 1, 1)
-        self.singleLayerRadioButton.raise_()
-        self.createBaseMapGroupBox.raise_()
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
         self.gridLayout_5 = QtGui.QGridLayout(self.tab_2)
+        self.gridLayout_5.setMargin(0)
         self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
         self.onlyOfflineCopyFeaturesInAoi = QtGui.QCheckBox(self.tab_2)
         self.onlyOfflineCopyFeaturesInAoi.setObjectName(_fromUtf8("onlyOfflineCopyFeaturesInAoi"))
         self.gridLayout_5.addWidget(self.onlyOfflineCopyFeaturesInAoi, 0, 0, 1, 1)
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
         self.gridLayout.addWidget(self.tabWidget, 1, 0, 1, 1)
+        self.unsupportedLayers = QtGui.QLabel(QFieldProjectConfigurationBase)
+        self.unsupportedLayers.setTextFormat(QtCore.Qt.RichText)
+        self.unsupportedLayers.setWordWrap(True)
+        self.unsupportedLayers.setObjectName(_fromUtf8("unsupportedLayers"))
+        self.gridLayout.addWidget(self.unsupportedLayers, 3, 0, 1, 1)
 
         self.retranslateUi(QFieldProjectConfigurationBase)
         self.tabWidget.setCurrentIndex(0)
@@ -168,5 +174,6 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("QFieldProjectConfigurationBase", "Base map", None))
         self.onlyOfflineCopyFeaturesInAoi.setText(_translate("QFieldProjectConfigurationBase", "Only copy features in area of interest", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("QFieldProjectConfigurationBase", "Offline editing", None))
+        self.unsupportedLayers.setText(_translate("QFieldProjectConfigurationBase", "Unsupported layers", None))
 
 from qgis.gui import QgsMapLayerComboBox
