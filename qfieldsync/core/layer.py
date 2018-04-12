@@ -6,7 +6,8 @@ from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsDataSourceUri,
-    QgsMapLayer
+    QgsMapLayer,
+    QgsReadWriteContext
 )
 
 # When copying files, if any of the extension in any of the groups is found,
@@ -180,10 +181,11 @@ class LayerSource(object):
         """
         Changes the datasource string of the layer
         """
+        context = QgsReadWriteContext()
         document = QDomDocument("style")
         map_layers_element = document.createElement("maplayers")
         map_layer_element = document.createElement("maplayer")
-        self.layer.writeLayerXml(map_layer_element, document)
+        self.layer.writeLayerXml(map_layer_element, document, context)
 
         # modify DOM element with new layer reference
         map_layer_element.firstChildElement("datasource").firstChild().setNodeValue(new_data_source)
