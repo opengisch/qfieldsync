@@ -193,5 +193,5 @@ class LayerSource(object):
         document.appendChild(map_layers_element)
 
         # reload layer definition
-        self.layer.readLayerXml(map_layer_element)
+        self.layer.readLayerXml(map_layer_element, context)
         self.layer.reload()
