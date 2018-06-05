@@ -105,6 +105,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhDialableCharactersOnly</set>
+            </property>
             <widget class="QWidget" name="mapThemePage">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -192,7 +195,7 @@
              <string>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</string>
             </property>
             <property name="inputMethodHints">
-             <set>Qt::ImhDigitsOnly</set>
+             <set>Qt::ImhFormattedNumbersOnly</set>
             </property>
             <property name="text">
              <string>100</string>
@@ -213,8 +216,6 @@
         </widget>
        </item>
       </layout>
-      <zorder>singleLayerRadioButton</zorder>
-      <zorder>createBaseMapGroupBox</zorder>
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
