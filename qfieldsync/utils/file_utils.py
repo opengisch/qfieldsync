@@ -23,6 +23,8 @@ import os
 import platform
 import subprocess
 
+from pathlib import Path
+
 from qfieldsync.utils.exceptions import NoProjectFoundError, QFieldSyncError
 
 
@@ -70,6 +72,7 @@ def open_folder(path):
     On Windows and Mac, this will open the parent directory
     and pre-select the actual folder.
     """
+    path = Path(path)
     if platform.system() == "Windows":
         subprocess.Popen(r'explorer /select,"{}"'.format(path))
     elif platform.system() == "Darwin":
