@@ -1,34 +1,48 @@
 language: python
-dist: trusty
-sudo: true
+
 python:
-- 2.7
-virtualenv:
-  system_site_packages: true
+  - 3.5
+
+addons:
+  apt:
+    packages:
+      - pyqt5-dev-tools
+
+git:
+  submodules: false
+
 before_install:
-- sudo apt-get -qq -y update
+  - >-
+    openssl aes-256-cbc
+    -K $encrypted_0b023fb27a48_key
+    -iv $encrypted_0b023fb27a48_iv
+    -in github_deploy_key.enc
+    -out github_deploy_key.out
+    -d
+  - chmod 600 github_deploy_key.out
+  - eval $(ssh-agent -s)
+  - ssh-add github_deploy_key.out
+  - git submodule update --init --recursive
+
 install:
-- printf "deb http://qgis.org/debian trusty main\ndeb-src http://qgis.org/debian trusty
-  main" | sudo tee /etc/apt/sources.list.d/qgis.list
-- sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 073D307A618E5811
-- sudo apt-get update
-- sudo apt-get install -y python-qgis python-nose pyqt4-dev-tools qgis
-- pip install -r requirements.txt
-before_script:
-- export QGIS_PREFIX_PATH=/usr
-- export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`/qfieldsync:${PYTHONPATH}
-- echo "PYTHONPATH:" ${PYTHONPATH}
-- export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
-script:
-- flake8 --jobs=1
-- xvfb-run nose2
-after_success:
-- scripts/ci/deploy.sh
+  - pip install -r requirements.txt
+
+jobs:
+  include:
+    - stage: deploy
+      if: tag IS present
+      script: plugin_ci/release/release.sh
 
 env:
   global:
-    - OSGEO_USERNAME=mkuhn
-    # Inject OSGEO_PASSWORD matching the OSGEO_USERNAME
+    # OSGEO credentials to release the plugin
     # Generate with the following command for proper special characters support
-    #     travis encrypt OSGEO_PASSWORD=\''Your super secret password!'\'
-    - secure: "bYNQfxCT3n7D6fj4hf/FZTJ7chMrah1maVHdlgIY5/f/S7IETL7TXSvxS8oRid5eeIACab560xQTK9uEKFdiOAAzNk3Y9GoauAlATtpRD3NCk7guqMhJgRmpTtkAuZ0FcYHOwGLNQQBlMmYf71Ys2/i4oNAH+7A14G6eQfGeiHVpOBxjhKfa/Z/PLGNDA4hbLhcRA2wQcGiWc6t3xiO4ln+jl/h1pUMbaFfYu3SCqiIRYtztMkgoQZGUSp7NB13YC2xzB8MO1Qy1/xNNioisxz9dgpEdLpuByjdqVfT+bBsm0M6XlPzxPFDUWrFzMefZqJlpXDgWUzYq6A+LP7d9+1fl1HE4PY+5M1nt0xWUlvRsJhcC/2gaOs/GpJiffm3vJgvJhuSxr23jJQcd5ZfjYVxFnXHvFFLjCqgIF/V0TBlOroNJ00hQerlAHkz5JTnXHJpsxCe74FCBUsrQMg/++HRTVANLtlUGp2OtYoeY6CYmcla5LEAI5mcB1xnoa9/GfjWMhIyJT5noGBeaACdqPdEgajDgnfa/UpfknRJJ7rFkHmH0ND6m20Kjma6LKZgPgkaqEMcHqUSNv5BbpB2f42jTSR+RUJNez7EfnG/VMeL5UKbL42gkKG+zRvAG5q2G3th9xP+WBLcFH3EBlhzjIGd9k7ceJr1xLDpXYR+o/h0="
+    # travis encrypt OSGEO_PASSWORD=\''Your super secret password!'\'
+    - OSGEO_USERNAME=m-kuhn
+    secure: "ibEhZvG5cDeP9WM2Pw+fM70RKou6sS76NECpUBkf2fN6ygBLPr43Bbl8z5EVhiBAatXQtaMGJQGv4NYHKYpJLxrqJoPmZnlkyMjZwy70AZk25sIIojeNZWczwJRlBlBvAWigpNpDVGn1+Mu3XAbarIrjpYgoKfb3PxH8uQn8YpXPx2YEmndRL4ZUevmQDxPVzRiis8rgr3AVb+oIzKcEdk+pl6MaulLprXQxCOjWFI3ejs2b8VyroZY06sDFoBtNLhXRBp6jzkQKSlmTubtJh/2XAT6Eow31ETwVzldqiqp18T4ipzGFj2a2D5txIfPrCnSxfP/jysf/OjRRQVtGQ3OxOy6+fG6CH55nt9/f/I/9bvJ9RB0OT0zPgr9TRwwy0pkrnF7ST2pyVjQvMSLBjDQu93wmN+ur+/KfOKLTVDdp277DwTsih59Fa4sTDIpP01VNA1s3H2klZxbPdI1TY51why7SMoQKCyw1Cm2nTqPGm8LN7bpLVQ73Et0RACzRDfdPOrN1luh4Fd8Kry45RHyO1+DnbuOzweW2uFwNxx7LdXO2886J53N7y90o/5H/d3CHQ40Wek5jMAzibYWbL2r7K1CStBRqAOAZaaWa4DAyv5pOeING4d5f4veyQMhkcu3774Ltq0X9wlL5pdVMlf7tDP5Xar5bwucePLdSsK0="
+
+    # GH_TOKEN for creating releases
+    # https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line
+    # authrize only "repo_deployment"
+    # travis encrypt GH_TOKEN="......"
+    secure: "LhFnNImE1ZajW9gzTXPew3jcX5RF5Yyfbhre2IvVRi7HbUBbax/oR4trAL6Zq+Q6YxMzuhcS6aGithVcr7p39u1YbIdzrj0h9XPWhuF5XlN8TQ7EedtY7fV2fuF3VUQwHdbnxnOMxmKoxSVyMF48F81v9JrGOQ2CupHHD0oT9hHPLMnbEoWnnQ68OxcZTEezOzOgNOCm9HtQaEYDc4mwiSiRbwpyuByXYYOYAFwfMtuXhamHjrHAvtQg66PBIVSN+i1XJokCNbucNeFSe22CEVc9fla1gbFWnj88lht96ezlIiOQUJeZY1WmWMM50iBdb96vRBaiZewo0FZzbu2wIxj3byxu5c+tjvi5VA+aDuQN4ianpg7+UY0kAiAu9RkIdO7ZfomEgNFSutK3YZ9ccW0rxEL7ubD63FvkMjLFYkoxqVS4i3d3rxvCekEZKKD/qaqX8bRoXTjQfrJz9+OZYqVmklHlE/JxZRtGbgMu5eimew5uB1np9mPAIEUoNc3FiYOpTZ9g8KLKIUfzGdqHcClV3DCzuqOdP8RXZe2d/yb4zmM5iqRnTsPj3Z7c5D4NJDdKuqy0u08LRhBiCCH0ZUF6t6MSgrA+EQtGiS6jTQWvAYeXTnHP/O3wbgWrMsTrIyn33aODJiTSkRJMgIb0Mg8RWgKmVf1eWOP8ib8cDXA="
