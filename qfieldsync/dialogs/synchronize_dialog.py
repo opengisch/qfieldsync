@@ -22,6 +22,7 @@
 """
 from __future__ import absolute_import
 
+from builtins import str
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import (
     QDialog,
@@ -73,7 +74,7 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
                                   "an offline project")
                 raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
-            self.iface.messageBar().pushWarning('Sync dialog', unicode(e))
+            self.iface.messageBar().pushWarning('Sync dialog', str(e))
         finally:
             self.progress_group.setEnabled(False)
 

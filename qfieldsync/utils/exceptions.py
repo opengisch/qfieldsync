@@ -20,7 +20,10 @@
 """
 
 # coding=utf-8
-from qgis.core import QgsMessageLog
+from qgis.core import (
+        QgsMessageLog,
+        Qgis
+)
 
 
 class QFieldSyncError(Exception):
@@ -49,7 +52,7 @@ class QFieldSyncError(Exception):
         if self.exception is not None:
             log_message = "\nException:\n %s" % self.long_message
 
-        QgsMessageLog.logMessage(log_message, tag, QgsMessageLog.CRITICAL)
+        QgsMessageLog.logMessage(log_message, tag, Qgis.Critical)
 
 
 class NoProjectFoundError(QFieldSyncError):

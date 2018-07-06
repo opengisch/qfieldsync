@@ -1,11 +1,13 @@
+from builtins import object
 import os
 import shutil
 
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
-    QgsDataSourceURI,
-    QgsMapLayer
+    QgsDataSourceUri,
+    QgsMapLayer,
+    QgsReadWriteContext
 )
 
 # When copying files, if any of the extension in any of the groups is found,
@@ -31,7 +33,7 @@ def get_file_extension_group(filename):
     return basename, [ext]
 
 
-class SyncAction:
+class SyncAction(object):
     """
     Enumeration of sync actions
     """
@@ -196,10 +198,11 @@ class LayerSource(object):
         """
         Changes the datasource string of the layer
         """
+        context = QgsReadWriteContext()
         document = QDomDocument("style")
         map_layers_element = document.createElement("maplayers")
         map_layer_element = document.createElement("maplayer")
-        self.layer.writeLayerXML(map_layer_element, document)
+        self.layer.writeLayerXml(map_layer_element, document, context)
 
         # modify DOM element with new layer reference
         map_layer_element.firstChildElement("datasource").firstChild().setNodeValue(new_data_source)
@@ -207,7 +210,7 @@ class LayerSource(object):
         document.appendChild(map_layers_element)
 
         # reload layer definition
-        self.layer.readLayerXML(map_layer_element)
+        self.layer.readLayerXml(map_layer_element, context)
         self.layer.reload()
 
     def _has_data_provider(self):

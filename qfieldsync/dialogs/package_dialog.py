@@ -20,6 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+from builtins import str
 import os
 
 from qfieldsync.core import (
@@ -42,11 +43,8 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.core import (
     QgsProject,
-    QgsMapLayerRegistry,
-    QgsMessageLog
-)
-from qgis.gui import (
-    QgsMessageBar
+    QgsApplication,
+    Qgis
 )
 from ..utils.file_utils import fileparts, open_folder
 from ..utils.qgis_utils import get_project_title
@@ -134,14 +132,14 @@ class PackageDialog(QDialog, FORM_CLASS):
         result_label.linkActivated.connect(lambda: open_folder(export_folder))
         result_label.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
 
-        self.iface.messageBar().pushWidget(result_label, QgsMessageBar.INFO, 0)
+        self.iface.messageBar().pushWidget(result_label, Qgis.Info, 0)
 
     def update_info_visibility(self):
         """
         Show the info label if there are unconfigured layers
         """
         self.infoGroupBox.hide()
-        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+        for layer in list(self.project.mapLayers().values()):
             if not LayerSource(layer).is_configured:
                 self.infoGroupBox.show()
 

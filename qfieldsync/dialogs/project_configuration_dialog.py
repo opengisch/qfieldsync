@@ -17,6 +17,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+from builtins import str
+from builtins import range
 from qfieldsync.core import ProjectConfiguration
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties
@@ -87,7 +89,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         self.unsupportedLayersList = list()
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        for layer in QgsMapLayerRegistry.instance().mapLayers().values():
+        for layer in list(self.project.mapLayers().values()):
             layer_source = LayerSource(layer)
             if not layer_source.is_supported:
                 self.unsupportedLayersList.append(layer_source)

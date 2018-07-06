@@ -22,8 +22,6 @@
 import os
 import tempfile
 
-import processing
-
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties, ProjectConfiguration
 from qgis.PyQt.QtCore import (
@@ -40,7 +38,9 @@ from qgis.core import (
     QgsRasterLayer,
     QgsCubicRasterResampler,
     QgsBilinearRasterResampler,
-    QgsMapLayerRegistry
+    QgsApplication,
+    QgsProcessingFeedback,
+    QgsProcessingContext
 )
 
 
@@ -91,7 +91,7 @@ class OfflineConverter(QObject):
             QApplication.setOverrideCursor(Qt.WaitCursor)
 
             self.__offline_layers = list()
-            self.__layers = QgsMapLayerRegistry.instance().mapLayers().values()
+            self.__layers = list(project.mapLayers().values())
 
             self.total_progress_updated.emit(0, 1, self.tr('Creating base map'))
             # Create the base map before layers are removed
@@ -163,18 +163,26 @@ class OfflineConverter(QObject):
         extent_string = '{},{},{},{}'.format(self.extent.xMinimum(), self.extent.xMaximum(), self.extent.yMinimum(),
                                              self.extent.yMaximum())
 
-        alg = processing.Processing.getAlgorithm('qfieldsync:basemap').getCopy()
+        alg = QgsApplication.instance().processingRegistry().createAlgorithmById('qgis:rasterize')
 
-        alg.setParameterValue('EXTENT', extent_string)
-        alg.setParameterValue('MAP_THEME', map_theme)
-        alg.setParameterValue('LAYER', layer)
-        alg.setParameterValue('MAP_UNITS_PER_PIXEL', map_units_per_pixel)
-        alg.setParameterValue('TILE_SIZE', tile_size)
-        alg.setOutputValue('OUTPUT_LAYER', os.path.join(self.export_folder, 'basemap.gpkg'))
-        alg.execute(progress=self.convertorProcessingProgress())
+        params = {
+            'EXTENT': extent_string,
+            'MAP_THEME': map_theme,
+            'LAYER': layer,
+            'MAP_UNITS_PER_PIXEL': map_units_per_pixel,
+            'TILE_SIZE': tile_size,
+            'MAKE_BACKGROUND_TRANSPARENT': False,
 
-        out = alg.outputs[0]
-        new_layer = QgsRasterLayer(out.value, self.tr('Basemap'))
+            'OUTPUT': os.path.join(self.export_folder, 'basemap.gpkg')
+        }
+
+        feedback = QgsProcessingFeedback()
+        context = QgsProcessingContext()
+        context.setProject(QgsProject.instance())
+
+        results, ok = alg.run(params, context, feedback)
+
+        new_layer = QgsRasterLayer(results['OUTPUT'], self.tr('Basemap'))
 
         resample_filter = new_layer.resampleFilter()
         resample_filter.setZoomedInResampler(QgsCubicRasterResampler())

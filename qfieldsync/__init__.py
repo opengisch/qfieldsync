@@ -22,6 +22,10 @@
  This script initializes the plugin, making it known to QGIS.
 """
 
+from __future__ import absolute_import
+
+import os
+import qgis.utils
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name

@@ -48,11 +48,6 @@ from qfieldsync.dialogs.preferences_dialog import PreferencesDialog
 from qfieldsync.dialogs.synchronize_dialog import SynchronizeDialog
 from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
 
-# Core processing imports
-from processing.core.Processing import Processing
-# Plugin provided processing extension
-from .processing.provider import QFieldProcessingProvider
-
 # noinspection PyUnresolvedReferences
 if qVersion()[0] == '4':
     import qfieldsync.resources_rc4  # pylint: disable=unused-import  # NOQA
@@ -220,9 +215,6 @@ class QFieldSync(object):
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
 
-        self.processing_provider = QFieldProcessingProvider()
-        Processing.addProvider(self.processing_provider)
-
         self.update_button_enabled_status()
 
     def unload(self):
@@ -234,8 +226,6 @@ class QFieldSync(object):
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-        Processing.removeProvider(self.processing_provider)
-        self.processing_provider = None
 
     def show_preferences_dialog(self):
         dlg = PreferencesDialog(self.preferences, self.iface.mainWindow())
