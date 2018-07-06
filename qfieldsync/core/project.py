@@ -1,8 +1,5 @@
 from builtins import object
-
-
 class ProjectProperties(object):
-
     def __init__(self):
         raise RuntimeError('This object holds only project property static variables')
 
@@ -15,7 +12,6 @@ class ProjectProperties(object):
     OFFLINE_COPY_ONLY_AOI = '/offlineCopyOnlyAoi'
 
     class BaseMapType(object):
-
         def __init__(self):
             raise RuntimeError('This object holds only project property static variables')
 
@@ -27,7 +23,6 @@ class ProjectConfiguration(object):
     """
     Manages the QFieldSync specific configuration for a QGIS project.
     """
-
     def __init__(self, project):
         self.project = project
 

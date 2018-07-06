@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/package_dialog.ui'
 #
-# Created by: PyQt5 UI code generator 5.9.1
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -59,6 +59,7 @@ class Ui_QFieldPackageDialogBase(object):
         self.widget.setSizePolicy(sizePolicy)
         self.widget.setObjectName("widget")
         self.gridLayout_6 = QtWidgets.QGridLayout(self.widget)
+        self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_6.setObjectName("gridLayout_6")
         self.yMaxLabel = QtWidgets.QLineEdit(self.widget)
         self.yMaxLabel.setEnabled(False)

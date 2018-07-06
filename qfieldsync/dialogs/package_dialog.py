@@ -30,7 +30,6 @@ from qfieldsync.core import (
 )
 from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
 from qgis.PyQt.QtCore import (
-    QCoreApplication,
     pyqtSlot,
     Qt
 )
@@ -55,7 +54,6 @@ FORM_CLASS = get_ui_class('package_dialog')
 
 
 class PackageDialog(QDialog, FORM_CLASS):
-
     def __init__(self, iface, preferences, project, offline_editing, parent=None):
         """Constructor."""
         super(PackageDialog, self).__init__(parent=parent)
@@ -104,8 +102,8 @@ class PackageDialog(QDialog, FORM_CLASS):
 
         export_folder = self.get_export_folder_from_dialog()
 
-        offline_convertor = OfflineConverter(self.iface, self.project, export_folder,
-                                             self.iface.mapCanvas().extent(), self.offline_editing)
+        offline_convertor = OfflineConverter(self.project, export_folder, self.iface.mapCanvas().extent(),
+                                             self.offline_editing)
 
         # progress connections
         offline_convertor.total_progress_updated.connect(self.update_total)
@@ -160,7 +158,6 @@ class PackageDialog(QDialog, FORM_CLASS):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
         self.statusLabel.setText(message)
-        QCoreApplication.processEvents()
 
     @pyqtSlot(int, int)
     def update_task(self, progress, max_progress):
@@ -179,4 +176,4 @@ class PackageDialog(QDialog, FORM_CLASS):
     def show_warning(self, _, message):
         # Most messages from the offline editing plugin are not important enough to show in the message bar.
         # In case we find important ones in the future, we need to filter them.
-        QgsMessageLog.instance().logMessage(message, 'QFieldSync')
+        QgsApplication.instance().messageLog().logMessage(message, 'QFieldSync')

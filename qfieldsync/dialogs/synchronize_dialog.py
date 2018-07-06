@@ -39,7 +39,6 @@ FORM_CLASS = get_ui_class('synchronize_dialog')
 
 
 class SynchronizeDialog(QDialog, FORM_CLASS):
-
     def __init__(self, iface, qfield_preferences, offline_editing, parent=None):
         """Constructor.
         :type qfield_preferences: qfieldsync.core.Preferences

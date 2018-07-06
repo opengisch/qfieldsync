@@ -51,15 +51,11 @@ class SyncAction(object):
     # - the file(s) will be copied
     NO_ACTION = "no_action"
 
-    # Keep already copied data or files if existent
-    KEEP_EXISTENT = 'keep_existent'
-
     # remove from the project
     REMOVE = "remove"
 
 
 class LayerSource(object):
-
     def __init__(self, layer):
         self.layer = layer
         self.read_layer()
@@ -100,9 +96,7 @@ class LayerSource(object):
     def is_file(self):
         if os.path.isfile(self.layer.source()):
             return True
-        elif not self._has_data_provider():
-            return False
-        elif os.path.isfile(QgsDataSourceURI(self.layer.dataProvider().dataSourceUri()).database()):
+        elif os.path.isfile(QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).database()):
             return True
         else:
             return False
@@ -113,7 +107,6 @@ class LayerSource(object):
 
         if self.is_file:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'copy')))
-            actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'copy if missing')))
         else:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'no action')))
 
@@ -132,34 +125,28 @@ class LayerSource(object):
         # ecw raster
         elif self.layer.source().endswith('ecw'):
             return False
-        elif not self._has_data_provider():
-            return False
         else:
             return True
 
     @property
     def warning(self):
-        if self.layer.source().endswith('jp2') or self.layer.source().endswith('jpx'):
+        if self.layer.source().endswith('jp2', 'jpx'):
             return QCoreApplication.translate('DataSourceWarning',
                                               'JPEG2000 layers are not supported by QField.<br>You can rasterize '
                                               'them as basemap.'
                                               )
-        elif self.layer.source().endswith('ecw'):
+        if self.layer.source().endswith('ecw'):
             return QCoreApplication.translate('DataSourceWarning',
                                               'ECW layers are not supported by QField.<br>You can rasterize them '
                                               'as basemap.')
-        elif not self._has_data_provider():
-            return QCoreApplication.translate('DataSourceWarning', 'Plugin layers are not supported by QField.<br>'
-                                              'Use the basemap functionality or the XYZ provider.')
         return None
 
-    def copy(self, target_path, keep_existent=False):
+    def copy(self, target_path):
         """
         Copy a layer to a new path and adjust its datasource.
 
         :param layer: The layer to copy
         :param target_path: A path to a folder into which the data will be copied
-        :param keep_existent: if True and target file already exists, keep it as it is
         """
         if not self.is_file:
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
@@ -168,16 +155,14 @@ class LayerSource(object):
         # Shapefiles... have the path in the source
         file_path = self.layer.source()
         # Spatialite have the path in the table part of the uri
-        uri = QgsDataSourceURI(self.layer.dataProvider().dataSourceUri())
+        uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
 
         if os.path.isfile(file_path):
             source_path, file_name = os.path.split(file_path)
             basename, extensions = get_file_extension_group(file_name)
             for ext in extensions:
-                dest_file = os.path.join(target_path, basename + ext)
-                if os.path.exists(os.path.join(source_path, basename + ext)) and \
-                        (keep_existent is False or not os.path.isfile(dest_file)):
-                    shutil.copy(os.path.join(source_path, basename + ext), dest_file)
+                if os.path.exists(os.path.join(source_path, basename + ext)):
+                    shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
             self._change_data_source(os.path.join(target_path, file_name))
         # Spatialite files have a uri
         else:
@@ -186,11 +171,9 @@ class LayerSource(object):
                 source_path, file_name = os.path.split(file_path)
                 basename, extensions = get_file_extension_group(file_name)
                 for ext in extensions:
-                    dest_file = os.path.join(target_path, basename + ext)
-                    if os.path.exists(os.path.join(source_path, basename + ext)) and \
-                            (keep_existent is False or not os.path.isfile(dest_file)):
+                    if os.path.exists(os.path.join(source_path, basename + ext)):
                         shutil.copy(os.path.join(source_path, basename + ext),
-                                    dest_file)
+                                    os.path.join(target_path, basename + ext))
                 uri.setDatabase(os.path.join(target_path, file_name))
                 self._change_data_source(uri.uri())
 
@@ -212,10 +195,3 @@ class LayerSource(object):
         # reload layer definition
         self.layer.readLayerXml(map_layer_element, context)
         self.layer.reload()
-
-    def _has_data_provider(self):
-        return hasattr(self.layer, 'dataProvider') # Plugin layers do not have a dataProvider (See #62)
-
-    @property
-    def name(self):
-        return self.layer.name()

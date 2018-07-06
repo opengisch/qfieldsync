@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/project_configuration_dialog.ui'
 #
-# Created by: PyQt5 UI code generator 5.9.1
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_QFieldProjectConfigurationBase(object):
     def setupUi(self, QFieldProjectConfigurationBase):
         QFieldProjectConfigurationBase.setObjectName("QFieldProjectConfigurationBase")
-        QFieldProjectConfigurationBase.resize(543, 510)
+        QFieldProjectConfigurationBase.resize(608, 510)
         self.gridLayout = QtWidgets.QGridLayout(QFieldProjectConfigurationBase)
         self.gridLayout.setObjectName("gridLayout")
         self.groupBox = QtWidgets.QGroupBox(QFieldProjectConfigurationBase)
@@ -20,17 +20,6 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.gridLayout_2 = QtWidgets.QGridLayout(self.groupBox)
         self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.multipleToggleButton = QtWidgets.QToolButton(self.groupBox)
-        self.multipleToggleButton.setText("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/plugins/qfieldsync/visibility.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.multipleToggleButton.setIcon(icon)
-        self.multipleToggleButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-        self.multipleToggleButton.setAutoRaise(True)
-        self.multipleToggleButton.setObjectName("multipleToggleButton")
-        self.gridLayout_2.addWidget(self.multipleToggleButton, 1, 1, 1, 1)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_2.addItem(spacerItem, 1, 0, 1, 1)
         self.layersTable = QtWidgets.QTableWidget(self.groupBox)
         self.layersTable.setObjectName("layersTable")
         self.layersTable.setColumnCount(2)
@@ -40,18 +29,19 @@ class Ui_QFieldProjectConfigurationBase(object):
         item = QtWidgets.QTableWidgetItem()
         self.layersTable.setHorizontalHeaderItem(1, item)
         self.layersTable.horizontalHeader().setStretchLastSection(True)
-        self.gridLayout_2.addWidget(self.layersTable, 2, 0, 1, 2)
+        self.gridLayout_2.addWidget(self.layersTable, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
         self.buttonBox = QtWidgets.QDialogButtonBox(QFieldProjectConfigurationBase)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
-        self.gridLayout.addWidget(self.buttonBox, 4, 0, 1, 1)
+        self.gridLayout.addWidget(self.buttonBox, 3, 0, 1, 1)
         self.tabWidget = QtWidgets.QTabWidget(QFieldProjectConfigurationBase)
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.tab)
+        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.createBaseMapGroupBox = QtWidgets.QGroupBox(self.tab)
         self.createBaseMapGroupBox.setCheckable(True)
@@ -97,6 +87,7 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.singleLayerPage.setSizePolicy(sizePolicy)
         self.singleLayerPage.setObjectName("singleLayerPage")
         self.formLayout = QtWidgets.QFormLayout(self.singleLayerPage)
+        self.formLayout.setContentsMargins(0, 0, 0, 0)
         self.formLayout.setObjectName("formLayout")
         self.label_2 = QtWidgets.QLabel(self.singleLayerPage)
         self.label_2.setObjectName("label_2")
@@ -125,21 +116,19 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.buttonGroup.addButton(self.singleLayerRadioButton)
         self.gridLayout_3.addWidget(self.singleLayerRadioButton, 0, 0, 1, 1)
         self.gridLayout_4.addWidget(self.createBaseMapGroupBox, 0, 0, 1, 1)
+        self.singleLayerRadioButton.raise_()
+        self.createBaseMapGroupBox.raise_()
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.gridLayout_5 = QtWidgets.QGridLayout(self.tab_2)
+        self.gridLayout_5.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_5.setObjectName("gridLayout_5")
         self.onlyOfflineCopyFeaturesInAoi = QtWidgets.QCheckBox(self.tab_2)
         self.onlyOfflineCopyFeaturesInAoi.setObjectName("onlyOfflineCopyFeaturesInAoi")
         self.gridLayout_5.addWidget(self.onlyOfflineCopyFeaturesInAoi, 0, 0, 1, 1)
         self.tabWidget.addTab(self.tab_2, "")
         self.gridLayout.addWidget(self.tabWidget, 1, 0, 1, 1)
-        self.unsupportedLayers = QtWidgets.QLabel(QFieldProjectConfigurationBase)
-        self.unsupportedLayers.setTextFormat(QtCore.Qt.RichText)
-        self.unsupportedLayers.setWordWrap(True)
-        self.unsupportedLayers.setObjectName("unsupportedLayers")
-        self.gridLayout.addWidget(self.unsupportedLayers, 3, 0, 1, 1)
 
         self.retranslateUi(QFieldProjectConfigurationBase)
         self.tabWidget.setCurrentIndex(0)
@@ -151,7 +140,6 @@ class Ui_QFieldProjectConfigurationBase(object):
         _translate = QtCore.QCoreApplication.translate
         QFieldProjectConfigurationBase.setWindowTitle(_translate("QFieldProjectConfigurationBase", "Configure Project for QField synchronisation"))
         self.groupBox.setTitle(_translate("QFieldProjectConfigurationBase", "Layers"))
-        self.multipleToggleButton.setToolTip(_translate("QFieldProjectConfigurationBase", "Toggle layers"))
         item = self.layersTable.horizontalHeaderItem(0)
         item.setText(_translate("QFieldProjectConfigurationBase", "Layer"))
         item = self.layersTable.horizontalHeaderItem(1)
@@ -171,7 +159,5 @@ class Ui_QFieldProjectConfigurationBase(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("QFieldProjectConfigurationBase", "Base map"))
         self.onlyOfflineCopyFeaturesInAoi.setText(_translate("QFieldProjectConfigurationBase", "Only copy features in area of interest"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("QFieldProjectConfigurationBase", "Offline editing"))
-        self.unsupportedLayers.setText(_translate("QFieldProjectConfigurationBase", "Unsupported layers"))
 
-from qgsmaplayercombobox import QgsMapLayerComboBox
-import resources_rc
+from qgis.gui import QgsMapLayerComboBox

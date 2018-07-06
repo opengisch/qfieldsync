@@ -33,7 +33,6 @@ FORM_CLASS = get_ui_class('preferences_dialog')
 
 
 class PreferencesDialog(QDialog, FORM_CLASS):
-
     def __init__(self, preferences, parent=None):
         """Constructor.
         :type preferences: qfieldsync.core.Preferences
