@@ -38,7 +38,7 @@ env:
     # OSGEO credentials to release the plugin
     # Generate with the following command for proper special characters support
     # travis encrypt OSGEO_PASSWORD=\''Your super secret password!'\'
-    - OSGEO_USERNAME=m-kuhn
+    - OSGEO_USERNAME=mkuhn
     - secure: "ibEhZvG5cDeP9WM2Pw+fM70RKou6sS76NECpUBkf2fN6ygBLPr43Bbl8z5EVhiBAatXQtaMGJQGv4NYHKYpJLxrqJoPmZnlkyMjZwy70AZk25sIIojeNZWczwJRlBlBvAWigpNpDVGn1+Mu3XAbarIrjpYgoKfb3PxH8uQn8YpXPx2YEmndRL4ZUevmQDxPVzRiis8rgr3AVb+oIzKcEdk+pl6MaulLprXQxCOjWFI3ejs2b8VyroZY06sDFoBtNLhXRBp6jzkQKSlmTubtJh/2XAT6Eow31ETwVzldqiqp18T4ipzGFj2a2D5txIfPrCnSxfP/jysf/OjRRQVtGQ3OxOy6+fG6CH55nt9/f/I/9bvJ9RB0OT0zPgr9TRwwy0pkrnF7ST2pyVjQvMSLBjDQu93wmN+ur+/KfOKLTVDdp277DwTsih59Fa4sTDIpP01VNA1s3H2klZxbPdI1TY51why7SMoQKCyw1Cm2nTqPGm8LN7bpLVQ73Et0RACzRDfdPOrN1luh4Fd8Kry45RHyO1+DnbuOzweW2uFwNxx7LdXO2886J53N7y90o/5H/d3CHQ40Wek5jMAzibYWbL2r7K1CStBRqAOAZaaWa4DAyv5pOeING4d5f4veyQMhkcu3774Ltq0X9wlL5pdVMlf7tDP5Xar5bwucePLdSsK0="
 
     # GH_TOKEN for creating releases
