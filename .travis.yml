@@ -12,16 +12,16 @@ git:
   submodules: false
 
 before_install:
-  - >-
-    openssl aes-256-cbc
-    -K $encrypted_0b023fb27a48_key
-    -iv $encrypted_0b023fb27a48_iv
-    -in github_deploy_key.enc
-    -out github_deploy_key.out
-    -d
-  - chmod 600 github_deploy_key.out
-  - eval $(ssh-agent -s)
-  - ssh-add github_deploy_key.out
+#  - >-
+#    openssl aes-256-cbc
+#    -K $encrypted_0b023fb27a48_key
+#    -iv $encrypted_0b023fb27a48_iv
+#    -in github_deploy_key.enc
+#    -out github_deploy_key.out
+#    -d
+#  - chmod 600 github_deploy_key.out
+#  - eval $(ssh-agent -s)
+#  - ssh-add github_deploy_key.out
   - git submodule update --init --recursive
 
 install:
@@ -29,6 +29,11 @@ install:
 
 jobs:
   include:
+    - stage: test
+      env:
+        QGIS_TEST_VERSION="latest"
+      script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
+
     - stage: deploy
       if: tag IS present
       script: plugin_ci/release/release.sh

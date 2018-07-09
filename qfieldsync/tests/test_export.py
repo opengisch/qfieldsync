@@ -25,7 +25,6 @@ import tempfile
 
 from qfieldsync.core.offline_converter import OfflineConverter
 from qfieldsync.tests.utilities import test_data_folder
-from qgis.PyQt.QtCore import QFileInfo
 from qgis.core import QgsProject, QgsRectangle, QgsOfflineEditing
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
@@ -66,5 +65,5 @@ class OfflineConverterTest(unittest.TestCase):
 
     def load_project(self, path):
         project = QgsProject.instance()
-        self.assertTrue(project.read(QFileInfo(path)))
+        self.assertTrue(project.read(path))
         return project
