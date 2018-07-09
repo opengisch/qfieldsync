@@ -29,6 +29,11 @@ install:
 
 jobs:
   include:
+    - stage: text
+      script:
+        - flake8 --jobs=1
+        - xvfb-run nose2
+
     - stage: deploy
       if: tag IS present
       script: plugin_ci/release/release.sh
