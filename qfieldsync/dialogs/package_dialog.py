@@ -54,6 +54,7 @@ FORM_CLASS = get_ui_class('package_dialog')
 
 
 class PackageDialog(QDialog, FORM_CLASS):
+
     def __init__(self, iface, preferences, project, offline_editing, parent=None):
         """Constructor."""
         super(PackageDialog, self).__init__(parent=parent)

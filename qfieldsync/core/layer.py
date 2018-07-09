@@ -56,6 +56,7 @@ class SyncAction(object):
 
 
 class LayerSource(object):
+
     def __init__(self, layer):
         self.layer = layer
         self.read_layer()
