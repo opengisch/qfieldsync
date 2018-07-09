@@ -29,10 +29,10 @@ install:
 
 jobs:
   include:
-    - stage: text
-      script:
-        - flake8 --jobs=1
-        - xvfb-run nose2
+    - stage: test
+      env:
+        QGIS_TEST_VERSION="latest"
+      script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
     - stage: deploy
       if: tag IS present
