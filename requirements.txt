@@ -3,3 +3,4 @@ pep8-naming
 flake8-respect-noqa
 nose2
 future
+transifex-client
