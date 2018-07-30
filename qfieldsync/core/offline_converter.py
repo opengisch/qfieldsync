@@ -31,7 +31,10 @@ from qgis.PyQt.QtCore import (
     pyqtSlot,
     QCoreApplication
 )
-from qgis.PyQt.QtWidgets import QApplication
+from qgis.PyQt.QtWidgets import (
+    QApplication,
+    QMessageBox
+)
 from qgis.core import (
     QgsProject,
     QgsRasterLayer,
@@ -41,6 +44,7 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsProcessingContext
 )
+import qgis
 
 
 class OfflineConverter(QObject):
@@ -94,6 +98,10 @@ class OfflineConverter(QObject):
             self.total_progress_updated.emit(0, 1, self.tr('Creating base map'))
             # Create the base map before layers are removed
             if self.project_configuration.create_base_map:
+                if 'processing' not in qgis.utils.plugins:
+                    QMessageBox.warning(None, self.tr('QFieldSync requires processing'), self.tr('Creating a basemap with QFieldSync requires the processing plugin to be enabled. Processing is not enabled on your system. Please go to Plugins > Manage and Install Plugins and enable processing.'))
+                    return
+
                 if self.project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
                     self.createBaseMapLayer(None, self.project_configuration.base_map_layer,
                                             self.project_configuration.base_map_tile_size,
