@@ -2,7 +2,7 @@
 host = https://www.transifex.com
 
 [qfieldsync.QFieldSync]
-source_file = i18n/QFieldSync_en.ts
+source_file = i18n/qfieldsync_en.ts
 source_lang = en
-file_filter = i18n/QFieldSync_<lang>.ts
+file_filter = i18n/qfieldsync_<lang>.ts
 type = QT
