@@ -139,6 +139,7 @@ class OfflineConverter(QObject):
                     if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
                                                                         offline_layer_ids,
                                                                         self.project_configuration.offline_copy_only_aoi, 1):
+                        raise Exception(self.tr("Error trying to convert layers to offline layers"))
             except AttributeError:
                 # Run the offline plugin for spatialite
                 spatialite_filename = "data.sqlite"
@@ -148,8 +149,6 @@ class OfflineConverter(QObject):
                                                                         offline_layer_ids,
                                                                         self.project_configuration.offline_copy_only_aoi):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
-
-
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(project_path)
