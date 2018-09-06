@@ -131,14 +131,25 @@ class OfflineConverter(QObject):
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             QgsProject.instance().write(project_path)
 
-            # Run the offline plugin
-            spatialite_filename = "data.sqlite"
-            if self.__offline_layers:
-                offline_layer_ids = [l.id() for l in self.__offline_layers]
-                if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
-                                                                    offline_layer_ids,
-                                                                    self.project_configuration.offline_copy_only_aoi):
-                    raise Exception(self.tr("Error trying to convert layers to offline layers"))
+            try:
+                # Run the offline plugin for gpkg
+                gpkg_filename = "data.gpkg"
+                if self.__offline_layers:
+                    offline_layer_ids = [l.id() for l in self.__offline_layers]
+                    if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
+                                                                        offline_layer_ids,
+                                                                        self.project_configuration.offline_copy_only_aoi, 1):
+            except AttributeError:
+                # Run the offline plugin for spatialite
+                spatialite_filename = "data.sqlite"
+                if self.__offline_layers:
+                    offline_layer_ids = [l.id() for l in self.__offline_layers]
+                    if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
+                                                                        offline_layer_ids,
+                                                                        self.project_configuration.offline_copy_only_aoi):
+                        raise Exception(self.tr("Error trying to convert layers to offline layers"))
+
+
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(project_path)
