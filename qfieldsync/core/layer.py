@@ -95,7 +95,8 @@ class LayerSource(object):
 
     @property
     def is_file(self):
-        if os.path.isfile(self.layer.source()):
+        # reading the part before | so it's valid when gpkg
+        if os.path.isfile(self.layer.source().split('|')[0]):
             return True
         elif os.path.isfile(QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).database()):
             return True
@@ -153,8 +154,8 @@ class LayerSource(object):
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
             return
 
-        # Shapefiles... have the path in the source
-        file_path = self.layer.source()
+        # Shapefiles and GeoPackages have the path in the source
+        file_path = self.layer.source().split('|')[0]
         # Spatialite have the path in the table part of the uri
         uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
 
