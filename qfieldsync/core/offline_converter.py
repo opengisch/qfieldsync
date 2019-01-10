@@ -128,6 +128,9 @@ class OfflineConverter(QObject):
 
             project_path = os.path.join(self.export_folder, project_filename + "_qfield.qgs")
 
+            # save the original project path
+            ProjectConfiguration(project).original_project_path = original_project_path
+
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             QgsProject.instance().write(project_path)
             try:
