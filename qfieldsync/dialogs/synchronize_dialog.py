@@ -29,6 +29,8 @@ from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QPushButton
 )
+from qgis.core import QgsProject
+from qfieldsync.core.project import ProjectConfiguration
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder
@@ -61,13 +63,21 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
         try:
             self.progress_group.setEnabled(True)
             qgs_file = get_project_in_folder(qfield_folder)
-            open_project(qgs_file)
+            project = QgsProject.instance()
+            project.clear()
+            project.read(qgs_file)
+            project.setFileName(qgs_file)
             self.offline_editing.progressStopped.connect(self.update_done)
             self.offline_editing.layerProgressUpdated.connect(self.update_total)
             self.offline_editing.progressModeSet.connect(self.update_mode)
             self.offline_editing.progressUpdated.connect(self.update_value)
             self.offline_editing.synchronize()
             if self.offline_editing_done:
+                original_project_path = ProjectConfiguration(project).original_project_path
+                if original_project_path:
+                    project.clear()
+                    project.read(original_project_path)
+                    project.setFileName(original_project_path)
                 self.close()
             else:
                 message = self.tr("The project you imported does not seem to be "
