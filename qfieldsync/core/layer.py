@@ -163,7 +163,7 @@ class LayerSource(object):
             source_path, file_name = os.path.split(file_path)
             basename, extensions = get_file_extension_group(file_name)
             for ext in extensions:
-                if os.path.exists(os.path.join(source_path, basename + ext)):
+                if os.path.exists(os.path.join(source_path, basename + ext)) and not os.path.exists(os.path.join(target_path, basename + ext)):
                     shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
             self._change_data_source(os.path.join(target_path, file_name))
         # Spatialite files have a uri
