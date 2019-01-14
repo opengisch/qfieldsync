@@ -72,8 +72,10 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
             if self.offline_editing_done:
                 original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
                 if original_project_path:
-                    open_project(original_project_path)
-                    self.iface.messageBar().pushInfo('Sync dialog', 'Opened original project')
+                    if open_project(original_project_path):
+                        self.iface.messageBar().pushInfo('Sync dialog', self.tr(u"Opened original project {}".format(original_project_path)))
+                    else:
+                        self.iface.messageBar().pushInfo('Sync dialog', self.tr(u"Did not open original project {}. Maybe it's not existing.".format(original_project_path)))
                 self.close()
             else:
                 message = self.tr("The project you imported does not seem to be "

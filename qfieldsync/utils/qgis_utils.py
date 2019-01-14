@@ -36,4 +36,4 @@ def get_project_title(proj):
 def open_project(fn):
     QgsProject.instance().clear()
     QgsProject.instance().setFileName(fn)
-    QgsProject.instance().read()
+    return QgsProject.instance().read()
