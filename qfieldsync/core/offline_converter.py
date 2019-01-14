@@ -112,6 +112,7 @@ class OfflineConverter(QObject):
                                             self.project_configuration.base_map_mupp)
 
             # Loop through all layers and copy/remove/offline them
+            copied_files = list()
             for current_layer_index, layer in enumerate(self.__layers):
                 self.total_progress_updated.emit(current_layer_index - len(self.__offline_layers), len(self.__layers),
                                                  self.tr('Copying layers'))
@@ -122,7 +123,8 @@ class OfflineConverter(QObject):
                         layer.selectByRect(self.extent)
                     self.__offline_layers.append(layer)
                 elif layer_source.action == SyncAction.NO_ACTION:
-                    layer_source.copy(self.export_folder)
+                    copied_files = layer_source.copy(self.export_folder, copied_files)
+                    print(copied_files)
                 elif layer_source.action == SyncAction.REMOVE:
                     project.removeMapLayer(layer)
 

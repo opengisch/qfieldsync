@@ -143,7 +143,7 @@ class LayerSource(object):
                                               'as basemap.')
         return None
 
-    def copy(self, target_path):
+    def copy(self, target_path, copied_files):
         """
         Copy a layer to a new path and adjust its datasource.
 
@@ -163,8 +163,9 @@ class LayerSource(object):
             source_path, file_name = os.path.split(file_path)
             basename, extensions = get_file_extension_group(file_name)
             for ext in extensions:
-                if os.path.exists(os.path.join(source_path, basename + ext)) and not os.path.exists(os.path.join(target_path, basename + ext)):
+                if os.path.exists(os.path.join(source_path, basename + ext)) and os.path.join(target_path, basename + ext) not in copied_files:
                     shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
+                    copied_files.append(os.path.join(target_path, basename + ext))
             self._change_data_source(os.path.join(target_path, file_name))
         # Spatialite files have a uri
         else:
@@ -178,6 +179,7 @@ class LayerSource(object):
                                     os.path.join(target_path, basename + ext))
                 uri.setDatabase(os.path.join(target_path, file_name))
                 self._change_data_source(uri.uri())
+        return copied_files
 
     def _change_data_source(self, new_data_source):
         """
