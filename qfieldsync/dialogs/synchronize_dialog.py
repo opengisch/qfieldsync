@@ -34,7 +34,7 @@ from qfieldsync.core.project import ProjectConfiguration
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum
-from qfieldsync.utils.qgis_utils import open_project
+from qfieldsync.utils.qgis_utils import open_project, last_import_checksum_of_project
 from qfieldsync.utils.qt_utils import get_ui_class, make_folder_selector
 
 FORM_CLASS = get_ui_class('synchronize_dialog')
@@ -63,7 +63,7 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
         try:
             self.progress_group.setEnabled(True)
 
-            if self.last_import_checksum_of_project(qfield_folder) and import_file_checksum(qfield_folder) == self.last_import_checksum_of_project(qfield_folder):
+            if last_import_checksum_of_project(qfield_folder) and import_file_checksum(qfield_folder) == last_import_checksum_of_project(qfield_folder):
                 message = self.tr("Data are already synchronized.")
                 raise NoProjectFoundError(message)
 
@@ -93,13 +93,6 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
             self.iface.messageBar().pushWarning('QFieldSync', str(e))
         finally:
             self.progress_group.setEnabled(False)
-
-    def last_import_checksum_of_project(self, folder):
-        qgs_file = get_project_in_folder(folder)
-        open_project(qgs_file)
-        original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
-        open_project(original_project_path)
-        return ProjectConfiguration(QgsProject.instance()).last_import_file_checksum
 
     @pyqtSlot(int, int)
     def update_total(self, current, layer_count):
