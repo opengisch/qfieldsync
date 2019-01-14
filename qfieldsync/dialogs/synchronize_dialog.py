@@ -29,6 +29,8 @@ from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QPushButton
 )
+from qgis.core import QgsProject
+from qfieldsync.core.project import ProjectConfiguration
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder
@@ -68,13 +70,19 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
             self.offline_editing.progressUpdated.connect(self.update_value)
             self.offline_editing.synchronize()
             if self.offline_editing_done:
+                original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
+                if original_project_path:
+                    if open_project(original_project_path):
+                        self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"Opened original project {}".format(original_project_path)))
+                    else:
+                        self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"The data has been synchronized successfully but the original project ({}) could not be opened. ".format(original_project_path)))
                 self.close()
             else:
                 message = self.tr("The project you imported does not seem to be "
                                   "an offline project")
                 raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
-            self.iface.messageBar().pushWarning('Sync dialog', str(e))
+            self.iface.messageBar().pushWarning('QFieldSync', str(e))
         finally:
             self.progress_group.setEnabled(False)
 
