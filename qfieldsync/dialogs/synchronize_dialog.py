@@ -82,7 +82,7 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
                                   "an offline project")
                 raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
-            self.iface.messageBar().pushWarning('Sync dialog', str(e))
+            self.iface.messageBar().pushWarning('QFieldSync', str(e))
         finally:
             self.progress_group.setEnabled(False)
 
