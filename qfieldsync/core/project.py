@@ -104,7 +104,7 @@ class ProjectConfiguration(object):
 
     @property
     def original_project_path(self):
-        original_project_path, _ = self.project.readBoolEntry('qfieldsync', ProjectProperties.ORIGINAL_PROJECT_PATH)
+        original_project_path, _ = self.project.readEntry('qfieldsync', ProjectProperties.ORIGINAL_PROJECT_PATH)
         return original_project_path
 
     @original_project_path.setter

@@ -63,21 +63,17 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
         try:
             self.progress_group.setEnabled(True)
             qgs_file = get_project_in_folder(qfield_folder)
-            project = QgsProject.instance()
-            project.clear()
-            project.read(qgs_file)
-            project.setFileName(qgs_file)
+            open_project(qgs_file)
             self.offline_editing.progressStopped.connect(self.update_done)
             self.offline_editing.layerProgressUpdated.connect(self.update_total)
             self.offline_editing.progressModeSet.connect(self.update_mode)
             self.offline_editing.progressUpdated.connect(self.update_value)
             self.offline_editing.synchronize()
             if self.offline_editing_done:
-                original_project_path = ProjectConfiguration(project).original_project_path
+                original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
                 if original_project_path:
-                    project.clear()
-                    project.read(original_project_path)
-                    project.setFileName(original_project_path)
+                    open_project(original_project_path)
+                    self.iface.messageBar().pushInfo('Sync dialog', 'Opened original project')
                 self.close()
             else:
                 message = self.tr("The project you imported does not seem to be "
