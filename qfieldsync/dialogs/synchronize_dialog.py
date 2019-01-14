@@ -73,7 +73,7 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
                 original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
                 if original_project_path:
                     if open_project(original_project_path):
-                        self.iface.messageBar().pushInfo('Sync dialog', self.tr(u"Opened original project {}".format(original_project_path)))
+                        self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"Opened original project {}".format(original_project_path)))
                     else:
                         self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"The data has been synchronized successfully but the original project ({}) could not be opened. ".format(original_project_path)))
                 self.close()
