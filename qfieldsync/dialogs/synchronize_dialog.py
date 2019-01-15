@@ -64,7 +64,7 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
             self.progress_group.setEnabled(True)
 
             if last_import_checksum_of_project(qfield_folder) and import_file_checksum(qfield_folder) == last_import_checksum_of_project(qfield_folder):
-                message = self.tr("Data are already synchronized.")
+                message = self.tr("Data from this file are already synchronized with the original project.")
                 raise NoProjectFoundError(message)
 
             qgs_file = get_project_in_folder(qfield_folder)
