@@ -86,5 +86,6 @@ def import_file_checksum(folder):
     path = os.path.join(folder, "data.gpkg")
     if not os.path.exists(path):
         path = os.path.join(folder, "data.sqlite")
-    file_data = open(path, 'rb').read()
+    with open(path, 'rb') as f:
+        file_data = f.read()
     return hashlib.md5(file_data).hexdigest()
