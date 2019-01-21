@@ -40,9 +40,9 @@ def open_project(fn):
     return QgsProject.instance().read()
 
 
-def last_import_checksum_of_project(folder):
+def import_checksums_of_project(folder):
     qgs_file = get_project_in_folder(folder)
     open_project(qgs_file)
     original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
     open_project(original_project_path)
-    return ProjectConfiguration(QgsProject.instance()).last_import_file_checksum
+    return ProjectConfiguration(QgsProject.instance()).imported_files_checksums

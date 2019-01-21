@@ -34,7 +34,7 @@ from qfieldsync.core.project import ProjectConfiguration
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum
-from qfieldsync.utils.qgis_utils import open_project, last_import_checksum_of_project
+from qfieldsync.utils.qgis_utils import open_project, import_checksums_of_project
 from qfieldsync.utils.qt_utils import get_ui_class, make_folder_selector
 
 FORM_CLASS = get_ui_class('synchronize_dialog')
@@ -62,11 +62,12 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
         qfield_folder = self.qfieldDir.text()
         try:
             self.progress_group.setEnabled(True)
+            current_import_file_checksum = import_file_checksum(qfield_folder)
+            imported_files_checksums = import_checksums_of_project(qfield_folder)
 
-            if last_import_checksum_of_project(qfield_folder) and import_file_checksum(qfield_folder) == last_import_checksum_of_project(qfield_folder):
+            if imported_files_checksums and current_import_file_checksum in imported_files_checksums:
                 message = self.tr("Data from this file are already synchronized with the original project.")
                 raise NoProjectFoundError(message)
-
             qgs_file = get_project_in_folder(qfield_folder)
             open_project(qgs_file)
             self.offline_editing.progressStopped.connect(self.update_done)
@@ -79,9 +80,11 @@ class SynchronizeDialog(QDialog, FORM_CLASS):
                 if original_project_path:
                     if open_project(original_project_path):
                         # save the data_file_checksum to the project and save it
-                        ProjectConfiguration(QgsProject.instance()).last_import_file_checksum = import_file_checksum(qfield_folder)
+                        imported_files_checksums.append(import_file_checksum(qfield_folder))
+                        ProjectConfiguration(QgsProject.instance()).imported_files_checksums = imported_files_checksums
                         QgsProject.instance().write()
                         self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"Opened original project {}".format(original_project_path)))
+                        print(imported_files_checksums)
                     else:
                         self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"The data has been synchronized successfully but the original project ({}) could not be opened. ".format(original_project_path)))
                 self.close()

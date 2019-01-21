@@ -14,7 +14,7 @@ class ProjectProperties(object):
     BASE_MAP_MUPP = '/baseMapMupp'
     OFFLINE_COPY_ONLY_AOI = '/offlineCopyOnlyAoi'
     ORIGINAL_PROJECT_PATH = '/originalProjectPath'
-    LAST_IMPORT_FILE_CHECKSUM = '/lastImportFileChecksum'
+    IMPORTED_FILES_CHECKSUMS = '/importedFilesChecksums'
 
     class BaseMapType(object):
 
@@ -113,10 +113,10 @@ class ProjectConfiguration(object):
         self.project.writeEntry('qfieldsync', ProjectProperties.ORIGINAL_PROJECT_PATH, value)
 
     @property
-    def last_import_file_checksum(self):
-        last_import_file_checksum, _ = self.project.readEntry('qfieldsync', ProjectProperties.LAST_IMPORT_FILE_CHECKSUM)
-        return last_import_file_checksum
+    def imported_files_checksums(self):
+        imported_files_checksums, _ = self.project.readListEntry('qfieldsync', ProjectProperties.IMPORTED_FILES_CHECKSUMS)
+        return imported_files_checksums
 
-    @last_import_file_checksum.setter
-    def last_import_file_checksum(self, value):
-        self.project.writeEntry('qfieldsync', ProjectProperties.LAST_IMPORT_FILE_CHECKSUM, value)
+    @imported_files_checksums.setter
+    def imported_files_checksums(self, value):
+        self.project.writeEntry('qfieldsync', ProjectProperties.IMPORTED_FILES_CHECKSUMS, value)
