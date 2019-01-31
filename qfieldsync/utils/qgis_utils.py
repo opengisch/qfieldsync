@@ -21,7 +21,8 @@
 
 from qgis.core import QgsProject
 
-from qfieldsync.utils.file_utils import fileparts
+from qfieldsync.utils.file_utils import fileparts, get_project_in_folder
+from qfieldsync.core.project import ProjectConfiguration
 
 
 def get_project_title(proj):
@@ -37,3 +38,11 @@ def open_project(fn):
     QgsProject.instance().clear()
     QgsProject.instance().setFileName(fn)
     return QgsProject.instance().read()
+
+
+def import_checksums_of_project(folder):
+    qgs_file = get_project_in_folder(folder)
+    open_project(qgs_file)
+    original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
+    open_project(original_project_path)
+    return ProjectConfiguration(QgsProject.instance()).imported_files_checksums
