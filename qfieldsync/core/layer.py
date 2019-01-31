@@ -95,7 +95,8 @@ class LayerSource(object):
 
     @property
     def is_file(self):
-        if os.path.isfile(self.layer.source()):
+        # reading the part before | so it's valid when gpkg
+        if os.path.isfile(self.layer.source().split('|')[0]):
             return True
         elif os.path.isfile(QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).database()):
             return True
@@ -142,7 +143,7 @@ class LayerSource(object):
                                               'as basemap.')
         return None
 
-    def copy(self, target_path):
+    def copy(self, target_path, copied_files):
         """
         Copy a layer to a new path and adjust its datasource.
 
@@ -153,8 +154,8 @@ class LayerSource(object):
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
             return
 
-        # Shapefiles... have the path in the source
-        file_path = self.layer.source()
+        # Shapefiles and GeoPackages have the path in the source
+        file_path = self.layer.source().split('|')[0]
         # Spatialite have the path in the table part of the uri
         uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
 
@@ -162,8 +163,9 @@ class LayerSource(object):
             source_path, file_name = os.path.split(file_path)
             basename, extensions = get_file_extension_group(file_name)
             for ext in extensions:
-                if os.path.exists(os.path.join(source_path, basename + ext)):
+                if os.path.exists(os.path.join(source_path, basename + ext)) and os.path.join(target_path, basename + ext) not in copied_files:
                     shutil.copy(os.path.join(source_path, basename + ext), os.path.join(target_path, basename + ext))
+                    copied_files.append(os.path.join(target_path, basename + ext))
             self._change_data_source(os.path.join(target_path, file_name))
         # Spatialite files have a uri
         else:
@@ -177,6 +179,7 @@ class LayerSource(object):
                                     os.path.join(target_path, basename + ext))
                 uri.setDatabase(os.path.join(target_path, file_name))
                 self._change_data_source(uri.uri())
+        return copied_files
 
     def _change_data_source(self, new_data_source):
         """
