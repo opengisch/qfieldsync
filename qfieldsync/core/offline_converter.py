@@ -210,9 +210,8 @@ class OfflineConverter(QObject):
 
     @pyqtSlot(int, int)
     def on_offline_editing_next_layer(self, layer_index, layer_count):
-        self.total_progress_updated.emit(layer_index, layer_count, self.tr(u'Packaging layer {layer_name}'.format(
-            layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
-            layer_count=layer_count)))
+        msg = self.tr(u'Packaging layer {layer_name}').format(layer_name=self.__offline_layers[layer_index - 1].name())
+        self.total_progress_updated.emit(layer_index, layer_count, msg)
 
     @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
     def on_offline_editing_max_changed(self, _, mode_count):
