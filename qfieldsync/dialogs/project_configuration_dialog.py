@@ -31,13 +31,7 @@ from qgis.PyQt.QtWidgets import (
     QMenu,
     QAction
 )
-from qgis.core import (
-    QgsProject,
-    QgsMapLayerRegistry
-)
-from qgis.gui import (
-    QgsMapLayerProxyModel
-)
+from qgis.core import QgsProject, QgsMapLayerProxyModel
 from ..utils.qt_utils import get_ui_class
 
 FORM_CLASS = get_ui_class('project_configuration_dialog')
@@ -113,7 +107,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
         self.layersTable.setSortingEnabled(True)
 
         # Load Map Themes
-        for theme in self.project.visibilityPresetCollection().presets():
+        for theme in self.project.mapThemeCollection().mapThemes():
             self.mapThemeComboBox.addItem(theme)
 
         self.layerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
@@ -128,7 +122,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
 
         self.mapThemeComboBox.setCurrentIndex(
             self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme))
-        layer = QgsMapLayerRegistry.instance().mapLayer(self.__project_configuration.base_map_layer)
+        layer = QgsProject.instance().mapLayer(self.__project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
         self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
         self.tileSize.setText(str(self.__project_configuration.base_map_tile_size))
@@ -210,7 +204,7 @@ class ProjectConfigurationDialog(QDialog, FORM_CLASS):
                     layer_source.apply()
         # based on visibility
         elif action in (self.remove_hidden_action, self.add_visible_copy_action, self.add_visible_offline_action):
-            visible = Qt.UnChecked if action == self.remove_hidden_action else Qt.Checked
+            visible = Qt.Unchecked if action == self.remove_hidden_action else Qt.Checked
             root = QgsProject.instance().layerTreeRoot()
             for layer in QgsProject.instance().mapLayers().values():
                 node = root.findLayer(layer.id())
