@@ -158,4 +158,9 @@ atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
-fabric.properties
+fabric.propertiesi
+
+
+# My super new category
+.DS_Store
+
