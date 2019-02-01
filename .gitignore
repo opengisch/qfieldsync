@@ -158,7 +158,7 @@ atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
-fabric.propertiesi
+fabric.properties
 
 
 # My super new category
