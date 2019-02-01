@@ -112,7 +112,7 @@ class LayerSource(object):
 
         if self.is_file:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'copy')))
-            actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'copy if missing')))
+            actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'keep existent (copy if missing)')))
         else:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'no action')))
 
