@@ -125,7 +125,7 @@ class OfflineConverter(QObject):
                 elif layer_source.action == SyncAction.NO_ACTION:
                     copied_files = layer_source.copy(self.export_folder, copied_files)
                 elif layer_source.action == SyncAction.KEEP_EXISTENT:
-                    layer_source.copy(self.export_folder, True)
+                    layer_source.copy(self.export_folder, copied_files, True)
                 elif layer_source.action == SyncAction.REMOVE:
                     project.removeMapLayer(layer)
 
