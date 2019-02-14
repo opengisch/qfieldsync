@@ -13,6 +13,8 @@ class ProjectProperties(object):
     BASE_MAP_TILE_SIZE = '/baseMapTileSize'
     BASE_MAP_MUPP = '/baseMapMupp'
     OFFLINE_COPY_ONLY_AOI = '/offlineCopyOnlyAoi'
+    ORIGINAL_PROJECT_PATH = '/originalProjectPath'
+    IMPORTED_FILES_CHECKSUMS = '/importedFilesChecksums'
 
     class BaseMapType(object):
 
@@ -100,3 +102,21 @@ class ProjectConfiguration(object):
     @offline_copy_only_aoi.setter
     def offline_copy_only_aoi(self, value):
         self.project.writeEntry('qfieldsync', ProjectProperties.OFFLINE_COPY_ONLY_AOI, value)
+
+    @property
+    def original_project_path(self):
+        original_project_path, _ = self.project.readEntry('qfieldsync', ProjectProperties.ORIGINAL_PROJECT_PATH)
+        return original_project_path
+
+    @original_project_path.setter
+    def original_project_path(self, value):
+        self.project.writeEntry('qfieldsync', ProjectProperties.ORIGINAL_PROJECT_PATH, value)
+
+    @property
+    def imported_files_checksums(self):
+        imported_files_checksums, _ = self.project.readListEntry('qfieldsync', ProjectProperties.IMPORTED_FILES_CHECKSUMS)
+        return imported_files_checksums
+
+    @imported_files_checksums.setter
+    def imported_files_checksums(self, value):
+        self.project.writeEntry('qfieldsync', ProjectProperties.IMPORTED_FILES_CHECKSUMS, value)

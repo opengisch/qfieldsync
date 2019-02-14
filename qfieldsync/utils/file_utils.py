@@ -22,6 +22,7 @@
 import os
 import platform
 import subprocess
+import hashlib
 
 from pathlib import Path
 
@@ -79,3 +80,12 @@ def open_folder(path):
         subprocess.Popen(["open", '-R', path])
     else:
         subprocess.Popen(["xdg-open", path])
+
+
+def import_file_checksum(folder):
+    path = os.path.join(folder, "data.gpkg")
+    if not os.path.exists(path):
+        path = os.path.join(folder, "data.sqlite")
+    with open(path, 'rb') as f:
+        file_data = f.read()
+    return hashlib.md5(file_data).hexdigest()

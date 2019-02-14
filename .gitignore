@@ -159,3 +159,8 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+
+# My super new category
+.DS_Store
+

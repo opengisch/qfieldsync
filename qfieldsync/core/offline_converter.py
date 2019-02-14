@@ -112,6 +112,7 @@ class OfflineConverter(QObject):
                                             self.project_configuration.base_map_mupp)
 
             # Loop through all layers and copy/remove/offline them
+            copied_files = list()
             for current_layer_index, layer in enumerate(self.__layers):
                 self.total_progress_updated.emit(current_layer_index - len(self.__offline_layers), len(self.__layers),
                                                  self.tr('Copying layers'))
@@ -122,11 +123,16 @@ class OfflineConverter(QObject):
                         layer.selectByRect(self.extent)
                     self.__offline_layers.append(layer)
                 elif layer_source.action == SyncAction.NO_ACTION:
-                    layer_source.copy(self.export_folder)
+                    copied_files = layer_source.copy(self.export_folder, copied_files)
+                elif layer_source.action == SyncAction.KEEP_EXISTENT:
+                    layer_source.copy(self.export_folder, copied_files, True)
                 elif layer_source.action == SyncAction.REMOVE:
                     project.removeMapLayer(layer)
 
             project_path = os.path.join(self.export_folder, project_filename + "_qfield.qgs")
+
+            # save the original project path
+            ProjectConfiguration(project).original_project_path = original_project_path
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             QgsProject.instance().write(project_path)
@@ -206,9 +212,8 @@ class OfflineConverter(QObject):
 
     @pyqtSlot(int, int)
     def on_offline_editing_next_layer(self, layer_index, layer_count):
-        self.total_progress_updated.emit(layer_index, layer_count, self.tr(u'Packaging layer {layer_name}'.format(
-            layer_name=self.__offline_layers[layer_index - 1].name(), layer_index=layer_index,
-            layer_count=layer_count)))
+        msg = self.tr(u'Packaging layer {layer_name}').format(layer_name=self.__offline_layers[layer_index - 1].name())
+        self.total_progress_updated.emit(layer_index, layer_count, msg)
 
     @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
     def on_offline_editing_max_changed(self, _, mode_count):
