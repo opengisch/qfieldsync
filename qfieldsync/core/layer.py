@@ -159,8 +159,12 @@ class LayerSource(object):
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
             return
 
+        layer_name_suffix = ''
         # Shapefiles and GeoPackages have the path in the source
-        file_path = self.layer.source().split('|')[0]
+        uri_parts = self.layer.source().split('|', 1)
+        file_path = uri_parts[0]
+        if len(uri_parts):
+            layer_name_suffix = uri_parts[1]
         # Spatialite have the path in the table part of the uri
         uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
 
@@ -172,7 +176,11 @@ class LayerSource(object):
                 if os.path.exists(os.path.join(source_path, basename + ext)) and \
                         (keep_existent is False or not os.path.isfile(dest_file)):
                     shutil.copy(os.path.join(source_path, basename + ext), dest_file)
-            self._change_data_source(os.path.join(target_path, file_name))
+
+            new_source = os.path.join(target_path, file_name)
+            if layer_name_suffix:
+                new_source = new_source + '|' + layer_name_suffix
+            self._change_data_source(new_source)
         # Spatialite files have a uri
         else:
             file_path = uri.database()
