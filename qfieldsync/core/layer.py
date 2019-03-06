@@ -163,7 +163,7 @@ class LayerSource(object):
         # Shapefiles and GeoPackages have the path in the source
         uri_parts = self.layer.source().split('|', 1)
         file_path = uri_parts[0]
-        if len(uri_parts):
+        if len(uri_parts) > 1:
             layer_name_suffix = uri_parts[1]
         # Spatialite have the path in the table part of the uri
         uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
