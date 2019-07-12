@@ -74,7 +74,12 @@ class QFieldSync(object):
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QLocale(QSettings().value('locale/userLocale'))
+        locale_str = QSettings().value('locale/userLocale')
+        if isinstance(locale_str, str):
+            locale = QLocale(locale_str)
+        else:
+            locale = QLocale()
+
         locale_path = os.path.join(self.plugin_dir, 'i18n')
         self.translator = QTranslator()
         self.translator.load(locale, 'QFieldSync', '_', locale_path)
