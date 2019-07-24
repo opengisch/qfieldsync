@@ -147,6 +147,10 @@ class LayerSource(object):
                                               'as basemap.')
         return None
 
+    @property
+    def name(self):
+        return self.layer.name()
+
     def copy(self, target_path, copied_files, keep_existent=False):
         """
         Copy a layer to a new path and adjust its datasource.
