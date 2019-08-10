@@ -82,7 +82,7 @@ class QFieldSync(object):
 
         locale_path = os.path.join(self.plugin_dir, 'i18n')
         self.translator = QTranslator()
-        self.translator.load(locale, 'QFieldSync', '_', locale_path)
+        self.translator.load(locale, 'qfieldsync', '_', locale_path)
 
         QCoreApplication.installTranslator(self.translator)
 
