@@ -13,9 +13,8 @@ from qgis.core import (
 # When copying files, if any of the extension in any of the groups is found,
 # other files with the same extension in the same folder will be copied as well.
 file_extension_groups = [
-    ['.shp', '.shx', '.dbf', '.sbx', '.sbn', '.shp.xml', '.qix']
+    ['.shp', '.shx', '.dbf', '.sbx', '.sbn', '.shp.xml', '.prj','.cpg','.qpj','.qix']['.tab','.dat','.map','.xls','.xlsx','.id','.ind','.wks','.dbf']['.png','.pgw']['.jpg','.jgw']['.tif','.tfw']
 ]
-
 
 def get_file_extension_group(filename):
     """
