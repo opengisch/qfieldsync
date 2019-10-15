@@ -17,7 +17,7 @@ file_extension_groups = [
     ['.tab','.dat','.map','.xls','.xlsx','.id','.ind','.wks','.dbf'],
     ['.png','.pgw'],
     ['.jpg','.jgw'],
-    ['.tif','.tfw']
+    ['.tif','.tfw','.wld']
 ]
 
 def get_file_extension_group(filename):
