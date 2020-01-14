@@ -20,9 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from __future__ import absolute_import
-
-from builtins import str
+import os
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import (
     QDialog,
@@ -30,17 +28,19 @@ from qgis.PyQt.QtWidgets import (
     QPushButton
 )
 from qgis.core import QgsProject
+from qgis.PyQt.uic import loadUiType
+
 from qfieldsync.core.project import ProjectConfiguration
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum
 from qfieldsync.utils.qgis_utils import open_project, import_checksums_of_project
-from qfieldsync.utils.qt_utils import get_ui_class, make_folder_selector
+from qfieldsync.utils.qt_utils import make_folder_selector
 
-FORM_CLASS = get_ui_class('synchronize_dialog')
+DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/synchronize_dialog.ui'))
 
 
-class SynchronizeDialog(QDialog, FORM_CLASS):
+class SynchronizeDialog(QDialog, DialogUi):
 
     def __init__(self, iface, qfield_preferences, offline_editing, parent=None):
         """Constructor.

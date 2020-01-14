@@ -20,19 +20,18 @@
  *                                                                         *
  ***************************************************************************/
 """
-from __future__ import absolute_import
-from __future__ import print_function
 
+import os
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QDialog
 
-from qfieldsync.utils.qt_utils import get_ui_class
+from qgis.PyQt.uic import loadUiType
 from qfieldsync.utils.qt_utils import make_folder_selector
 
-FORM_CLASS = get_ui_class('preferences_dialog')
+DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/preferences_dialog.ui'))
 
 
-class PreferencesDialog(QDialog, FORM_CLASS):
+class PreferencesDialog(QDialog, DialogUi):
 
     def __init__(self, preferences, parent=None):
         """Constructor.

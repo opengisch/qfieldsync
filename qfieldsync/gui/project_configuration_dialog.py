@@ -17,8 +17,8 @@
  *                                                                         *
  ***************************************************************************/
 """
-from builtins import str
-from builtins import range
+import os
+
 from qfieldsync.core import ProjectConfiguration
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties
@@ -32,12 +32,12 @@ from qgis.PyQt.QtWidgets import (
     QAction
 )
 from qgis.core import QgsProject, QgsMapLayerProxyModel
-from ..utils.qt_utils import get_ui_class
+from qgis.PyQt.uic import loadUiType
 
-FORM_CLASS = get_ui_class('project_configuration_dialog')
+DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/project_configuration_dialog.ui'))
 
 
-class ProjectConfigurationDialog(QDialog, FORM_CLASS):
+class ProjectConfigurationDialog(QDialog, DialogUi):
     """
     Configuration dialog for QFieldSync on a particular project.
     """

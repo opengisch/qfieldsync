@@ -20,7 +20,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-from builtins import str
 import os
 
 from qfieldsync.core import (
@@ -45,15 +44,16 @@ from qgis.core import (
     QgsApplication,
     Qgis
 )
+from qgis.PyQt.uic import loadUiType
 from ..utils.file_utils import fileparts, open_folder
 from ..utils.qgis_utils import get_project_title
-from ..utils.qt_utils import get_ui_class
 from ..utils.qt_utils import make_folder_selector
 
-FORM_CLASS = get_ui_class('package_dialog')
+
+DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/package_dialog.ui'))
 
 
-class PackageDialog(QDialog, FORM_CLASS):
+class PackageDialog(QDialog, DialogUi):
 
     def __init__(self, iface, preferences, project, offline_editing, parent=None):
         """Constructor."""
