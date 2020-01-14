@@ -1,4 +1,3 @@
-from builtins import object
 
 
 class ProjectProperties(object):

@@ -1,6 +1,3 @@
-from __future__ import print_function
-# GUI messages options
-from builtins import object
 import os
 
 from qgis.PyQt.QtCore import QSettings
