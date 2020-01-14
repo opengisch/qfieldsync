@@ -19,7 +19,7 @@
  ***************************************************************************/
 """
 from qfieldsync.core import Preferences
-from qfieldsync.dialogs.synchronize_dialog import SynchronizeDialog
+from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 from qgis.core import QgsOfflineEditing

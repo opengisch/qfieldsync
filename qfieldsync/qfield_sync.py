@@ -43,10 +43,10 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsOfflineEditing, QgsProject
 
-from qfieldsync.dialogs.package_dialog import PackageDialog
-from qfieldsync.dialogs.preferences_dialog import PreferencesDialog
-from qfieldsync.dialogs.synchronize_dialog import SynchronizeDialog
-from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
+from qfieldsync.gui.package_dialog import PackageDialog
+from qfieldsync.gui.preferences_dialog import PreferencesDialog
+from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
+from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 
 # noinspection PyUnresolvedReferences
 if qVersion()[0] == '4':

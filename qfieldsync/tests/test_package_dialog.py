@@ -20,7 +20,7 @@
 """
 
 from qfieldsync.core import Preferences
-from qfieldsync.dialogs.package_dialog import PackageDialog
+from qfieldsync.gui.package_dialog import PackageDialog
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 from qgis.core import QgsOfflineEditing, QgsProject

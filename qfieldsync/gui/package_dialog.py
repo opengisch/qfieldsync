@@ -28,7 +28,7 @@ from qfieldsync.core import (
     ProjectConfiguration,
     OfflineConverter
 )
-from qfieldsync.dialogs.project_configuration_dialog import ProjectConfigurationDialog
+from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qgis.PyQt.QtCore import (
     pyqtSlot,
     Qt
