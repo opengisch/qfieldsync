@@ -21,19 +21,12 @@
  ***************************************************************************/
 """
 
-from __future__ import absolute_import
-
 from qfieldsync.core import Preferences
 
-try:
-    from builtins import object
-except:
-    pass
 
 import os.path
 from qgis.PyQt.QtCore import (
     QTranslator,
-    qVersion,
     QCoreApplication,
     QSettings,
     Qt,
@@ -48,11 +41,7 @@ from qfieldsync.gui.preferences_dialog import PreferencesDialog
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 
-# noinspection PyUnresolvedReferences
-if qVersion()[0] == '4':
-    import qfieldsync.resources_rc4  # pylint: disable=unused-import  # NOQA
-else:
-    import qfieldsync.resources_rc5  # pylint: disable=unused-import  # NOQA
+import qfieldsync.resources_rc  # pylint: disable=unused-import  # NOQA
 
 
 class QFieldSync(object):
