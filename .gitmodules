@@ -1,3 +1,0 @@
-[submodule "plugin_ci"]
-	path = plugin_ci
-	url = https://github.com/opengisch/plugin_ci.git
