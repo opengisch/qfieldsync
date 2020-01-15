@@ -164,5 +164,6 @@ fabric.properties
 # My super new category
 .DS_Store
 
-resources_rc.py
+qfield-sync.*.zip
+qfieldsync/resources_rc.py
 

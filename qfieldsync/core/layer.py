@@ -1,5 +1,6 @@
 import os
 import shutil
+import json
 
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtCore import QCoreApplication
@@ -8,6 +9,9 @@ from qgis.core import (
     QgsMapLayer,
     QgsReadWriteContext
 )
+
+from qfieldsync.utils.file_utils import slugify
+
 
 # When copying files, if any of the extension in any of the groups is found,
 # other files with the same extension in the same folder will be copied as well.
@@ -18,6 +22,7 @@ file_extension_groups = [
     ['.jpg','.jgw'],
     ['.tif','.tfw','.wld']
 ]
+
 
 def get_file_extension_group(filename):
     """
@@ -64,13 +69,17 @@ class LayerSource(object):
 
     def __init__(self, layer):
         self.layer = layer
+        self._action = None
+        self._photo_naming = {}
         self.read_layer()
 
     def read_layer(self):
         self._action = self.layer.customProperty('QFieldSync/action')
+        self._photo_naming = json.loads(self.layer.customProperty('QFieldSync/photo_naming') or '{}')
 
     def apply(self):
         self.layer.setCustomProperty('QFieldSync/action', self.action)
+        self.layer.setCustomProperty('QFieldSync/photo_naming', json.dumps(self._photo_naming))
 
     @property
     def action(self):
@@ -82,6 +91,12 @@ class LayerSource(object):
     @action.setter
     def action(self, action):
         self._action = action
+
+    def photo_naming(self, field_name: str) -> str:
+        return self._photo_naming.get(field_name, "'{}_'||now()".format(slugify(self.layer.name())))
+
+    def set_photo_naming(self, field_name: str, expression: str):
+        self._photo_naming[field_name] = expression
 
     @property
     def default_action(self):

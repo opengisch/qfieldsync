@@ -20,7 +20,16 @@
       <string>Layers</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item row="1" column="1">
@@ -32,8 +41,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
-          <normaloff>:/plugins/qfieldsync/visibility.svg</normaloff>:/plugins/qfieldsync/visibility.svg</iconset>
+         <iconset>
+          <normaloff>../resources/visibility.svg</normaloff>../resources/visibility.svg</iconset>
         </property>
         <property name="popupMode">
          <enum>QToolButton::InstantPopup</enum>
@@ -93,7 +102,7 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Base map</string>
+       <string>Base Map</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="0">
@@ -140,7 +149,16 @@
               </sizepolicy>
              </property>
              <layout class="QFormLayout" name="formLayout_2">
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item row="0" column="0">
@@ -234,7 +252,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Offline editing</string>
+       <string>Offline Editing</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="0" column="0">
@@ -243,6 +261,16 @@
           <string>Only copy features in area of interest</string>
          </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="photo_naming">
+      <attribute name="title">
+       <string>Photo Naming</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="photoResourceTable"/>
        </item>
       </layout>
      </widget>
@@ -270,9 +298,6 @@
    <header>qgsmaplayercombobox.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../resources.qrc"/>
- </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

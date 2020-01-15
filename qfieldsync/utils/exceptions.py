@@ -19,17 +19,12 @@
  ***************************************************************************/
 """
 
-# coding=utf-8
-from qgis.core import (
-        QgsMessageLog,
-        Qgis
-)
+from qgis.core import QgsMessageLog, Qgis
 
 
 class QFieldSyncError(Exception):
 
-    def __init__(
-            self, message, exception=None, long_message=None, tag="QFieldSync"):
+    def __init__(self, message, exception=None, long_message=None, tag="QFieldSync"):
         """
         an Exception that automatically logs the error to the QgsMessageLog
         :param exception:
