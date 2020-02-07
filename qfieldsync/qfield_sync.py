@@ -41,8 +41,6 @@ from qfieldsync.gui.preferences_dialog import PreferencesDialog
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 
-import qfieldsync.resources_rc  # pylint: disable=unused-import  # NOQA
-
 
 class QFieldSync(object):
     """QGIS Plugin Implementation."""
@@ -183,19 +181,19 @@ class QFieldSync(object):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         self.push_action = self.add_action(
-            ':/plugins/qfieldsync/refresh.png',
+            os.path.join(os.path.dirname(__file__), 'resources/refresh.png'),
             text=self.tr(u'Package for QField'),
             callback=self.show_package_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
-            ':/plugins/qfieldsync/refresh-reverse.png',
+            os.path.join(os.path.dirname(__file__), 'resources/refresh-reverse.png'),
             text=self.tr(u'Synchronize from QField'),
             callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
-            ':/plugins/qfieldsync/icon.png',
+            './resources/icon.png',
             text=self.tr(u'Project Configuration'),
             callback=self.show_project_configuration_dialog,
             parent=self.iface.mainWindow(),
@@ -203,7 +201,7 @@ class QFieldSync(object):
         )
 
         self.add_action(
-            ':/plugins/qfieldsync/icon.png',
+            './resources/icon.png',
             text=self.tr(u'Preferences'),
             callback=self.show_preferences_dialog,
             parent=self.iface.mainWindow(),

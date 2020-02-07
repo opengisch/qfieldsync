@@ -27,6 +27,7 @@ from qgis.core import QgsOfflineEditing
 
 start_app()
 
+
 class ProjectConfigurationDialogTest(unittest.TestCase):
 
     @classmethod

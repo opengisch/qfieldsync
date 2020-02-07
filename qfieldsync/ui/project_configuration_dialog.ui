@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>510</height>
+    <width>525</width>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -298,6 +298,7 @@
    <header>qgsmaplayercombobox.h</header>
   </customwidget>
  </customwidgets>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

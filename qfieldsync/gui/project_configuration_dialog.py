@@ -20,6 +20,7 @@
 import os
 
 from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction
 from qgis.PyQt.uic import loadUiType
 
@@ -30,7 +31,6 @@ from qfieldsync.core import ProjectConfiguration
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties
 
-from .. import resources_rc as resources_rc
 
 DialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), '../ui/project_configuration_dialog.ui'),
@@ -53,6 +53,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         self.__project_configuration = ProjectConfiguration(self.project)
 
         self.setupUi(self)
+        self.multipleToggleButton.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/visibility.svg')))
 
         self.toggle_menu = QMenu(self)
         self.remove_all_action = QAction(self.tr("remove all layers"), self.toggle_menu)
