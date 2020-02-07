@@ -19,22 +19,23 @@
 """
 import os
 
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction
+from qgis.PyQt.uic import loadUiType
+
+from qgis.core import QgsProject, QgsMapLayerProxyModel
+from qgis.gui import QgsFieldExpressionWidget
+
 from qfieldsync.core import ProjectConfiguration
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import (
-    QDialog,
-    QTableWidgetItem,
-    QToolButton,
-    QComboBox,
-    QMenu,
-    QAction
-)
-from qgis.core import QgsProject, QgsMapLayerProxyModel
-from qgis.PyQt.uic import loadUiType
 
-DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/project_configuration_dialog.ui'))
+from .. import resources_rc as resources_rc
+
+DialogUi, _ = loadUiType(
+    os.path.join(os.path.dirname(__file__), '../ui/project_configuration_dialog.ui'),
+    import_from='..'
+)
 
 
 class ProjectConfigurationDialog(QDialog, DialogUi):
@@ -83,7 +84,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         self.unsupportedLayersList = list()
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        for layer in list(self.project.mapLayers().values()):
+        for layer in self.project.mapLayers().values():
             layer_source = LayerSource(layer)
             if not layer_source.is_supported:
                 self.unsupportedLayersList.append(layer_source)
@@ -102,9 +103,37 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                     cbx.setCurrentIndex(cbx.count() - 1)
 
             self.layersTable.setCellWidget(count, 1, cbx)
+
         self.layersTable.resizeColumnsToContents()
         self.layersTable.sortByColumn(0, Qt.AscendingOrder)
         self.layersTable.setSortingEnabled(True)
+
+        self.photoResourceTable.setColumnCount(3)
+        self.photoResourceTable.setHorizontalHeaderLabels([self.tr('Layer'), self.tr('Field'), self.tr('Naming Expression')])
+        self.photoResourceTable.horizontalHeader().setStretchLastSection(True)
+        self.photoResourceTable.setRowCount(0)
+        row = 0
+        for layer in self.project.instance().mapLayers().values():
+            i = 0
+            for field in layer.fields():
+                ews = layer.editorWidgetSetup(i)
+                i += 1
+                if ews.type() == 'ExternalResource':
+                    # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
+                    self.photoResourceTable.insertRow(row)
+                    item = QTableWidgetItem(layer.name())
+                    layer_source = LayerSource(layer)
+                    item.setData(Qt.UserRole, layer_source)
+                    self.photoResourceTable.setItem(count, 0, item)
+                    item = QTableWidgetItem(field.name())
+                    self.photoResourceTable.setItem(count, 1, item)
+                    ew = QgsFieldExpressionWidget()
+                    ew.setLayer(layer)
+                    expression = layer_source.photo_naming(field.name())
+                    ew.setExpression(expression)
+                    self.photoResourceTable.setCellWidget(count, 2, ew)
+                    row += 1
+        self.photoResourceTable.resizeColumnsToContents()
 
         # Load Map Themes
         for theme in self.project.mapThemeCollection().mapThemes():
@@ -154,8 +183,17 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
             layer_source.action = cbx.itemData(cbx.currentIndex())
             if layer_source.action != old_action:
                 self.project.setDirty(True)
+                layer_source.apply()
 
-            layer_source.apply()
+        for i in range(self.photoResourceTable.rowCount()):
+            layer_source: LayerSource = self.photoResourceTable.item(i, 0).data(Qt.UserRole)
+            field_name = self.photoResourceTable.item(i, 1).text()
+            old_expression = layer_source.photo_naming(field_name)
+            new_expression = self.photoResourceTable.cellWidget(i, 2).currentText()
+            if new_expression != old_expression:
+                layer_source.set_photo_naming(field_name, new_expression)
+                self.project.setDirty(True)
+                layer_source.apply()
 
         self.__project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
         self.__project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
