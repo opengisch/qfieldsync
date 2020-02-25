@@ -7,6 +7,10 @@ git:
   submodules: false
 
 before_install:
+  # cannot use SSH to fetch submodule
+  - sed -i 's#git@github.com:#https://github.com/#' .gitmodules
+  - git submodule update --init --recursive
+  - sed -i 's#https://github.com/#git@github.com:#' .gitmodules
 
 install:
 
