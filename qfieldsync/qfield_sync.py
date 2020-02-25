@@ -220,21 +220,21 @@ class QFieldSync(object):
         del self.toolbar
 
     def show_preferences_dialog(self):
-        dlg = PreferencesDialog(self.preferences, self.iface.mainWindow())
+        dlg = PreferencesDialog(self.iface.mainWindow())
         dlg.exec_()
 
     def show_synchronize_dialog(self):
         """
         Synchronize from QField
         """
-        dlg = SynchronizeDialog(self.iface, self.preferences, self.offline_editing, self.iface.mainWindow())
+        dlg = SynchronizeDialog(self.iface, self.offline_editing, self.iface.mainWindow())
         dlg.exec_()
 
     def show_package_dialog(self):
         """
         Push to QField
         """
-        self.push_dlg = PackageDialog(self.iface, self.preferences, QgsProject.instance(), self.offline_editing,
+        self.push_dlg = PackageDialog(self.iface, QgsProject.instance(), self.offline_editing,
                                       self.iface.mainWindow())
         self.push_dlg.setAttribute(Qt.WA_DeleteOnClose)
         self.push_dlg.setWindowFlags(self.push_dlg.windowFlags() | Qt.Tool)
