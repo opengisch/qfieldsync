@@ -1,28 +1,14 @@
 import os
+from qfieldsync.setting_manager import SettingManager, Scope, String
 
-from qgis.PyQt.QtCore import QSettings
-
-LOG_TAG = "QFieldSync"
-MSG_DURATION_SECS = 10
+pluginName = "QFieldSync"
 
 
-class Preferences(object):
-    __EXPORT_DIRECTORY_SETTING = "QFieldSync/exportDirectory"
-    __IMPORT_DIRECTORY_SETTING = "QFieldSync/importDirectory"
+class Preferences(SettingManager):
+    def __init__(self):
+        SettingManager.__init__(self, pluginName, False)
+        self.add_setting(String('exportDirectory', Scope.Global, os.path.expanduser("~/QField/export")))
+        self.add_setting(String('exportDirectoryProject', Scope.Project, None))
+        self.add_setting(String('importDirectory', Scope.Global, os.path.expanduser("~/QField/import")))
+        self.add_setting(String('importDirectoryProject', Scope.Project, None))
 
-    @property
-    def export_directory(self):
-        return QSettings().value(self.__EXPORT_DIRECTORY_SETTING, os.path.expanduser("~/QField/export"))
-
-    @export_directory.setter
-    def export_directory(self, value):
-        QSettings().setValue(self.__EXPORT_DIRECTORY_SETTING, value)
-
-    @property
-    def import_directory(self):
-        return QSettings().value(self.__IMPORT_DIRECTORY_SETTING, os.path.expanduser("~/QField/import"))
-
-    @import_directory.setter
-    def import_directory(self, value):
-        print('setting new directory import')
-        QSettings().setValue(self.__IMPORT_DIRECTORY_SETTING, value)

@@ -22,18 +22,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLineEdit" name="import_directory"/>
-     </item>
-     <item>
-      <widget class="QToolButton" name="import_directory_button">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QgsFileWidget" name="importDirectory"/>
    </item>
    <item>
     <widget class="QLabel" name="label">
@@ -43,18 +32,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLineEdit" name="export_directory"/>
-     </item>
-     <item>
-      <widget class="QToolButton" name="export_directory_button">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QgsFileWidget" name="exportDirectory"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="button_box">
@@ -68,6 +46,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsFileWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsfilewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
