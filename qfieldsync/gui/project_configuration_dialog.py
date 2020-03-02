@@ -126,14 +126,14 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                         item = QTableWidgetItem(layer.name())
                         layer_source = LayerSource(layer)
                         item.setData(Qt.UserRole, layer_source)
-                        self.photoResourceTable.setItem(count, 0, item)
+                        self.photoResourceTable.setItem(row, 0, item)
                         item = QTableWidgetItem(field.name())
-                        self.photoResourceTable.setItem(count, 1, item)
+                        self.photoResourceTable.setItem(row, 1, item)
                         ew = QgsFieldExpressionWidget()
                         ew.setLayer(layer)
                         expression = layer_source.photo_naming(field.name())
                         ew.setExpression(expression)
-                        self.photoResourceTable.setCellWidget(count, 2, ew)
+                        self.photoResourceTable.setCellWidget(row, 2, ew)
                         row += 1
         self.photoResourceTable.resizeColumnsToContents()
 
