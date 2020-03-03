@@ -24,7 +24,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction
 from qgis.PyQt.uic import loadUiType
 
-from qgis.core import QgsProject, QgsMapLayerProxyModel
+from qgis.core import QgsProject, QgsMapLayerProxyModel, QgsMapLayer
 from qgis.gui import QgsFieldExpressionWidget
 
 from qfieldsync.core import ProjectConfiguration
@@ -115,25 +115,26 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         self.photoResourceTable.setRowCount(0)
         row = 0
         for layer in self.project.instance().mapLayers().values():
-            i = 0
-            for field in layer.fields():
-                ews = layer.editorWidgetSetup(i)
-                i += 1
-                if ews.type() == 'ExternalResource':
-                    # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
-                    self.photoResourceTable.insertRow(row)
-                    item = QTableWidgetItem(layer.name())
-                    layer_source = LayerSource(layer)
-                    item.setData(Qt.UserRole, layer_source)
-                    self.photoResourceTable.setItem(count, 0, item)
-                    item = QTableWidgetItem(field.name())
-                    self.photoResourceTable.setItem(count, 1, item)
-                    ew = QgsFieldExpressionWidget()
-                    ew.setLayer(layer)
-                    expression = layer_source.photo_naming(field.name())
-                    ew.setExpression(expression)
-                    self.photoResourceTable.setCellWidget(count, 2, ew)
-                    row += 1
+            if layer.type() == QgsMapLayer.VectorLayer:
+                i = 0
+                for field in layer.fields():
+                    ews = layer.editorWidgetSetup(i)
+                    i += 1
+                    if ews.type() == 'ExternalResource':
+                        # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
+                        self.photoResourceTable.insertRow(row)
+                        item = QTableWidgetItem(layer.name())
+                        layer_source = LayerSource(layer)
+                        item.setData(Qt.UserRole, layer_source)
+                        self.photoResourceTable.setItem(row, 0, item)
+                        item = QTableWidgetItem(field.name())
+                        self.photoResourceTable.setItem(row, 1, item)
+                        ew = QgsFieldExpressionWidget()
+                        ew.setLayer(layer)
+                        expression = layer_source.photo_naming(field.name())
+                        ew.setExpression(expression)
+                        self.photoResourceTable.setCellWidget(row, 2, ew)
+                        row += 1
         self.photoResourceTable.resizeColumnsToContents()
 
         # Load Map Themes
