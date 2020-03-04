@@ -21,7 +21,7 @@ import os
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction
+from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction, QTabWidget
 from qgis.PyQt.uic import loadUiType
 
 from qgis.core import QgsProject, QgsMapLayerProxyModel, QgsMapLayer
@@ -136,6 +136,9 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                         self.photoResourceTable.setCellWidget(row, 2, ew)
                         row += 1
         self.photoResourceTable.resizeColumnsToContents()
+
+        # Remove this part to remove the tab when the functionality will be available on QField
+        self.tabWidget.removeTab(self.tabWidget.count()-1)
 
         # Load Map Themes
         for theme in self.project.mapThemeCollection().mapThemes():
