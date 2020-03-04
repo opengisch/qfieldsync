@@ -21,7 +21,7 @@ import os
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction, QTabWidget
+from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction
 from qgis.PyQt.uic import loadUiType
 
 from qgis.core import QgsProject, QgsMapLayerProxyModel, QgsMapLayer
