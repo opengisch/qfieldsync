@@ -137,6 +137,9 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                         row += 1
         self.photoResourceTable.resizeColumnsToContents()
 
+        # Remove this part to remove the tab when the functionality will be available on QField
+        self.tabWidget.removeTab(self.tabWidget.count()-1)
+
         # Load Map Themes
         for theme in self.project.mapThemeCollection().mapThemes():
             self.mapThemeComboBox.addItem(theme)
