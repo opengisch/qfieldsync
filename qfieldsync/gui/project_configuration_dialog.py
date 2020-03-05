@@ -111,6 +111,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
 
         self.photoResourceTable.setColumnCount(3)
         self.photoResourceTable.setHorizontalHeaderLabels([self.tr('Layer'), self.tr('Field'), self.tr('Naming Expression')])
+        self.photoResourceTable.horizontalHeaderItem(2).setToolTip(self.tr('Enter expression for a file path without extension'))
         self.photoResourceTable.horizontalHeader().setStretchLastSection(True)
         self.photoResourceTable.setRowCount(0)
         row = 0
