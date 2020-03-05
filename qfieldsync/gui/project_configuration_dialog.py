@@ -111,7 +111,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
 
         self.photoResourceTable.setColumnCount(3)
         self.photoResourceTable.setHorizontalHeaderLabels([self.tr('Layer'), self.tr('Field'), self.tr('Naming Expression')])
-        self.photoResourceTable.horizontalHeaderItem(2).setToolTip(self.tr('Enter expression for a file path without extension'))
+        self.photoResourceTable.horizontalHeaderItem(2).setToolTip(self.tr('Enter expression for a file path with the extension .jpg'))
         self.photoResourceTable.horizontalHeader().setStretchLastSection(True)
         self.photoResourceTable.setRowCount(0)
         row = 0
@@ -139,7 +139,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         self.photoResourceTable.resizeColumnsToContents()
 
         # Remove this part to remove the tab when the functionality will be available on QField
-        self.tabWidget.removeTab(self.tabWidget.count()-1)
+        self.tabWidget.removeTab(self.tabWidget.count() - 1)
 
         # Load Map Themes
         for theme in self.project.mapThemeCollection().mapThemes():
