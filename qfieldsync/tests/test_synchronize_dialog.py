@@ -18,13 +18,14 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qfieldsync.core import Preferences
-from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 from qgis.core import QgsOfflineEditing
+from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
+
 
 start_app()
+
 
 class SynchronizeDialogTest(unittest.TestCase):
 
@@ -33,8 +34,7 @@ class SynchronizeDialogTest(unittest.TestCase):
         cls.iface = get_iface()
 
     def test_open_dialog(self):
-        preferences = Preferences()
         offline_editing = QgsOfflineEditing()
 
-        dlg = SynchronizeDialog(self.iface, preferences, offline_editing)
+        dlg = SynchronizeDialog(self.iface, offline_editing)
         dlg.show()

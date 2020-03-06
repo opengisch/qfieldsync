@@ -19,11 +19,11 @@
  ***************************************************************************/
 """
 
-from qfieldsync.core import Preferences
-from qfieldsync.gui.package_dialog import PackageDialog
+
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 from qgis.core import QgsOfflineEditing, QgsProject
+from qfieldsync.gui.package_dialog import PackageDialog
 
 start_app()
 
@@ -34,8 +34,7 @@ class PackageDialogTest(unittest.TestCase):
         cls.iface = get_iface()
 
     def test_open_dialog(self):
-        preferences = Preferences()
         offline_editing = QgsOfflineEditing()
 
-        dlg = PackageDialog(self.iface, preferences, QgsProject.instance(), offline_editing)
+        dlg = PackageDialog(self.iface, QgsProject.instance(), offline_editing)
         dlg.show()

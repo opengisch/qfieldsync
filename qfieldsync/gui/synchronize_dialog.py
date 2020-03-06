@@ -31,6 +31,7 @@ from qgis.core import QgsProject
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.project import ProjectConfiguration
+from qfieldsync.core.preferences import Preferences
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum
@@ -42,24 +43,25 @@ DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/synchron
 
 class SynchronizeDialog(QDialog, DialogUi):
 
-    def __init__(self, iface, qfield_preferences, offline_editing, parent=None):
+    def __init__(self, iface, offline_editing, parent=None):
         """Constructor.
-        :type qfield_preferences: qfieldsync.core.Preferences
         """
         super(SynchronizeDialog, self).__init__(parent=parent)
         self.setupUi(self)
         self.iface = iface
+        self.preferences = Preferences()
         self.offline_editing = offline_editing
         self.push_btn = QPushButton(self.tr('Synchronize'))
         self.push_btn.clicked.connect(self.start_synchronization)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
-        self.qfieldDir.setText(qfield_preferences.import_directory)
+        self.qfieldDir.setText(self.preferences.value('importDirectoryProject') or self.preferences.value('importDirectory'))
         self.qfieldDir_button.clicked.connect(make_folder_selector(self.qfieldDir))
 
         self.offline_editing_done = False
 
     def start_synchronization(self):
         qfield_folder = self.qfieldDir.text()
+        self.preferences.set_value('importDirectoryProject', qfield_folder)
         try:
             self.progress_group.setEnabled(True)
             current_import_file_checksum = import_file_checksum(qfield_folder)

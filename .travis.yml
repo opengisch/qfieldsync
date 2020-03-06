@@ -4,20 +4,26 @@ python:
   - 3.7
 
 git:
-  submodules: false
-
-before_install:
+  submodules: true
 
 install:
 
 jobs:
   include:
     - stage: test
+      name: Test on QGIS 3.4
+      env:
+        QGIS_TEST_VERSION="release-3_4"
+      script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
+
+    - stage: test
+      name: Test on QGIS master
       env:
         QGIS_TEST_VERSION="latest"
       script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
     - stage: deploy
+      name: Release 
       if: tag IS present
       install:
         - pip install qgis-plugin-ci
@@ -30,6 +36,7 @@ jobs:
           --osgeo-password ${OSGEO_PASSWORD}
 
     - stage: deploy
+      name: Update translations
       if: branch = master
       install:
         - pip install qgis-plugin-ci

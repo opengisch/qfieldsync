@@ -48,14 +48,14 @@ from qgis.PyQt.uic import loadUiType
 from ..utils.file_utils import fileparts, open_folder
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import make_folder_selector
-
+from qfieldsync.core.preferences import Preferences
 
 DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/package_dialog.ui'))
 
 
 class PackageDialog(QDialog, DialogUi):
 
-    def __init__(self, iface, preferences, project, offline_editing, parent=None):
+    def __init__(self, iface, project, offline_editing, parent=None):
         """Constructor."""
         super(PackageDialog, self).__init__(parent=parent)
         self.setupUi(self)
@@ -63,7 +63,7 @@ class PackageDialog(QDialog, DialogUi):
         self.iface = iface
         self.offline_editing = offline_editing
         self.project = project
-        self.qfield_preferences = preferences
+        self.qfield_preferences = Preferences()
         self.project_lbl.setText(get_project_title(self.project))
         self.push_btn = QPushButton(self.tr('Create'))
         self.push_btn.clicked.connect(self.package_project)
@@ -83,7 +83,7 @@ class PackageDialog(QDialog, DialogUi):
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
-        base_folder = self.qfield_preferences.export_directory
+        base_folder = self.qfield_preferences.value('exportDirectoryProject') or self.qfield_preferences.value('exportDirectory')
         project_fn = QgsProject.instance().fileName()
         export_folder_name = fileparts(project_fn)[1]
         export_folder_path = os.path.join(base_folder, export_folder_name)
@@ -102,6 +102,8 @@ class PackageDialog(QDialog, DialogUi):
         self.informationStack.setCurrentWidget(self.progressPage)
 
         export_folder = self.get_export_folder_from_dialog()
+
+        self.qfield_preferences.set_value('exportDirectoryProject', export_folder)
 
         offline_convertor = OfflineConverter(self.project, export_folder, self.iface.mapCanvas().extent(),
                                              self.offline_editing)

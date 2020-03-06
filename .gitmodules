@@ -1,0 +1,3 @@
+[submodule "qfieldsync/setting_manager"]
+	path = qfieldsync/setting_manager
+	url = https://github.com/opengisch/qgissettingmanager.git
