@@ -77,7 +77,7 @@ class QFieldCloudClient(QObject):
         # TODO: improve join of urls
         url = urljoin(self._base_url, 'api/v1/projects/' + project + '/files/')
         headers = {'Authorization': 'token {}'.format(self.token)}
-        print(url)
+
         try:
             response = requests.get(
                 url,

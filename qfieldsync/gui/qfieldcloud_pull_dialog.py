@@ -63,8 +63,6 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
             project_list = list(project_list)
             project_list.extend(x for x in public_projects if x not in project_list)
 
-        print(project_list)
-
         self.project_tree_widget.setColumnCount(2)
         self.project_tree_widget.setHeaderLabels(['Name', 'Description'])
         self.project_tree_widget.setSortingEnabled(True)
