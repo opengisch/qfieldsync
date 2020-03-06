@@ -241,7 +241,6 @@ class QFieldSync(object):
         """
         Pull QFieldCloud project
         """
-        print("download cloud project")
         dlg = QFieldCloudPullDialog(self.iface, self.preferences, self.iface.mainWindow())
         dlg.exec_()
 
