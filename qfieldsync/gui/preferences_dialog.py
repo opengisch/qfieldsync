@@ -27,7 +27,7 @@ from qgis.PyQt.QtWidgets import QDialog
 
 from qgis.PyQt.uic import loadUiType
 from qfieldsync.utils.qt_utils import make_folder_selector
-from qfieldsync.utils.qfieldcloud_utils import login
+from qfieldsync.utils.qfieldcloud_utils import QFieldCloudClient
 
 DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/preferences_dialog.ui'))
 
@@ -68,12 +68,12 @@ class PreferencesDialog(QDialog, DialogUi):
             'QLabel { background-color : white; color : white; }')
         self.qfieldcloud_check_result.setText('')
 
-        token = login(
-            self.qfieldcloud_base_url.text(),
+        qfieldcloud_client = QFieldCloudClient(self.qfieldcloud_base_url.text())
+        result = qfieldcloud_client.login(
             self.qfieldcloud_username.text(),
             self.qfieldcloud_password.text())
 
-        if token:
+        if result:
             self.qfieldcloud_check_result.setStyleSheet(
                 'QLabel { background-color : green; color : white; }')
             self.qfieldcloud_check_result.setText(

@@ -40,6 +40,7 @@ from qfieldsync.gui.package_dialog import PackageDialog
 from qfieldsync.gui.preferences_dialog import PreferencesDialog
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
+from qfieldsync.gui.qfieldcloud_pull_dialog import QFieldCloudPullDialog
 
 
 class QFieldSync(object):
@@ -193,6 +194,12 @@ class QFieldSync(object):
             parent=self.iface.mainWindow())
 
         self.add_action(
+            os.path.join(os.path.dirname(__file__), 'resources/cloud-download.png'),
+            text=self.tr(u'Download QFieldCloud project'),
+            callback=self.show_qfieldcloud_pull_dialog,
+            parent=self.iface.mainWindow())
+
+        self.add_action(
             './resources/icon.png',
             text=self.tr(u'Project Configuration'),
             callback=self.show_project_configuration_dialog,
@@ -228,6 +235,14 @@ class QFieldSync(object):
         Synchronize from QField
         """
         dlg = SynchronizeDialog(self.iface, self.preferences, self.offline_editing, self.iface.mainWindow())
+        dlg.exec_()
+
+    def show_qfieldcloud_pull_dialog(self):
+        """
+        Pull QFieldCloud project
+        """
+        print("download cloud project")
+        dlg = QFieldCloudPullDialog(self.iface, self.preferences, self.iface.mainWindow())
         dlg.exec_()
 
     def show_package_dialog(self):
