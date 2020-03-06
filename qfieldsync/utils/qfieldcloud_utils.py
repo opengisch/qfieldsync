@@ -74,8 +74,7 @@ class QFieldCloudClient(QObject):
 
     def list_files(self, project):
 
-        # TODO: improve join of urls
-        url = urljoin(self._base_url, 'api/v1/projects/' + project + '/files/')
+        url = urljoin(self._base_url, 'api/v1/projects/{}/files/'.format(project))
         headers = {'Authorization': 'token {}'.format(self.token)}
 
         try:
@@ -93,10 +92,7 @@ class QFieldCloudClient(QObject):
 
     def pull_file(self, project, file_path, dest_path, file_size=0):
 
-        # TODO: better arg names
-
-        # TODO: improve join of urls
-        url = urljoin(self._base_url, 'api/v1/projects/' + project + '/' + file_path + '/')
+        url = urljoin(self._base_url, 'api/v1/projects/{}/{}/'.format(project, file_path))
         headers = {'Authorization': 'token {}'.format(self.token)}
 
         try:
