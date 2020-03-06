@@ -11,3 +11,6 @@ class Preferences(SettingManager):
         self.add_setting(String('exportDirectoryProject', Scope.Project, None))
         self.add_setting(String('importDirectory', Scope.Global, os.path.expanduser("~/QField/import")))
         self.add_setting(String('importDirectoryProject', Scope.Project, None))
+        self.add_setting(String('qfieldcloud_username', Scope.Global, None))
+        self.add_setting(String('qfieldcloud_password', Scope.Global, None))
+        self.add_setting(String('qfieldcloud_base_url', Scope.Global, "https://dev.qfield.cloud"))

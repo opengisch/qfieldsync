@@ -37,15 +37,15 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
         self.push_btn.clicked.connect(self.start_download_and_open)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
 
-        self.download_directory.setText(self.preferences.import_directory)
+        self.download_directory.setText(self.preferences.value('importDirectory'))
         self.download_directory_button.clicked.connect(make_folder_selector(self.download_directory))
 
         self.include_public_projects.stateChanged.connect(self.include_public_projects_changed)
         self.offline_editing_done = False
-        self.qfieldcloud_client = QFieldCloudClient(self.preferences.qfieldcloud_base_url)
+        self.qfieldcloud_client = QFieldCloudClient(self.preferences.value('qfieldcloud_base_url'))
         self.qfieldcloud_client.login(
-            self.preferences.qfieldcloud_username,
-            self.preferences.qfieldcloud_password
+            self.preferences.value('qfieldcloud_username'),
+            self.preferences.value('qfieldcloud_password')
         )
 
         self.get_project_list()

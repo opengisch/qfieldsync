@@ -22,11 +22,13 @@
 """
 
 import os
+from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.uic import loadUiType
 from qgis.gui import QgsFileWidget
 from qfieldsync.setting_manager import SettingDialog, UpdateMode
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.utils.qfieldcloud_utils import QFieldCloudClient
 
 DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/preferences_dialog.ui'))
 
@@ -43,3 +45,29 @@ class PreferencesDialog(QDialog, DialogUi, SettingDialog):
         self.setting_widget('importDirectory').widget.setStorageMode(QgsFileWidget.GetDirectory)
         self.setting_widget('exportDirectory').widget.setStorageMode(QgsFileWidget.GetDirectory)
 
+        self.qfieldcloud_check.clicked.connect(self.check_qfieldcloud_connection)
+
+    @pyqtSlot()
+    def check_qfieldcloud_connection(self):
+        self.qfieldcloud_check.setDisabled(True)
+        self.qfieldcloud_check_result.setStyleSheet(
+            'QLabel { background-color : white; color : white; }')
+        self.qfieldcloud_check_result.setText('')
+
+        qfieldcloud_client = QFieldCloudClient(self.qfieldcloud_base_url.text())
+        result = qfieldcloud_client.login(
+            self.qfieldcloud_username.text(),
+            self.qfieldcloud_password.text())
+
+        if result:
+            self.qfieldcloud_check_result.setStyleSheet(
+                'QLabel { background-color : green; color : white; }')
+            self.qfieldcloud_check_result.setText(
+                'Connection to QFieldCloud was successful')
+        else:
+            self.qfieldcloud_check_result.setStyleSheet(
+                'QLabel { background-color : red; color : white; }')
+            self.qfieldcloud_check_result.setText(
+                'Unable to connect to QFieldCloud!')
+
+        self.qfieldcloud_check.setDisabled(False)
