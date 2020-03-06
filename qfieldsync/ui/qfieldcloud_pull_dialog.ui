@@ -15,6 +15,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QCheckBox" name="include_public_projects">
+     <property name="text">
+      <string>Include public projects</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QTreeWidget" name="project_tree_widget">
      <column>
       <property name="text">

@@ -39,6 +39,7 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
         self.download_directory.setText(self.preferences.import_directory)
         self.download_directory_button.clicked.connect(make_folder_selector(self.download_directory))
 
+        self.include_public_projects.stateChanged.connect(self.include_public_projects_changed)
         self.offline_editing_done = False
         self.qfieldcloud_client = QFieldCloudClient(self.preferences.qfieldcloud_base_url)
         self.qfieldcloud_client.login(
@@ -50,7 +51,18 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
 
     def get_project_list(self):
 
+        self.project_tree_widget.clear()
+
         project_list = self.qfieldcloud_client.list_user_projects()
+
+        # Include public projects
+        if self.include_public_projects.isChecked():
+            public_projects = self.qfieldcloud_client.list_public_projects()
+
+            project_list = list(project_list)
+            project_list.extend(x for x in public_projects if x not in project_list)
+
+        print(project_list)
 
         self.project_tree_widget.setColumnCount(2)
         self.project_tree_widget.setHeaderLabels(['Name', 'Description'])
@@ -63,12 +75,16 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
             item = QTreeWidgetItem([project['owner'] + '/' + project['name'], project['description']])
             self.project_tree_widget.addTopLevelItem(item)
 
+    def include_public_projects_changed(self):
+        print("changed")
+        self.get_project_list()
+
     def start_download_and_open(self):
         self.start_download(load_project=True)
 
     def start_download(self, load_project=False):
 
-        # TODO: create the main project directory
+        # TODO: create the main project directory?
         self.progress_group.setEnabled(True)
 
         download_directory = self.download_directory.text()
@@ -94,6 +110,8 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
                 self.update_total(i + 1, len(file_list))
 
         if load_project:
+            # TODO: if the folder contains more than one qgs file there is an error
+            # TODO: manage if no qgs file is present
             qgs_file = get_project_in_folder(download_directory)
             open_project(qgs_file)
             self.close()

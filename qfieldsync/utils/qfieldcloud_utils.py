@@ -54,6 +54,24 @@ class QFieldCloudClient(QObject):
 
         return response.json()
 
+    def list_public_projects(self):
+
+        url = urljoin(self._base_url, 'api/v1/projects/')
+        headers = {'Authorization': 'token {}'.format(self.token)}
+
+        try:
+            response = requests.get(
+                url,
+                headers=headers,
+            )
+
+            # Raise exception if bad response status
+            response.raise_for_status()
+        except requests.exceptions.RequestException:
+            return None
+
+        return response.json()
+
     def list_files(self, project):
 
         # TODO: improve join of urls
