@@ -13,6 +13,7 @@ from qfieldsync.utils.file_utils import get_project_in_folder
 from qfieldsync.utils.qgis_utils import open_project
 from qfieldsync.utils.qt_utils import make_folder_selector
 from qfieldsync.utils.qfieldcloud_utils import QFieldCloudClient
+from qfieldsync.utils.exceptions import NoProjectFoundError
 
 DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/qfieldcloud_pull_dialog.ui'))
 
@@ -76,7 +77,6 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
             self.project_tree_widget.addTopLevelItem(item)
 
     def include_public_projects_changed(self):
-        print("changed")
         self.get_project_list()
 
     def start_download_and_open(self):
@@ -84,14 +84,13 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
 
     def start_download(self, load_project=False):
 
-        # TODO: create the main project directory?
-        self.progress_group.setEnabled(True)
+        selectedItems = self.project_tree_widget.selectedItems()
+        if not selectedItems:
+            return
 
         download_directory = self.download_directory.text()
 
-        # TODO: only one selectedItem
-        # TODO: check if at least one item is selected
-        selectedItems = self.project_tree_widget.selectedItems()
+        self.progress_group.setEnabled(True)
 
         self.qfieldcloud_client.download_progress.connect(self.update_value)
 
@@ -110,11 +109,14 @@ class QFieldCloudPullDialog(QDialog, DialogUi):
                 self.update_total(i + 1, len(file_list))
 
         if load_project:
-            # TODO: if the folder contains more than one qgs file there is an error
-            # TODO: manage if no qgs file is present
-            qgs_file = get_project_in_folder(download_directory)
-            open_project(qgs_file)
-            self.close()
+            try:
+                qgs_file = get_project_in_folder(download_directory)
+                open_project(qgs_file)
+            except NoProjectFoundError:
+                # TODO: write error somewhere
+                pass
+            finally:
+                self.close()
 
     @pyqtSlot(int, int)
     def update_total(self, current, layer_count):
