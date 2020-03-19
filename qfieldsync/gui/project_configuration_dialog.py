@@ -24,7 +24,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction
 from qgis.PyQt.uic import loadUiType
 
-from qgis.core import QgsProject, QgsMapLayerProxyModel, QgsMapLayer
+from qgis.core import QgsProject, QgsMapLayerProxyModel, QgsMapLayer, Qgis
 from qgis.gui import QgsFieldExpressionWidget
 
 from qfieldsync.core import ProjectConfiguration
@@ -117,6 +117,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         row = 0
         for layer in self.project.instance().mapLayers().values():
             if layer.type() == QgsMapLayer.VectorLayer:
+                layer_source = LayerSource(layer)
                 i = 0
                 for field in layer.fields():
                     ews = layer.editorWidgetSetup(i)
@@ -125,7 +126,6 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                         # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
                         self.photoResourceTable.insertRow(row)
                         item = QTableWidgetItem(layer.name())
-                        layer_source = LayerSource(layer)
                         item.setData(Qt.UserRole, layer_source)
                         self.photoResourceTable.setItem(row, 0, item)
                         item = QTableWidgetItem(field.name())
@@ -138,8 +138,9 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                         row += 1
         self.photoResourceTable.resizeColumnsToContents()
 
-        # Remove this part to remove the tab when the functionality will be available on QField
-        self.tabWidget.removeTab(self.tabWidget.count() - 1)
+        # Remove the tab when not yet suported in QGIS
+        if Qgis.QGIS_VERSION_INT < 31300:
+            self.tabWidget.removeTab(self.tabWidget.count() - 1)
 
         # Load Map Themes
         for theme in self.project.mapThemeCollection().mapThemes():
@@ -196,10 +197,9 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
             field_name = self.photoResourceTable.item(i, 1).text()
             old_expression = layer_source.photo_naming(field_name)
             new_expression = self.photoResourceTable.cellWidget(i, 2).currentText()
-            if new_expression != old_expression:
-                layer_source.set_photo_naming(field_name, new_expression)
-                self.project.setDirty(True)
-                layer_source.apply()
+            layer_source.set_photo_naming(field_name, new_expression)
+            self.project.setDirty(True)
+            layer_source.apply()
 
         self.__project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
         self.__project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
