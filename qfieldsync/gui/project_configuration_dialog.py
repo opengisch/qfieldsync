@@ -117,6 +117,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         row = 0
         for layer in self.project.instance().mapLayers().values():
             if layer.type() == QgsMapLayer.VectorLayer:
+                layer_source = LayerSource(layer)
                 i = 0
                 for field in layer.fields():
                     ews = layer.editorWidgetSetup(i)
@@ -125,7 +126,6 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                         # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
                         self.photoResourceTable.insertRow(row)
                         item = QTableWidgetItem(layer.name())
-                        layer_source = LayerSource(layer)
                         item.setData(Qt.UserRole, layer_source)
                         self.photoResourceTable.setItem(row, 0, item)
                         item = QTableWidgetItem(field.name())
