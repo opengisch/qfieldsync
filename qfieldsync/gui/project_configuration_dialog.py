@@ -197,10 +197,9 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
             field_name = self.photoResourceTable.item(i, 1).text()
             old_expression = layer_source.photo_naming(field_name)
             new_expression = self.photoResourceTable.cellWidget(i, 2).currentText()
-            if new_expression != old_expression:
-                layer_source.set_photo_naming(field_name, new_expression)
-                self.project.setDirty(True)
-                layer_source.apply()
+            layer_source.set_photo_naming(field_name, new_expression)
+            self.project.setDirty(True)
+            layer_source.apply()
 
         self.__project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
         self.__project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
