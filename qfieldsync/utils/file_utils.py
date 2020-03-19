@@ -100,11 +100,7 @@ def import_file_checksum(folder):
 def slugify(text: str) -> str:
     # https://stackoverflow.com/q/5574042/1548052
     slug = unicodedata.normalize('NFKD', text)
-    print(slug)
-    #slug = slug.encode('ascii', 'ignore').lower()
-    print(slug)
-    slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
-    print(slug)
+    slug = re.sub(r'[^a-zA-Z0-9]+', '-', slug).strip('-')
     slug = re.sub(r'[-]+', '-', slug)
-    print(slug)
+    slug = slug.lower()
     return slug
