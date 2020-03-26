@@ -60,6 +60,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.offline_editing_done = False
 
     def start_synchronization(self):
+        self.push_btn.setEnabled(False)
         qfield_folder = self.qfieldDir.text()
         self.preferences.set_value('importDirectoryProject', qfield_folder)
         try:
