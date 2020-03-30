@@ -24,6 +24,7 @@ import tempfile
 
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties, ProjectConfiguration
+from qfieldsync.utils.file_utils import copy_images
 from qgis.PyQt.QtCore import (
     Qt,
     QObject,
@@ -136,6 +137,10 @@ class OfflineConverter(QObject):
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             QgsProject.instance().write(project_path)
+
+            # export the DCIM folder
+            copy_images(os.path.join(os.path.dirname(original_project_path), "DCIM"),
+                        os.path.join(os.path.dirname(project_path), "DCIM"))
             try:
                 # Run the offline plugin for gpkg
                 gpkg_filename = "data.gpkg"
