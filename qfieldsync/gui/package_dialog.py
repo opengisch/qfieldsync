@@ -83,10 +83,12 @@ class PackageDialog(QDialog, DialogUi):
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
-        base_folder = self.qfield_preferences.value('exportDirectoryProject') or self.qfield_preferences.value('exportDirectory')
-        project_fn = QgsProject.instance().fileName()
-        export_folder_name = fileparts(project_fn)[1]
-        export_folder_path = os.path.join(base_folder, export_folder_name)
+        export_folder_path = self.qfield_preferences.value('exportDirectoryProject')
+        if not export_folder_path:
+            project_fn = QgsProject.instance().fileName()
+            export_folder_name = fileparts(project_fn)[1]
+            export_folder_path = os.path.join(self.qfield_preferences.value('exportDirectory'), export_folder_name)
+
         self.manualDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
