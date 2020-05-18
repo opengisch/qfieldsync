@@ -34,7 +34,7 @@ from qfieldsync.core.project import ProjectConfiguration
 from qfieldsync.core.preferences import Preferences
 
 from qfieldsync.utils.exceptions import NoProjectFoundError
-from qfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum
+from qfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum, copy_images
 from qfieldsync.utils.qgis_utils import open_project, import_checksums_of_project
 from qfieldsync.utils.qt_utils import make_folder_selector
 
@@ -60,6 +60,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.offline_editing_done = False
 
     def start_synchronization(self):
+        self.push_btn.setEnabled(False)
         qfield_folder = self.qfieldDir.text()
         self.preferences.set_value('importDirectoryProject', qfield_folder)
         try:
@@ -80,6 +81,8 @@ class SynchronizeDialog(QDialog, DialogUi):
             if self.offline_editing_done:
                 original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
                 if original_project_path:
+                    # import the DCIM folder
+                    copy_images(os.path.join(qfield_folder, "DCIM"),os.path.join(os.path.dirname(original_project_path), "DCIM"))
                     if open_project(original_project_path):
                         # save the data_file_checksum to the project and save it
                         imported_files_checksums.append(import_file_checksum(qfield_folder))
@@ -88,10 +91,11 @@ class SynchronizeDialog(QDialog, DialogUi):
                         self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"Opened original project {}".format(original_project_path)))
                     else:
                         self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"The data has been synchronized successfully but the original project ({}) could not be opened. ".format(original_project_path)))
+                else:
+                    self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"No original project path found."))
                 self.close()
             else:
-                message = self.tr("The project you imported does not seem to be "
-                                  "an offline project")
+                message = self.tr("The project you imported does not seem to be an offline project")
                 raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
             self.iface.messageBar().pushWarning('QFieldSync', str(e))

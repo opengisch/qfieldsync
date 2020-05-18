@@ -25,6 +25,7 @@ import subprocess
 import hashlib
 import re
 import unicodedata
+import shutil
 
 from pathlib import Path
 
@@ -104,3 +105,22 @@ def slugify(text: str) -> str:
     slug = re.sub(r'[-]+', '-', slug)
     slug = slug.lower()
     return slug
+
+
+def copy_images(source_folder, destination_folder):
+    if os.path.isdir(source_folder):
+        if not os.path.isdir(destination_folder):
+            os.mkdir(destination_folder)
+    for root, dirs, files in os.walk(source_folder):
+        for name in dirs:
+            dir_path = os.path.join(root, name)
+            destination_dir_path = os.path.join(destination_folder, os.path.relpath(dir_path, source_folder))
+            # create the folder if it does not exists
+            if not os.path.isdir(destination_dir_path):
+                os.mkdir(destination_dir_path)
+        for name in files:
+            file_path = os.path.join(root, name)
+            destination_file_path = os.path.join(destination_folder, os.path.relpath(file_path, source_folder))
+            # copy the file no matter if it exists or not
+            shutil.copyfile(os.path.join(root, name), destination_file_path)
+

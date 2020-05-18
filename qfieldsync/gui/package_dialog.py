@@ -101,6 +101,7 @@ class PackageDialog(QDialog, DialogUi):
         return self.manualDir.text()
 
     def package_project(self):
+        self.push_btn.setEnabled(False)
         self.informationStack.setCurrentWidget(self.progressPage)
 
         export_folder = self.get_export_folder_from_dialog()

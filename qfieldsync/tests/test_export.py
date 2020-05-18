@@ -60,6 +60,15 @@ class OfflineConverterTest(unittest.TestCase):
         self.assertIn('curved_polys.gpkg', files)
         self.assertIn('spatialite.db', files)
 
+        dcim_folder = os.path.join(export_folder, "DCIM")
+        self.assertIn('qfield_photo_1.jpg', dcim_folder)
+        self.assertIn('qfield_photo_2.jpg', dcim_folder)
+        self.assertIn('qfield_photo_3.jpg', dcim_folder)
+        dcim_subfolder = os.path.join(dcim_folder, "subfolder")
+        self.assertIn('qfield_photo_sub_1.jpg', dcim_subfolder)
+        self.assertIn('qfield_photo_sub_2.jpg', dcim_subfolder)
+        self.assertIn('qfield_photo_sub_3.jpg', dcim_subfolder)
+
         shutil.rmtree(export_folder)
         shutil.rmtree(source_folder)
 
