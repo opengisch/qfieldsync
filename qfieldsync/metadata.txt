@@ -19,36 +19,11 @@ email=info@opengis.ch
 # Recommended items:
 
 changelog=
-    Release 1.0.0
+    Release 3.1.8
     -------------
-    * Fix synchronisation and add translations
-
-    Release 0.9.3
-    --------------
-    * Allow taking offline copies of spatialite databases
-
-    Release 0.9.2
-    --------------
-    * Properly reload original project after packaging
-
-    Release 0.9.1
-    --------------
-    * Fix the basemap functionality on Windows
-
-    Release 0.8.19
-    --------------
-    * Configurable temporary directory
-
-    Release 0.8.17
-    --------------
-    * Allow using raster layers as basemap
-
-    Initial release
-    ---------------
-    * Allow syncing from QField to QGIS
-    * Use qgis2compat plugin
-    * Show syncing errors
-    * Allow syncing from QGIS to QField
+    * Configurable attachement path with expressions
+    * Synchronize files of DCIM folder
+    * Fix adding project folder
 
 # Tags are comma separated with spaces allowed
 tags=QField, Android, Synchronization, Offline, qfieldsync
