@@ -153,7 +153,7 @@ class LayerSource(object):
 
     @property
     def warning(self):
-        if self.layer.source().endswith('jp2', 'jpx'):
+        if self.layer.source().endswith(('jp2', 'jpx')):
             return QCoreApplication.translate('DataSourceWarning',
                                               'JPEG2000 layers are not supported by QField.<br>You can rasterize '
                                               'them as basemap.'
