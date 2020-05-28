@@ -24,6 +24,8 @@ changelog=
     * Configurable attachement path with expressions
     * Synchronize files of DCIM folder
     * Fix adding project folder
+    
+    Check out the complete changelog on: https://github.com/opengisch/qfieldsync/releases
 
 # Tags are comma separated with spaces allowed
 tags=QField, Android, Synchronization, Offline, qfieldsync
@@ -42,3 +44,4 @@ deprecated=False
 about=
     This plugin facilitates packaging QGIS projects for QField.<br>
     It analyses the current project and suggests (and performs) actions needed to make the project working on QField.
+    
