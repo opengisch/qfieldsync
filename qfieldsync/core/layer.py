@@ -7,7 +7,6 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsDataSourceUri,
     QgsMapLayer,
-    QgsMapLayerType,
     QgsReadWriteContext
 )
 
@@ -177,7 +176,7 @@ class LayerSource(object):
         """
         layers = []
         # fields
-        if self.layer.type() == QgsMapLayerType.VectorLayer:
+        if self.layer.type() == QgsMapLayer.VectorLayer:
             for field in self.layer.fields():
                 ews = field.editorWidgetSetup()
                 if ews.type() == 'ValueRelation':

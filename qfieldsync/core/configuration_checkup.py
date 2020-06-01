@@ -21,7 +21,7 @@ class ConfigurationCheckup(QObject):
         for layer in list(project.mapLayers().values()):
             layer_source = LayerSource(layer)
             if not layer_source.is_configured:
-                self._errors.append(QfieldSyncError(layer, Qgis.Warning, QObject.tr('Layer is not configured.')))
+                self._errors.append(QfieldSyncError(layer, Qgis.Warning, self.tr('Layer is not configured.')))
 
             if layer_source.action != SyncAction.REMOVE:
                 for layer_id in layer_source.dependent_layers:
