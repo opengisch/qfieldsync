@@ -7,6 +7,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsDataSourceUri,
     QgsMapLayer,
+    QgsMapLayerType,
     QgsReadWriteContext
 )
 
@@ -67,7 +68,7 @@ class SyncAction(object):
 
 class LayerSource(object):
 
-    def __init__(self, layer):
+    def __init__(self, layer: QgsMapLayer):
         self.layer = layer
         self._action = None
         self._photo_naming = {}
@@ -167,6 +168,21 @@ class LayerSource(object):
     @property
     def name(self):
         return self.layer.name()
+
+    @property
+    def dependent_layers(self) -> [str]:
+        """
+        Returns a list of layer IDs of the layers required by the current layer
+        :return:
+        """
+        layers = []
+        # fields
+        if self.layer.type() == QgsMapLayerType.VectorLayer:
+            for field in self.layer.fields():
+                ews = field.editorWidgetSetup()
+                if ews.type() == 'ValueRelation':
+                    layers.append(ews.config()['Layer'])
+        return layers
 
     def copy(self, target_path, copied_files, keep_existent=False):
         """
