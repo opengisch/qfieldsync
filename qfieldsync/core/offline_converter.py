@@ -43,7 +43,9 @@ from qgis.core import (
     QgsBilinearRasterResampler,
     QgsApplication,
     QgsProcessingFeedback,
-    QgsProcessingContext
+    QgsProcessingContext,
+    QgsMapLayer,
+    QgsEditorWidgetSetup
 )
 import qgis
 
@@ -78,6 +80,7 @@ class OfflineConverter(QObject):
         """
 
         project = QgsProject.instance()
+        original_project = project
 
         original_project_path = project.fileName()
         project_filename, _ = os.path.splitext(os.path.basename(original_project_path))
@@ -95,6 +98,10 @@ class OfflineConverter(QObject):
 
             self.__offline_layers = list()
             self.__layers = list(project.mapLayers().values())
+
+            original_names = {}
+            for layer in self.__layers:
+                original_names[layer.id()] = layer.name()
 
             self.total_progress_updated.emit(0, 1, self.tr('Creating base map'))
             # Create the base map before layers are removed
@@ -150,6 +157,7 @@ class OfflineConverter(QObject):
                                                                         offline_layer_ids,
                                                                         self.project_configuration.offline_copy_only_aoi, self.offline_editing.GPKG):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
+
             except AttributeError:
                 # Run the offline plugin for spatialite
                 spatialite_filename = "data.sqlite"
@@ -165,6 +173,23 @@ class OfflineConverter(QObject):
             if self.__offline_layers:
                 QgsProject.instance().setEvaluateDefaultValues(False)
                 QgsProject.instance().setAutoTransaction(False)
+
+                # check if value relations point to offline layers and adjust if necessary
+                for layer in project.mapLayers().values():
+                    if layer.type() == QgsMapLayer.VectorLayer:
+                        for field in layer.fields():
+                            ews = field.editorWidgetSetup()
+                            if ews.type() == 'ValueRelation':
+                                widget_config = ews.config()
+                                online_layer_id = widget_config['Layer']
+                                if project.mapLayer(online_layer_id):
+                                    continue
+
+                                layer_name = original_names[online_layer_id] + " (offline)"
+                                layer_id = project.mapLayersByName(layer_name)[0].id()
+                                widget_config['Layer'] = layer_id
+                                offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
+                                layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(project_path)
