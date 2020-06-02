@@ -174,17 +174,22 @@ class OfflineConverter(QObject):
                 QgsProject.instance().setEvaluateDefaultValues(False)
                 QgsProject.instance().setAutoTransaction(False)
 
-                # check and convert value relations
+                # check if value relations point to offline layers and adjust if necessary
                 for layer in project.mapLayers().values():
                     if layer.type() == QgsMapLayer.VectorLayer:
                         for field in layer.fields():
                             ews = field.editorWidgetSetup()
                             if ews.type() == 'ValueRelation':
-                                online_layer_id = ews.config()['Layer']
+                                widget_config = ews.config()
+                                online_layer_id = widget_config['Layer']
+                                if project.mapLayer(online_layer_id):
+                                    continue
+
                                 layer_name = original_names[online_layer_id] + " (offline)"
                                 layer_id = project.mapLayersByName(layer_name)[0].id()
-                                ews.config()['Layer'] = layer_id
-                                layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), ews)
+                                widget_config['Layer'] = layer_id
+                                offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
+                                layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(project_path)
