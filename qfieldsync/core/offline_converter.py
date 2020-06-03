@@ -99,9 +99,9 @@ class OfflineConverter(QObject):
             self.__offline_layers = list()
             self.__layers = list(project.mapLayers().values())
 
-            original_names = {}
+            original_layer_info = {}
             for layer in self.__layers:
-                original_names[layer.id()] = layer.name()
+                original_layer_info[layer.id()] = (layer.source(), layer.name())
 
             self.total_progress_updated.emit(0, 1, self.tr('Creating base map'))
             # Create the base map before layers are removed
@@ -185,9 +185,18 @@ class OfflineConverter(QObject):
                                 if project.mapLayer(online_layer_id):
                                     continue
 
-                                layer_name = original_names[online_layer_id] + " (offline)"
-                                layer_id = project.mapLayersByName(layer_name)[0].id()
-                                widget_config['Layer'] = layer_id
+                                layer_id = None
+                                loose_layer_id = None
+                                for offline_layer in project.mapLayers().values():
+                                    if offline_layer.customProperty('remoteSource') == original_layer_info[online_layer_id][0]:
+                                        #  First try strict matching: the offline layer should have a "remoteSource" property
+                                        layer_id = offline_layer.id()
+                                        break
+                                    elif offline_layer.name().startswith(original_layer_info[online_layer_id][1] + ' '):
+                                        #  If that did not work, go with loose matching
+                                        #    The offline layer should start with the online layer name + a translated version of " (offline)"
+                                        loose_layer_id = offline_layer.id()
+                                widget_config['Layer'] = layer_id or loose_layer_id
                                 offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
                                 layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
 
