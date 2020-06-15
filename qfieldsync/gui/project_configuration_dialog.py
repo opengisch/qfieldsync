@@ -21,15 +21,16 @@ import os
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QMenu, QAction
+from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QCheckBox, QMenu, QAction, QWidget, QHBoxLayout
 from qgis.PyQt.uic import loadUiType
 
-from qgis.core import QgsProject, QgsMapLayerProxyModel, QgsMapLayer, Qgis
-from qgis.gui import QgsFieldExpressionWidget
+from qgis.core import QgsProject, QgsMapLayerProxyModel, Qgis
 
 from qfieldsync.core import ProjectConfiguration
 from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties
+from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
+from qfieldsync.gui.utils import set_available_actions
 
 
 DialogUi, _ = loadUiType(
@@ -83,6 +84,10 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         Load all layers from the map layer registry into the table.
         """
         self.unsupportedLayersList = list()
+
+        self.photoNamingTable = PhotoNamingTableWidget()
+        self.photoNamingTab.layout().addWidget(self.photoNamingTable)
+
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
         for layer in self.project.mapLayers().values():
@@ -96,47 +101,31 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
             item.setData(Qt.EditRole, layer.name())
             self.layersTable.setItem(count, 0, item)
 
-            cbx = QComboBox()
-            for action, description in layer_source.available_actions:
-                cbx.addItem(description)
-                cbx.setItemData(cbx.count() - 1, action)
-                if layer_source.action == action:
-                    cbx.setCurrentIndex(cbx.count() - 1)
+            cmb = QComboBox()
+            set_available_actions(cmb, layer_source)
+            
+            cbx = QCheckBox()
+            cbx.setEnabled(layer_source.can_lock_geometry)
+            cbx.setChecked(layer_source.is_geometry_locked)
+            # it's more UI friendly when the checkbox is centered, an ugly workaround to achieve it
+            cbx_widget = QWidget()
+            cbx_layout = QHBoxLayout()
+            cbx_layout.setAlignment(Qt.AlignCenter)
+            cbx_layout.setContentsMargins(0, 0, 0, 0)
+            cbx_layout.addWidget(cbx)
+            cbx_widget.setLayout(cbx_layout)
+            # NOTE the margin is not updated when the table column is resized, so better rely on the code above
+            # cbx.setStyleSheet("margin-left:50%; margin-right:50%;")
 
-            self.layersTable.setCellWidget(count, 1, cbx)
+            self.layersTable.setCellWidget(count, 1, cbx_widget)
+            self.layersTable.setCellWidget(count, 2, cmb)
+
+            # make sure layer_source is the same instance everywhere
+            self.photoNamingTable.addLayerFields(layer_source)
 
         self.layersTable.resizeColumnsToContents()
         self.layersTable.sortByColumn(0, Qt.AscendingOrder)
         self.layersTable.setSortingEnabled(True)
-
-        self.photoResourceTable.setColumnCount(3)
-        self.photoResourceTable.setHorizontalHeaderLabels([self.tr('Layer'), self.tr('Field'), self.tr('Naming Expression')])
-        self.photoResourceTable.horizontalHeaderItem(2).setToolTip(self.tr('Enter expression for a file path with the extension .jpg'))
-        self.photoResourceTable.horizontalHeader().setStretchLastSection(True)
-        self.photoResourceTable.setRowCount(0)
-        row = 0
-        for layer in self.project.instance().mapLayers().values():
-            if layer.type() == QgsMapLayer.VectorLayer:
-                layer_source = LayerSource(layer)
-                i = 0
-                for field in layer.fields():
-                    ews = layer.editorWidgetSetup(i)
-                    i += 1
-                    if ews.type() == 'ExternalResource':
-                        # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
-                        self.photoResourceTable.insertRow(row)
-                        item = QTableWidgetItem(layer.name())
-                        item.setData(Qt.UserRole, layer_source)
-                        self.photoResourceTable.setItem(row, 0, item)
-                        item = QTableWidgetItem(field.name())
-                        self.photoResourceTable.setItem(row, 1, item)
-                        ew = QgsFieldExpressionWidget()
-                        ew.setLayer(layer)
-                        expression = layer_source.photo_naming(field.name())
-                        ew.setExpression(expression)
-                        self.photoResourceTable.setCellWidget(row, 2, ew)
-                        row += 1
-        self.photoResourceTable.resizeColumnsToContents()
 
         # Remove the tab when not yet suported in QGIS
         if Qgis.QGIS_VERSION_INT < 31300:
@@ -184,22 +173,23 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         for i in range(self.layersTable.rowCount()):
             item = self.layersTable.item(i, 0)
             layer_source = item.data(Qt.UserRole)
-            cbx = self.layersTable.cellWidget(i, 1)
+            cbx = self.layersTable.cellWidget(i, 1).layout().itemAt(0).widget()
+            cmb = self.layersTable.cellWidget(i, 2)
 
             old_action = layer_source.action
-            layer_source.action = cbx.itemData(cbx.currentIndex())
-            if layer_source.action != old_action:
+            old_is_geometry_locked = layer_source.can_lock_geometry and layer_source.is_geometry_locked
+
+            layer_source.action = cmb.itemData(cmb.currentIndex())
+            layer_source.is_geometry_locked = cbx.isChecked()
+
+            if layer_source.action != old_action or layer_source.is_geometry_locked != old_is_geometry_locked:
                 self.project.setDirty(True)
                 layer_source.apply()
 
-        for i in range(self.photoResourceTable.rowCount()):
-            layer_source: LayerSource = self.photoResourceTable.item(i, 0).data(Qt.UserRole)
-            field_name = self.photoResourceTable.item(i, 1).text()
-            old_expression = layer_source.photo_naming(field_name)
-            new_expression = self.photoResourceTable.cellWidget(i, 2).currentText()
-            layer_source.set_photo_naming(field_name, new_expression)
+        # apply always the photo_namings (to store default values on first apply as well)
+        self.photoNamingTable.syncLayerSourceValues(should_apply=True)
+        if self.photoNamingTable.rowCount() > 0:
             self.project.setDirty(True)
-            layer_source.apply()
 
         self.__project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
         self.__project_configuration.base_map_theme = self.mapThemeComboBox.currentText()

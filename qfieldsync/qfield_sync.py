@@ -40,6 +40,7 @@ from qfieldsync.gui.package_dialog import PackageDialog
 from qfieldsync.gui.preferences_dialog import PreferencesDialog
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
+from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 
 
 class QFieldSync(object):
@@ -79,6 +80,9 @@ class QFieldSync(object):
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'QFieldSync')
         self.toolbar.setObjectName(u'QFieldSync')
+
+        # instance of the map config widget factory, shown in layer properties
+        self.mapLayerConfigWidgetFactory = MapLayerConfigWidgetFactory('QField', QIcon(os.path.join(os.path.dirname(__file__), 'resources/icon.png')))
 
         # instance of the QgsOfflineEditing
         self.offline_editing = QgsOfflineEditing()
@@ -193,7 +197,7 @@ class QFieldSync(object):
             parent=self.iface.mainWindow())
 
         self.add_action(
-            './resources/icon.png',
+            os.path.join(os.path.dirname(__file__), './resources/icon.png'),
             text=self.tr(u'Project Configuration'),
             callback=self.show_project_configuration_dialog,
             parent=self.iface.mainWindow(),
@@ -201,11 +205,13 @@ class QFieldSync(object):
         )
 
         self.add_action(
-            './resources/icon.png',
+            os.path.join(os.path.dirname(__file__), './resources/icon.png' ),
             text=self.tr(u'Preferences'),
             callback=self.show_preferences_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
+
+        self.iface.registerMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
 
         self.update_button_enabled_status()
 
@@ -218,6 +224,8 @@ class QFieldSync(object):
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
+
+        self.iface.unregisterMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
 
     def show_preferences_dialog(self):
         dlg = PreferencesDialog(self.iface.mainWindow())

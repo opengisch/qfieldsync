@@ -71,15 +71,23 @@ class LayerSource(object):
         self.layer = layer
         self._action = None
         self._photo_naming = {}
+        self._is_geometry_locked = None
         self.read_layer()
 
     def read_layer(self):
         self._action = self.layer.customProperty('QFieldSync/action')
         self._photo_naming = json.loads(self.layer.customProperty('QFieldSync/photo_naming') or '{}')
+        self._is_geometry_locked = self.layer.customProperty('QFieldSync/is_geometry_locked', False)
 
     def apply(self):
         self.layer.setCustomProperty('QFieldSync/action', self.action)
         self.layer.setCustomProperty('QFieldSync/photo_naming', json.dumps(self._photo_naming))
+
+        # custom properties does not store the data type, so it is safer to remove boolean custom properties, rather than setting them to the string 'false' (which is boolean `True`)
+        if self.is_geometry_locked:
+            self.layer.setCustomProperty('QFieldSync/is_geometry_locked', True)
+        else:
+            self.layer.removeCustomProperty('QFieldSync/is_geometry_locked')
 
     @property
     def action(self):
@@ -150,6 +158,18 @@ class LayerSource(object):
             return False
         else:
             return True
+
+    @property
+    def can_lock_geometry(self):
+        return self.layer.type() == QgsMapLayer.VectorLayer
+
+    @property
+    def is_geometry_locked(self):
+        return bool(self._is_geometry_locked)
+
+    @is_geometry_locked.setter
+    def is_geometry_locked(self, is_geometry_locked):
+        self._is_geometry_locked = is_geometry_locked
 
     @property
     def warning(self):

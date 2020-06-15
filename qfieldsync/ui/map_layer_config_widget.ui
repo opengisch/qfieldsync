@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QFieldLayerSettingsPage</class>
+ <widget class="QWidget" name="QFieldLayerSettingsPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>250</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QFormLayout" name="QFieldLayerSettingsPageLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="layerActionLabel">
+     <property name="text">
+      <string>Layer Action</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="layerActionComboBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QCheckBox" name="isGeometryLockedCheckBox">
+     <property name="toolTip">
+      <string>When enabled, this option disables adding and deleting features, as well as modifying the geometries of existing features.</string>
+     </property>
+     <property name="text">
+      <string>lock geometry</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
