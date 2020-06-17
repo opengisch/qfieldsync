@@ -37,7 +37,7 @@
       <string>When enabled, this option disables adding and deleting features, as well as modifying the geometries of existing features.</string>
      </property>
      <property name="text">
-      <string>lock geometry</string>
+      <string>Lock Geometries</string>
      </property>
     </widget>
    </item>

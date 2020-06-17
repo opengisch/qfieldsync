@@ -77,7 +77,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Lock geometry</string>
+          <string>Lock Geometries</string>
          </property>
          <property name="toolTip">
           <string>When enabled, this option disables adding and deleting features, as well as modifying the geometries of existing features.</string>
