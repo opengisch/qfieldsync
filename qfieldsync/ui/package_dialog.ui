@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Package project for QField</string>
+   <string>Package Project for QField</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="2" column="0" colspan="2">
@@ -89,7 +89,7 @@
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Select extent</string>
+          <string>Select Extent</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0">

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Configure Project for QField synchronisation</string>
+   <string>Configure Project for QField Synchronisation</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -111,7 +111,7 @@
           <string>A base map is fully rendered to a raster image. Attributes from layers on a base map are no longer accessible.</string>
          </property>
          <property name="title">
-          <string>Create base map</string>
+          <string>Create Base Map</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -258,7 +258,7 @@
        <item row="0" column="0">
         <widget class="QCheckBox" name="onlyOfflineCopyFeaturesInAoi">
          <property name="text">
-          <string>Only copy features in area of interest</string>
+          <string>Only Copy Features in Area of Interest</string>
          </property>
         </widget>
        </item>

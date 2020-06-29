@@ -11,16 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Synchronize project</string>
+   <string>Synchronize Project</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the QField project folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::RichText</enum>
+      <string>Select the QField Project Folder</string>
      </property>
     </widget>
    </item>
