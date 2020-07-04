@@ -77,6 +77,14 @@
         </column>
         <column>
          <property name="text">
+          <string>Lock Geometries</string>
+         </property>
+         <property name="toolTip">
+          <string>When enabled, this option disables adding and deleting features, as well as modifying the geometries of existing features.</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>Action</string>
          </property>
         </column>
@@ -264,15 +272,11 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="photo_naming">
+     <widget class="QWidget" name="photoNamingTab">
       <attribute name="title">
        <string>Photo Naming</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_6">
-       <item row="0" column="0">
-        <widget class="QTableWidget" name="photoResourceTable"/>
-       </item>
-      </layout>
+      <layout class="QVBoxLayout" name="photoNamingLayout"/>
      </widget>
     </widget>
    </item>
