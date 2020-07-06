@@ -37,7 +37,7 @@ jobs:
 
     - stage: deploy
       name: Update translations
-      if: branch = master
+      if: branch = master and type = push
       install:
         - pip install qgis-plugin-ci
       script: qgis-plugin-ci push-translation ${TX_TOKEN}
