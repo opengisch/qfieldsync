@@ -88,11 +88,11 @@ class SynchronizeDialog(QDialog, DialogUi):
                         imported_files_checksums.append(import_file_checksum(qfield_folder))
                         ProjectConfiguration(QgsProject.instance()).imported_files_checksums = imported_files_checksums
                         QgsProject.instance().write()
-                        self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"Opened original project {}".format(original_project_path)))
+                        self.iface.messageBar().pushInfo('QFieldSync', self.tr("Opened original project {}".format(original_project_path)))
                     else:
-                        self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"The data has been synchronized successfully but the original project ({}) could not be opened. ".format(original_project_path)))
+                        self.iface.messageBar().pushInfo('QFieldSync', self.tr("The data has been synchronized successfully but the original project ({}) could not be opened".format(original_project_path)))
                 else:
-                    self.iface.messageBar().pushInfo('QFieldSync', self.tr(u"No original project path found."))
+                    self.iface.messageBar().pushInfo('QFieldSync', self.tr("No original project path found"))
                 self.close()
             else:
                 message = self.tr("The project you imported does not seem to be an offline project")

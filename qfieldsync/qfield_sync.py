@@ -76,10 +76,10 @@ class QFieldSync(object):
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&QFieldSync')
+        self.menu = self.tr('&QFieldSync')
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'QFieldSync')
-        self.toolbar.setObjectName(u'QFieldSync')
+        self.toolbar = self.iface.addToolBar('QFieldSync')
+        self.toolbar.setObjectName('QFieldSync')
 
         # instance of the map config widget factory, shown in layer properties
         self.mapLayerConfigWidgetFactory = MapLayerConfigWidgetFactory('QField', QIcon(os.path.join(os.path.dirname(__file__), 'resources/icon.png')))
@@ -186,19 +186,19 @@ class QFieldSync(object):
 
         self.push_action = self.add_action(
             os.path.join(os.path.dirname(__file__), 'resources/refresh.png'),
-            text=self.tr(u'Package for QField'),
+            text=self.tr('Package for QField'),
             callback=self.show_package_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
             os.path.join(os.path.dirname(__file__), 'resources/refresh-reverse.png'),
-            text=self.tr(u'Synchronize from QField'),
+            text=self.tr('Synchronize from QField'),
             callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
             os.path.join(os.path.dirname(__file__), './resources/icon.png'),
-            text=self.tr(u'Project Configuration'),
+            text=self.tr('Project Configuration'),
             callback=self.show_project_configuration_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False
@@ -206,7 +206,7 @@ class QFieldSync(object):
 
         self.add_action(
             os.path.join(os.path.dirname(__file__), './resources/icon.png' ),
-            text=self.tr(u'Preferences'),
+            text=self.tr('Preferences'),
             callback=self.show_preferences_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
@@ -219,7 +219,7 @@ class QFieldSync(object):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&QFieldSync'),
+                self.tr('&QFieldSync'),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
