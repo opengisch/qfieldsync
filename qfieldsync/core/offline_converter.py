@@ -103,7 +103,7 @@ class OfflineConverter(QObject):
             for layer in self.__layers:
                 original_layer_info[layer.id()] = (layer.source(), layer.name())
 
-            self.total_progress_updated.emit(0, 1, self.tr('Creating base map...'))
+            self.total_progress_updated.emit(0, 1, self.trUtf8('Creating base map…'))
             # Create the base map before layers are removed
             if self.project_configuration.create_base_map:
                 if 'processing' not in qgis.utils.plugins:
@@ -123,7 +123,7 @@ class OfflineConverter(QObject):
             copied_files = list()
             for current_layer_index, layer in enumerate(self.__layers):
                 self.total_progress_updated.emit(current_layer_index - len(self.__offline_layers), len(self.__layers),
-                                                 self.tr('Copying layers...'))
+                                                 self.trUtf8('Copying layers…'))
                 layer_source = LayerSource(layer)
 
                 if layer_source.action == SyncAction.OFFLINE:
@@ -257,7 +257,7 @@ class OfflineConverter(QObject):
 
     @pyqtSlot(int, int)
     def on_offline_editing_next_layer(self, layer_index, layer_count):
-        msg = self.tr('Packaging layer {layer_name}...').format(layer_name=self.__offline_layers[layer_index - 1].name())
+        msg = self.trUtf8('Packaging layer {layer_name}…').format(layer_name=self.__offline_layers[layer_index - 1].name())
         self.total_progress_updated.emit(layer_index, layer_count, msg)
 
     @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
