@@ -62,6 +62,9 @@ class OfflineConverter(QObject):
         self.__convertor_progress = None  # for processing feedback
         self.__layers = list()
 
+        # elipsis workaround
+        self.trUtf8 = self.tr
+
         self.export_folder = export_folder
         self.extent = extent
         self.offline_editing = offline_editing
