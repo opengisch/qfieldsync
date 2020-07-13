@@ -215,7 +215,7 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
 
     def toggle_menu_triggered(self, action):
         """
-        Toggles usae of layers
+        Toggles usage of layers
         :param action: the menu action that triggered this
         """
         sync_action = SyncAction.NO_ACTION
