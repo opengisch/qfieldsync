@@ -69,6 +69,9 @@ class SyncAction(object):
     # remove from the project
     REMOVE = "remove"
 
+    # acts like "NO_ACTION", but the layer is going to be synced via deltas in QField
+    CLOUD = "cloud"
+
 
 class LayerSource(object):
 
@@ -160,6 +163,7 @@ class LayerSource(object):
 
         if self.layer.type() == QgsMapLayer.VectorLayer:
             actions.append((SyncAction.OFFLINE, QCoreApplication.translate('LayerAction', 'offline editing')))
+            actions.append((SyncAction.CLOUD, QCoreApplication.translate('LayerAction', 'Cloud')))
 
         actions.append((SyncAction.REMOVE, QCoreApplication.translate('LayerAction', 'remove')))
 
