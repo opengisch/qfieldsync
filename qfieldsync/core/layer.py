@@ -101,7 +101,7 @@ class LayerSource(object):
         self._action = action
 
     def photo_naming(self, field_name: str) -> str:
-        return self._photo_naming.get(field_name, "'DCIM/{}_'||now()||'.jpg'".format(slugify(self.layer.name())))
+        return self._photo_naming.get(field_name, "'DCIM/{layername}_' || format_date(now(),'yyyyMMddhhmmsszzz') || '.jpg'".format(layername=slugify(self.layer.name())))
 
     def set_photo_naming(self, field_name: str, expression: str):
         self._photo_naming[field_name] = expression
