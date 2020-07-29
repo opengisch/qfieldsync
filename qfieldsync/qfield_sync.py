@@ -46,6 +46,7 @@ from qfieldsync.gui.preferences_widget import PreferencesWidget
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_widget import ProjectConfigurationWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
+from qfieldsync.gui.qfield_cloud_dialog import QFieldCloudDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 
 
@@ -308,6 +309,13 @@ class QFieldSync(object):
         else:
             dlg = ProjectConfigurationDialog(self.iface.mainWindow())
             dlg.exec_()
+
+    def show_qfield_cloud_dialog(self):
+        """
+        Show the QFieldCloud dialog.
+        """
+        dlg = QFieldCloudDialog(self.iface, self.iface.mainWindow())
+        dlg.exec_()
 
     def action_start(self):
         self.clear_last_action_warnings()
