@@ -21,9 +21,10 @@
  ***************************************************************************/
 """
 import os
+import functools
 from typing import Any, Dict
 
-from qgis.PyQt.QtCore import Qt, pyqtSlot
+from qgis.PyQt.QtCore import Qt, QItemSelectionModel, pyqtSlot
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -32,6 +33,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
     QCheckBox,
     QHBoxLayout,
+    QTreeWidgetItem,
 )
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtNetwork import QNetworkReply
@@ -40,13 +42,25 @@ from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.project import ProjectConfiguration
 from qfieldsync.core.preferences import Preferences
-from qfieldsync.core.cloud_api import login, logout, create_project, ProjectUploader, get_error_reason, QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
 from qfieldsync.utils.cloud_utils import to_cloud_title
 
 
 QFieldCloudDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/qfield_cloud_dialog.ui'))
 
 
+def select_table_row(func):
+    @functools.wraps(func)
+    def closure(self, table_widget, row_idx):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            index = table_widget.model().index(row_idx, 0)
+            table_widget.setCurrentIndex(index)
+            table_widget.selectionModel().select(index, QItemSelectionModel.ClearAndSelect|QItemSelectionModel.Rows)
+            return func(self, *args, **kwargs)
+        return wrapper
+
+    return closure
 
 
 class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
@@ -59,14 +73,15 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.iface = iface
         self.preferences = Preferences()
         self.networkManager = QFieldCloudNetworkManager(parent)
+        self.current_cloud_project = None
 
         self.loginButton.clicked.connect(self.onLoginButtonClicked)
         self.logoutButton.clicked.connect(self.onLogoutButtonClicked)
         self.createButton.clicked.connect(self.onCreateButtonClicked)
-        self.deleteButton.clicked.connect(self.onDeleteButtonClicked)
         self.refreshButton.clicked.connect(self.onRefreshButtonClicked)
         self.backButton.clicked.connect(self.onBackButtonClicked)
         self.submitButton.clicked.connect(self.onSubmitButtonClicked)
+        self.projectsTable.cellDoubleClicked.connect(self.onProjectsTableCellDoubleClicked)
 
         self.projectsTable.selectionModel().selectionChanged.connect(self.onProjectsTableSelectionChanged)
 
@@ -127,6 +142,11 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             self.logoutButton.setEnabled(True)
             return
 
+        self.networkManager.set_token("")
+        self.projectsTable.setRowCount(0)
+        self.projectsStack.setCurrentWidget(self.projectsListPage)
+        self.projectsStackGroup.setEnabled(False)
+
         self.usernameLineEdit.setEnabled(True)
         self.passwordLineEdit.setText("")
         self.passwordLineEdit.setEnabled(True)
@@ -140,7 +160,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
     def getProjects(self):
         self.projectsStackGroup.setEnabled(False)
-        self.projectsFeedbackLabel.setText("Loading...")
+        self.projectsFeedbackLabel.setText("Loading…")
         self.projectsFeedbackLabel.setVisible(True)
 
         reply = self.networkManager.get_projects()
@@ -189,18 +209,27 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
             btn_synchronize = QToolButton()
             btn_synchronize.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')))
+            btn_edit = QToolButton()
+            btn_edit.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')))
+            btn_delete = QToolButton()
+            btn_delete.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')))
             btn_widget = QWidget()
             btn_layout = QHBoxLayout()
             btn_layout.setAlignment(Qt.AlignCenter)
             btn_layout.setContentsMargins(0, 0, 0, 0)
             btn_layout.addWidget(btn_synchronize)
+            btn_layout.addWidget(btn_edit)
+            btn_layout.addWidget(btn_delete)
             btn_widget.setLayout(btn_layout)
+
+            btn_synchronize.clicked.connect(self.onProjectSynchronizeButtonClicked(self.projectsTable, count))
+            btn_edit.clicked.connect(self.onProjectEditButtonClicked(self.projectsTable, count))
+            btn_delete.clicked.connect(self.onProjectDeleteButtonClicked(self.projectsTable, count))
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
             self.projectsTable.setCellWidget(count, 2, cbx_widget)
-            self.projectsTable.setItem(count, 3, QTableWidgetItem("TODO"))
-            self.projectsTable.setCellWidget(count, 4, btn_widget)
+            self.projectsTable.setCellWidget(count, 3, btn_widget)
 
 
 
@@ -209,11 +238,42 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.projectsTable.setSortingEnabled(True)
 
 
-    def onDeleteButtonClicked(self):
+    @select_table_row
+    def onProjectSynchronizeButtonClicked(self, is_toggled):
+        # TODO check if project already saved
+        # if there is saved location for this project id
+        #   download all the files
+        #   if project is the current one:
+        #       reload the project
+        # else
+        #   if the cloud project is not empty
+        #       ask for path that is empty dir
+        #       download the project there
+        #   else
+        #       ask for path
+        #    
+        #       if path contains .qgs file:
+        #           assert single .qgs file
+        #           upload all the files
+        # 
+        # 
+        #   save the project location
+        # ask should that project be opened
+
+        pass
+
+
+    @select_table_row
+    def onProjectDeleteButtonClicked(self, is_toggled):
         self.projectsStackGroup.setEnabled(False)
 
         reply = self.networkManager.delete_project(self.current_cloud_project.id)
         reply.finished.connect(self.onDeleteProjectReplyFinished(reply))
+
+
+    @select_table_row
+    def onProjectEditButtonClicked(self, is_toggled):
+        self.showProjectForm()
 
 
     @QFieldCloudNetworkManager.reply_wrapper
@@ -229,13 +289,73 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.getProjects()
 
 
+    def onProjectsTableCellDoubleClicked(self, _row, _col):
+        self.showProjectForm()
+
+
     def onCreateButtonClicked(self):
+        self.projectsTable.clearSelection()
+        self.showProjectForm()
+
+    
+    def showProjectForm(self):
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
 
-        self.projectsTable.clearSelection()
+        self.projectOwnerComboBox.clear()
+        self.projectOwnerComboBox.addItem(self.usernameLineEdit.text(), self.usernameLineEdit.text())
+        self.projectFilesTree.clear()
+        self.projectFilesGroup.setEnabled(False)
+        self.projectFilesGroup.setCollapsed(True)
 
-        self.projectOwnerComboBox.addItem(self.usernameLineEdit.text())
-        self.projectOwnerComboBox.setItemData(0, self.usernameLineEdit.text())
+        if self.current_cloud_project is None:
+            self.projectNameLineEdit.setText("")
+            self.projectDescriptionTextEdit.setPlainText("")
+            self.projectIsPrivateCheckBox.setChecked(True)
+        else:
+            self.projectNameLineEdit.setText(self.current_cloud_project.name)
+            self.projectDescriptionTextEdit.setPlainText(self.current_cloud_project.description)
+            self.projectIsPrivateCheckBox.setChecked(self.current_cloud_project.is_private)
+
+            index = self.projectOwnerComboBox.findData(self.current_cloud_project.owner)
+            
+            if index == -1:
+                self.projectOwnerComboBox.insertItem(0, self.current_cloud_project.owner, self.current_cloud_project.owner)
+                self.projectOwnerComboBox.setCurrentIndex(0)
+
+            reply = self.networkManager.get_files(self.current_cloud_project.id)
+            reply.finished.connect(self.onGetFilesFinished(reply))
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    @QFieldCloudNetworkManager.read_json
+    def onGetFilesFinished(self, reply, payload):
+        self.projectFilesGroup.setEnabled(True)
+        self.projectFilesGroup.setCollapsed(False)
+
+        if reply.error() != QNetworkReply.NoError or payload is None:
+            self.projectsFeedbackLabel.setText("Obtaining project files list failed: {}".format(QFieldCloudNetworkManager.error_reason(reply)))
+            self.projectsFeedbackLabel.setVisible(True)
+            return
+
+        for file_obj in payload:
+            file_item = QTreeWidgetItem(file_obj)
+            
+            file_item.setText(0, file_obj['name'])
+            file_item.setText(1, str(file_obj['size']))
+            file_item.setTextAlignment(1, Qt.AlignRight)
+            file_item.setText(2, file_obj['versions'][-1]['created_at'])
+
+            for version_idx, version_obj in enumerate(file_obj['versions'], 1):
+                version_item = QTreeWidgetItem(version_obj)
+                
+                version_item.setText(0, 'Version {}'.format(version_idx))
+                version_item.setText(1, str(version_obj['size']))
+                version_item.setTextAlignment(1, Qt.AlignRight)
+                version_item.setText(2, version_obj['created_at'])
+
+                file_item.addChild(version_item)
+
+            self.projectFilesTree.addTopLevelItem(file_item)
 
 
     def onBackButtonClicked(self):
@@ -250,36 +370,68 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             "private": self.projectIsPrivateCheckBox.isChecked(),
         }
 
+        self.projectsFormPage.setEnabled(False)
+        self.projectsFeedbackLabel.setVisible(True)
+
         if self.current_cloud_project is None:
-            reply = self.networkManager.create_project(cloud_project_data['name'], cloud_project_data['owner'], cloud_project_data['description'], cloud_project_data['private'])
+            self.projectsFeedbackLabel.setText(self.tr("Creating project…"))
+            reply = self.networkManager.create_project(
+                cloud_project_data['name'], 
+                cloud_project_data['owner'], 
+                cloud_project_data['description'], 
+                cloud_project_data['private'])
             reply.finished.connect(self.onCreateProjectFinished(reply))
         else:
             self.current_cloud_project.update_data(cloud_project_data)
+            self.projectsFeedbackLabel.setText(self.tr("Updating project…"))
 
-            reply = self.networkManager.update_project(cloud_project_data['id'], cloud_project_data['name'], cloud_project_data['owner'], cloud_project_data['description'], cloud_project_data['private'])
+            reply = self.networkManager.update_project(
+                self.current_cloud_project.id, 
+                self.current_cloud_project.name, 
+                self.current_cloud_project.owner, 
+                self.current_cloud_project.description, 
+                self.current_cloud_project.is_private)
             reply.finished.connect(self.onUpdateProjectFinished(reply))
 
 
-
-
+    @QFieldCloudNetworkManager.reply_wrapper
+    @QFieldCloudNetworkManager.read_json
     def onCreateProjectFinished(self, reply, payload):
+        self.projectsFormPage.setEnabled(True)
+
+        if reply.error() != QNetworkReply.NoError or payload is None:
+            self.projectsFeedbackLabel.setText("Project create failed: {}".format(QFieldCloudNetworkManager.error_reason(reply)))
+            self.projectsFeedbackLabel.setVisible(True)
+            return
+
         self.projectsStack.setCurrentWidget(self.projectsListPage)
-        pass
+        self.projectsFeedbackLabel.setVisible(False)
+
+        self.getProjects()
 
 
+    @QFieldCloudNetworkManager.reply_wrapper
+    @QFieldCloudNetworkManager.read_json
     def onUpdateProjectFinished(self, reply, payload):
+        self.projectsFormPage.setEnabled(True)
+
+        if reply.error() != QNetworkReply.NoError or payload is None:
+            self.projectsFeedbackLabel.setText("Project update failed: {}".format(QFieldCloudNetworkManager.error_reason(reply)))
+            self.projectsFeedbackLabel.setVisible(True)
+            return
+
         self.projectsStack.setCurrentWidget(self.projectsListPage)
-        pass
+        self.projectsFeedbackLabel.setVisible(False)
 
-    def onProjectsTableSelectionChanged(self, new_selection, old_selection):
-        self.current_cloud_project = self.projectsTable.currentItem().data(Qt.UserRole)
-
-        print(old_selection, new_selection, self.projectsTable.currentItem(), self.current_cloud_project)
-
-        self.editButton.setEnabled(self.current_cloud_project is not None)
-        self.deleteButton.setEnabled(self.current_cloud_project is not None)
+        self.getProjects()
 
 
+    def onProjectsTableSelectionChanged(self, _new_selection, _old_selection):
+        if self.projectsTable.selectionModel().hasSelection():
+            row_idx = self.projectsTable.currentRow()
+            self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
+        else:
+            self.current_cloud_project = None
 
 
 class CloudProject:
