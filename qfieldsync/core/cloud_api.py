@@ -135,7 +135,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
     def update_project(self, project_id: str, name: str, owner: str, description: str, private: bool) -> QNetworkReply:
         """Update an existing QFieldCloud project"""
 
-        return self.cloud_patch(['projects', project_id], {
+        return self.cloud_put(['projects', project_id], {
             'name': name,
             'owner': owner,
             'description': description,
@@ -148,11 +148,17 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         return self.cloud_delete(['projects', project_id])
 
 
+    def get_files(self, project_id: str, client: str = "qgis") -> QNetworkReply:
+        """"Get project files and their versions"""
+
+        return self.cloud_get(['files', project_id], {"client": client})
+
+
     def set_token(self, token: str) -> None:
         self._token = token
 
 
-    def cloud_get(self, uri: str, params: Dict[str, Any] = {}) -> QNetworkReply:
+    def cloud_get(self, uri: Union[str, List[str]], params: Dict[str, Any] = {}) -> QNetworkReply:
         url = QUrl(self.url + self._prepare_uri(uri))
         query = QUrlQuery()
 
@@ -169,7 +175,6 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
-            request.setRawHeader(b'Authorization1', 'Token {}'.format(self._token).encode('utf-8'))
 
         reply = self.get(request)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
@@ -186,7 +191,6 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
-            request.setRawHeader(b'Authorization1', 'Token {}'.format(self._token).encode('utf-8'))
 
         payload_bytes = b'' if payload is None else json.dumps(payload).encode('utf-8')
         reply = self.post(request, payload_bytes)
@@ -195,7 +199,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         return reply
 
 
-    def cloud_patch(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
+    def cloud_put(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
         url = QUrl(self.url + self._prepare_uri(uri))
 
         request = QNetworkRequest(url)
@@ -204,10 +208,9 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
-            request.setRawHeader(b'Authorization1', 'Token {}'.format(self._token).encode('utf-8'))
 
         payload_bytes = b'' if payload is None else json.dumps(payload).encode('utf-8')
-        reply = self.post(request, payload_bytes)
+        reply = self.put(request, payload_bytes)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
 
         return reply
@@ -222,7 +225,6 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
-            request.setRawHeader(b'Authorization1', 'Token {}'.format(self._token).encode('utf-8'))
 
         reply = self.deleteResource(request)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
@@ -239,7 +241,6 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
-            request.setRawHeader(b'Authorization1', 'Token {}'.format(self._token).encode('utf-8'))
 
         multi_part = QHttpMultiPart(QHttpMultiPart.FormDataType)
 

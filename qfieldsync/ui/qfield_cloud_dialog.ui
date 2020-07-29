@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>574</width>
-    <height>584</height>
+    <width>563</width>
+    <height>858</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,16 +20,6 @@
       <string>QFieldCloud Login</string>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
-      <item row="0" column="1">
-       <widget class="QLabel" name="loginFeedbackLabel">
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="usernameLabel">
         <property name="text">
@@ -102,7 +92,7 @@
       <item row="4" column="1">
        <widget class="QLabel" name="syncFeedbackLabel">
         <property name="visible">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string/>
@@ -110,13 +100,26 @@
        </widget>
       </item>
      </layout>
+     <widget class="QLabel" name="loginFeedbackLabel">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>100</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="visible">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="projectsStackGroup">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
      <property name="title">
       <string>Projects</string>
      </property>
@@ -150,7 +153,7 @@
            <number>0</number>
           </property>
           <item row="2" column="1">
-           <layout class="QHBoxLayout" name="projectsSelectButtonLayout" stretch="0,0,0,0,0">
+           <layout class="QHBoxLayout" name="projectsSelectButtonLayout" stretch="0,0,0">
             <item>
              <spacer name="projectsSelectButtonSpacer">
               <property name="orientation">
@@ -168,26 +171,6 @@
              <widget class="QPushButton" name="createButton">
               <property name="text">
                <string>Create</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="editButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Edit</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="deleteButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Delete</string>
               </property>
              </widget>
             </item>
@@ -253,12 +236,10 @@
             </column>
             <column>
              <property name="text">
-              <string>Status</string>
+              <string>Actions</string>
              </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Synchronize</string>
+             <property name="toolTip">
+              <string>Synchronize| Edit | Delete  </string>
              </property>
             </column>
            </widget>
@@ -272,106 +253,161 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="2" column="0">
-           <widget class="QLabel" name="projectNameLabel">
-            <property name="text">
-             <string>Name</string>
-            </property>
+         <layout class="QVBoxLayout" name="projectsSelectButtonLayout" stretch="0,0">
+          <item>
+           <widget class="QFrame" name="projectFormGroup">
+            <layout class="QFormLayout" name="projectFormGroupLayout">
+             <item row="1" column="0">
+              <widget class="QLabel" name="projectUrlLabel">
+               <property name="text">
+                <string>Project URL</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="projectUrlLabelValue">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="projectNameLabel">
+               <property name="text">
+                <string>Name</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="projectNameLineEdit"/>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="projectDescriptionLabel">
+               <property name="text">
+                <string>Description</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QPlainTextEdit" name="projectDescriptionTextEdit"/>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="projectOwnerLabel">
+               <property name="text">
+                <string>Owner</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QComboBox" name="projectOwnerComboBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <layout class="QHBoxLayout" name="projectFormButtonLayout">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QCheckBox" name="projectIsPrivateCheckBox">
+                 <property name="text">
+                  <string>Private</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="projectFormButtonSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="backButton">
+                 <property name="text">
+                  <string>Back</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="submitButton">
+                 <property name="text">
+                  <string>Submit</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="projectNameLineEdit"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="projectDescriptionLabel">
-            <property name="text">
-             <string>Description</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QPlainTextEdit" name="projectDescriptionTextEdit"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="projectOwnerLabel">
-            <property name="text">
-             <string>Owner</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <layout class="QHBoxLayout" name="projectFormButtonLayout">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QCheckBox" name="projectIsPrivateCheckBox">
-              <property name="text">
-               <string>Private</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="projectFormButtonSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="backButton">
-              <property name="text">
-               <string>Back</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="submitButton">
-              <property name="text">
-               <string>Submit</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="projectUrlLabelValue">
+          <item>
+           <widget class="QgsCollapsibleGroupBox" name="projectFilesGroup">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text">
-             <string/>
+            <property name="title">
+             <string>Files</string>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="projectUrlLabel">
-            <property name="text">
-             <string>Project URL</string>
+            <property name="flat">
+             <bool>true</bool>
             </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QComboBox" name="projectOwnerComboBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+            <property name="collapsed">
+             <bool>false</bool>
             </property>
+            <property name="scrollOnExpand">
+             <bool>false</bool>
+            </property>
+            <property name="saveCollapsedState">
+             <bool>false</bool>
+            </property>
+            <layout class="QVBoxLayout" name="projectFilesGroupLayout">
+             <item>
+              <widget class="QTreeWidget" name="projectFilesTree">
+               <property name="columnCount">
+                <number>3</number>
+               </property>
+               <column>
+                <property name="text">
+                 <string>Filename</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Size (bytes)</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Created at</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -384,6 +420,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QgsCollapsibleGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>qgscollapsiblegroupbox.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>QgsPasswordLineEdit</class>
    <extends>QLineEdit</extends>
