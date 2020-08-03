@@ -24,7 +24,7 @@ import os
 import functools
 import glob
 
-from qgis.PyQt.QtCore import Qt, QItemSelectionModel, pyqtSlot
+from qgis.PyQt.QtCore import Qt, QItemSelectionModel, pyqtSignal
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -43,7 +43,7 @@ from qgis.core import QgsProject
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core import CloudProject, Preferences
-from qfieldsync.core.cloud_api import ProjectTransferrer, QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import ProjectTransferType, ProjectTransferrer, QFieldCloudNetworkManager
 from qfieldsync.utils.cloud_utils import to_cloud_title
 from qfieldsync.gui.qfield_cloud_transfer_dialog import QFieldCloudTransferDialog
 
@@ -66,6 +66,7 @@ def select_table_row(func):
 
 
 class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
+    projects_refreshed = pyqtSignal()
 
     def __init__(self, iface, cloud_network_manager, parent=None):
         """Constructor.
@@ -77,7 +78,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.cloud_network_manager = cloud_network_manager
         self.transfer_dialog = None
         self.current_cloud_project = None
-        self.project_upload_transfer = None
+        self.project_transfer = None
         self.project_download_transfer = None
 
         self.usernameLineEdit.setText(self.preferences.value('qfieldCloudLastUsername'))
@@ -201,6 +202,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
         self.preferences.set_value('qfieldCloudProjectsCache', payload)
 
+        self.projects_refreshed.emit()
         self.show_projects(payload)
 
 
@@ -560,26 +562,23 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
 
     def sync_project(self, replace_remote_files: bool) -> None:
-        assert self.project_upload_transfer is None, 'There is a project currently uploading'
-        assert self.project_download_transfer is None, 'There is a project currently downloading'
+        assert self.current_cloud_project is not None, 'No project to sync selected'
+        assert self.project_transfer is None, 'There is a project currently uploading'
 
-        self.project_upload_transfer = ProjectTransferrer(self.cloud_network_manager, self.current_cloud_project)
-        self.project_download_transfer = ProjectTransferrer(self.cloud_network_manager, self.current_cloud_project)
+        self.project_transfer = ProjectTransferrer(self.cloud_network_manager, self.current_cloud_project, ProjectTransferType.Sync)
 
-        self.transfer_dialog = QFieldCloudTransferDialog(self.project_upload_transfer, self.project_download_transfer, self)
-        self.transfer_dialog.setWindowTitle(self.tr('Uploading project "{}"'.format(self.current_cloud_project.name)))
+        self.transfer_dialog = QFieldCloudTransferDialog(self.project_transfer, self)
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
         self.transfer_dialog.open()
         
-        self.project_upload_transfer.finished.connect(self.on_project_sync_upload_finished)
-        self.project_upload_transfer.upload(upload_all=replace_remote_files)
+        self.project_transfer.sync()
 
 
     def on_transfer_dialog_rejected(self):
-        self.project_upload_transfer.abort_requests()
+        self.project_transfer.abort_requests()
         self.transfer_dialog.close()
-        self.project_upload_transfer = None
+        self.project_transfer = None
         self.project_download_transfer = None
         self.transfer_dialog = None
 
@@ -588,12 +587,24 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         QgsProject().instance().reloadAllLayers()
 
         self.transfer_dialog.close()
-        self.project_upload_transfer = None
+        self.project_transfer = None
         self.project_download_transfer = None
         self.transfer_dialog = None
 
 
-    def on_project_sync_upload_finished(self):
-        self.transfer_dialog.setWindowTitle(self.tr('Downloading project "{}"'.format(self.current_cloud_project.name)))
-        self.project_download_transfer.download()
+        # replace_all = False
+
+        # for path in Path(self.temp_dir.path()).glob('**/*'):
+        #     dest_path = Path(self.cloud_project.local_dir + '/' + str(path.relative_to(self.temp_dir.path())))
+
+        #     if dest_path.exists() and replace_all != True:
+        #         result = QMessageBox.question(
+        #             self,
+        #             self.tr('Replace local file'), 
+        #             self.tr('Would you like to replace file "%1" with its cloud version?'), 
+        #             QMessageBox.Yes | QMessageBox.YesToAll | QMessageBox.No | QMessageBox.NoToAll,
+        #             QMessageBox.NoToAll)
+
+        #     else:
+        #         shutil.copy(path, dest_path)
 

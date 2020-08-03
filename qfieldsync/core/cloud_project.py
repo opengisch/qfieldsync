@@ -20,6 +20,8 @@
 """
 
 
+from pathlib import Path
+
 from qgis.core import QgsProject
 
 from qfieldsync.core.preferences import Preferences
@@ -42,10 +44,9 @@ class CloudProject:
         project_dir = QgsProject.instance().homePath()
 
         for project_id, local_dir in preferences.value('qfieldCloudProjectLocalDirs').items():
-            print(project_id, local_dir, project_dir)
             if local_dir != project_dir:
                 continue
-
+            
             cached_cloud_project = CloudProject.get_project_cache(project_id)
 
             if cached_cloud_project is not None:
@@ -134,7 +135,30 @@ class CloudProject:
 
 
     @property
+    def cloud_only_files(self):
+        return [f for f in self.cloud_files if f['name'] not in self.local_files]
+
+
+    @property
     def is_current_qgis_project(self):
         project_home_path = QgsProject.instance().homePath()
 
         return len(project_home_path) > 0 and self.local_dir == QgsProject.instance().homePath()
+
+
+    @property
+    def local_files(self):
+        assert self.local_dir
+
+        return [f for f in [str(f.relative_to(self.local_dir)) for f in Path(self.local_dir).glob('**/*')] if not f.startswith('.qfieldsync')]
+
+
+    @property
+    def  local_only_files(self):
+        assert self._cloud_files
+
+        return [f for f in self.local_files if f not in self.cloud_files]
+
+
+
+

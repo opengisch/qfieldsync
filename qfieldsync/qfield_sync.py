@@ -287,6 +287,7 @@ class QFieldSync(object):
         Show the QFieldCloud dialog.
         """
         dlg = QFieldCloudDialog(self.iface, self.cloud_network_manager, self.iface.mainWindow())
+        dlg.projects_refreshed.connect(lambda: self.update_qfield_sync_toolbar_icon())
         dlg.exec_()
 
 
@@ -299,6 +300,7 @@ class QFieldSync(object):
             return
 
         dlg = QFieldCloudDialog(self.iface, self.cloud_network_manager, self.iface.mainWindow())
+        dlg.projects_refreshed.connect(lambda: self.update_qfield_sync_toolbar_icon())
         dlg.current_cloud_project = current_cloud_project
         dlg.ask_sync_project()
 
