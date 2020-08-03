@@ -27,15 +27,12 @@ import shutil
 import urllib.parse
 from pathlib import Path
 
-from qfieldsync.core import project
-
 from PyQt5.QtCore import QTemporaryDir
 from qgis.PyQt.QtCore import (
     QObject,
     pyqtSignal,
     QUrl,
     QUrlQuery,
-    QFile,
 )
 from qgis.PyQt.QtNetwork import (
     QNetworkRequest,
@@ -46,21 +43,15 @@ from qgis.PyQt.QtNetwork import (
 from qgis.core import QgsNetworkAccessManager
 
 
-
-BASE_URL = 'http://dev.qfield.cloud/api/v1/'
-
-# store the current token
-token = None
-
-
 class QFieldCloudNetworkManager(QgsNetworkAccessManager):
-
+    
+    token_changed = pyqtSignal()
 
     def __init__(self, parent=None):
         """Constructor.
         """
         super(QFieldCloudNetworkManager, self).__init__(parent=parent)
-        self.url = BASE_URL
+        self.url = 'http://dev.qfield.cloud/api/v1/'
         self._token = ''
 
 
@@ -159,7 +150,16 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
     def set_token(self, token: str) -> None:
         """Sets QFieldCloud authentication token to be used by all the following requests. Set to `None` to disable token authentication."""
+        if self._token == token:
+            return
+
         self._token = token
+
+        self.token_changed.emit()
+
+
+    def has_token(self) -> bool:
+        return self._token is not None and len(self._token) > 0
 
 
     def cloud_get(self, uri: Union[str, List[str]], params: Dict[str, Any] = {}, local_filename: str = None) -> QNetworkReply:
@@ -307,83 +307,6 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         return encoded_uri
 
 
-
-def set_token(new_token):
-    global token
-    token = new_token
-
-
-def get_error_reason(response):
-    try:
-        resp = response.json()
-        return resp['detail']
-    except:
-        return 'Unknown reason'
-
-
-def login(username, password):
-
-    url = BASE_URL + 'auth/login/'
-    data = {
-        "username": username,
-        "password": password,
-    }
-
-    response = requests.post(
-        url,
-        data=data,
-    )
-
-
-
-    response.raise_for_status()
-    resp = response.json()
-    set_token(resp['token'])
-
-    return resp
-
-
-def logout():
-    """Login to QFieldCloud and print the token"""
-
-    url = BASE_URL + 'auth/logout/'
-
-    headers = {'Authorization': 'token {}'.format(token)}
-    response = requests.post(
-        url,
-        headers=headers,
-    )
-
-    response.raise_for_status()
-    set_token(None)
-
-    return response.json()
-
-
-def create_project(name, owner, description, private=True):
-    """Create a new QFieldCloud project"""
-
-    url = BASE_URL + 'projects/'
-    data = {
-        "name": name,
-        "owner": owner,
-        "description": description,
-        "private": private
-    }
-
-    headers = {'Authorization': 'token {}'.format(token)}
-
-    response = requests.post(
-        url,
-        data=data,
-        headers=headers,
-    )
-
-    response.raise_for_status()
-
-    return response.json()
-
-
 class ProjectTransferrer(QObject):
     # TODO show progress of individual files
     progress = pyqtSignal(float)
@@ -433,7 +356,7 @@ class ProjectTransferrer(QObject):
 
         self.is_active = True
         
-        assert self.cloud_project.local_dir is not None
+        assert self.cloud_project.local_dir
 
         for file in Path(self.cloud_project.local_dir).glob('**/*.*'):
             relative_filename = str(file.relative_to(self.cloud_project.local_dir))
