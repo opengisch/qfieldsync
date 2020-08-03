@@ -342,7 +342,7 @@ class ProjectTransferrer(QObject):
 
         self.is_active = True
         reply = self.network_manager.get_files(self.cloud_project.id)
-        reply.finished.connect(self.on_get_files_finished(reply))
+        reply.finished.connect(self.on_get_files_finished(reply)) # pylint: disable=no-value-for-parameter
 
 
     def upload(self, upload_all: bool) -> None:
@@ -372,7 +372,7 @@ class ProjectTransferrer(QObject):
             self.bytes_total_files_only += file.stat().st_size
 
             reply = self.network_manager.cloud_upload_files('files/' + self.cloud_project.id + '/' + relative_filename, filenames=[str(temp_file)])
-            reply.uploadProgress.connect(self.on_upload_file_progress(reply, filename=relative_filename)) # types: ignore
+            reply.uploadProgress.connect(self.on_upload_file_progress(reply, filename=relative_filename)) # pylint: disable=no-value-for-parameter
             reply.finished.connect(self.on_upload_file_finished(reply, filename=relative_filename))
 
             self.replies.append(reply)
@@ -435,7 +435,7 @@ class ProjectTransferrer(QObject):
             temp_destination.parent.mkdir(parents=True, exist_ok=True)
 
             reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_destination))
-            reply.downloadProgress.connect(self.on_download_file_progress(reply, filename=filename))
+            reply.downloadProgress.connect(self.on_download_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
             reply.finished.connect(self.on_download_file_finished(reply, filename=filename))
 
             self.replies.append(reply)

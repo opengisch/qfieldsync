@@ -113,7 +113,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         password = self.passwordLineEdit.text()
 
         reply = self.cloud_network_manager.login(username, password)
-        reply.finished.connect(self.onLoginReplyFinished(reply))
+        reply.finished.connect(self.onLoginReplyFinished(reply)) # pylint: disable=no-value-for-parameter
 
 
     @QFieldCloudNetworkManager.reply_wrapper
@@ -149,7 +149,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.loginFeedbackLabel.setVisible(False)
 
         reply = self.cloud_network_manager.logout()
-        reply.finished.connect(self.onLogoutReplyFinished(reply))
+        reply.finished.connect(self.onLogoutReplyFinished(reply)) # pylint: disable=no-value-for-parameter
 
 
     @QFieldCloudNetworkManager.reply_wrapper
@@ -186,7 +186,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.projectsFeedbackLabel.setVisible(True)
 
         reply = self.cloud_network_manager.get_projects()
-        reply.finished.connect(self.onGetProjectsReplyFinished(reply))
+        reply.finished.connect(self.onGetProjectsReplyFinished(reply)) # pylint: disable=no-value-for-parameter
 
 
     @QFieldCloudNetworkManager.reply_wrapper
@@ -252,9 +252,9 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             btn_layout.addWidget(btn_delete)
             btn_widget.setLayout(btn_layout)
 
-            btn_sync.clicked.connect(self.onProjectSyncButtonClicked(self.projectsTable, count))
-            btn_edit.clicked.connect(self.onProjectEditButtonClicked(self.projectsTable, count))
-            btn_delete.clicked.connect(self.onProjectDeleteButtonClicked(self.projectsTable, count))
+            btn_sync.clicked.connect(self.onProjectSyncButtonClicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
+            btn_edit.clicked.connect(self.onProjectEditButtonClicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
+            btn_delete.clicked.connect(self.onProjectDeleteButtonClicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
@@ -284,7 +284,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             self.ask_sync_project()
         else:
             reply = self.cloud_network_manager.get_files(self.current_cloud_project.id)
-            reply.finished.connect(self.onCheckoutGetFilesListFinished(reply))
+            reply.finished.connect(self.onCheckoutGetFilesListFinished(reply)) # pylint: disable=no-value-for-parameter
 
         # if there is saved location for this project id #
         #   download all the files #
@@ -364,7 +364,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.projectsStackGroup.setEnabled(False)
 
         reply = self.cloud_network_manager.delete_project(self.current_cloud_project.id)
-        reply.finished.connect(self.onDeleteProjectReplyFinished(reply))
+        reply.finished.connect(self.onDeleteProjectReplyFinished(reply)) # pylint: disable=no-value-for-parameter
 
 
     @select_table_row
@@ -421,7 +421,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
                 self.projectOwnerComboBox.setCurrentIndex(0)
 
             reply = self.cloud_network_manager.get_files(self.current_cloud_project.id)
-            reply.finished.connect(self.onGetFilesFinished(reply))
+            reply.finished.connect(self.onGetFilesFinished(reply)) # pylint: disable=no-value-for-parameter
 
 
     @QFieldCloudNetworkManager.reply_wrapper
@@ -479,7 +479,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
                 cloud_project_data['owner'], 
                 cloud_project_data['description'], 
                 cloud_project_data['private'])
-            reply.finished.connect(self.onCreateProjectFinished(reply, local_dir=cloud_project_data['local_dir']))
+            reply.finished.connect(self.onCreateProjectFinished(reply, local_dir=cloud_project_data['local_dir'])) # pylint: disable=no-value-for-parameter
         else:
             self.current_cloud_project.update_data(cloud_project_data)
             self.projectsFeedbackLabel.setText(self.tr("Updating project…"))
@@ -490,7 +490,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
                 self.current_cloud_project.owner, 
                 self.current_cloud_project.description, 
                 self.current_cloud_project.is_private)
-            reply.finished.connect(self.onUpdateProjectFinished(reply))
+            reply.finished.connect(self.onUpdateProjectFinished(reply)) # pylint: disable=no-value-for-parameter
 
 
     @QFieldCloudNetworkManager.reply_wrapper
