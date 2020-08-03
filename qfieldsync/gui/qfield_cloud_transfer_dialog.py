@@ -35,22 +35,21 @@ QFieldCloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file_
 
 class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
 
-    def __init__(self, upload_transfer: ProjectTransferrer, download_transfer: ProjectTransferrer, parent: QObject = None):
+    def __init__(self, project_transfer: ProjectTransferrer, parent: QObject = None):
         """Constructor.
         """
         super(QFieldCloudTransferDialog, self).__init__(parent=parent)
         self.setupUi(self)
-        self.upload_transfer = upload_transfer
-        self.download_transfer = download_transfer
+        self.project_transfer = project_transfer
 
-        self.upload_transfer.progress.connect(self.on_upload_transfer_progress)
-        self.upload_transfer.finished.connect(self.on_upload_transfer_finished)
-        self.upload_transfer.error.connect(self.on_error)
-        self.download_transfer.progress.connect(self.on_download_transfer_progress)
-        self.download_transfer.finished.connect(self.on_download_transfer_finished)
-        self.download_transfer.error.connect(self.on_error)
+        self.project_transfer.error.connect(self.on_error)
+        self.project_transfer.upload_progress.connect(self.on_upload_transfer_progress)
+        self.project_transfer.download_progress.connect(self.on_download_transfer_progress)
+        self.project_transfer.finished.connect(self.on_transfer_finished)
 
+        self.setWindowTitle(self.tr('Synchronizing project "%1"').arg(self.project_transfer.cloud_project.name))
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+
         self.uploadProgressBar.setValue(0)
         self.downloadProgressBar.setValue(0)
 
@@ -63,15 +62,10 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
         self.uploadProgressBar.setValue(fraction * 100)
 
 
-    def on_upload_transfer_finished(self) -> None:
-        self.uploadProgressBar.setValue(100)
-
-
     def on_download_transfer_progress(self, fraction: float) -> None:
         self.uploadProgressBar.setValue(fraction * 100)
 
 
-    def on_download_transfer_finished(self, fraction: float) -> None:
-        self.downloadProgressBar.setValue(100)
+    def on_transfer_finished(self, fraction: float) -> None:
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         self.buttonBox.button(QDialogButtonBox.Abort).setEnabled(False)
