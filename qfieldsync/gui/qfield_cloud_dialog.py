@@ -37,7 +37,7 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QMessageBox,
 )
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QFont
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.core import QgsProject
 from qgis.PyQt.uic import loadUiType
@@ -67,17 +67,28 @@ def select_table_row(func):
 
 class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
-    def __init__(self, iface, parent=None):
+    def __init__(self, iface, cloud_network_manager, parent=None):
         """Constructor.
         """
         super(QFieldCloudDialog, self).__init__(parent=parent)
         self.setupUi(self)
         self.iface = iface
         self.preferences = Preferences()
-        self.networkManager = QFieldCloudNetworkManager(parent)
+        self.cloud_network_manager = cloud_network_manager
         self.transfer_dialog = None
         self.current_cloud_project = None
         self.project_upload_transfer = None
+        self.project_download_transfer = None
+
+        self.usernameLineEdit.setText(self.preferences.value('qfieldCloudLastUsername'))
+
+        if self.cloud_network_manager.has_token():
+            self.usernameLineEdit.setEnabled(False)
+            self.passwordLineEdit.setEnabled(False)
+            self.loginButton.setEnabled(False)
+            self.rememberMeCheckBox.setEnabled(False)
+            self.logoutButton.setEnabled(True)
+            self.show_projects(self.preferences.value('qfieldCloudProjectsCache'))
 
         self.loginButton.clicked.connect(self.onLoginButtonClicked)
         self.logoutButton.clicked.connect(self.onLogoutButtonClicked)
@@ -96,10 +107,12 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.rememberMeCheckBox.setEnabled(False)
         self.loginFeedbackLabel.setVisible(False)
 
+        self.preferences.set_value('qfieldCloudProjectsCache', [])
+
         username = self.usernameLineEdit.text()
         password = self.passwordLineEdit.text()
 
-        reply = self.networkManager.login(username, password)
+        reply = self.cloud_network_manager.login(username, password)
         reply.finished.connect(self.onLoginReplyFinished(reply))
 
 
@@ -118,7 +131,9 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             # resp['token']
             pass
 
-        self.networkManager.set_token(payload['token'])
+        self.cloud_network_manager.set_token(payload['token'])
+
+        self.preferences.set_value('qfieldCloudLastUsername', payload['username'])
 
         self.usernameLineEdit.setEnabled(False)
         self.passwordLineEdit.setEnabled(False)
@@ -133,7 +148,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.logoutButton.setEnabled(False)
         self.loginFeedbackLabel.setVisible(False)
 
-        reply = self.networkManager.logout()
+        reply = self.cloud_network_manager.logout()
         reply.finished.connect(self.onLogoutReplyFinished(reply))
 
 
@@ -146,16 +161,19 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             self.logoutButton.setEnabled(True)
             return
 
-        self.networkManager.set_token("")
+        self.cloud_network_manager.set_token("")
         self.projectsTable.setRowCount(0)
         self.projectsStack.setCurrentWidget(self.projectsListPage)
         self.projectsStackGroup.setEnabled(False)
 
+        self.usernameLineEdit.setText(self.preferences.value('qfieldCloudLastUsername'))
         self.usernameLineEdit.setEnabled(True)
         self.passwordLineEdit.setText("")
         self.passwordLineEdit.setEnabled(True)
         self.rememberMeCheckBox.setEnabled(True)
         self.loginButton.setEnabled(True)
+
+        self.preferences.set_value('qfieldCloudProjectsCache', [])
 
 
     def onRefreshButtonClicked(self):
@@ -167,8 +185,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
         self.projectsFeedbackLabel.setText("Loading…")
         self.projectsFeedbackLabel.setVisible(True)
 
-        reply = self.networkManager.get_projects()
-
+        reply = self.cloud_network_manager.get_projects()
         reply.finished.connect(self.onGetProjectsReplyFinished(reply))
 
 
@@ -182,13 +199,19 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             self.projectsFeedbackLabel.setVisible(True)
             return
 
+        self.preferences.set_value('qfieldCloudProjectsCache', payload)
+
+        self.show_projects(payload)
+
+
+    def show_projects(self, projects):
         self.projectsFeedbackLabel.setText("")
         self.projectsFeedbackLabel.setVisible(False)
 
         self.projectsTable.setRowCount(0)
         self.projectsTable.setSortingEnabled(False)
 
-        for project in payload:
+        for project in projects:
             cloud_project = CloudProject(project)
 
             count = self.projectsTable.rowCount()
@@ -211,9 +234,9 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             # NOTE the margin is not updated when the table column is resized, so better rely on the code above
             # cbx.setStyleSheet("margin-left:50%; margin-right:50%;")
 
-            btn_download = QToolButton()
-            btn_download.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_download.svg')))
-            btn_download.setToolTip(self.tr("Synchronize with QFieldCloud"))
+            btn_sync = QToolButton()
+            btn_sync.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')))
+            btn_sync.setToolTip(self.tr("Synchronize with QFieldCloud"))
             btn_edit = QToolButton()
             btn_edit.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')))
             btn_edit.setToolTip(self.tr("Edit project data"))
@@ -224,12 +247,12 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             btn_layout = QHBoxLayout()
             btn_layout.setAlignment(Qt.AlignCenter)
             btn_layout.setContentsMargins(0, 0, 0, 0)
-            btn_layout.addWidget(btn_download)
+            btn_layout.addWidget(btn_sync)
             btn_layout.addWidget(btn_edit)
             btn_layout.addWidget(btn_delete)
             btn_widget.setLayout(btn_layout)
 
-            btn_download.clicked.connect(self.onProjectDownloadButtonClicked(self.projectsTable, count))
+            btn_sync.clicked.connect(self.onProjectSyncButtonClicked(self.projectsTable, count))
             btn_edit.clicked.connect(self.onProjectEditButtonClicked(self.projectsTable, count))
             btn_delete.clicked.connect(self.onProjectDeleteButtonClicked(self.projectsTable, count))
 
@@ -238,6 +261,14 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             self.projectsTable.setCellWidget(count, 2, cbx_widget)
             self.projectsTable.setCellWidget(count, 3, btn_widget)
 
+            font = QFont()
+
+            if cloud_project.is_current_qgis_project:
+                font.setBold(True)
+
+            self.projectsTable.item(count, 0).setFont(font)
+            self.projectsTable.item(count, 1).setFont(font)
+
         self.projectsTable.resizeColumnsToContents()
         self.projectsTable.sortByColumn(2, Qt.AscendingOrder)
         self.projectsTable.setSortingEnabled(True)
@@ -245,33 +276,34 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
 
     @select_table_row
-    def onProjectDownloadButtonClicked(self, is_toggled):
+    def onProjectSyncButtonClicked(self, is_toggled):
         # TODO check if project already saved
         assert self.current_cloud_project is not None
 
-        if self.current_cloud_project.local_dir is not None:
+        if self.current_cloud_project.local_dir:
             self.ask_sync_project()
         else:
-            reply = self.networkManager.get_files(self.current_cloud_project.id)
+            reply = self.cloud_network_manager.get_files(self.current_cloud_project.id)
             reply.finished.connect(self.onCheckoutGetFilesListFinished(reply))
 
-        # if there is saved location for this project id
-        #   download all the files
-        #   if project is the current one:
-        #       reload the project
+        # if there is saved location for this project id #
+        #   download all the files #
+        #   if project is the current one: #
+        #       reload the project #
         # else
         #   if the cloud project is not empty
         #       ask for path that is empty dir
         #       download the project there
         #   else
-        #       ask for path
+        #       ask for path #
         #    
-        #       if path contains .qgs file:
-        #           assert single .qgs file
-        #           upload all the files
+        #       if path contains .qgs file: #
+        #           assert single .qgs file #
+        #           upload all the files #
         # 
         # 
-        #   save the project location
+        #   save the project location #
+        #
         # ask should that project be opened
 
         pass
@@ -279,12 +311,10 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
     @QFieldCloudNetworkManager.reply_wrapper
     @QFieldCloudNetworkManager.read_json
     def onCheckoutGetFilesListFinished(self, reply, payload):
+        assert self.current_cloud_project is not None
+
         if reply.error() != QNetworkReply.NoError or payload is None:
-            QMessageBox.warning(None, self.tr('Failed attempt to sync'), self.tr(''))
-            
-            # TODO alert
-            # self.projectsFeedbackLabel.setText("Obtaining project files list failed: {}".format(QFieldCloudNetworkManager.error_reason(reply)))
-            # self.projectsFeedbackLabel.setVisible(True)
+            QMessageBox.warning(self.iface.mainWidnow(), self.tr('Synchronization failed'), self.tr("Obtaining project files list failed: %1").arg(QFieldCloudNetworkManager.error_reason(reply)))
             return
         
         # cloud project is empty, you can upload a local project into it
@@ -305,7 +335,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
                 break
 
-            # TODO save settings qfieldsync/projects/ID/local_dir = dir_path
+            self.current_cloud_project.update_data({'local_dir': dir_path})
             # TODO upload the project
 
         # cloud project exists and has files in it, so checkout in an empty dir
@@ -325,7 +355,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
                 break
 
-            # TODO save settings qfieldsync/projects/ID/local_dir = dir_path
+            self.current_cloud_project.update_data({'local_dir': dir_path})
             # TODO download project
 
 
@@ -333,7 +363,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
     def onProjectDeleteButtonClicked(self, is_toggled):
         self.projectsStackGroup.setEnabled(False)
 
-        reply = self.networkManager.delete_project(self.current_cloud_project.id)
+        reply = self.cloud_network_manager.delete_project(self.current_cloud_project.id)
         reply.finished.connect(self.onDeleteProjectReplyFinished(reply))
 
 
@@ -390,7 +420,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
                 self.projectOwnerComboBox.insertItem(0, self.current_cloud_project.owner, self.current_cloud_project.owner)
                 self.projectOwnerComboBox.setCurrentIndex(0)
 
-            reply = self.networkManager.get_files(self.current_cloud_project.id)
+            reply = self.cloud_network_manager.get_files(self.current_cloud_project.id)
             reply.finished.connect(self.onGetFilesFinished(reply))
 
 
@@ -444,7 +474,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
         if self.current_cloud_project is None:
             self.projectsFeedbackLabel.setText(self.tr("Creating project…"))
-            reply = self.networkManager.create_project(
+            reply = self.cloud_network_manager.create_project(
                 cloud_project_data['name'], 
                 cloud_project_data['owner'], 
                 cloud_project_data['description'], 
@@ -454,7 +484,7 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             self.current_cloud_project.update_data(cloud_project_data)
             self.projectsFeedbackLabel.setText(self.tr("Updating project…"))
 
-            reply = self.networkManager.update_project(
+            reply = self.cloud_network_manager.update_project(
                 self.current_cloud_project.id, 
                 self.current_cloud_project.name, 
                 self.current_cloud_project.owner, 
@@ -509,9 +539,10 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
             self.current_cloud_project = None
 
 
+    # TODO move this to a separate class
     def ask_sync_project(self):
         assert self.current_cloud_project is not None, 'No project to download selected'
-        assert self.current_cloud_project.local_dir is not None, 'Cannot download a project without `local_dir` properly set'
+        assert self.current_cloud_project.local_dir, 'Cannot download a project without `local_dir` properly set'
 
         dialog_result = QMessageBox.question(
             self, 
@@ -529,19 +560,20 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
 
     def sync_project(self, replace_remote_files: bool) -> None:
-        assert self.project_upload_transfer is None, 'There is a project currently downloading'
+        assert self.project_upload_transfer is None, 'There is a project currently uploading'
+        assert self.project_download_transfer is None, 'There is a project currently downloading'
 
-        self.project_upload_transfer = ProjectTransferrer(self.networkManager, self.current_cloud_project)
-        self.project_upload_transfer.finished.connect(self.on_project_sync_upload_finished)
-        self.project_upload_transfer.upload(upload_all=replace_remote_files)
-
-        self.project_download_transfer = ProjectTransferrer(self.networkManager, self.current_cloud_project)
+        self.project_upload_transfer = ProjectTransferrer(self.cloud_network_manager, self.current_cloud_project)
+        self.project_download_transfer = ProjectTransferrer(self.cloud_network_manager, self.current_cloud_project)
 
         self.transfer_dialog = QFieldCloudTransferDialog(self.project_upload_transfer, self.project_download_transfer, self)
         self.transfer_dialog.setWindowTitle(self.tr('Uploading project "{}"'.format(self.current_cloud_project.name)))
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
         self.transfer_dialog.open()
+        
+        self.project_upload_transfer.finished.connect(self.on_project_sync_upload_finished)
+        self.project_upload_transfer.upload(upload_all=replace_remote_files)
 
 
     def on_transfer_dialog_rejected(self):
@@ -562,5 +594,6 @@ class QFieldCloudDialog(QDialog, QFieldCloudDialogUi):
 
 
     def on_project_sync_upload_finished(self):
+        self.transfer_dialog.setWindowTitle(self.tr('Downloading project "{}"'.format(self.current_cloud_project.name)))
         self.project_download_transfer.download()
 

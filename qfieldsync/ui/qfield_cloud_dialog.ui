@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>563</width>
-    <height>858</height>
+    <height>888</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,11 +28,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="usernameLineEdit">
-        <property name="text">
-         <string>demo_user</string>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="usernameLineEdit"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="passwordLabel">
@@ -42,11 +38,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QgsPasswordLineEdit" name="passwordLineEdit">
-        <property name="text">
-         <string>demo_pwd</string>
-        </property>
-       </widget>
+       <widget class="QgsPasswordLineEdit" name="passwordLineEdit"/>
       </item>
       <item row="3" column="1">
        <layout class="QHBoxLayout" name="loginFormButtonsLayout" stretch="0,0,0,0">
