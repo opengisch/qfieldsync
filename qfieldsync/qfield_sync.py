@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 
+from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core import Preferences
 
 
@@ -32,7 +33,7 @@ from qgis.PyQt.QtCore import (
     Qt,
     QLocale
 )
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QToolButton, QMenu
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import Qgis, QgsApplication, QgsOfflineEditing, QgsProject
 
@@ -48,7 +49,7 @@ from qfieldsync.gui.project_configuration_widget import ProjectConfigurationWidg
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.gui.qfield_cloud_dialog import QFieldCloudDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
-
+from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
 
 class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
     """
@@ -126,6 +127,12 @@ class QFieldSync(object):
 
         # store warnings from last run
         self.last_action_warnings = []
+
+        self.cloud_network_manager = QFieldCloudNetworkManager(self.iface.mainWindow())
+        self.cloud_network_manager.token_changed.connect(self.update_qfield_sync_toolbar_icon)
+        # TODO enable this and watch the world collapse
+        # QgsProject().homePathChanged.connect(self.update_qfield_sync_toolbar_icon)
+
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -249,6 +256,23 @@ class QFieldSync(object):
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
 
+        self.qfield_cloud_sync_action = self.add_action(
+            os.path.join(os.path.dirname(__file__), './resources/cloud.svg'),
+            text=self.tr('QFieldCloud'),
+            callback=self.show_qfield_cloud_dialog,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False)
+
+        
+        self.qfield_cloud_sync_btn = QToolButton(self.iface.mainWindow())
+        self.qfield_cloud_sync_btn.setMenu(QMenu())
+        self.qfield_cloud_sync_btn.setPopupMode(QToolButton.MenuButtonPopup)
+        self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud_off.svg')))
+        self.qfield_cloud_sync_btn.setToolTip('Synchronize with QFieldCloud')
+        self.qfield_cloud_sync_btn.clicked.connect(self.sync_qfieldcloud_project)
+        self.qfield_cloud_sync_btn.menu().addAction(self.qfield_cloud_sync_action)
+        self.toolbar.addWidget(self.qfield_cloud_sync_btn)
+
         self.iface.registerMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
 
         if Qgis.QGIS_VERSION_INT >= 31500:
@@ -314,8 +338,22 @@ class QFieldSync(object):
         """
         Show the QFieldCloud dialog.
         """
-        dlg = QFieldCloudDialog(self.iface, self.iface.mainWindow())
+        dlg = QFieldCloudDialog(self.iface, self.cloud_network_manager, self.iface.mainWindow())
         dlg.exec_()
+
+
+    def sync_qfieldcloud_project(self):
+        """Synchronize the current QFieldCloud project"""
+        current_cloud_project = CloudProject.get_instance_cloud_project()
+
+        if current_cloud_project is None or not self.cloud_network_manager.has_token():
+            self.show_qfield_cloud_dialog()
+            return
+
+        dlg = QFieldCloudDialog(self.iface, self.cloud_network_manager, self.iface.mainWindow())
+        dlg.current_cloud_project = current_cloud_project
+        dlg.ask_sync_project()
+
 
     def action_start(self):
         self.clear_last_action_warnings()
@@ -347,3 +385,10 @@ class QFieldSync(object):
             self.push_action.setEnabled(False)
         else:
             self.push_action.setEnabled(True)
+
+
+    def update_qfield_sync_toolbar_icon(self):
+        if self.cloud_network_manager.has_token() and CloudProject.get_instance_cloud_project() is not None:
+            self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud.svg')))
+        else:
+            self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud_off.svg')))

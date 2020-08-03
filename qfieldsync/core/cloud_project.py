@@ -20,6 +20,8 @@
 """
 
 
+from qgis.core import QgsProject
+
 from qfieldsync.core.preferences import Preferences
 
 
@@ -32,6 +34,36 @@ class CloudProject:
         self._data = project_data
         self._cloud_files = None
         self.local_dir = self._data.get('local_dir', self.local_dir)
+
+
+    @staticmethod
+    def get_instance_cloud_project():
+        preferences = Preferences()
+        project_dir = QgsProject.instance().homePath()
+
+        for project_id, local_dir in preferences.value('qfieldCloudProjectLocalDirs').items():
+            print(project_id, local_dir, project_dir)
+            if local_dir != project_dir:
+                continue
+
+            cached_cloud_project = CloudProject.get_project_cache(project_id)
+
+            if cached_cloud_project is not None:
+                return cached_cloud_project
+
+    
+    @staticmethod
+    def get_project_cache(project_id):
+        preferences = Preferences()
+
+        for project in preferences.value('qfieldCloudProjectsCache'):
+            if project['id'] == project_id:
+                return CloudProject({
+                    **project,
+                    'local_dir': preferences.value('qfieldCloudProjectLocalDirs').get(project_id)
+                })
+
+        return None
 
 
     def update_data(self, new_project_data):
@@ -76,19 +108,19 @@ class CloudProject:
 
     @property
     def local_dir(self):
-        return self._preferences.value('qfieldCloudProjects').get(self.id)
+        return self._preferences.value('qfieldCloudProjectLocalDirs').get(self.id)
 
 
     @local_dir.setter
     def local_dir(self, local_dir):
-        old_value = self._preferences.value('qfieldCloudProjects')
+        old_value = self._preferences.value('qfieldCloudProjectLocalDirs')
 
         new_value = {
             **old_value,
             self.id: local_dir,
         }
 
-        self._preferences.set_value('qfieldCloudProjects', new_value)
+        self._preferences.set_value('qfieldCloudProjectLocalDirs', new_value)
 
 
     @property
@@ -99,3 +131,10 @@ class CloudProject:
     @cloud_files.setter
     def cloud_files(self, files):
         self._cloud_files = files
+
+
+    @property
+    def is_current_qgis_project(self):
+        project_home_path = QgsProject.instance().homePath()
+
+        return len(project_home_path) > 0 and self.local_dir == QgsProject.instance().homePath()
