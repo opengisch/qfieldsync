@@ -358,6 +358,23 @@
                </item>
               </layout>
              </item>
+             <item row="5" column="1">
+              <widget class="QgsFileWidget" name="projectLocalDirFileWidget">
+               <property name="dialogTitle">
+                <string>Select Local QFieldCloud project directory</string>
+               </property>
+               <property name="storageMode">
+                <enum>QgsFileWidget::GetDirectory</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="projectLocalDirLabel">
+               <property name="text">
+                <string>Local directory</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -425,6 +442,11 @@
    <extends>QGroupBox</extends>
    <header>qgscollapsiblegroupbox.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QgsFileWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsfilewidget.h</header>
   </customwidget>
   <customwidget>
    <class>QgsPasswordLineEdit</class>

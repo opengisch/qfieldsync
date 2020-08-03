@@ -19,19 +19,17 @@
  ***************************************************************************/
 """
 
-
-import os
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, IO, List, Union
 import requests
 import functools
 import json
-import mimetypes
+import shutil
 import urllib.parse
-from glob import glob
 from pathlib import Path
 
 from qfieldsync.core import project
 
+from PyQt5.QtCore import QTemporaryDir
 from qgis.PyQt.QtCore import (
     QObject,
     pyqtSignal,
@@ -153,12 +151,19 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         return self.cloud_get(['files', project_id], {"client": client})
 
+    def get_file(self, filename: str, local_filename: str) -> QNetworkReply:
+        """"Download file"""
+
+        return self.cloud_get('files/' + filename, local_filename=local_filename)
+
 
     def set_token(self, token: str) -> None:
+        """Sets QFieldCloud authentication token to be used by all the following requests. Set to `None` to disable token authentication."""
         self._token = token
 
 
-    def cloud_get(self, uri: Union[str, List[str]], params: Dict[str, Any] = {}) -> QNetworkReply:
+    def cloud_get(self, uri: Union[str, List[str]], params: Dict[str, Any] = {}, local_filename: str = None) -> QNetworkReply:
+        """Issues a GET HTTP request"""
         url = QUrl(self.url + self._prepare_uri(uri))
         query = QUrlQuery()
 
@@ -178,8 +183,18 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         reply = self.get(request)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.setParent(self)
+
+        if local_filename is not None:
+            file = open(local_filename, 'wb')
+            reply.finished.connect(lambda: self._on_cloud_get_download_finished(reply, file=file))
 
         return reply
+
+
+    def _on_cloud_get_download_finished(self, reply: QNetworkReply, file: IO) -> None:
+        assert file.write(reply.readAll()) != -1, 'Error while writing to file "{}"'.format(file.name)
+        file.close()
 
 
     def cloud_post(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
@@ -195,6 +210,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         payload_bytes = b'' if payload is None else json.dumps(payload).encode('utf-8')
         reply = self.post(request, payload_bytes)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.setParent(self)
 
         return reply
 
@@ -212,6 +228,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         payload_bytes = b'' if payload is None else json.dumps(payload).encode('utf-8')
         reply = self.put(request, payload_bytes)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.setParent(self)
 
         return reply
 
@@ -228,45 +245,48 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         reply = self.deleteResource(request)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.setParent(self)
 
         return reply
 
 
-    def cloud_upload_files(self, uri: Union[str, List[str]], filenames: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
+    def cloud_upload_files(self, uri: Union[str, List[str]], filenames: List[str], payload: Dict = None) -> QNetworkReply:
         url = QUrl(self.url + self._prepare_uri(uri))
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
-        request.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
 
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
 
         multi_part = QHttpMultiPart(QHttpMultiPart.FormDataType)
+        multi_part.setParent(self)
 
         # most of the time there is no other payload
         if payload is not None:
             json_part = QHttpPart()
 
             json_part.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
-            json_part.setHeader(QNetworkRequest.ContentDispositionHeader, 'form-data; name=\"text\"')
+            json_part.setHeader(QNetworkRequest.ContentDispositionHeader, 'form-data; name=\"json\"')
             json_part.setBody(json.dumps(payload).encode('utf-8'))
             
             multi_part.append(json_part)
 
         # now attach each file
         for filename in filenames:
-            file_part = QHttpPart()
-            file = QFile(filename, multi_part)
+            # this might be optimized by usung QFile and QHttpPart.setBodyDevice, but didn't work on the first
+            filedata = open(filename, 'rb').read()
 
-            # file_part.setHeader(QNetworkRequest.ContentTypeHeader, mimetypes.guess_type(filename ).encode('utf-8') ;
+            file_part = QHttpPart()
+            file_part.setBody(filedata)
             file_part.setHeader(QNetworkRequest.ContentDispositionHeader, "form-data; name=\"file\"; filename=\"{}\"".format(filename))
-            file_part.setBodyDevice(file)
 
             multi_part.append(file_part)
 
         reply = self.post(request, multi_part)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.setParent(self)
+        multi_part.setParent(reply)
 
         return reply
 
@@ -359,118 +379,186 @@ def create_project(name, owner, description, private=True):
         headers=headers,
     )
 
-    print(data, response, headers, response.text)
-
     response.raise_for_status()
 
     return response.json()
 
 
-class ProjectUploader(QObject):
-    progress_uploaded = pyqtSignal(int, int, str)
+class ProjectTransferrer(QObject):
+    # TODO show progress of individual files
+    progress = pyqtSignal(float)
+    error = pyqtSignal(str)
+    abort = pyqtSignal()
+    finished = pyqtSignal()
 
 
-    def __init__(self, project_id, local_dir, is_new_project=False):
-        super(ProjectUploader, self).__init__(parent=None)
-
-        self.project_id = project_id
-        self.local_dir = local_dir
-        self.is_new_project = is_new_project
-
-
-    def upload(self):
-        file_names = glob(os.path.join(self.local_dir, '**'), recursive=True)
-
-        # upload the QGIS project file at the end
-        file_names.sort(key=lambda s: Path(s).suffix in ('.qgs', '.qgz') )
-
-        # do not upload the project file, if it is already there
-        if not self.is_new_project:
-            file_names = file_names[:-2]
-
-        file_paths = [Path(f) for f in file_names if Path(f).is_file()]
-        total_size = sum([p.stat().st_size for p in file_paths])
-        total_transferred = 0
-
-        for local_path in file_paths:
-            remote_path = local_path.relative_to(self.local_dir)
-
-            url = BASE_URL + 'files/' + self.project_id + '/' + str(remote_path) + '/'
-            headers = {
-                'Authorization': 'token {}'.format(token),
-            }
-
-            with open(local_path, 'rb')  as local_file:
-                files = {'file': local_file}
-
-                self.progress_uploaded.emit(total_transferred, total_size, str(local_path))
-
-                response = requests.post(
-                    url,  
-                    headers=headers,
-                    files=files,
-                    stream=True
-                )
-                response.raise_for_status()
-
-                total_transferred += local_path.stat().st_size
-
-                if total_transferred == total_size:
-                    self.progress_uploaded.emit(total_transferred, total_size, "Done!")
-
-
-
-
-class ProjectFileTransfer(QObject):
-    progress_uploaded = pyqtSignal(int, int, str)
-
-
-    def __init__(self, network_manager, project_id, local_dir, is_new_project=False):
-        super(ProjectFileTransfer, self).__init__(parent=None)
+    def __init__(self, network_manager, cloud_project):
+        super(ProjectTransferrer, self).__init__(parent=None)
 
         self.network_manager = network_manager
-        self.project_id = project_id
-        self.local_dir = local_dir
-        self.is_new_project = is_new_project
+        self.cloud_project = cloud_project
+        self._files_to_transfer = {}
+        self.files_finished = 0
+        self.files_total = 0
+        self.bytes_total_files_only = 0
+        self.is_aborted = False
+        self.is_finished = False
+        self.is_active = False
+        self.replies = []
+        self.temp_dir = QTemporaryDir('qfieldcloud_project')
 
 
-    def upload(self):
-        file_names = glob(os.path.join(self.local_dir, '**'), recursive=True)
+    def download(self) -> None:
+        if self.is_active:
+            self.error.emit(self.tr('Already in progress'))
+            return
 
-        # upload the QGIS project file at the end
-        file_names.sort(key=lambda s: Path(s).suffix in ('.qgs', '.qgz') )
+        if self.is_finished:
+            self.error.emit(self.tr('Already in finished'))
+            return
 
-        # do not upload the project file, if it is already there
-        if not self.is_new_project:
-            file_names = file_names[:-2]
+        self.is_active = True
+        reply = self.network_manager.get_files(self.cloud_project.id)
+        reply.finished.connect(self.on_get_files_finished(reply))
 
-        file_paths = [Path(f) for f in file_names if Path(f).is_file()]
-        total_size = sum([p.stat().st_size for p in file_paths])
-        total_transferred = 0
 
-        for local_path in file_paths:
-            remote_path = local_path.relative_to(self.local_dir)
+    def upload(self, upload_all: bool) -> None:
+        if self.is_active:
+            self.error.emit(self.tr('Already in progress'))
+            return
 
-            url = BASE_URL + 'files/' + self.project_id + '/' + str(remote_path) + '/'
-            headers = {
-                'Authorization': 'token {}'.format(token),
+        if self.is_finished:
+            self.error.emit(self.tr('Already in finished'))
+            return
+
+        self.is_active = True
+        
+        assert self.cloud_project.local_dir is not None
+
+        for file in Path(self.cloud_project.local_dir).glob('**/*.*'):
+            relative_filename = str(file.relative_to(self.cloud_project.local_dir))
+            temp_file = Path(self.temp_dir.path() + '/' + relative_filename)
+
+            shutil.copyfile(file, temp_file)
+
+            self._files_to_transfer[relative_filename] = {
+                'bytes_total': file.stat().st_size,
+                'bytes_sent': 0,
+            }
+            self.files_total += 1
+            self.bytes_total_files_only += file.stat().st_size
+
+            reply = self.network_manager.cloud_upload_files('files/' + self.cloud_project.id + '/' + relative_filename, filenames=[str(temp_file)])
+            reply.uploadProgress.connect(self.on_upload_file_progress(reply, filename=relative_filename)) # types: ignore
+            reply.finished.connect(self.on_upload_file_finished(reply, filename=relative_filename))
+
+            self.replies.append(reply)
+
+        if self.files_total == 0:
+            self.finished.emit()
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    def on_upload_file_progress(self, reply: QNetworkReply, bytes_sent: int, bytes_total: int, filename: str):
+        # there is always at least a few bytes to send, so ignore this situation
+        if bytes_total == 0:
+            return
+
+        self._files_to_transfer[filename]['bytes_sent'] = bytes_sent
+        self._files_to_transfer[filename]['bytes_total'] = bytes_total
+
+        bytes_sent_sum = sum([self._files_to_transfer[filename]['bytes_sent'] for filename in self._files_to_transfer])
+        bytes_total_sum = max(sum([self._files_to_transfer[filename]['bytes_total'] for filename in self._files_to_transfer]), self.bytes_total_files_only)
+
+        if self.bytes_total_files_only > 0:
+            self.progress.emit(min(bytes_sent_sum / bytes_total_sum, 1))
+        else:
+            self.progress.emit(1)
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    def on_upload_file_finished(self, reply: QNetworkReply, filename: str):
+        if reply.error() != QNetworkReply.NoError:
+            self.error.emit(self.tr('Uploading file "{}" failed: {}'.format(filename, QFieldCloudNetworkManager.error_reason(reply))))
+            self.abort_requests()
+            return
+
+        self.files_finished += 1
+
+        if self.files_finished == self.files_total:
+            self.finished.emit()
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    @QFieldCloudNetworkManager.read_json
+    def on_get_files_finished(self, reply: QNetworkReply, payload: Dict) -> None:
+        if reply.error() != QNetworkReply.NoError or payload is None:
+            self.error.emit(self.tr('Obtaining project files list failed: {}'.format(QFieldCloudNetworkManager.error_reason(reply))))
+            self.abort_requests()
+            return
+
+        self.cloud_project.files = payload
+
+        for file_obj in self.cloud_project.files:
+            filename = file_obj['name']
+            self.bytes_total_files_only += file_obj['size']
+
+            self._files_to_transfer[filename] = {
+                'bytes_total': file_obj['size'],
+                'bytes_received': 0,
             }
 
-            with open(local_path, 'rb')  as local_file:
-                files = {'file': local_file}
+            temp_destination = Path(self.temp_dir.path() + '/' + filename)
+            temp_destination.parent.mkdir(parents=True, exist_ok=True)
 
-                self.progress_uploaded.emit(total_transferred, total_size, str(local_path))
+            reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_destination))
+            reply.downloadProgress.connect(self.on_download_file_progress(reply, filename=filename))
+            reply.finished.connect(self.on_download_file_finished(reply, filename=filename))
 
-                response = requests.post(
-                    url,  
-                    headers=headers,
-                    files=files,
-                    stream=True
-                )
-                response.raise_for_status()
+            self.replies.append(reply)
 
-                total_transferred += local_path.stat().st_size
 
-                if total_transferred == total_size:
-                    self.progress_uploaded.emit(total_transferred, total_size, "Done!")
+    @QFieldCloudNetworkManager.reply_wrapper
+    def on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, filename: str = '') -> None:
+        self._files_to_transfer[filename]['bytes_received'] = bytes_received
+        self._files_to_transfer[filename]['bytes_total'] = bytes_total
+
+        bytes_received_sum = sum([self._files_to_transfer[filename]['bytes_received'] for filename in self._files_to_transfer])
+        bytes_total_sum = max(sum([self._files_to_transfer[filename]['bytes_total'] for filename in self._files_to_transfer]), self.bytes_total_files_only)
+
+        if self.bytes_total_files_only > 0:
+            self.progress.emit(min(bytes_received_sum / bytes_total_sum, 1))
+        else:
+            self.progress.emit(1)
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    def on_download_file_finished(self, reply: QNetworkReply, filename: str = ''):
+        if reply.error() != QNetworkReply.NoError:
+            self.error.emit(self.tr('Downloading file "{}" failed: {}'.format(filename, QFieldCloudNetworkManager.error_reason(reply))))
+            self.abort_requests()
+            return
+
+        if self.files_finished == self.files_total:
+            self.finished.emit()
+            return
+
+        if not Path(filename).exists():
+            self.error.emit(self.tr('Downloaded file "{}" not found!'.format(filename)))
+            self.abort_requests()
+            return
+
+        self.files_finished += 1
+
+
+    def abort_requests(self):
+        if self.is_aborted:
+            return
+
+        self.is_aborted = True
+
+        for reply in self.replies:
+            reply.abort()
+
+        self.abort.emit()
 

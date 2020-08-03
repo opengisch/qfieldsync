@@ -1,5 +1,5 @@
 import os
-from qfieldsync.setting_manager import SettingManager, Scope, String
+from qfieldsync.setting_manager import SettingManager, Scope, String, Dictionary
 
 pluginName = "QFieldSync"
 
@@ -11,4 +11,4 @@ class Preferences(SettingManager):
         self.add_setting(String('exportDirectoryProject', Scope.Project, None))
         self.add_setting(String('importDirectory', Scope.Global, os.path.expanduser("~/QField/import")))
         self.add_setting(String('importDirectoryProject', Scope.Project, None))
-
+        self.add_setting(Dictionary('qfieldCloudProjects', Scope.Project, {}))
