@@ -41,6 +41,7 @@ from qgis.PyQt.QtWidgets import (
     QAbstractButton,
     QMenu,
     QAction,
+    QHeaderView,
 )
 from qgis.PyQt.QtGui import QIcon, QFont
 from qgis.PyQt.QtNetwork import QNetworkReply
@@ -118,6 +119,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.project_files_started.connect(self.on_projects_cached_project_files_started)
         self.network_manager.projects_cache.project_files_error.connect(self.on_projects_cached_project_files_error)
         self.network_manager.projects_cache.project_files_updated.connect(self.on_projects_cached_project_files_updated)
+
+        self.projectFilesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.projectFilesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.projectFilesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
         if self.current_cloud_project:
             self.show_project_form()
