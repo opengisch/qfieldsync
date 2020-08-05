@@ -12,5 +12,5 @@ class Preferences(SettingManager):
         self.add_setting(String('importDirectory', Scope.Global, os.path.expanduser("~/QField/import")))
         self.add_setting(String('importDirectoryProject', Scope.Project, None))
         self.add_setting(Dictionary('qfieldCloudProjectLocalDirs', Scope.Global, {}))
-        self.add_setting(List('qfieldCloudProjectsCache', Scope.Global, []))
+        self.add_setting(String('qfieldCloudLastToken', Scope.Global, ''))
         self.add_setting(String('qfieldCloudLastUsername', Scope.Project, ''))

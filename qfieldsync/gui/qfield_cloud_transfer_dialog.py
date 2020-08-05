@@ -47,7 +47,7 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
         self.project_transfer.download_progress.connect(self.on_download_transfer_progress)
         self.project_transfer.finished.connect(self.on_transfer_finished)
 
-        self.setWindowTitle(self.tr('Synchronizing project "%1"').arg(self.project_transfer.cloud_project.name))
+        self.setWindowTitle(self.tr('Synchronizing project "{}"').format(self.project_transfer.cloud_project.name))
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
         self.uploadProgressBar.setValue(0)
