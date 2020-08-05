@@ -24,24 +24,7 @@ import json
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
-import shutil
-import urllib.parse
-import sip
-from enum import IntFlag
-from pathlib import Path
 
-from qgis.PyQt.QtCore import (
-    QObject,
-    pyqtSignal,
-    QUrl,
-    QUrlQuery,
-)
-from qgis.PyQt.QtNetwork import (
-    QNetworkRequest,
-    QNetworkReply,
-    QHttpMultiPart,
-    QHttpPart,
-)
 from qgis.core import QgsDataProvider, QgsDataItemProvider, QgsDataItem, QgsDataCollectionItem, QgsErrorItem
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
