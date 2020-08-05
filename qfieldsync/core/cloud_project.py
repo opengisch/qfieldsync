@@ -38,35 +38,6 @@ class CloudProject:
         self.local_dir = self._data.get('local_dir', self.local_dir)
 
 
-    @staticmethod
-    def get_instance_cloud_project():
-        preferences = Preferences()
-        project_dir = QgsProject.instance().homePath()
-
-        for project_id, local_dir in preferences.value('qfieldCloudProjectLocalDirs').items():
-            if local_dir != project_dir:
-                continue
-            
-            cached_cloud_project = CloudProject.get_project_cache(project_id)
-
-            if cached_cloud_project is not None:
-                return cached_cloud_project
-
-    
-    @staticmethod
-    def get_project_cache(project_id):
-        preferences = Preferences()
-
-        for project in preferences.value('qfieldCloudProjectsCache'):
-            if project['id'] == project_id:
-                return CloudProject({
-                    **project,
-                    'local_dir': preferences.value('qfieldCloudProjectLocalDirs').get(project_id)
-                })
-
-        return None
-
-
     def update_data(self, new_project_data):
         self._data = {**self._data, **new_project_data}
         self.local_dir = self._data.get('local_dir')
@@ -154,11 +125,14 @@ class CloudProject:
 
 
     @property
-    def  local_only_files(self):
+    def local_only_files(self):
         assert self._cloud_files
 
         return [f for f in self.local_files if f not in self.cloud_files]
 
 
+    @property
+    def url(self):
+        return 'https://qfield.cloud/projects/{}'.format(self.id)
 
 

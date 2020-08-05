@@ -42,6 +42,8 @@ from qgis.PyQt.QtNetwork import (
 )
 from qgis.core import QgsNetworkAccessManager, QgsProject
 
+from qfieldsync.core.preferences import Preferences
+
 
 class QFieldCloudNetworkManager(QgsNetworkAccessManager):
     
@@ -53,6 +55,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         super(QFieldCloudNetworkManager, self).__init__(parent=parent)
         self.url = 'http://dev.qfield.cloud/api/v1/'
         self._token = ''
+        self.projects_cache = CloudProjectsCache(self, self)
 
 
     @staticmethod
@@ -95,6 +98,13 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         return self.cloud_post('auth/login/', {
             'username': username,
             'password': password,
+        })
+
+
+    def get_user(self, token: str) -> QNetworkReply:
+        """Gets current user and if token is still valid"""
+        return self.cloud_get('auth/user/', {
+            'token': token
         })
 
 
@@ -546,3 +556,133 @@ class ProjectTransferrer(QObject):
 
     def rollback_backup(self):
         pass
+
+# TODO do i really need a singleton?
+class QObjectSingleton(type(QObject)):
+    _instances = {}
+
+    def __call__(self, *args, **kwargs):
+        if self not in self._instances:
+            self._instances[self] = super(QObjectSingleton, self).__call__(*args, **kwargs)
+            
+        return self._instances[self]
+
+class CloudProjectsCache(QObject, metaclass=QObjectSingleton):
+
+    projects_started = pyqtSignal()
+    projects_updated = pyqtSignal()
+    projects_error = pyqtSignal(str)
+    project_files_started = pyqtSignal(str)
+    project_files_updated = pyqtSignal(str)
+    project_files_error = pyqtSignal(str, str)
+
+    def __init__(self, network_manager: QFieldCloudNetworkManager, parent=None):
+        super(CloudProjectsCache, self).__init__(parent)
+
+        self.preferences = Preferences()
+        self.network_manager = network_manager
+        self._error_reason = ''
+        self._projects = None
+        self._projects_reply = None
+
+        self.network_manager.token_changed.connect(self._on_token_changed)
+
+        if self.network_manager.has_token():
+            self.refresh()
+
+
+    @property
+    def projects(self):
+        return self._projects
+
+
+    @property
+    def error_reason(self):
+        return self._error_reason
+
+
+    @property
+    def currently_open_project(self):
+        project_dir = QgsProject.instance().homePath()
+
+        for project_id, local_dir in self.preferences.value('qfieldCloudProjectLocalDirs').items():
+            if local_dir != project_dir:
+                continue
+            
+            cloud_project = self.find_project(project_id)
+
+            if cloud_project is not None:
+                return cloud_project
+
+
+    def refresh(self):
+        if self._projects_reply:
+            self._projects_reply.abort()
+
+        self.projects_started.emit()
+        self._projects_reply = self.network_manager.get_projects()
+        self._projects_reply.finished.connect(self._on_get_projects_reply_finished(self._projects_reply)) # pylint: disable=no-value-for-parameter
+
+        return self._projects_reply
+
+
+    def get_project_files(self, project_id):
+        assert project_id
+
+        self.project_files_started.emit(project_id)
+        reply = self.network_manager.get_files(project_id)
+        reply.finished.connect(self._on_get_project_files_reply_finished(reply, project_id=project_id)) # pylint: disable=no-value-for-parameter
+        return reply
+
+
+    def find_project(self, project_id):
+        if not self._projects or not project_id:
+            return
+
+        for project in self._projects:
+            if project.id == project_id:
+                return project
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    @QFieldCloudNetworkManager.read_json
+    def _on_get_projects_reply_finished(self, reply, payload):
+        self._projects_reply = None
+
+        if reply.error() != QNetworkReply.NoError or payload is None:
+            self.projects_error.emit(QFieldCloudNetworkManager.error_reason(reply))
+            return
+
+        self._projects = []
+
+        for project_data in payload:
+            self._projects.append(CloudProject(project_data))
+
+        self.projects_updated.emit()
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    @QFieldCloudNetworkManager.read_json
+    def _on_get_project_files_reply_finished(self, reply, payload, project_id=None):
+        assert project_id
+
+        if reply.error() != QNetworkReply.NoError or payload is None:
+            self.project_files_error.emit(project_id, QFieldCloudNetworkManager.error_reason(reply))
+            return
+
+        cloud_project = self.find_project(project_id)
+
+        if not cloud_project:
+            return
+
+        cloud_project.cloud_files = payload
+
+        self.project_files_updated.emit(project_id)
+
+
+    def _on_token_changed(self):
+        self._projects = None
+        self.projects_updated.emit()
+
+        if self.network_manager.has_token():
+            self.refresh()
