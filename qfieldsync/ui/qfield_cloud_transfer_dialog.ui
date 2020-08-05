@@ -104,6 +104,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QTreeWidget" name="filesTree">
+         <attribute name="headerStretchLastSection">
+          <bool>false</bool>
+         </attribute>
          <column>
           <property name="text">
            <string>Filename</string>
