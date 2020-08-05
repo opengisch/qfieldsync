@@ -24,7 +24,7 @@ import os
 import functools
 import glob
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QItemSelectionModel, QDateTime
 from qgis.PyQt.QtWidgets import (
@@ -50,8 +50,9 @@ from qgis.PyQt.uic import loadUiType
 from qgis.core import QgsProject
 from qgis.utils import iface
 
-from qfieldsync.core import CloudProject, Preferences
-from qfieldsync.core.cloud_api import ProjectTransferType, ProjectTransferrer, QFieldCloudNetworkManager
+from qfieldsync.core import Preferences
+from qfieldsync.core.cloud_project import CloudProject, ProjectFileCheckout
+from qfieldsync.core.cloud_api import ProjectTransferrer, QFieldCloudNetworkManager
 from qfieldsync.utils.cloud_utils import to_cloud_title
 from qfieldsync.gui.qfield_cloud_transfer_dialog import QFieldCloudTransferDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
@@ -77,7 +78,7 @@ def select_table_row(func):
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
 
-    def __init__(self, network_manager, parent=None, project=None):
+    def __init__(self, network_manager: QFieldCloudNetworkManager, parent: QWidget = None, project: CloudProject = None) -> None:
         """Constructor."""
         super(CloudProjectsDialog, self).__init__(parent=parent)
         self.setupUi(self)
@@ -128,7 +129,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.show_project_form()
 
 
-    def on_projects_cached_projects_started(self):
+    def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
         self.feedbackLabel.setVisible(False)
         self.feedbackLabel.setText('')
@@ -136,7 +137,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         print('on_projects_cached_projects_started')
 
 
-    def on_projects_cached_projects_error(self, error):
+    def on_projects_cached_projects_error(self, error: str) -> None:
         self.projectsStack.setEnabled(True)
         self.feedbackLabel.setVisible(True)
         self.feedbackLabel.setText(error)
@@ -144,7 +145,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         print('on_projects_cached_projects_error')
 
 
-    def on_projects_cached_projects_updated(self):
+    def on_projects_cached_projects_updated(self) -> None:
         self.projectsStack.setEnabled(True)
         self.projects_refreshed.emit()
         self.show_projects()
@@ -152,8 +153,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         print('on_projects_cached_projects_updated')
 
 
-
-    def on_projects_cached_project_files_started(self, project_id):
+    def on_projects_cached_project_files_started(self, project_id: str) -> None:
         self.projectFilesTab.setEnabled(False)
         self.feedbackLabel.setVisible(False)
         self.feedbackLabel.setText('')
@@ -161,7 +161,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         print('on_projects_cached_project_files_started', project_id)
 
 
-    def on_projects_cached_project_files_error(self, project_id, error):
+    def on_projects_cached_project_files_error(self, project_id: str, error: str) -> None:
         self.projectFilesTab.setEnabled(True)
 
         if self.current_cloud_project.id != project_id:
@@ -173,22 +173,24 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         print('on_projects_cached_project_files_error', project_id)
 
 
-    def on_projects_cached_project_files_updated(self, project_id):
+    def on_projects_cached_project_files_updated(self, project_id: str) -> None:
         print('on_projects_cached_project_files_updated', project_id)
         if not self.current_cloud_project or self.current_cloud_project.id != project_id:
             return
 
         self.projectFilesTab.setEnabled(True)
 
-        for file_obj in self.network_manager.projects_cache.find_project(project_id).cloud_files:
-            file_item = QTreeWidgetItem(file_obj)
+        for project_file in self.current_cloud_project.get_files(ProjectFileCheckout.Cloud):
+            assert isinstance(project_file.versions, list)
 
-            file_item.setText(0, file_obj['name'])
-            file_item.setText(1, str(file_obj['size']))
+            file_item = QTreeWidgetItem()
+
+            file_item.setText(0, project_file.name)
+            file_item.setText(1, str(project_file.size))
             file_item.setTextAlignment(1, Qt.AlignRight)
-            file_item.setText(2, file_obj['versions'][-1]['created_at'])
+            file_item.setText(2, project_file.created_at)
 
-            for version_idx, version_obj in enumerate(file_obj['versions'], 1):
+            for version_idx, version_obj in enumerate(project_file.versions, 1):
                 version_item = QTreeWidgetItem(version_obj)
 
                 version_item.setText(0, 'Version {}'.format(version_idx))
@@ -201,24 +203,21 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectFilesTree.addTopLevelItem(file_item)
 
 
-        print('on_projects_cached_project_files_updated')
-
-
-    def on_use_current_project_directory_action_triggered(self, _toggled):
+    def on_use_current_project_directory_action_triggered(self, _toggled: bool) -> None:
         self.localDirLineEdit.setText(QgsProject.instance().homePath())
 
 
-    def on_button_box_clicked(self, _button: QAbstractButton):
+    def on_button_box_clicked(self, _button: QAbstractButton) -> None:
         self.close()
 
 
-    def on_local_dir_button_clicked(self):
-        self.current_cloud_project.local_dir = self.select_local_dir()
+    def on_local_dir_button_clicked(self) -> None:
+        self.current_cloud_project.update_data({'local_dir': self.select_local_dir()})
         self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
         self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
 
 
-    def on_logout_button_clicked(self):
+    def on_logout_button_clicked(self) -> None:
         self.logoutButton.setEnabled(False)
         self.feedbackLabel.setVisible(False)
 
@@ -228,7 +227,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     @QFieldCloudNetworkManager.reply_wrapper
     @QFieldCloudNetworkManager.read_json
-    def on_logout_reply_finished(self, reply, payload):
+    def on_logout_reply_finished(self, reply: QNetworkReply, payload: Dict) -> None:
         if reply.error() != QNetworkReply.NoError or payload is None:
             self.feedbackLabel.setText('Logout failed: {}'.format(QFieldCloudNetworkManager.error_reason(reply)))
             self.feedbackLabel.setVisible(True)
@@ -243,11 +242,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.close()
 
 
-    def on_refresh_button_clicked(self):
+    def on_refresh_button_clicked(self) -> None:
         self.network_manager.projects_cache.refresh()
 
 
-    def show_projects(self):
+    def show_projects(self) -> None:
         self.feedbackLabel.setText('')
         self.feedbackLabel.setVisible(False)
 
@@ -320,28 +319,21 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
 
 
-    def sync(self):
+    def sync(self) -> None:
         assert self.current_cloud_project is not None
 
         if self.current_cloud_project.cloud_files is not None:
-            self.sync2()
+            if not self.current_cloud_project.local_dir:
+                self.current_cloud_project.update_data({'local_dir': self.select_local_dir()})
+
+            if not self.current_cloud_project.local_dir:
+                return
+
+            self.show_sync_popup()
             return
 
         reply = self.network_manager.projects_cache.get_project_files(self.current_cloud_project.id)
         reply.finished.connect(lambda: self.sync())
-
-
-    def sync2(self):
-        assert self.current_cloud_project
-        assert self.current_cloud_project.cloud_files is not None
-
-        if not self.current_cloud_project.local_dir:
-            self.current_cloud_project.local_dir = self.select_local_dir()
-
-        if not self.current_cloud_project.local_dir:
-            return
-
-        self.ask_sync_project()
 
 
     def select_local_dir(self) -> Optional[str]:
@@ -410,12 +402,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
 
     @select_table_row
-    def on_project_sync_button_clicked(self, is_toggled):
+    def on_project_sync_button_clicked(self, is_toggled: bool) -> None:
         self.sync()
 
 
     @select_table_row
-    def onProjectDeleteButtonClicked(self, is_toggled):
+    def onProjectDeleteButtonClicked(self, is_toggled: bool) -> None:
         self.projectsStack.setEnabled(False)
 
         reply = self.network_manager.delete_project(self.current_cloud_project.id)
@@ -423,12 +415,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
 
     @select_table_row
-    def on_project_edit_button_clicked(self, is_toggled):
+    def on_project_edit_button_clicked(self, is_toggled: bool) -> None:
         self.show_project_form()
 
 
     @QFieldCloudNetworkManager.reply_wrapper
-    def onDeleteProjectReplyFinished(self, reply):
+    def onDeleteProjectReplyFinished(self, reply: QNetworkReply) -> None:
         self.projectsStack.setEnabled(True)
 
         if reply.error() != QNetworkReply.NoError:
@@ -439,16 +431,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
 
-    def on_projects_table_cell_double_clicked(self, _row, _col):
+    def on_projects_table_cell_double_clicked(self, _row: int, _col: int) -> None:
         self.show_project_form()
 
 
-    def on_create_button_clicked(self):
+    def on_create_button_clicked(self) -> None:
         self.projectsTable.clearSelection()
         self.show_project_form()
 
     
-    def show_project_form(self):
+    def show_project_form(self) -> None:
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
         self.projectTabs.setCurrentWidget(self.projectFormTab)
 
@@ -469,6 +461,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         else:
             self.projectTabs.setTabEnabled(1, True)
             self.projectTabs.setTabEnabled(2, True)
+            # TODO use current project name from project proterties by default
+            # TODO validate project name to match QFieldCloudRequirements
             self.projectNameLineEdit.setText(self.current_cloud_project.name)
             self.projectDescriptionTextEdit.setPlainText(self.current_cloud_project.description)
             self.projectIsPrivateCheckBox.setChecked(self.current_cloud_project.is_private)
@@ -490,11 +484,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.network_manager.projects_cache.get_project_files(self.current_cloud_project.id)
 
 
-    def on_back_button_clicked(self):
+    def on_back_button_clicked(self) -> None:
         self.projectsStack.setCurrentWidget(self.projectsListPage)
 
 
-    def on_submit_button_clicked(self):
+    def on_submit_button_clicked(self) -> None:
         cloud_project_data = {
             'name': self.projectNameLineEdit.text(),
             'description': self.projectDescriptionTextEdit.toPlainText(),
@@ -529,7 +523,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     @QFieldCloudNetworkManager.reply_wrapper
     @QFieldCloudNetworkManager.read_json
-    def on_create_project_finished(self, reply, payload, local_dir=None):
+    def on_create_project_finished(self, reply: QNetworkReply, payload, local_dir: str = None) -> None:
         self.projectsFormPage.setEnabled(True)
 
         if reply.error() != QNetworkReply.NoError or payload is None:
@@ -551,7 +545,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     @QFieldCloudNetworkManager.reply_wrapper
     @QFieldCloudNetworkManager.read_json
-    def on_update_project_finished(self, reply, payload):
+    def on_update_project_finished(self, reply: QNetworkReply, payload: Dict) -> None:
         self.projectsFormPage.setEnabled(True)
 
         if reply.error() != QNetworkReply.NoError or payload is None:
@@ -565,7 +559,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
 
-    def on_projects_table_selection_changed(self, _new_selection, _old_selection):
+    def on_projects_table_selection_changed(self, _new_selection, _old_selection) -> None:
         if self.projectsTable.selectionModel().hasSelection():
             row_idx = self.projectsTable.currentRow()
             self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
@@ -573,48 +567,25 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.current_cloud_project = None
 
 
-    # TODO move this to a separate class
-    def ask_sync_project(self):
+    def show_sync_popup(self) -> None:
         assert self.current_cloud_project is not None, 'No project to download selected'
         assert self.current_cloud_project.local_dir, 'Cannot download a project without `local_dir` properly set'
 
-        dialog_result = QMessageBox.question(
-            self, 
-            self.tr('Replace QFieldCloud files'), 
-            self.tr('Would you like to replace remote QFieldCloud files with the version available locally?'), 
-            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, 
-            QMessageBox.No)
-
-        if dialog_result == QDialogButtonBox.Yes:
-            self.sync_project(replace_remote_files=True)
-        elif dialog_result == QDialogButtonBox.No:
-            self.sync_project(replace_remote_files=False)
-        else:
-            return
-
-
-    def sync_project(self, replace_remote_files: bool) -> None:
-        assert self.current_cloud_project is not None, 'No project to sync selected'
-        assert self.project_transfer is None, 'There is a project currently uploading'
-
-        self.project_transfer = ProjectTransferrer(self.network_manager, self.current_cloud_project, ProjectTransferType.Sync)
-
+        self.project_transfer = ProjectTransferrer(self.network_manager, self.current_cloud_project)
         self.transfer_dialog = QFieldCloudTransferDialog(self.project_transfer, self)
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
-        self.transfer_dialog.open()
-        
-        self.project_transfer.sync()
+        self.transfer_dialog.exec_()
 
 
-    def on_transfer_dialog_rejected(self):
+    def on_transfer_dialog_rejected(self) -> None:
         self.project_transfer.abort_requests()
         self.transfer_dialog.close()
         self.project_transfer = None
         self.transfer_dialog = None
 
 
-    def on_transfer_dialog_accepted(self):
+    def on_transfer_dialog_accepted(self) -> None:
         QgsProject().instance().reloadAllLayers()
 
         self.transfer_dialog.close()
