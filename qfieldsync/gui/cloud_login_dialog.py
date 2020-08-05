@@ -21,32 +21,15 @@
  ***************************************************************************/
 """
 import os
-import functools
-import glob
-from typing import Callable, Dict, TypeVar
+from typing import Dict
 
-from qgis.PyQt.QtCore import Qt, QItemSelectionModel, pyqtSignal
-from qgis.PyQt.QtWidgets import (
-    QDialog,
-    QDialogButtonBox,
-    QToolButton,
-    QTableWidgetItem,
-    QWidget,
-    QCheckBox,
-    QHBoxLayout,
-    QTreeWidgetItem,
-    QFileDialog,
-    QMessageBox,
-)
-from qgis.PyQt.QtGui import QIcon, QFont
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.QtNetwork import QNetworkReply
-from qgis.core import QgsProject
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core import CloudProject, Preferences
-from qfieldsync.core.cloud_api import ProjectTransferType, ProjectTransferrer, QFieldCloudNetworkManager
-from qfieldsync.utils.cloud_utils import to_cloud_title
-from qfieldsync.gui.qfield_cloud_transfer_dialog import QFieldCloudTransferDialog
+from qfieldsync.core import Preferences
+from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
 
 
 CloudLoginDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_login_dialog.ui'))

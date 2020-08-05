@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>511</width>
-    <height>281</height>
+    <width>600</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QStackedWidget" name="stepsStackedWidget">
+    <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
       <number>1</number>
      </property>
@@ -103,6 +103,19 @@
      <widget class="QWidget" name="filesPage">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
+        <widget class="QLabel" name="explanationLabel">
+         <property name="text">
+          <string>Please select action to be applied on the files. If you check &quot;cloud&quot; it will result in local files being overwritten by their cloud version and vice versa. If a cloud radio button is disabled, it means the files does not exist on the cloud and will be uploaded anyway. The opposite goes if the &quot;local&quot; radio is disabled.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QTreeWidget" name="filesTree">
          <attribute name="headerStretchLastSection">
           <bool>false</bool>
@@ -134,7 +147,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Abort|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Abort|QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
