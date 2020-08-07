@@ -487,8 +487,17 @@
            </item>
            <item>
             <widget class="QTreeWidget" name="projectFilesTree">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="tabKeyNavigation">
+              <bool>true</bool>
+             </property>
+             <property name="showDropIndicator" stdset="0">
+              <bool>false</bool>
+             </property>
              <property name="columnCount">
-              <number>3</number>
+              <number>4</number>
              </property>
              <attribute name="headerStretchLastSection">
               <bool>false</bool>
@@ -506,6 +515,11 @@
              <column>
               <property name="text">
                <string>Created at</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Actions</string>
               </property>
              </column>
             </widget>
