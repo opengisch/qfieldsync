@@ -26,3 +26,13 @@ import re
 def to_cloud_title(title):
     title.replace(' ', '_')
     return re.sub('[^\w]','', title)
+
+
+def closure(cb):
+    def wrapper(*closure_args, **closure_kwargs):
+        def call(*args, **kwargs):
+            return cb(*closure_args, *args, **closure_kwargs, **kwargs)
+
+        return call
+
+    return wrapper

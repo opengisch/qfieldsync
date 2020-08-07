@@ -41,6 +41,7 @@ from qgis.PyQt.QtWidgets import (
     QAbstractButton,
     QMenu,
     QAction,
+    QPushButton,
     QHeaderView,
 )
 from qgis.PyQt.QtGui import QIcon, QFont
@@ -51,9 +52,9 @@ from qgis.core import QgsProject
 from qgis.utils import iface
 
 from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_project import CloudProject, ProjectFileCheckout
+from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_api import ProjectTransferrer, QFieldCloudNetworkManager
-from qfieldsync.utils.cloud_utils import to_cloud_title
+from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 from qfieldsync.gui.qfield_cloud_transfer_dialog import QFieldCloudTransferDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 
@@ -124,6 +125,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectFilesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.projectFilesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.projectFilesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
 
         if self.current_cloud_project:
             self.show_project_form()
@@ -174,7 +176,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
 
     def on_projects_cached_project_files_updated(self, project_id: str) -> None:
-        print('on_projects_cached_project_files_updated', project_id)
         if not self.current_cloud_project or self.current_cloud_project.id != project_id:
             return
 
@@ -190,17 +191,72 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             file_item.setTextAlignment(1, Qt.AlignRight)
             file_item.setText(2, project_file.created_at)
 
-            for version_idx, version_obj in enumerate(project_file.versions, 1):
-                version_item = QTreeWidgetItem(version_obj)
+            for version_idx, version_obj in enumerate(project_file.versions):
+                version_item = QTreeWidgetItem()
 
-                version_item.setText(0, 'Version {}'.format(version_idx))
+                version_item.setData(0, Qt.UserRole, version_obj)
+                version_item.setText(0, 'Version {}'.format(version_idx + 1))
                 version_item.setText(1, str(version_obj['size']))
                 version_item.setTextAlignment(1, Qt.AlignRight)
                 version_item.setText(2, version_obj['created_at'])
+                
+                save_as_btn = QPushButton()
+                save_as_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_download.svg')))
+                save_as_btn.clicked.connect(self.on_save_as_btn_version_clicked(project_file, version_idx))
+                save_as_widget = QWidget()
+                save_as_layout = QHBoxLayout()
+                save_as_layout.setAlignment(Qt.AlignCenter)
+                save_as_layout.setContentsMargins(0, 0, 0, 0)
+                save_as_layout.addWidget(save_as_btn)
+                save_as_widget.setLayout(save_as_layout)
 
                 file_item.addChild(version_item)
 
+                self.projectFilesTree.setItemWidget(version_item, 3, save_as_widget)
+
             self.projectFilesTree.addTopLevelItem(file_item)
+
+
+    @closure
+    def on_save_as_btn_version_clicked(self, project_file: ProjectFile, version_idx: int, _is_checked: bool):
+        assert project_file.versions
+        assert version_idx < len(project_file.versions)
+
+        basename = '{}_{}{}'.format(project_file.path.stem, str(version_idx + 1), project_file.path.suffix)
+
+        if project_file.local_path:
+            default_path = project_file.local_path.parent.joinpath(basename)
+        else:
+            default_path = Path(QgsProject().instance().homePath()).joinpath(project_file.path.parent, basename)
+
+        version_dest_filename, _ = QFileDialog.getSaveFileName(self, self.tr('Select version file name…'), str(default_path))
+
+        if not version_dest_filename:
+            return
+
+        reply = self.network_manager.get_file(
+            self.current_cloud_project.id + '/' + str(project_file.name) + '/', 
+            str(version_dest_filename), 
+            project_file.versions[version_idx]['created_at'])
+        reply.downloadProgress.connect(self.on_download_file_progress(reply, project_file=project_file)) # pylint: disable=no-value-for-parameter
+        reply.finished.connect(self.on_download_file_finished(reply, project_file=project_file))
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    def on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, project_file: ProjectFile) -> None:
+        self.feedbackLabel.setVisible(True)
+        self.feedbackLabel.setText(self.tr('Downloading file "{}" at {}%…').format(project_file.name, int((bytes_total / bytes_received) * 100)))
+
+
+    @QFieldCloudNetworkManager.reply_wrapper
+    def on_download_file_finished(self, reply: QNetworkReply, project_file: ProjectFile) -> None:
+        if reply.error() != QNetworkReply.NoError:
+            self.feedbackLabel.setVisible(True)
+            self.feedbackLabel.setText(self.tr('Downloading file "{}" failed: {}'.format(project_file.name, QFieldCloudNetworkManager.error_reason(reply))))
+            return
+
+        self.feedbackLabel.setVisible(False)
+        self.feedbackLabel.setText('')
 
 
     def on_use_current_project_directory_action_triggered(self, _toggled: bool) -> None:
@@ -316,7 +372,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsTable.resizeColumnsToContents()
         self.projectsTable.sortByColumn(2, Qt.AscendingOrder)
         self.projectsTable.setSortingEnabled(True)
-
 
 
     def sync(self) -> None:
@@ -439,7 +494,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsTable.clearSelection()
         self.show_project_form()
 
-    
+
     def show_project_form(self) -> None:
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
         self.projectTabs.setCurrentWidget(self.projectFormTab)
@@ -591,21 +646,3 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog.close()
         self.project_transfer = None
         self.transfer_dialog = None
-
-
-        # replace_all = False
-
-        # for path in Path(self.temp_dir.path()).glob('**/*'):
-        #     dest_path = Path(self.cloud_project.local_dir + '/' + str(path.relative_to(self.temp_dir.path())))
-
-        #     if dest_path.exists() and replace_all != True:
-        #         result = QMessageBox.question(
-        #             self,
-        #             self.tr('Replace local file'), 
-        #             self.tr('Would you like to replace file "%1" with its cloud version?'), 
-        #             QMessageBox.Yes | QMessageBox.YesToAll | QMessageBox.No | QMessageBox.NoToAll,
-        #             QMessageBox.NoToAll)
-
-        #     else:
-        #         shutil.copy(path, dest_path)
-
