@@ -151,10 +151,10 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
         return self.cloud_get(['files', project_id], {"client": client})
 
-    def get_file(self, filename: str, local_filename: str) -> QNetworkReply:
+    def get_file(self, filename: str, local_filename: str, version: str = None) -> QNetworkReply:
         """"Download file"""
 
-        return self.cloud_get('files/' + filename, local_filename=local_filename)
+        return self.cloud_get('files/' + filename, local_filename=local_filename, params={'version': version})
 
 
     def set_token(self, token: str) -> None:
