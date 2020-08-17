@@ -47,7 +47,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.network_manager = network_manager
 
         self.loginButton.clicked.connect(self.on_login_button_clicked)
-        self.cancelButton.clicked.connect(lambda: self.hide())
+        self.cancelButton.clicked.connect(lambda: self.close())
 
 
     def authenticate(self) -> None:
