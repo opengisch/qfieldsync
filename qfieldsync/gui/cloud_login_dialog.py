@@ -36,7 +36,7 @@ CloudLoginDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../u
 
 
 class CloudLoginDialog(QDialog, CloudLoginDialogUi):
-    authenticated = pyqtSignal(str)
+    authenticated = pyqtSignal()
 
     def __init__(self, network_manager, parent=None):
         """Constructor.
@@ -61,7 +61,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         if self.parent():
             self.parent().setEnabled(False)
             self.setEnabled(True)
-
 
         if last_token:
             self.usernameLineEdit.setEnabled(False)
@@ -108,7 +107,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.loginButton.setEnabled(True)
             return
 
-        self.authenticated.emit(payload['username'])
+        self.authenticated.emit()
 
         self.close()
 
@@ -126,6 +125,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.passwordLineEdit.setEnabled(True)
             self.rememberMeCheckBox.setEnabled(True)
             self.loginButton.setEnabled(True)
+
             return
 
         self.network_manager.set_token(payload['token'])
@@ -139,6 +139,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.passwordLineEdit.setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
 
-        self.authenticated.emit(payload['username'])
+        self.authenticated.emit()
 
         self.close()
