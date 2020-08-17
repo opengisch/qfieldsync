@@ -95,6 +95,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             login_dlg.authenticate()
             login_dlg.authenticated.connect(lambda: self.welcomeLabelValue.setText(self.preferences.value('qfieldCloudLastUsername')))
             login_dlg.authenticated.connect(lambda: self.network_manager.projects_cache.refresh())
+            login_dlg.rejected.connect(lambda: self.close())
+        else:
+            self.welcomeLabelValue.setText(self.preferences.value('qfieldCloudLastUsername'))
 
         if self.network_manager.has_token():
             self.show_projects()
