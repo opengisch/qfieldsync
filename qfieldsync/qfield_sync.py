@@ -264,14 +264,14 @@ class QFieldSync(object):
         self.cloud_projects_overview_action = self.add_action(
             os.path.join(os.path.dirname(__file__), './resources/cloud.svg'),
             text=self.tr('Projects Overview'),
-            callback=self.show_qfield_cloud_dialog,
+            callback=self.show_cloud_overview_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
 
         self.cloud_current_project_action = self.add_action(
             os.path.join(os.path.dirname(__file__), './resources/cloud.svg'),
             text=self.tr('Current Project Properties'),
-            callback=self.show_qfield_cloud_dialog,
+            callback=self.show_cloud_project_details_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
 
@@ -349,21 +349,29 @@ class QFieldSync(object):
             dlg = ProjectConfigurationDialog(self.iface.mainWindow())
             dlg.exec_()
 
-    def show_qfield_cloud_dialog(self):
+    def show_cloud_overview_dialog(self):
         """
-        Show the QFieldCloud dialog.
+        Show the QFieldCloud overview dialog.
         """
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow())
         dlg.projects_refreshed.connect(lambda: self.update_qfield_sync_toolbar_icon())
         dlg.exec_()
 
+    def show_cloud_project_details_dialog(self):
+        """
+        Show the QFieldCloud project details dialog.
+        """
+        cloud_project = self.network_manager.projects_cache.currently_open_project
+        dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow(), cloud_project)
+        dlg.projects_refreshed.connect(lambda: self.update_qfield_sync_toolbar_icon())
+        dlg.exec_()
 
     def sync_qfieldcloud_project(self):
         """Synchronize the current QFieldCloud project"""
         currently_open_project = self.network_manager.projects_cache.currently_open_project
 
         if currently_open_project is None or not self.network_manager.has_token():
-            self.show_qfield_cloud_dialog()
+            self.show_cloud_overview_dialog()
             return
 
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow(), project=currently_open_project)
