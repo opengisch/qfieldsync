@@ -154,7 +154,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
     def get_file(self, filename: str, local_filename: str, version: str = None) -> QNetworkReply:
         """"Download file"""
 
-        return self.cloud_get('files/' + filename, local_filename=local_filename, params={'version': version})
+        return self.cloud_get('files/' + filename, local_filename=local_filename, params={'version': version,'client':'qgis'})
 
 
     def set_token(self, token: str) -> None:
@@ -179,6 +179,9 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         assert isinstance(params, dict)
 
         for param, value in params.items():
+            if value is None:
+                continue
+
             query.addQueryItem(param, str(value))
 
         url.setQuery(query)
@@ -384,12 +387,12 @@ class ProjectTransferrer(QObject):
                 'bytes_received': 0,
             }
 
-            temp_destination = Path(self.temp_dir.joinpath('download', filename))
-            temp_destination.parent.mkdir(parents=True, exist_ok=True)
+            temp_filename = Path(self.temp_dir.joinpath('download', filename))
+            temp_filename.parent.mkdir(parents=True, exist_ok=True)
 
-            reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_destination))
+            reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_filename))
             reply.downloadProgress.connect(self.on_download_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
-            reply.finished.connect(self.on_download_file_finished(reply, filename=filename))
+            reply.finished.connect(self.on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
 
             self.download_files_total += 1
             self.replies.append(reply)
@@ -469,8 +472,7 @@ class ProjectTransferrer(QObject):
         if self.upload_files_finished == self.upload_files_total:
             self.upload_finished.emit()
 
-            if len(self.files['cloud']) == 0:
-                self.finished.emit()
+            self.download()
 
 
     @QFieldCloudNetworkManager.reply_wrapper
@@ -487,7 +489,7 @@ class ProjectTransferrer(QObject):
 
 
     @QFieldCloudNetworkManager.reply_wrapper
-    def on_download_file_finished(self, reply: QNetworkReply, filename: str = '') -> None:
+    def on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
         if reply.error() != QNetworkReply.NoError:
             self.error.emit(self.tr('Downloading file "{}" failed: {}'.format(filename, QFieldCloudNetworkManager.error_reason(reply))))
             self.abort_requests()
@@ -499,8 +501,8 @@ class ProjectTransferrer(QObject):
             self.finished.emit()
             return
 
-        if not Path(filename).exists():
-            self.error.emit(self.tr('Downloaded file "{}" not found!'.format(filename)))
+        if not Path(temp_filename).exists():
+            self.error.emit(self.tr('Downloaded file "{}" not found!'.format(temp_filename)))
             self.abort_requests()
             return
 

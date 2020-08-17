@@ -236,7 +236,7 @@ class CloudProject:
         if checkout_filter is None:
             return list(self._files.values())
 
-        return [file for file in self._files.values() if file.checkout == checkout_filter]
+        return [file for file in self._files.values() if file.checkout & checkout_filter]
 
 
     def _refresh_files(self) -> None:
