@@ -21,16 +21,14 @@
  ***************************************************************************/
 """
 import os
-from pathlib import Path
-from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from typing import Dict, List
 
-from PyQt5.QtCore import Qt, QObject
+from qgis.PyQt.QtCore import Qt, QObject
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QTreeWidgetItem, QWidget, QCheckBox, QHBoxLayout, QHeaderView
 from qgis.PyQt.uic import loadUiType
 
-
 from qfieldsync.core.cloud_api import ProjectTransferrer
+from qfieldsync.core.cloud_project import ProjectFile, ProjectFileCheckout
 
 
 QFieldCloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_transfer_dialog.ui'))
