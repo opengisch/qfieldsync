@@ -57,10 +57,9 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         self._token = ''
         self.projects_cache = CloudProjectsCache(self, self)
 
-
     @staticmethod
     def error_reason(reply: QNetworkReply) -> str:
-        return reply.errorString()
+        return '[HTTP-{}/QT-{}] {}'.format(reply.attribute(QNetworkRequest.HttpStatusCodeAttribute), reply.error(), reply.errorString())
 
     @staticmethod
     def read_json(func) -> Callable:
