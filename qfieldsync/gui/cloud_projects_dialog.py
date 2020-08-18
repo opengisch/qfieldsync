@@ -464,6 +464,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     @select_table_row
     def onProjectDeleteButtonClicked(self, is_toggled: bool) -> None:
+        button_pressed = QMessageBox.question(
+            self, 
+            self.tr('Delete project'), 
+            self.tr('Are you sure you want to delete project "{}"?').format(self.current_cloud_project.name))
+
+        if button_pressed != QMessageBox.Yes:
+            return
+
         self.projectsStack.setEnabled(False)
 
         reply = self.network_manager.delete_project(self.current_cloud_project.id)
