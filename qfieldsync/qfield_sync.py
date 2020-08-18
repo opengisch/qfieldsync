@@ -21,12 +21,6 @@
  ***************************************************************************/
 """
 
-from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
-
-from qfieldsync.core.cloud_project import CloudProject
-from qfieldsync.core import Preferences
-
-
 import os.path
 from qgis.PyQt.QtCore import (
     QTranslator,
@@ -44,9 +38,10 @@ from qfieldsync.gui.preferences_dialog import PreferencesDialog
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
-from qfieldsync.gui.browser_tree import DataItemProvider
+from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_browser_tree import DataItemProvider
 from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
+from qfieldsync.core import Preferences
 
 class QFieldSync(object):
     """QGIS Plugin Implementation."""

@@ -49,12 +49,12 @@ from qgis.PyQt.uic import loadUiType
 
 from qgis.core import QgsProject
 
+from qfieldsync.gui.cloud_transfer_dialog import QFieldCloudTransferDialog
+from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_api import CloudException, ProjectTransferrer, QFieldCloudNetworkManager
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
-from qfieldsync.gui.cloud_transfer_dialog import QFieldCloudTransferDialog
-from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 
 
 CloudProjectsDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_projects_dialog.ui'))
