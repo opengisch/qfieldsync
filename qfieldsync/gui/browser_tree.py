@@ -20,7 +20,7 @@
 """
 
 import os
-import json
+from typing import List
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
@@ -37,9 +37,8 @@ class DataItemProvider(QgsDataItemProvider):
         QgsDataItemProvider.__init__(self)
         self.network_manager = network_manager
 
-
     def name(self):
-        return 'MerginProvider'
+        return 'QFieldSyncProvider'
 
     def capabilities(self):
         return QgsDataProvider.Net
@@ -80,20 +79,19 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
         my_projects.refresh()
         items.append(my_projects)
 
-        # public_projects = QFieldSyncGroupItem(self, 'Public projects', 'public', '../resources/cloud.svg', 2)
-        # public_projects.setState(QgsDataItem.Populated)
-        # public_projects.refresh()
-        # items.append(public_projects)
+        public_projects = QFieldSyncGroupItem(self, 'Public projects', 'public', '../resources/cloud.svg', 2)
+        public_projects.setState(QgsDataItem.Populated)
+        public_projects.refresh()
+        items.append(public_projects)
 
         return items
 
     def actions(self, parent):
         actions = []
+        currently_open_project = self.network_manager.projects_cache.currently_open_project
 
         projects_overview_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')), self.tr('Projects Overview'), parent)
         projects_overview_action.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow()).show())
-
-        currently_open_project = self.network_manager.projects_cache.currently_open_project
 
         current_project_action = QAction(QIcon(), self.tr('Current Cloud Project'), parent)
         current_project_action.setEnabled(bool(currently_open_project))
@@ -149,33 +147,35 @@ class QFieldSyncGroupItem(QgsDataCollectionItem):
     def createChildren(self):
         items = []
 
-        if self.network_manager.projects_cache.projects:
-            for project in self.network_manager.projects_cache.projects:
-                if ((self.project_type == 'public' and not project.is_private)
-                    or (self.project_type == 'private' and project.is_private)):
-                    item = QFieldSyncProjectItem(self, project)
-                    item.setState(QgsDataItem.Populated)
-                    items.append(item)
-        else:
-            self.parent().refresh_projects()
+        projects: List[CloudProject] = self.network_manager.projects_cache.projects
 
-        item = QFieldSyncProjectItem(self, CloudProject({'id': 'id', 'name': 'name', 'description': '', 'private': True}))
-        items.append(item)
+        if projects is None:
+            try: 
+                self.network_manager.projects_cache.refresh_not_async()
+            except Exception as err:
+                return []
 
-        # print('items', items)
+            projects = self.network_manager.projects_cache.projects
+
+        for project in self.network_manager.projects_cache.projects:
+            if ((self.project_type == 'public' and not project.is_private)
+                or (self.project_type == 'private' and project.is_private)):
+                item = QFieldSyncProjectItem(self, project)
+                item.setState(QgsDataItem.Populated)
+                items.append(item)
 
         return items
 
 
     def actions(self, parent):
         actions = []
-        
+
         refresh = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Refresh projects', parent)
         create = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')), 'Create new project', parent)
 
         actions.append(refresh)
         actions.append(create)
-        
+
         return actions
 
 
@@ -186,17 +186,16 @@ class QFieldSyncProjectItem(QgsDataItem):
         super(QFieldSyncProjectItem, self).__init__(QgsDataItem.Collection, parent, project.name, '/QFieldSync/project/' + project.id)
         self.project = project
 
-
     def actions(self, parent):
         actions = []
 
-        # sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.png')), 'Sync', parent)
-        # sync_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).ask_sync())
+        sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.png')), 'Sync', parent)
+        sync_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).ask_sync())
 
         properties_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Project properties', parent)
         properties_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).exec_())
 
-        # actions.append(sync_action)
+        actions.append(sync_action)
         actions.append(properties_action)
 
         return actions
