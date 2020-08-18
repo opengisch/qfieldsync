@@ -21,15 +21,17 @@
 
 import os
 from typing import List
-from qfieldsync.core.cloud_project import CloudProject
-from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
-from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
 
 from qgis.core import QgsDataProvider, QgsDataItemProvider, QgsDataItem, QgsDataCollectionItem, QgsErrorItem
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qgis.utils import iface
+
+from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
+from qfieldsync.core.cloud_project import CloudProject
+from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
+
 
 class DataItemProvider(QgsDataItemProvider):
 
