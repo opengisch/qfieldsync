@@ -31,15 +31,15 @@ from qfieldsync.core.cloud_api import ProjectTransferrer
 from qfieldsync.core.cloud_project import ProjectFile, ProjectFileCheckout
 
 
-QFieldCloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_transfer_dialog.ui'))
+CloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_transfer_dialog.ui'))
 
 
-class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
+class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
     def __init__(self, project_transfer: ProjectTransferrer, parent: QObject = None) -> None:
         """Constructor.
         """
-        super(QFieldCloudTransferDialog, self).__init__(parent=parent)
+        super(CloudTransferDialog, self).__init__(parent=parent)
         self.setupUi(self)
         self.project_transfer = project_transfer
 

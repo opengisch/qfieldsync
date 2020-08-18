@@ -47,7 +47,7 @@ from qfieldsync.gui.qfield_cloud_dialog import QFieldCloudDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_browser_tree import DataItemProvider
-from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core import Preferences
 
 class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
@@ -127,7 +127,7 @@ class QFieldSync(object):
         # store warnings from last run
         self.last_action_warnings = []
 
-        self.network_manager = QFieldCloudNetworkManager(self.iface.mainWindow())
+        self.network_manager = CloudNetworkAccessManager(self.iface.mainWindow())
         self.network_manager.token_changed.connect(self.update_qfield_sync_toolbar_icon)
         # TODO enable this and watch the world collapse
         # QgsProject().homePathChanged.connect(self.update_qfield_sync_toolbar_icon)
