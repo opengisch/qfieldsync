@@ -376,9 +376,9 @@ class ProjectTransferrer(QObject):
 
 
     def sync(self, files: Dict[str, List[ProjectFile]]) -> None:
-        self._make_backup()
-        
         self.files = files
+        
+        self._make_backup()
 
         self.upload()
 
@@ -437,8 +437,8 @@ class ProjectTransferrer(QObject):
             filename = project_file.name
             file_size = project_file.local_size
             temp_file = self.temp_dir.joinpath('upload', filename)
-
             temp_file.parent.mkdir(parents=True, exist_ok=True)
+
             shutil.copyfile(project_file.local_path, temp_file)
 
             self._files_to_upload[filename] = {
@@ -535,11 +535,23 @@ class ProjectTransferrer(QObject):
 
 
     def _make_backup(self) -> None:
-        pass
+        for file_type in self.files:
+            for project_file in self.files[file_type]:
+                if project_file.local_path and project_file.local_path.exists():
+                    dest = self.temp_dir.joinpath('backup', project_file.path)
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    shutil.copyfile(project_file.local_path, dest)
 
 
     def rollback_backup(self) -> None:
-        pass
+        for filename in self.temp_dir.joinpath('backup').glob('**/*'):
+            if filename.is_dir():
+                filename.mkdir(parents=True, exist_ok=True)
+                continue
+
+            shutil.copyfile(filename, Path(filename).relative_to(self.temp_dir.joinpath('backup')))
+
 
 
 class CloudProjectsCache(QObject):
