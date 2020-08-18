@@ -19,9 +19,8 @@
  ***************************************************************************/
 """
 
-from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from typing import Any, Callable, Dict, IO, List, Optional, Union
-import functools
+from qfieldsync.core.cloud_project import CloudProject, ProjectFile
+from typing import Any, Dict, IO, List, Optional, Union
 import json
 import shutil
 import requests
@@ -44,6 +43,21 @@ from qgis.core import QgsNetworkAccessManager, QgsProject
 
 from qfieldsync.core.preferences import Preferences
 
+class CloudException(Exception):
+    
+    def __init__(self, reply, exception: Optional[Exception] = None):
+        super(CloudException, self).__init__(exception)
+        self.reply = reply
+        self.parent = exception
+
+
+def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
+    if reply.error() == QNetworkReply.NoError:
+        return None
+
+    return CloudException(reply, Exception('[HTTP-{}/QT-{}] {}'.format(reply.attribute(QNetworkRequest.HttpStatusCodeAttribute), reply.error(), reply.errorString())))
+
+
 
 class QFieldCloudNetworkManager(QgsNetworkAccessManager):
     
@@ -57,38 +71,41 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         self._token = ''
         self.projects_cache = CloudProjectsCache(self, self)
 
-    @staticmethod
-    def error_reason(reply: QNetworkReply) -> str:
-        return '[HTTP-{}/QT-{}] {}'.format(reply.attribute(QNetworkRequest.HttpStatusCodeAttribute), reply.error(), reply.errorString())
 
     @staticmethod
-    def read_json(func) -> Callable:
-        @functools.wraps(func)
-        def wrapper(self, reply: QNetworkReply, *args, **kwargs):
-            payload = {}
-            payload_str = ''
+    def handle_response(reply: QNetworkReply, should_parse_json: bool = True) -> Optional[Union[List, Dict]]:
+        payload_str = ''
 
-            try:
-                payload_str = str(reply.readAll().data(), encoding='utf-8')
-                payload = json.loads(payload_str)
-            except Exception as error:
-                print('Error while parsing JSON response:\n' + str(error) + '\n' + payload_str)
-                payload = None
+        error = from_reply(reply)
+        if error:
+            raise error
 
-            return func(self, reply, payload, *args, **kwargs)
-        
-        return wrapper
+        if not should_parse_json:
+            return None
+
+        try:
+            payload_str = str(reply.readAll().data(), encoding='utf-8')
+            return json.loads(payload_str)
+        except Exception as error:
+            raise CloudException(reply, error) from error
+
 
     @staticmethod
-    def reply_wrapper(func) -> Callable:
-        @functools.wraps(func)
-        def closure(self, reply: QNetworkReply, **outerKwargs):
-            @functools.wraps(func)
-            def wrapper(*args, **kwargs):
-                return func(self, reply, *args, **{**kwargs, **outerKwargs})
-            return wrapper
+    def json_object(reply: QNetworkReply) -> Dict[str, Any]:
+        payload = QFieldCloudNetworkManager.handle_response(reply)
 
-        return closure
+        assert isinstance(payload, dict)
+
+        return payload
+
+
+    @staticmethod
+    def json_array(reply: QNetworkReply) -> List[Any]:
+        payload = QFieldCloudNetworkManager.handle_response(reply)
+
+        assert isinstance(payload, list)
+
+        return payload
 
 
     def login(self, username: str, password: str) -> QNetworkReply:
@@ -434,8 +451,8 @@ class ProjectTransferrer(QObject):
             temp_filename = self._files_to_upload[filename]['temp_filename']
 
             reply = self.network_manager.cloud_upload_files('files/' + self.cloud_project.id + '/' + filename, filenames=[str(temp_filename)])
-            reply.uploadProgress.connect(self._on_upload_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
-            reply.finished.connect(self._on_upload_file_finished(reply, filename=filename))
+            reply.uploadProgress.connect(lambda s, t: self._on_upload_file_progress(reply, s, t, filename=filename))
+            reply.finished.connect(lambda: self._on_upload_file_finished(reply, filename=filename))
 
             self.replies.append(reply)
 
@@ -456,13 +473,12 @@ class ProjectTransferrer(QObject):
             temp_filename = self._files_to_download[filename]['temp_filename']
 
             reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_filename))
-            reply.downloadProgress.connect(self._on_download_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
-            reply.finished.connect(self._on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
+            reply.downloadProgress.connect(lambda r, t: self._on_download_file_progress(reply, r, t, filename=filename))
+            reply.finished.connect(lambda: self._on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
 
             self.replies.append(reply)
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
     def _on_upload_file_progress(self, reply: QNetworkReply, bytes_sent: int, bytes_total: int, filename: str) -> None:
         # there are always at least a few bytes to send, so ignore this situation
         if bytes_total == 0:
@@ -479,10 +495,11 @@ class ProjectTransferrer(QObject):
         self.upload_progress.emit(fraction)
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
     def _on_upload_file_finished(self, reply: QNetworkReply, filename: str) -> None:
-        if reply.error() != QNetworkReply.NoError:
-            self.error.emit(self.tr('Uploading file "{}" failed: {}'.format(filename, QFieldCloudNetworkManager.error_reason(reply))))
+        try:
+            QFieldCloudNetworkManager.handle_response(reply, False)
+        except CloudException as err:
+            self.error.emit(self.tr('Uploading file "{}" failed: {}'.format(filename, str(err))))
             self.abort_requests()
             return
 
@@ -495,7 +512,6 @@ class ProjectTransferrer(QObject):
             return
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
     def _on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, filename: str = '') -> None:
         self._files_to_download[filename]['bytes_transferred'] = bytes_received
         self._files_to_download[filename]['bytes_total'] = bytes_total
@@ -508,10 +524,11 @@ class ProjectTransferrer(QObject):
         self.download_progress.emit(fraction)
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
     def _on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
-        if reply.error() != QNetworkReply.NoError:
-            self.error.emit(self.tr('Downloading file "{}" failed: {}'.format(filename, QFieldCloudNetworkManager.error_reason(reply))))
+        try:
+            QFieldCloudNetworkManager.handle_response(reply, False)
+        except CloudException as err:
+            self.error.emit(self.tr('Downloading file "{}" failed: {}'.format(filename, str(err))))
             self.abort_requests()
             return
 
@@ -633,7 +650,7 @@ class CloudProjectsCache(QObject):
 
         self.projects_started.emit()
         self._projects_reply = self.network_manager.get_projects()
-        self._projects_reply.finished.connect(self._on_get_projects_reply_finished(self._projects_reply)) # pylint: disable=no-value-for-parameter
+        self._projects_reply.finished.connect(lambda: self._on_get_projects_reply_finished(self._projects_reply))
 
         return self._projects_reply
 
@@ -656,7 +673,7 @@ class CloudProjectsCache(QObject):
 
         self.project_files_started.emit(project_id)
         reply = self.network_manager.get_files(project_id)
-        reply.finished.connect(self._on_get_project_files_reply_finished(reply, project_id=project_id)) # pylint: disable=no-value-for-parameter
+        reply.finished.connect(lambda: self._on_get_project_files_reply_finished(reply, project_id=project_id))
         return reply
 
 
@@ -669,13 +686,13 @@ class CloudProjectsCache(QObject):
                 return project
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    @QFieldCloudNetworkManager.read_json
-    def _on_get_projects_reply_finished(self, reply: QNetworkReply, payload: List[Dict]) -> None:
+    def _on_get_projects_reply_finished(self, reply: QNetworkReply) -> None:
         self._projects_reply = None
 
-        if reply.error() != QNetworkReply.NoError or payload is None:
-            self.projects_error.emit(QFieldCloudNetworkManager.error_reason(reply))
+        try:
+            payload = QFieldCloudNetworkManager.json_array(reply)
+        except Exception as err:
+            self.projects_error.emit(str(err))
             return
 
         self._projects = []
@@ -686,13 +703,13 @@ class CloudProjectsCache(QObject):
         self.projects_updated.emit()
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    @QFieldCloudNetworkManager.read_json
-    def _on_get_project_files_reply_finished(self, reply: QNetworkReply, payload: List[Dict], project_id: str = None) -> None:
+    def _on_get_project_files_reply_finished(self, reply: QNetworkReply, project_id: str = None) -> None:
         assert project_id
 
-        if reply.error() != QNetworkReply.NoError or payload is None:
-            self.project_files_error.emit(project_id, QFieldCloudNetworkManager.error_reason(reply))
+        try:
+            payload = QFieldCloudNetworkManager.json_array(reply)
+        except Exception as err:
+            self.project_files_error.emit(project_id, str(err))
             return
 
         cloud_project = self.find_project(project_id)
