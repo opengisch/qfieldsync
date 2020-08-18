@@ -355,6 +355,7 @@ class ProjectTransferrer(QObject):
         self.download_files_finished = 0
         self.download_bytes_total_files_only = 0
         self.is_aborted = False
+        self.is_started = False
         self.is_finished = False
         self.is_upload_active = False
         self.is_download_active = False
@@ -368,8 +369,15 @@ class ProjectTransferrer(QObject):
         self.temp_dir.joinpath('upload').mkdir(parents=True, exist_ok=True)
         self.temp_dir.joinpath('download').mkdir(parents=True, exist_ok=True)
 
+        self.upload_finished.connect(self._on_upload_finished)
+        self.download_finished.connect(self._on_download_finished)
+
 
     def sync(self, files_to_upload: List[ProjectFile], files_to_download: List[ProjectFile]) -> None:
+        assert not self.is_started
+        
+        self.is_started = True
+
         # prepare the files to be uploaded, copy them in a temporary destination
         for project_file in files_to_upload:
             assert project_file.local_path
@@ -404,68 +412,66 @@ class ProjectTransferrer(QObject):
             }
 
         self._make_backup()
+        self._upload()
 
-        self.upload()
 
+    def _upload(self) -> None:
+        assert not self.is_upload_active, 'Upload in progress'
+        assert not self.is_download_active, 'Download in progress'
 
-    def upload(self) -> None:
-        if self.is_upload_active:
-            self.error.emit(self.tr('Already in progress'))
-            return
-
-        if self.is_finished:
-            self.error.emit(self.tr('Already in finished'))
-            return
+        self.is_upload_active = True
 
         # nothing to upload
         if len(self._files_to_upload) == 0:
             self.upload_progress.emit(1)
             self.upload_finished.emit()
-            self.download()
+            # NOTE check _on_upload_finished
             return
 
-        self.is_upload_active = True
-        
         assert self.cloud_project.local_dir
 
         for filename in self._files_to_upload:
             temp_filename = self._files_to_upload[filename]['temp_filename']
 
             reply = self.network_manager.cloud_upload_files('files/' + self.cloud_project.id + '/' + filename, filenames=[str(temp_filename)])
-            reply.uploadProgress.connect(self.on_upload_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
-            reply.finished.connect(self.on_upload_file_finished(reply, filename=filename))
+            reply.uploadProgress.connect(self._on_upload_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
+            reply.finished.connect(self._on_upload_file_finished(reply, filename=filename))
 
             self.replies.append(reply)
 
 
-    def download(self) -> None:
+    def _download(self) -> None:
+        assert not self.is_upload_active, 'Upload in progress'
+        assert not self.is_download_active, 'Download in progress'
+
+        self.is_download_active = True
+
         # nothing to download
         if len(self._files_to_download) == 0:
             self.download_progress.emit(1)
             self.download_finished.emit()
-            self.finished.emit()
             return
 
         for filename in self._files_to_download:
             temp_filename = self._files_to_download[filename]['temp_filename']
 
             reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_filename))
-            reply.downloadProgress.connect(self.on_download_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
-            reply.finished.connect(self.on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
+            reply.downloadProgress.connect(self._on_download_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
+            reply.finished.connect(self._on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
 
             self.replies.append(reply)
 
 
     @QFieldCloudNetworkManager.reply_wrapper
-    def on_upload_file_progress(self, reply: QNetworkReply, bytes_sent: int, bytes_total: int, filename: str) -> None:
+    def _on_upload_file_progress(self, reply: QNetworkReply, bytes_sent: int, bytes_total: int, filename: str) -> None:
         # there are always at least a few bytes to send, so ignore this situation
         if bytes_total == 0:
             return
 
-        self._files_to_upload[filename]['bytes_sent'] = bytes_sent
+        self._files_to_upload[filename]['bytes_transferred'] = bytes_sent
         self._files_to_upload[filename]['bytes_total'] = bytes_total
 
-        bytes_sent_sum = sum([self._files_to_upload[filename]['bytes_sent'] for filename in self._files_to_upload])
+        bytes_sent_sum = sum([self._files_to_upload[filename]['bytes_transferred'] for filename in self._files_to_upload])
         bytes_total_sum = max(sum([self._files_to_upload[filename]['bytes_total'] for filename in self._files_to_upload]), self.upload_bytes_total_files_only)
 
         fraction = min(bytes_sent_sum / bytes_total_sum, 1) if self.upload_bytes_total_files_only > 0 else 1
@@ -474,7 +480,7 @@ class ProjectTransferrer(QObject):
 
 
     @QFieldCloudNetworkManager.reply_wrapper
-    def on_upload_file_finished(self, reply: QNetworkReply, filename: str) -> None:
+    def _on_upload_file_finished(self, reply: QNetworkReply, filename: str) -> None:
         if reply.error() != QNetworkReply.NoError:
             self.error.emit(self.tr('Uploading file "{}" failed: {}'.format(filename, QFieldCloudNetworkManager.error_reason(reply))))
             self.abort_requests()
@@ -483,17 +489,18 @@ class ProjectTransferrer(QObject):
         self.upload_files_finished += 1
 
         if self.upload_files_finished == len(self._files_to_upload):
+            self.upload_progress.emit(1)
             self.upload_finished.emit()
-
-            self.download()
+            # NOTE check _on_upload_finished
+            return
 
 
     @QFieldCloudNetworkManager.reply_wrapper
-    def on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, filename: str = '') -> None:
-        self._files_to_download[filename]['bytes_received'] = bytes_received
+    def _on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, filename: str = '') -> None:
+        self._files_to_download[filename]['bytes_transferred'] = bytes_received
         self._files_to_download[filename]['bytes_total'] = bytes_total
 
-        bytes_received_sum = sum([self._files_to_download[filename]['bytes_received'] for filename in self._files_to_download])
+        bytes_received_sum = sum([self._files_to_download[filename]['bytes_transferred'] for filename in self._files_to_download])
         bytes_total_sum = max(sum([self._files_to_download[filename]['bytes_total'] for filename in self._files_to_download]), self.download_bytes_total_files_only)
 
         fraction = min(bytes_received_sum / bytes_total_sum, 1) if self.download_bytes_total_files_only > 0 else 1
@@ -502,25 +509,34 @@ class ProjectTransferrer(QObject):
 
 
     @QFieldCloudNetworkManager.reply_wrapper
-    def on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
+    def _on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
         if reply.error() != QNetworkReply.NoError:
             self.error.emit(self.tr('Downloading file "{}" failed: {}'.format(filename, QFieldCloudNetworkManager.error_reason(reply))))
             self.abort_requests()
             return
 
-        if self.download_files_finished == len(self._files_to_download):
-            self.download_progress.emit(1)
-            self._temp_dir2main_dir('download')
-            self.download_finished.emit()
-            self.finished.emit()
-            return
+        self.download_files_finished += 1
 
         if not Path(temp_filename).exists():
             self.error.emit(self.tr('Downloaded file "{}" not found!'.format(temp_filename)))
             self.abort_requests()
             return
 
-        self.download_files_finished += 1
+        if self.download_files_finished == len(self._files_to_download):
+            self._temp_dir2main_dir('download')
+            self.download_progress.emit(1)
+            self.download_finished.emit()
+            return
+
+    def _on_upload_finished(self):
+        self.is_upload_active = False
+        self._download()
+
+
+    def _on_download_finished(self):
+        self.is_download_active = False
+        self.is_finished = True
+        self.finished.emit()
 
 
     def abort_requests(self) -> None:
