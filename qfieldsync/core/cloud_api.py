@@ -433,7 +433,6 @@ class ProjectTransferrer(QObject):
 
         for project_file in self.files['local']:
             assert project_file.local_path
-            assert project_file.local_size
 
             filename = project_file.name
             file_size = project_file.local_size

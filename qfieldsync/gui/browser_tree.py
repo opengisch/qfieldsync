@@ -129,7 +129,6 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
 
     def refresh_projects(self):
         self.network_manager.projects_cache.refresh()
-        
 
 
 class QFieldSyncGroupItem(QgsDataCollectionItem):
@@ -151,6 +150,8 @@ class QFieldSyncGroupItem(QgsDataCollectionItem):
 
         if projects is None:
             try: 
+                # TODO try to be make it Fast Fertile
+                # TODO try using QgsNetworkAccessManager
                 self.network_manager.projects_cache.refresh_not_async()
             except Exception as err:
                 return []
