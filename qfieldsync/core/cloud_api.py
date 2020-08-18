@@ -24,6 +24,7 @@ from typing import Any, Callable, Dict, IO, List, Optional, Union
 import functools
 import json
 import shutil
+import requests
 import urllib.parse
 from pathlib import Path
 
@@ -113,10 +114,21 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
         return self.cloud_post('auth/logout/')
 
 
-    def get_projects(self) -> QNetworkReply:
+    def get_projects(self, should_include_public: bool = False) -> QNetworkReply:
         """Get QFieldCloud projects"""
 
         return self.cloud_get('projects/')
+
+
+    def get_projects_not_async(self, should_include_public: bool = False) -> List[Dict]:
+        """Get QFieldCloud projects synchronously"""
+        headers = {'Authorization': 'token {}'.format(self._token)}
+        params = {'include-public': should_include_public}
+
+        response = requests.get(self.url + self._prepare_uri('projects'), headers=headers, params=params)
+        response.raise_for_status()
+        
+        return response.json()
 
 
     def create_project(self, name: str, owner: str, description: str, private: bool) -> QNetworkReply:
@@ -589,6 +601,19 @@ class CloudProjectsCache(QObject):
         self._projects_reply.finished.connect(self._on_get_projects_reply_finished(self._projects_reply)) # pylint: disable=no-value-for-parameter
 
         return self._projects_reply
+
+    
+    def refresh_not_async(self) -> None:
+        self.projects_started.emit()
+        
+        payload = self.network_manager.get_projects_not_async()
+        
+        self._projects = []
+
+        for project_data in payload:
+            self._projects.append(CloudProject(project_data))
+
+        self.projects_updated.emit()
 
 
     def get_project_files(self, project_id: str) -> QNetworkReply:
