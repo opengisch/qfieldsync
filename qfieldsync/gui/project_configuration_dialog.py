@@ -73,8 +73,6 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
         self.multipleToggleButton.setPopupMode(QToolButton.InstantPopup)
         self.toggle_menu.triggered.connect(self.toggle_menu_triggered)
 
-        self.cloudSyncButton.clicked.connect(self.onCloudSyncButtonClicked)
-
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
         self.unsupportedLayersList = list()
 
@@ -254,50 +252,3 @@ class ProjectConfigurationDialog(QDialog, DialogUi):
                         layer_source.apply()
 
         self.reloadProject()
-
-
-    def onCloudSyncButtonClicked(self):
-        self.cloudSyncButton.setEnabled(False)
-        # self.syncFeedbackLabel.setText('')
-        # self.syncFeedbackLabel.setVisible(True)
-
-        # (project_id, _) = self.project.readEntry("qfieldcloud", "projectId")
-        # is_new_project = False
-
-        # if not project_id:
-        #     is_new_project = True
-
-        #     self.syncFeedbackLabel.setText(self.tr("Creating cloud project..."))
-
-        #     try:
-        #         title = self.project.title() 
-        #         title = title if title else self.project.fileName()
-        #         title = title if title else self.tr('Untitled Project')
-        #         resp = create_project(to_cloud_title(title), self.usernameLineEdit.text(), title)
-        #         project_id = resp['id']
-
-        #         self.project.writeEntry("qfieldcloud", "projectId", project_id)
-        #         self.project.setDirty(True)
-        #     except HTTPError as error:
-        #         self.syncFeedbackLabel.setText(self.tr("Failed to create project: {}".format(get_error_reason(error.response))))
-        #         return
-
-        # export_dir = QTemporaryDir().path()
-
-        # offline_convertor = OfflineConverter(self.project, export_dir, self.iface.mapCanvas().extent(),
-        #                                      QgsOfflineEditing())
-        # offline_convertor.total_progress_updated.connect(self.on_offline_convertor_total_progress_updated)
-        # offline_convertor.convert()
-
-        # project_uploader = ProjectUploader(project_id, export_dir, is_new_project)
-        # project_uploader.progress_uploaded.connect(self.on_project_progress_uploaded)
-
-        # try:
-        #     project_uploader.upload()
-        # except HTTPError as error:
-        #     self.syncFeedbackLabel.setText(self.tr("Failed to upload project: {}".format(get_error_reason(error.response))))
-        #     return
-
-        # self.cloudSyncButton.setEnabled(True)
-        # self.syncFeedbackLabel.setVisible(False)
-
