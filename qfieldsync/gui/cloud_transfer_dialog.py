@@ -112,7 +112,7 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
 
-        files: Dict[str, List[ProjectFile]] = {'local': [], 'cloud': []}
+        files: Dict[str, List[ProjectFile]] = {'to_upload': [], 'to_download': []}
 
         for item_idx in range(self.filesTree.topLevelItemCount()):
             item = self.filesTree.topLevelItem(item_idx)
@@ -120,7 +120,7 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
             self.traverse_tree_item(item, files)
             
         self.stackedWidget.setCurrentWidget(self.progressPage)
-        self.project_transfer.sync(files)
+        self.project_transfer.sync(files['to_upload'], files['to_download'])
 
 
     def traverse_tree_item(self, item: QTreeWidgetItem, files: Dict[str, List[ProjectFile]]) -> None:
@@ -130,9 +130,9 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
             assert item.childCount() == 0
 
             if self.filesTree.itemWidget(item, 1).children()[1].isChecked():
-                files['local'].append(project_file)
+                files['to_upload'].append(project_file)
             elif self.filesTree.itemWidget(item, 2).children()[1].isChecked():
-                files['cloud'].append(project_file)
+                files['to_download'].append(project_file)
 
             return
 
