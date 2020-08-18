@@ -24,12 +24,11 @@ import os
 import functools
 import glob
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QItemSelectionModel, QDateTime
 from qgis.PyQt.QtWidgets import (
     QDialog,
-    QDialogButtonBox,
     QToolButton,
     QTableWidgetItem,
     QWidget,
@@ -49,11 +48,10 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
 from qgis.core import QgsProject
-from qgis.utils import iface
 
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.core.cloud_api import ProjectTransferrer, QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import CloudException, ProjectTransferrer, QFieldCloudNetworkManager
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 from qfieldsync.gui.cloud_transfer_dialog import QFieldCloudTransferDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
@@ -241,21 +239,21 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.current_cloud_project.id + '/' + str(project_file.name) + '/', 
             str(version_dest_filename), 
             project_file.versions[version_idx]['created_at'])
-        reply.downloadProgress.connect(self.on_download_file_progress(reply, project_file=project_file)) # pylint: disable=no-value-for-parameter
-        reply.finished.connect(self.on_download_file_finished(reply, project_file=project_file))
+        reply.downloadProgress.connect(lambda r, t: self.on_download_file_progress(reply, r, t, project_file=project_file))
+        reply.finished.connect(lambda: self.on_download_file_finished(reply, project_file=project_file))
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    def on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, project_file: ProjectFile) -> None:
+    def on_download_file_progress(self, _reply: QNetworkReply, bytes_received: int, bytes_total: int, project_file: ProjectFile) -> None:
         self.feedbackLabel.setVisible(True)
         self.feedbackLabel.setText(self.tr('Downloading file "{}" at {}%…').format(project_file.name, int((bytes_total / bytes_received) * 100)))
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
     def on_download_file_finished(self, reply: QNetworkReply, project_file: ProjectFile) -> None:
-        if reply.error() != QNetworkReply.NoError:
+        try:
+            QFieldCloudNetworkManager.handle_response(reply, False)
+        except CloudException as err:
+            self.feedbackLabel.setText(self.tr('Downloading file "{}" failed: {}'.format(project_file.name, str(err))))
             self.feedbackLabel.setVisible(True)
-            self.feedbackLabel.setText(self.tr('Downloading file "{}" failed: {}'.format(project_file.name, QFieldCloudNetworkManager.error_reason(reply))))
             return
 
         self.feedbackLabel.setVisible(False)
@@ -281,14 +279,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.feedbackLabel.setVisible(False)
 
         reply = self.network_manager.logout()
-        reply.finished.connect(self.on_logout_reply_finished(reply)) # pylint: disable=no-value-for-parameter
+        reply.finished.connect(lambda: self.on_logout_reply_finished(reply))
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    @QFieldCloudNetworkManager.read_json
-    def on_logout_reply_finished(self, reply: QNetworkReply, payload: Dict) -> None:
-        if reply.error() != QNetworkReply.NoError or payload is None:
-            self.feedbackLabel.setText('Logout failed: {}'.format(QFieldCloudNetworkManager.error_reason(reply)))
+    def on_logout_reply_finished(self, reply: QNetworkReply) -> None:
+        try:
+            QFieldCloudNetworkManager.json_object(reply)
+        except CloudException as err:
+            self.feedbackLabel.setText('Logout failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
             self.logoutButton.setEnabled(True)
             return
@@ -428,7 +426,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         # cloud project is empty, you can upload a local project into it
         if len(self.current_cloud_project.cloud_files) == 0:
             while local_dir is None:
-                local_dir = QFileDialog.getExistingDirectory(self, 'Upload local project to QFieldCloud', initial_path)
+                local_dir = QFileDialog.getExistingDirectory(self, self.tr('Upload local project to QFieldCloud'), initial_path)
 
                 if local_dir == '':
                     return
@@ -444,7 +442,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         # cloud project exists and has files in it, so checkout in an empty dir
         else:
             while local_dir is None:
-                local_dir = QFileDialog.getExistingDirectory(self, 'Save QFieldCloud project at', initial_path)
+                local_dir = QFileDialog.getExistingDirectory(self, self.tr('Save QFieldCloud project at'), initial_path)
 
                 if local_dir == '':
                     return
@@ -469,7 +467,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setEnabled(False)
 
         reply = self.network_manager.delete_project(self.current_cloud_project.id)
-        reply.finished.connect(self.onDeleteProjectReplyFinished(reply)) # pylint: disable=no-value-for-parameter
+        reply.finished.connect(lambda: self.on_delete_project_reply_finished(reply))
 
 
     @select_table_row
@@ -477,12 +475,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.show_project_form()
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    def onDeleteProjectReplyFinished(self, reply: QNetworkReply) -> None:
+    def on_delete_project_reply_finished(self, reply: QNetworkReply) -> None:
         self.projectsStack.setEnabled(True)
 
-        if reply.error() != QNetworkReply.NoError:
-            self.feedbackLabel.setText('Project delete failed: {}'.format(QFieldCloudNetworkManager.error_reason(reply)))
+        try:
+            QFieldCloudNetworkManager.handle_response(reply, False)
+        except CloudException as err:
+            self.feedbackLabel.setText(self.tr('Project delete failed: {}').format(str(err)))
             self.feedbackLabel.setVisible(True)
             return
 
@@ -565,7 +564,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 cloud_project_data['owner'], 
                 cloud_project_data['description'], 
                 cloud_project_data['private'])
-            reply.finished.connect(self.on_create_project_finished(reply, local_dir=cloud_project_data['local_dir'])) # pylint: disable=no-value-for-parameter
+            reply.finished.connect(lambda: self.on_create_project_finished(reply, local_dir=cloud_project_data['local_dir']))
         else:
             self.current_cloud_project.update_data(cloud_project_data)
             self.feedbackLabel.setText(self.tr('Updating project…'))
@@ -576,16 +575,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.current_cloud_project.owner, 
                 self.current_cloud_project.description, 
                 self.current_cloud_project.is_private)
-            reply.finished.connect(self.on_update_project_finished(reply)) # pylint: disable=no-value-for-parameter
+            reply.finished.connect(lambda: self.on_update_project_finished(reply))
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    @QFieldCloudNetworkManager.read_json
-    def on_create_project_finished(self, reply: QNetworkReply, payload, local_dir: str = None) -> None:
+    def on_create_project_finished(self, reply: QNetworkReply, local_dir: str = None) -> None:
         self.projectsFormPage.setEnabled(True)
 
-        if reply.error() != QNetworkReply.NoError or payload is None:
-            self.feedbackLabel.setText('Project create failed: {}'.format(QFieldCloudNetworkManager.error_reason(reply)))
+        try:
+            payload = QFieldCloudNetworkManager.json_object(reply)
+        except CloudException as err:
+            self.feedbackLabel.setText('Project create failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
             return
 
@@ -601,13 +600,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    @QFieldCloudNetworkManager.read_json
-    def on_update_project_finished(self, reply: QNetworkReply, payload: Dict) -> None:
+    def on_update_project_finished(self, reply: QNetworkReply) -> None:
         self.projectsFormPage.setEnabled(True)
 
-        if reply.error() != QNetworkReply.NoError or payload is None:
-            self.feedbackLabel.setText('Project update failed: {}'.format(QFieldCloudNetworkManager.error_reason(reply)))
+        try:
+            QFieldCloudNetworkManager.json_object(reply)
+        except CloudException as err:
+            self.feedbackLabel.setText('Project update failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
             return
 

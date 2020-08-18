@@ -21,7 +21,6 @@
  ***************************************************************************/
 """
 import os
-from typing import Dict
 
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QDialog
@@ -29,7 +28,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import CloudException, QFieldCloudNetworkManager
 
 
 CloudLoginDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_login_dialog.ui'))
@@ -71,11 +70,12 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.network_manager.set_token(last_token)
 
             reply = self.network_manager.get_user(last_token)
-            reply.finished.connect(self.on_get_user_reply_finished(reply)) # pylint: disable=no-value-for-parameter
+            reply.finished.connect(lambda: self.on_get_user_reply_finished(reply))
         else:
             if not self.usernameLineEdit.text():
                 self.usernameLineEdit.setText(self.preferences.value('qfieldCloudLastUsername'))
             self.show()
+
 
     def on_login_button_clicked(self) -> None:
         self.loginButton.setEnabled(False)
@@ -85,21 +85,21 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         password = self.passwordLineEdit.text()
 
         reply = self.network_manager.login(username, password)
-        reply.finished.connect(self.on_login_reply_finished(reply)) # pylint: disable=no-value-for-parameter
+        reply.finished.connect(lambda: self.on_login_reply_finished(reply))
 
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    @QFieldCloudNetworkManager.read_json
-    def on_get_user_reply_finished(self, reply: QNetworkReply, payload: Dict) -> None:
+    def on_get_user_reply_finished(self, reply: QNetworkReply) -> None:
         if self.parent():
             self.parent().setEnabled(True)
             self.setEnabled(True)
 
-        if reply.error() != QNetworkReply.NoError or payload is None:
+        try:
+            QFieldCloudNetworkManager.json_object(reply)
+        except CloudException as err:
             self.preferences.set_value('qfieldCloudLastToken', '')
             self.network_manager.set_token('')
             
-            self.loginFeedbackLabel.setText(self.tr('Token reuse failed: %1').format(QFieldCloudNetworkManager.error_reason(reply)))
+            self.loginFeedbackLabel.setText(self.tr('Token reuse failed: %1').format(str(err)))
             self.loginFeedbackLabel.setVisible(True)
             self.usernameLineEdit.setEnabled(True)
             self.passwordLineEdit.setEnabled(True)
@@ -111,15 +111,15 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.close()
 
-    @QFieldCloudNetworkManager.reply_wrapper
-    @QFieldCloudNetworkManager.read_json
-    def on_login_reply_finished(self, reply: QNetworkReply, payload: Dict) -> None:
+    def on_login_reply_finished(self, reply: QNetworkReply) -> None:
         if self.parent():
             self.parent().setEnabled(True)
             self.setEnabled(True)
 
-        if reply.error() != QNetworkReply.NoError or payload is None:
-            self.loginFeedbackLabel.setText(self.tr('Login failed: {}').format(QFieldCloudNetworkManager.error_reason(reply)))
+        try:
+            payload = QFieldCloudNetworkManager.json_object(reply)
+        except CloudException as err:
+            self.loginFeedbackLabel.setText(self.tr('Login failed: {}').format(str(err)))
             self.loginFeedbackLabel.setVisible(True)
             self.usernameLineEdit.setEnabled(True)
             self.passwordLineEdit.setEnabled(True)
