@@ -351,19 +351,14 @@ class ProjectTransferrer(QObject):
         self._files_to_upload = {}
         self._files_to_download = {}
         self.upload_files_finished = 0
-        # TODO obsolete, use self.files
-        self.upload_files_total = 0
         self.upload_bytes_total_files_only = 0
         self.download_files_finished = 0
-        # TODO obsolete, use self.files
-        self.download_files_total = 0
         self.download_bytes_total_files_only = 0
         self.is_aborted = False
         self.is_finished = False
         self.is_upload_active = False
         self.is_download_active = False
         self.replies = []
-        self.files: Dict[str, List[ProjectFile]] = {'local':[], 'cloud':[]}
         self.temp_dir = Path(QgsProject.instance().homePath()).joinpath('.qfieldsync')
 
         if self.temp_dir.exists():
@@ -374,40 +369,43 @@ class ProjectTransferrer(QObject):
         self.temp_dir.joinpath('download').mkdir(parents=True, exist_ok=True)
 
 
-    def sync(self, files: Dict[str, List[ProjectFile]]) -> None:
-        self.files = files
+    def sync(self, files_to_upload: List[ProjectFile], files_to_download: List[ProjectFile]) -> None:
+        # prepare the files to be uploaded, copy them in a temporary destination
+        for project_file in files_to_upload:
+            assert project_file.local_path
+
+            filename = project_file.name
+
+            temp_filename = self.temp_dir.joinpath('upload', filename)
+            temp_filename.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(project_file.local_path, temp_filename)
+
+            self.upload_bytes_total_files_only += project_file.local_size
+            self._files_to_upload[filename] = {
+                'project_file': project_file,
+                'bytes_total': project_file.local_size,
+                'bytes_transferred': 0,
+                'temp_filename': temp_filename,
+            }
         
+        # prepare the files to be downloaded, download them in a temporary destination
+        for project_file in files_to_download:
+            filename = project_file.name
+
+            temp_filename = self.temp_dir.joinpath('download', filename)
+            temp_filename.parent.mkdir(parents=True, exist_ok=True)
+
+            self.download_bytes_total_files_only += project_file.size
+            self._files_to_download[filename] = {
+                'project_file': project_file,
+                'bytes_total': project_file.size,
+                'bytes_transferred': 0,
+                'temp_filename': temp_filename,
+            }
+
         self._make_backup()
 
         self.upload()
-
-
-    def download(self) -> None:
-        # nothing to download
-        if len(self.files['cloud']) == 0:
-            self.download_progress.emit(1)
-            self.download_finished.emit()
-            self.finished.emit()
-            return
-
-        for project_file in self.files['cloud']:
-            filename = project_file.name
-            self.download_bytes_total_files_only += project_file.size
-
-            self._files_to_download[filename] = {
-                'bytes_total': project_file.size,
-                'bytes_received': 0,
-            }
-
-            temp_filename = Path(self.temp_dir.joinpath('download', filename))
-            temp_filename.parent.mkdir(parents=True, exist_ok=True)
-
-            reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_filename))
-            reply.downloadProgress.connect(self.on_download_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
-            reply.finished.connect(self.on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
-
-            self.download_files_total += 1
-            self.replies.append(reply)
 
 
     def upload(self) -> None:
@@ -420,7 +418,7 @@ class ProjectTransferrer(QObject):
             return
 
         # nothing to upload
-        if len(self.files['local']) == 0:
+        if len(self._files_to_upload) == 0:
             self.upload_progress.emit(1)
             self.upload_finished.emit()
             self.download()
@@ -430,26 +428,30 @@ class ProjectTransferrer(QObject):
         
         assert self.cloud_project.local_dir
 
-        for project_file in self.files['local']:
-            assert project_file.local_path
+        for filename in self._files_to_upload:
+            temp_filename = self._files_to_upload[filename]['temp_filename']
 
-            filename = project_file.name
-            file_size = project_file.local_size
-            temp_file = self.temp_dir.joinpath('upload', filename)
-            temp_file.parent.mkdir(parents=True, exist_ok=True)
-
-            shutil.copyfile(project_file.local_path, temp_file)
-
-            self._files_to_upload[filename] = {
-                'bytes_total': file_size,
-                'bytes_sent': 0,
-            }
-            self.upload_files_total += 1
-            self.upload_bytes_total_files_only += file_size
-
-            reply = self.network_manager.cloud_upload_files('files/' + self.cloud_project.id + '/' + filename, filenames=[str(temp_file)])
+            reply = self.network_manager.cloud_upload_files('files/' + self.cloud_project.id + '/' + filename, filenames=[str(temp_filename)])
             reply.uploadProgress.connect(self.on_upload_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
             reply.finished.connect(self.on_upload_file_finished(reply, filename=filename))
+
+            self.replies.append(reply)
+
+
+    def download(self) -> None:
+        # nothing to download
+        if len(self._files_to_download) == 0:
+            self.download_progress.emit(1)
+            self.download_finished.emit()
+            self.finished.emit()
+            return
+
+        for filename in self._files_to_download:
+            temp_filename = self._files_to_download[filename]['temp_filename']
+
+            reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_filename))
+            reply.downloadProgress.connect(self.on_download_file_progress(reply, filename=filename)) # pylint: disable=no-value-for-parameter
+            reply.finished.connect(self.on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
 
             self.replies.append(reply)
 
@@ -480,7 +482,7 @@ class ProjectTransferrer(QObject):
 
         self.upload_files_finished += 1
 
-        if self.upload_files_finished == self.upload_files_total:
+        if self.upload_files_finished == len(self._files_to_upload):
             self.upload_finished.emit()
 
             self.download()
@@ -506,8 +508,9 @@ class ProjectTransferrer(QObject):
             self.abort_requests()
             return
 
-        if self.download_files_finished == self.download_files_total:
+        if self.download_files_finished == len(self._files_to_download):
             self.download_progress.emit(1)
+            self._temp_dir2main_dir('download')
             self.download_finished.emit()
             self.finished.emit()
             return
@@ -534,22 +537,28 @@ class ProjectTransferrer(QObject):
 
 
     def _make_backup(self) -> None:
-        for file_type in self.files:
-            for project_file in self.files[file_type]:
-                if project_file.local_path and project_file.local_path.exists():
-                    dest = self.temp_dir.joinpath('backup', project_file.path)
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    
-                    shutil.copyfile(project_file.local_path, dest)
+        for project_file in [
+            *list(map(lambda f: f['project_file'], self._files_to_upload.values())),
+            *list(map(lambda f: f['project_file'], self._files_to_download.values())),
+        ]:
+            if project_file.local_path and project_file.local_path.exists():
+                dest = self.temp_dir.joinpath('backup', project_file.path)
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                
+                shutil.copyfile(project_file.local_path, dest)
 
 
-    def rollback_backup(self) -> None:
-        for filename in self.temp_dir.joinpath('backup').glob('**/*'):
+    def _temp_dir2main_dir(self, subdir: str) -> None:
+        subdir_path = self.temp_dir.joinpath(subdir)
+        
+        assert subdir_path.exists()
+
+        for filename in subdir_path.glob('**/*'):
             if filename.is_dir():
                 filename.mkdir(parents=True, exist_ok=True)
                 continue
 
-            shutil.copyfile(filename, Path(filename).relative_to(self.temp_dir.joinpath('backup')))
+            shutil.copyfile(filename, Path(filename).relative_to(subdir_path))
 
 
 
