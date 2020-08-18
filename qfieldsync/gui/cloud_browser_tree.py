@@ -30,12 +30,12 @@ from qgis.utils import iface
 
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.core.cloud_project import CloudProject
-from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 
 
 class DataItemProvider(QgsDataItemProvider):
 
-    def __init__(self, network_manager: QFieldCloudNetworkManager):
+    def __init__(self, network_manager: CloudNetworkAccessManager):
         QgsDataItemProvider.__init__(self)
         self.network_manager = network_manager
 
@@ -56,7 +56,7 @@ class DataItemProvider(QgsDataItemProvider):
 class QFieldSyncRootItem(QgsDataCollectionItem):
     """ QFieldSync root """
 
-    def __init__(self, network_manager: QFieldCloudNetworkManager):
+    def __init__(self, network_manager: CloudNetworkAccessManager):
         QgsDataCollectionItem.__init__(self, None, 'QFieldSync', '/QFieldSync')
         self.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_off.svg')))
         self.network_manager = network_manager
