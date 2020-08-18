@@ -52,6 +52,7 @@ from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDial
 from qfieldsync.gui.qfield_cloud_dialog import QFieldCloudDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 from qfieldsync.gui.browser_tree import DataItemProvider
+from qfieldsync.gui.cloud_browser_tree import DataItemProvider
 from qfieldsync.core.cloud_api import QFieldCloudNetworkManager
 
 class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
