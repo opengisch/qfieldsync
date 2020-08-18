@@ -26,7 +26,7 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from typing import Dict, List
 
 from PyQt5.QtCore import Qt, QObject
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QTreeWidgetItem, QWidget, QRadioButton, QHBoxLayout, QHeaderView
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QTreeWidgetItem, QWidget, QCheckBox, QHBoxLayout, QHeaderView
 from qgis.PyQt.uic import loadUiType
 
 
@@ -84,7 +84,7 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
                 # the length of the stack and the parts is equal for file entries
                 if len(stack) == len(parts):
                     item.setData(0, Qt.UserRole, project_file)
-                    self.add_file_radio_buttons(item, project_file)
+                    self.add_file_checkbox_buttons(item, project_file)
                 else:
                     # TODO make a fancy button that marks all the child items as checked or not
                     pass
@@ -140,35 +140,35 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
             self.traverse_tree_item(item.child(child_idx), files)
 
 
-    def add_file_radio_buttons(self, item: QTreeWidgetItem, project_file: ProjectFile) -> None:
+    def add_file_checkbox_buttons(self, item: QTreeWidgetItem, project_file: ProjectFile) -> None:
         is_local_enabled = project_file.checkout & ProjectFileCheckout.Local
         is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
         is_local_checked = is_local_enabled
 
-        local_radio = QRadioButton()
-        local_radio.setEnabled(is_local_enabled)
-        local_radio.setChecked(is_local_checked)
-        local_radio.toggled.connect(lambda _is_checked: self.on_local_radio_toggled(item))
-        local_radio_widget = QWidget()
-        local_radio_layout = QHBoxLayout()
-        local_radio_layout.setAlignment(Qt.AlignCenter)
-        local_radio_layout.setContentsMargins(0, 0, 0, 0)
-        local_radio_layout.addWidget(local_radio)
-        local_radio_widget.setLayout(local_radio_layout)
+        local_checkbox = QCheckBox()
+        local_checkbox.setEnabled(is_local_enabled)
+        local_checkbox.setChecked(is_local_checked)
+        local_checkbox.toggled.connect(lambda _is_checked: self.on_local_checkbox_toggled(item))
+        local_checkbox_widget = QWidget()
+        local_checkbox_layout = QHBoxLayout()
+        local_checkbox_layout.setAlignment(Qt.AlignCenter)
+        local_checkbox_layout.setContentsMargins(0, 0, 0, 0)
+        local_checkbox_layout.addWidget(local_checkbox)
+        local_checkbox_widget.setLayout(local_checkbox_layout)
 
-        cloud_radio = QRadioButton()
-        cloud_radio.setEnabled(is_cloud_enabled)
-        cloud_radio.setChecked(is_cloud_enabled and not is_local_checked)
-        cloud_radio.toggled.connect(lambda _is_checked: self.on_cloud_radio_toggled(item))
-        cloud_radio_widget = QWidget()
-        cloud_radio_layout = QHBoxLayout()
-        cloud_radio_layout.setAlignment(Qt.AlignCenter)
-        cloud_radio_layout.setContentsMargins(0, 0, 0, 0)
-        cloud_radio_layout.addWidget(cloud_radio)
-        cloud_radio_widget.setLayout(cloud_radio_layout)
+        cloud_checkbox = QCheckBox()
+        cloud_checkbox.setEnabled(is_cloud_enabled)
+        cloud_checkbox.setChecked(is_cloud_enabled and not is_local_checked)
+        cloud_checkbox.toggled.connect(lambda _is_checked: self.on_cloud_checkbox_toggled(item))
+        cloud_checkbox_widget = QWidget()
+        cloud_checkbox_layout = QHBoxLayout()
+        cloud_checkbox_layout.setAlignment(Qt.AlignCenter)
+        cloud_checkbox_layout.setContentsMargins(0, 0, 0, 0)
+        cloud_checkbox_layout.addWidget(cloud_checkbox)
+        cloud_checkbox_widget.setLayout(cloud_checkbox_layout)
 
-        self.filesTree.setItemWidget(item, 1, local_radio_widget)
-        self.filesTree.setItemWidget(item, 2, cloud_radio_widget)
+        self.filesTree.setItemWidget(item, 1, local_checkbox_widget)
+        self.filesTree.setItemWidget(item, 2, cloud_checkbox_widget)
 
     def on_error(self, error: str) -> None:
         self.errorLabel.setText(self.errorLabel.text() + '\n' + error)
@@ -187,22 +187,20 @@ class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Abort).setEnabled(False)
 
 
-    def on_local_radio_toggled(self, item: QTreeWidgetItem) -> None:
-        local_radio = self.filesTree.itemWidget(item, 1).children()[1]
-        cloud_radio = self.filesTree.itemWidget(item, 2).children()[1]
+    def on_local_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
+        local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
+        cloud_checkbox = self.filesTree.itemWidget(item, 2).children()[1]
+        is_checked = local_checkbox.isChecked()
 
-        if cloud_radio.isEnabled():
-            cloud_radio.setChecked(not local_radio.isChecked())
-        else:
-            local_radio.setChecked(True)
+        if cloud_checkbox.isEnabled() and is_checked:
+            cloud_checkbox.setChecked(False)
 
 
-    def on_cloud_radio_toggled(self, item: QTreeWidgetItem) -> None:
-        local_radio = self.filesTree.itemWidget(item, 1).children()[1]
-        cloud_radio = self.filesTree.itemWidget(item, 2).children()[1]
+    def on_cloud_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
+        local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
+        cloud_checkbox = self.filesTree.itemWidget(item, 2).children()[1]
+        is_checked = cloud_checkbox.isChecked()
 
-        if local_radio.isEnabled():
-            local_radio.setChecked(not cloud_radio.isChecked())
-        else:
-            cloud_radio.setChecked(True)
+        if local_checkbox.isEnabled() and is_checked:
+            local_checkbox.setChecked(False)
 

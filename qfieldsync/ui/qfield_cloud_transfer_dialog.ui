@@ -132,7 +132,7 @@
          </column>
          <column>
           <property name="text">
-           <string>Remote</string>
+           <string>Cloud</string>
           </property>
          </column>
         </widget>
