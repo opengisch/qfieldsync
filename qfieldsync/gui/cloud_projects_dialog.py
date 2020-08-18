@@ -49,11 +49,11 @@ from qgis.PyQt.uic import loadUiType
 
 from qgis.core import QgsProject
 
-from qfieldsync.gui.cloud_transfer_dialog import QFieldCloudTransferDialog
+from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.core.cloud_api import CloudException, ProjectTransferrer, QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import CloudException, ProjectTransferrer, CloudNetworkAccessManager
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 
 
@@ -77,7 +77,7 @@ def select_table_row(func):
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
 
-    def __init__(self, network_manager: QFieldCloudNetworkManager, parent: QWidget = None, project: CloudProject = None) -> None:
+    def __init__(self, network_manager: CloudNetworkAccessManager, parent: QWidget = None, project: CloudProject = None) -> None:
         """Constructor."""
         super(CloudProjectsDialog, self).__init__(parent=parent)
         self.setupUi(self)
@@ -250,7 +250,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_download_file_finished(self, reply: QNetworkReply, project_file: ProjectFile) -> None:
         try:
-            QFieldCloudNetworkManager.handle_response(reply, False)
+            CloudNetworkAccessManager.handle_response(reply, False)
         except CloudException as err:
             self.feedbackLabel.setText(self.tr('Downloading file "{}" failed: {}'.format(project_file.name, str(err))))
             self.feedbackLabel.setVisible(True)
@@ -284,7 +284,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_logout_reply_finished(self, reply: QNetworkReply) -> None:
         try:
-            QFieldCloudNetworkManager.json_object(reply)
+            CloudNetworkAccessManager.json_object(reply)
         except CloudException as err:
             self.feedbackLabel.setText('Logout failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
@@ -487,7 +487,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setEnabled(True)
 
         try:
-            QFieldCloudNetworkManager.handle_response(reply, False)
+            CloudNetworkAccessManager.handle_response(reply, False)
         except CloudException as err:
             self.feedbackLabel.setText(self.tr('Project delete failed: {}').format(str(err)))
             self.feedbackLabel.setVisible(True)
@@ -590,7 +590,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsFormPage.setEnabled(True)
 
         try:
-            payload = QFieldCloudNetworkManager.json_object(reply)
+            payload = CloudNetworkAccessManager.json_object(reply)
         except CloudException as err:
             self.feedbackLabel.setText('Project create failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
@@ -612,7 +612,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsFormPage.setEnabled(True)
 
         try:
-            QFieldCloudNetworkManager.json_object(reply)
+            CloudNetworkAccessManager.json_object(reply)
         except CloudException as err:
             self.feedbackLabel.setText('Project update failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
@@ -637,7 +637,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         assert self.current_cloud_project.local_dir, 'Cannot download a project without `local_dir` properly set'
 
         self.project_transfer = ProjectTransferrer(self.network_manager, self.current_cloud_project)
-        self.transfer_dialog = QFieldCloudTransferDialog(self.project_transfer, self)
+        self.transfer_dialog = CloudTransferDialog(self.project_transfer, self)
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
         self.transfer_dialog.exec_()

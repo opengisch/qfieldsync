@@ -59,14 +59,14 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 
 
 
-class QFieldCloudNetworkManager(QgsNetworkAccessManager):
+class CloudNetworkAccessManager(QgsNetworkAccessManager):
     
     token_changed = pyqtSignal()
 
     def __init__(self, parent=None) -> None:
         """Constructor.
         """
-        super(QFieldCloudNetworkManager, self).__init__(parent=parent)
+        super(CloudNetworkAccessManager, self).__init__(parent=parent)
         self.url = 'http://dev.qfield.cloud/api/v1/'
         self._token = ''
         self.projects_cache = CloudProjectsCache(self, self)
@@ -92,7 +92,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
     @staticmethod
     def json_object(reply: QNetworkReply) -> Dict[str, Any]:
-        payload = QFieldCloudNetworkManager.handle_response(reply)
+        payload = CloudNetworkAccessManager.handle_response(reply)
 
         assert isinstance(payload, dict)
 
@@ -101,7 +101,7 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
     @staticmethod
     def json_array(reply: QNetworkReply) -> List[Any]:
-        payload = QFieldCloudNetworkManager.handle_response(reply)
+        payload = CloudNetworkAccessManager.handle_response(reply)
 
         assert isinstance(payload, list)
 
@@ -360,7 +360,7 @@ class ProjectTransferrer(QObject):
     download_finished = pyqtSignal()
 
 
-    def __init__(self, network_manager: QFieldCloudNetworkManager, cloud_project: CloudProject) -> None:
+    def __init__(self, network_manager: CloudNetworkAccessManager, cloud_project: CloudProject) -> None:
         super(ProjectTransferrer, self).__init__(parent=None)
 
         self.network_manager = network_manager
@@ -497,7 +497,7 @@ class ProjectTransferrer(QObject):
 
     def _on_upload_file_finished(self, reply: QNetworkReply, filename: str) -> None:
         try:
-            QFieldCloudNetworkManager.handle_response(reply, False)
+            CloudNetworkAccessManager.handle_response(reply, False)
         except CloudException as err:
             self.error.emit(self.tr('Uploading file "{}" failed: {}'.format(filename, str(err))))
             self.abort_requests()
@@ -526,7 +526,7 @@ class ProjectTransferrer(QObject):
 
     def _on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
         try:
-            QFieldCloudNetworkManager.handle_response(reply, False)
+            CloudNetworkAccessManager.handle_response(reply, False)
         except CloudException as err:
             self.error.emit(self.tr('Downloading file "{}" failed: {}'.format(filename, str(err))))
             self.abort_requests()
@@ -604,7 +604,7 @@ class CloudProjectsCache(QObject):
     project_files_updated = pyqtSignal(str)
     project_files_error = pyqtSignal(str, str)
 
-    def __init__(self, network_manager: QFieldCloudNetworkManager, parent=None) -> None:
+    def __init__(self, network_manager: CloudNetworkAccessManager, parent=None) -> None:
         super(CloudProjectsCache, self).__init__(parent)
 
         self.preferences = Preferences()
@@ -690,7 +690,7 @@ class CloudProjectsCache(QObject):
         self._projects_reply = None
 
         try:
-            payload = QFieldCloudNetworkManager.json_array(reply)
+            payload = CloudNetworkAccessManager.json_array(reply)
         except Exception as err:
             self.projects_error.emit(str(err))
             return
@@ -707,7 +707,7 @@ class CloudProjectsCache(QObject):
         assert project_id
 
         try:
-            payload = QFieldCloudNetworkManager.json_array(reply)
+            payload = CloudNetworkAccessManager.json_array(reply)
         except Exception as err:
             self.project_files_error.emit(project_id, str(err))
             return

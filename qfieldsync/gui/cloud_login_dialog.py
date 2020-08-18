@@ -28,7 +28,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_api import CloudException, QFieldCloudNetworkManager
+from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
 
 
 CloudLoginDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_login_dialog.ui'))
@@ -94,7 +94,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.setEnabled(True)
 
         try:
-            QFieldCloudNetworkManager.json_object(reply)
+            CloudNetworkAccessManager.json_object(reply)
         except CloudException as err:
             self.preferences.set_value('qfieldCloudLastToken', '')
             self.network_manager.set_token('')
@@ -117,7 +117,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.setEnabled(True)
 
         try:
-            payload = QFieldCloudNetworkManager.json_object(reply)
+            payload = CloudNetworkAccessManager.json_object(reply)
         except CloudException as err:
             self.loginFeedbackLabel.setText(self.tr('Login failed: {}').format(str(err)))
             self.loginFeedbackLabel.setVisible(True)
