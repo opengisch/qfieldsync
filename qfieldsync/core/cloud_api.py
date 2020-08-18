@@ -304,8 +304,9 @@ class QFieldCloudNetworkManager(QgsNetworkAccessManager):
 
 
     def _prepare_uri(self, uri: Union[str, List[str]]) -> str:
-        encoded_uri = uri
-        if not isinstance(uri, str):
+        if isinstance(uri, str):
+            encoded_uri = uri
+        else:
             encoded_parts = []
             
             for part in uri:
