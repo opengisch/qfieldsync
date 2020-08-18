@@ -33,7 +33,7 @@ from qgis.PyQt.uic import loadUiType
 from qfieldsync.core.cloud_api import ProjectTransferrer
 
 
-QFieldCloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/qfield_cloud_transfer_dialog.ui'))
+QFieldCloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_transfer_dialog.ui'))
 
 
 class QFieldCloudTransferDialog(QDialog, QFieldCloudTransferDialogUi):
