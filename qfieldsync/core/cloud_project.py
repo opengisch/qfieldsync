@@ -22,7 +22,7 @@
 
 from enum import IntFlag
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import hashlib
 
 from qgis.core import QgsProject
@@ -40,6 +40,7 @@ class ProjectFileCheckout(IntFlag):
 class ProjectFile:
     def __init__(self, data: Dict[str, Any], local_dir: str = None) -> None:
         self._local_dir = local_dir
+        self._temp_dir = None
         self._data = data
 
 
@@ -125,6 +126,51 @@ class ProjectFile:
             return
 
         with open(self.local_path, 'rb') as f:
+            return hashlib.sha256(f.read()).hexdigest()
+
+
+    @property
+    def export_dir(self) -> Optional[str]:
+        return self._export_dir
+
+
+    @export_dir.setter
+    def export_dir(self, export_dir: Optional[Union[str, Path]]) -> None:
+        self._export_dir = str(export_dir)
+
+
+    @property
+    def export_size(self) -> Optional[int]:
+        if not self.export_path_exists:
+            return
+
+        return self.export_path.stat().st_size
+
+
+    @property
+    def export_path(self) -> Optional[Path]:
+        if not self._export_dir:
+            return
+
+        return Path(self._export_dir + '/' + self.name)
+
+
+    @property
+    def export_path_exists(self) -> bool:
+        if self.export_path:
+            return self.export_path.exists()
+
+        return False
+
+
+    @property
+    def export_sha256(self) -> Optional[str]:
+        if not self.export_path_exists:
+            return
+        
+        assert self.export_path
+
+        with open(self.export_path, 'rb') as f:
             return hashlib.sha256(f.read()).hexdigest()
 
 

@@ -19,7 +19,6 @@
  ***************************************************************************/
 """
 
-from qfieldsync.core.cloud_project import CloudProject, ProjectFile
 from typing import Any, Dict, IO, List, Optional, Union
 import json
 import shutil
@@ -39,9 +38,13 @@ from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
 )
-from qgis.core import QgsNetworkAccessManager, QgsProject
+from qgis.core import QgsNetworkAccessManager, QgsProject, QgsOfflineEditing
+from qgis.utils import iface
 
+from qfieldsync.core.cloud_project import CloudProject, ProjectFile
+from qfieldsync.core.offline_converter import OfflineConverter
 from qfieldsync.core.preferences import Preferences
+
 
 class CloudException(Exception):
     
@@ -63,13 +66,14 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
     
     token_changed = pyqtSignal()
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, offline_editing: QgsOfflineEditing, parent=None) -> None:
         """Constructor.
         """
         super(CloudNetworkAccessManager, self).__init__(parent=parent)
         self.url = 'http://dev.qfield.cloud/api/v1/'
         self._token = ''
         self.projects_cache = CloudProjectsCache(self, self)
+        self.offline_editing = offline_editing
 
 
     @staticmethod
@@ -382,12 +386,32 @@ class ProjectTransferrer(QObject):
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
-        self.temp_dir.joinpath('backup').mkdir(parents=True, exist_ok=True)
-        self.temp_dir.joinpath('upload').mkdir(parents=True, exist_ok=True)
-        self.temp_dir.joinpath('download').mkdir(parents=True, exist_ok=True)
+        self.temp_dir.mkdir()
+        self.temp_dir.joinpath('backup').mkdir()
+        self.temp_dir.joinpath('upload').mkdir()
+        self.temp_dir.joinpath('download').mkdir()
+        self.temp_dir.joinpath('export').mkdir()
+
+        for project_file in self.cloud_project.get_files():
+            project_file.export_dir = self.temp_dir.joinpath('export')
+
+        self.offline_convertor = OfflineConverter(
+            QgsProject.instance(), 
+            str(self.temp_dir.joinpath('export')), 
+            iface.mapCanvas().extent(),
+            self.network_manager.offline_editing)
 
         self.upload_finished.connect(self._on_upload_finished)
         self.download_finished.connect(self._on_download_finished)
+
+
+    def __del__(self):
+        for project_file in self.cloud_project.get_files():
+            project_file.export_dir = None
+
+
+    def convert(self):
+        self.offline_convertor.convert()
 
 
     def sync(self, files_to_upload: List[ProjectFile], files_to_download: List[ProjectFile]) -> None:
