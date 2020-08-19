@@ -23,7 +23,8 @@
 import os
 from typing import Dict, List
 
-from qgis.PyQt.QtCore import Qt, QObject
+from qgis.PyQt.QtCore import Qt, QObject, QTimer
+from qgis.PyQt.QtGui import QShowEvent
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QTreeWidgetItem, QWidget, QCheckBox, QHBoxLayout, QHeaderView
 from qgis.PyQt.uic import loadUiType
 
@@ -48,6 +49,41 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.project_transfer.download_progress.connect(self.on_download_transfer_progress)
         self.project_transfer.finished.connect(self.on_transfer_finished)
 
+        self.filesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.filesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.filesTree.expandAll()
+
+        self.setWindowTitle(self.tr('Synchronizing project "{}"').format(self.project_transfer.cloud_project.name))
+        self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.Abort).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr('Sync!'))
+        self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self.on_project_apply_clicked)
+
+        self.uploadProgressBar.setValue(0)
+        self.downloadProgressBar.setValue(0)
+
+        self.project_transfer.offline_convertor.total_progress_updated.connect(self._on_offline_convertor_total_progress_updated)
+        self.project_transfer.offline_convertor.task_progress_updated.connect(self._on_offline_convertor_task_progress_updated)
+
+    
+    def showEvent(self, event: QShowEvent) -> None:
+        self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
+
+        super().showEvent(event)
+
+        def convert_finished():
+            self.project_transfer.convert()
+            self.build_files_tree()
+            self.stackedWidget.setCurrentWidget(self.filesPage)
+            self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
+
+        QTimer.singleShot(100, convert_finished)
+
+
+    def build_files_tree(self):
         # NOTE algorithmic part
         # ##########
         # The "cloud_files" objects are assumed to be sorted alphabetically by name.
@@ -59,7 +95,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         for project_file in self.project_transfer.cloud_project.get_files():
             # don't attempt to sync files that are the same both locally and remote
-            if project_file.sha256 == project_file.local_sha256:
+            if project_file.sha256 == project_file.export_sha256:
+                continue
+
+            # ignore local files that are not in the temp directory
+            if project_file.checkout == ProjectFileCheckout.Local and not project_file.export_path.exists():
                 continue
 
             parts = tuple(project_file.path.parts)
@@ -87,21 +127,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     # TODO make a fancy button that marks all the child items as checked or not
                     pass
         # NOTE END algorithmic part
-
-        self.filesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.filesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.filesTree.expandAll()
-
-        self.setWindowTitle(self.tr('Synchronizing project "{}"').format(self.project_transfer.cloud_project.name))
-        self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
-        self.buttonBox.button(QDialogButtonBox.Abort).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr('Sync!'))
-        self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self.on_project_apply_clicked)
-
-        self.uploadProgressBar.setValue(0)
-        self.downloadProgressBar.setValue(0)
 
 
     def on_project_apply_clicked(self) -> None:
@@ -139,7 +164,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
 
     def add_file_checkbox_buttons(self, item: QTreeWidgetItem, project_file: ProjectFile) -> None:
-        is_local_enabled = project_file.checkout & ProjectFileCheckout.Local
+        is_local_enabled = project_file.export_path_exists
         is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
         is_local_checked = is_local_enabled
 
@@ -201,4 +226,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         if local_checkbox.isEnabled() and is_checked:
             local_checkbox.setChecked(False)
+
+
+    def _on_offline_convertor_total_progress_updated(self, current, layer_count, message):
+        print(111)
+        self.totalProgressBar.setMaximum(layer_count)
+        self.totalProgressBar.setValue(current)
+        self.statusLabel.setText(message)
+
+
+    def _on_offline_convertor_task_progress_updated(self, progress, max_progress):
+        print(222)
+        self.layerProgressBar.setMaximum(max_progress)
+        self.layerProgressBar.setValue(progress)
 
