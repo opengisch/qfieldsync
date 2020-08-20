@@ -78,11 +78,11 @@ class LayerSource(object):
         self.read_layer()
 
         self.storedInlocalizedDataPath = False
-        if layer.dataProvider() is not None:
+        if self.layer.dataProvider() is not None:
             pathResolver = QgsProject.instance().pathResolver()
-            md = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+            md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
             if md is not None:
-                decoded = md.decodeUri(layer.source())
+                decoded = md.decodeUri(self.layer.source())
                 if "path" in decoded:
                     path = pathResolver.writePath(decoded["path"])
                     if path.startswith("localized:"):
@@ -137,13 +137,14 @@ class LayerSource(object):
 
     @property
     def is_file(self):
-        # reading the part before | so it's valid when gpkg
-        if os.path.isfile(self.layer.source().split('|')[0]):
-            return True
-        elif os.path.isfile(QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).database()):
-            return True
-        else:
-            return False
+        if self.layer.dataProvider() is not None:
+            md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if md is not None:
+                decoded = md.decodeUri(self.layer.source())
+                if "path" in decoded:
+                    if os.path.isfile(decoded["path"]):
+                        return True
+        return False
 
     @property
     def available_actions(self):
@@ -214,14 +215,19 @@ class LayerSource(object):
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
             return
 
-        layer_name_suffix = ''
-        # Shapefiles and GeoPackages have the path in the source
-        uri_parts = self.layer.source().split('|', 1)
-        file_path = uri_parts[0]
-        if len(uri_parts) > 1:
-            layer_name_suffix = uri_parts[1]
-        # Spatialite have the path in the table part of the uri
-        uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
+        file_path = ''
+        layer_name = ''
+        
+        if self.layer.dataProvider() is not None:
+            md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if md is not None:
+                decoded = md.decodeUri(self.layer.source())
+                if "path" in decoded:
+                    file_path = decoded["path"]
+                if "layerName" in decoded:
+                    layer_name = decoded["layerName"]
+        if file_path == '':
+            file_path = self.layer.source()
 
         if os.path.isfile(file_path):
             source_path, file_name = os.path.split(file_path)
@@ -232,24 +238,14 @@ class LayerSource(object):
                         (keep_existent is False or not os.path.isfile(dest_file)):
                     shutil.copy(os.path.join(source_path, basename + ext), dest_file)
 
-            new_source = os.path.join(target_path, file_name)
-            if layer_name_suffix:
-                new_source = new_source + '|' + layer_name_suffix
+            new_source = ''
+            if self.layer.dataProvider() is not None:
+                md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+                if md is not None:
+                    new_source = md.encodeUri({"path":os.path.join(target_path, file_name),"layerName":layer_name})
+            if new_source == '':
+              new_source = os.path.join(target_path, file_name)
             self._change_data_source(new_source)
-        # Spatialite files have a uri
-        else:
-            file_path = uri.database()
-            if os.path.isfile(file_path):
-                source_path, file_name = os.path.split(file_path)
-                basename, extensions = get_file_extension_group(file_name)
-                for ext in extensions:
-                    dest_file = os.path.join(target_path, basename + ext)
-                    if os.path.exists(os.path.join(source_path, basename + ext)) and \
-                            (keep_existent is False or not os.path.isfile(dest_file)):
-                        shutil.copy(os.path.join(source_path, basename + ext),
-                                    dest_file)
-                uri.setDatabase(os.path.join(target_path, file_name))
-                self._change_data_source(uri.uri())
         return copied_files
 
     def _change_data_source(self, new_data_source):
