@@ -7,7 +7,10 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsDataSourceUri,
     QgsMapLayer,
-    QgsReadWriteContext
+    QgsReadWriteContext,
+    QgsProject,
+    QgsProviderRegistry,
+    QgsProviderMetadata
 )
 
 from qfieldsync.utils.file_utils import slugify
@@ -74,6 +77,17 @@ class LayerSource(object):
         self._is_geometry_locked = None
         self.read_layer()
 
+        self.storedInlocalizedDataPath = False
+        if layer.dataProvider() is not None:
+            pathResolver = QgsProject.instance().pathResolver()
+            md = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+            if md is not None:
+                decoded = md.decodeUri(layer.source())
+                if "path" in decoded:
+                    path = pathResolver.writePath(decoded["path"])
+                    if path.startswith("localized:"):
+                        self.storedInlocalizedDataPath = True
+
     def read_layer(self):
         self._action = self.layer.customProperty('QFieldSync/action')
         self._photo_naming = json.loads(self.layer.customProperty('QFieldSync/photo_naming') or '{}')
@@ -135,7 +149,7 @@ class LayerSource(object):
     def available_actions(self):
         actions = list()
 
-        if self.is_file:
+        if self.is_file and not self.storedInlocalizedDataPath:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'copy')))
             actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'keep existent (copy if missing)')))
         else:
