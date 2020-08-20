@@ -32,6 +32,9 @@ from qgis.PyQt.QtCore import (
     pyqtSlot,
     Qt
 )
+from qgis.PyQt.QtGui import (
+    QIcon
+)
 from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QPushButton,
@@ -42,6 +45,8 @@ from qgis.PyQt.QtWidgets import (
 from qgis.core import (
     QgsProject,
     QgsApplication,
+    QgsProviderRegistry,
+    QgsProviderMetadata,
     Qgis
 )
 from qgis.PyQt.uic import loadUiType
@@ -68,6 +73,9 @@ class PackageDialog(QDialog, DialogUi):
         self.push_btn = QPushButton(self.tr('Create'))
         self.push_btn.clicked.connect(self.package_project)
         self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
+        self.button_box.button(QDialogButtonBox.Reset).setText(self.tr('Configure project...'))
+        self.button_box.button(QDialogButtonBox.Reset).setIcon(QIcon())
+        self.button_box.button(QDialogButtonBox.Reset).clicked.connect(lambda: self.show_settings())
         self.iface.mapCanvas().extentsChanged.connect(self.extent_changed)
         self.extent_changed()
 
@@ -92,8 +100,8 @@ class PackageDialog(QDialog, DialogUi):
         self.manualDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
-        self.infoLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        self.infoLabel.linkActivated.connect(lambda: self.show_settings())
+        self.infoConfigurationLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        self.infoConfigurationLabel.linkActivated.connect(lambda: self.show_settings())
 
     def get_export_folder_from_dialog(self):
         """Get the export folder according to the inputs in the selected"""
@@ -142,10 +150,25 @@ class PackageDialog(QDialog, DialogUi):
         """
         Show the info label if there are unconfigured layers
         """
-        self.infoGroupBox.hide()
+        pathResolver = QgsProject.instance().pathResolver()
+        showInfoConfiguration = False
+        showInfoLocalizedPresent = False
+        showInfoSuggestLocalized = False
         for layer in list(self.project.mapLayers().values()):
             if not LayerSource(layer).is_configured:
-                self.infoGroupBox.show()
+                showInfoConfiguration = True
+            if layer.dataProvider() is not None:
+                md = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+                if md is not None:
+                    decoded = md.decodeUri(layer.source())
+                    if "path" in decoded:
+                        path = pathResolver.writePath(decoded["path"])
+                        if path.startswith("localized:"):
+                            showInfoLocalizedPresent = True
+
+        self.infoConfigurationLabel.setVisible(showInfoConfiguration)
+        self.infoLocalizedPresentLabel.setVisible(showInfoLocalizedPresent)
+        self.infoGroupBox.setVisible(showInfoConfiguration or showInfoLocalizedPresent or showInfoSuggestLocalized)
 
         project_configuration = ProjectConfiguration(self.project)
 
