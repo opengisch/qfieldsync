@@ -118,4 +118,8 @@ class SynchronizeDialog(QDialog, DialogUi):
 
     @pyqtSlot()
     def update_done(self):
+        self.offline_editing.progressStopped.disconnect(self.update_done)
+        self.offline_editing.layerProgressUpdated.disconnect(self.update_total)
+        self.offline_editing.progressModeSet.disconnect(self.update_mode)
+        self.offline_editing.progressUpdated.disconnect(self.update_value)
         self.offline_editing_done = True
