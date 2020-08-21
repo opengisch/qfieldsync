@@ -11,9 +11,9 @@ install:
 jobs:
   include:
     - stage: test
-      name: Test on QGIS 3.4
+      name: Test on QGIS LTR 3.10
       env:
-        QGIS_TEST_VERSION="release-3_4"
+        QGIS_TEST_VERSION="release-3_10"
       script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
     - stage: test
