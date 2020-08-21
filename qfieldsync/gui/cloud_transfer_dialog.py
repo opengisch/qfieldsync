@@ -28,7 +28,7 @@ from qgis.PyQt.QtGui import QShowEvent
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QTreeWidgetItem, QWidget, QCheckBox, QHBoxLayout, QHeaderView
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_api import ProjectTransferrer
+from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.cloud_project import ProjectFile, ProjectFileCheckout
 
 
@@ -37,7 +37,7 @@ CloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '.
 
 class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
-    def __init__(self, project_transfer: ProjectTransferrer, parent: QObject = None) -> None:
+    def __init__(self, project_transfer: CloudTransferrer, parent: QObject = None) -> None:
         """Constructor.
         """
         super(CloudTransferDialog, self).__init__(parent=parent)
@@ -65,8 +65,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.uploadProgressBar.setValue(0)
         self.downloadProgressBar.setValue(0)
 
-        self.project_transfer.offline_convertor.total_progress_updated.connect(self._on_offline_convertor_total_progress_updated)
-        self.project_transfer.offline_convertor.task_progress_updated.connect(self._on_offline_convertor_task_progress_updated)
+        self.project_transfer.offline_editing.progressStopped.connect(self.on_offline_editing_progress_stopped)
+        self.project_transfer.offline_editing.layerProgressUpdated.connect(self.on_offline_editing_layer_progress_updated)
+        self.project_transfer.offline_editing.progressModeSet.connect(self.on_offline_editing_progress_mode_set)
+        self.project_transfer.offline_editing.progressUpdated.connect(self.on_offline_editing_progress_updated)
 
     
     def showEvent(self, event: QShowEvent) -> None:
@@ -74,13 +76,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         super().showEvent(event)
 
-        def convert_finished():
-            self.project_transfer.convert()
+        def offline_converter_start():
+            offline_converter = self.project_transfer.convert()
+            
+            offline_converter.total_progress_updated.connect(self._on_offline_converter_total_progress_updated)
+            offline_converter.task_progress_updated.connect(self._on_offline_converter_task_progress_updated)
+
             self.build_files_tree()
             self.stackedWidget.setCurrentWidget(self.filesPage)
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
 
-        QTimer.singleShot(100, convert_finished)
+        QTimer.singleShot(100, offline_converter_start)
 
 
     def build_files_tree(self):
@@ -95,11 +101,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         for project_file in self.project_transfer.cloud_project.get_files():
             # don't attempt to sync files that are the same both locally and remote
-            if project_file.sha256 == project_file.export_sha256:
+            if project_file.sha256 == project_file.local_sha256:
                 continue
 
             # ignore local files that are not in the temp directory
-            if project_file.checkout == ProjectFileCheckout.Local and not project_file.export_path.exists():
+            if project_file.checkout & ProjectFileCheckout.Local and not project_file.local_path_exists:
                 continue
 
             parts = tuple(project_file.path.parts)
@@ -131,6 +137,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
     def on_project_apply_clicked(self) -> None:
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(True)
+        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.buttonBox.button(QDialogButtonBox.Abort).setVisible(True)
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
@@ -164,7 +171,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
 
     def add_file_checkbox_buttons(self, item: QTreeWidgetItem, project_file: ProjectFile) -> None:
-        is_local_enabled = project_file.export_path_exists
+        is_local_enabled = project_file.local_path_exists
         is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
         is_local_checked = is_local_enabled
 
@@ -228,15 +235,30 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             local_checkbox.setChecked(False)
 
 
-    def _on_offline_convertor_total_progress_updated(self, current, layer_count, message):
-        print(111)
-        self.totalProgressBar.setMaximum(layer_count)
+    def _on_offline_converter_total_progress_updated(self, current: int, total: int, message: str) -> None:
+        self.totalProgressBar.setMaximum(total)
         self.totalProgressBar.setValue(current)
         self.statusLabel.setText(message)
 
 
-    def _on_offline_convertor_task_progress_updated(self, progress, max_progress):
-        print(222)
-        self.layerProgressBar.setMaximum(max_progress)
+    def _on_offline_converter_task_progress_updated(self, progress: int, total: int) -> None:
+        self.layerProgressBar.setMaximum(total)
         self.layerProgressBar.setValue(progress)
 
+
+    def on_offline_editing_progress_stopped(self) -> None:
+        self.offline_editing_done = True
+
+
+    def on_offline_editing_layer_progress_updated(self, progress: int, total: int) -> None:
+        self.totalProgressBar.setMaximum(total)
+        self.totalProgressBar.setValue(progress)
+
+
+    def on_offline_editing_progress_mode_set(self, _, total: int) -> None:
+        self.layerProgressBar.setMaximum(total)
+        self.layerProgressBar.setValue(0)
+
+
+    def on_offline_editing_progress_updated(self, progress: int) -> None:
+        self.layerProgressBar.setValue(progress)

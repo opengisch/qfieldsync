@@ -100,7 +100,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="convertPage">
+     <widget class="QWidget" name="ioPage">
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QLabel" name="totalProgressLabel">
@@ -138,7 +138,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="convertPageSpacer">
+        <spacer name="ioPageSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
