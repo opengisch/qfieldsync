@@ -143,8 +143,7 @@ class PackageDialog(QDialog, DialogUi):
         """
         pathResolver = QgsProject.instance().pathResolver()
         showInfoConfiguration = False
-        showInfoLocalizedPresent = False
-        showInfoSuggestLocalized = False
+        localizedDataPathLayers = []
         for layer in list(self.project.mapLayers().values()):
             if not LayerSource(layer).is_configured:
                 showInfoConfiguration = True
@@ -155,11 +154,20 @@ class PackageDialog(QDialog, DialogUi):
                     if "path" in decoded:
                         path = pathResolver.writePath(decoded["path"])
                         if path.startswith("localized:"):
-                            showInfoLocalizedPresent = True
+                            localizedDataPathLayers.append('- {} ({})'.format(layer.name(), path[10:]))
 
         self.infoConfigurationLabel.setVisible(showInfoConfiguration)
-        self.infoLocalizedPresentLabel.setVisible(showInfoLocalizedPresent)
-        self.infoGroupBox.setVisible(showInfoConfiguration or showInfoLocalizedPresent or showInfoSuggestLocalized)
+        if localizedDataPathLayers:
+            if len(localizedDataPathLayers) == 1:
+                self.infoLocalizedLayersLabel.setText(self.tr('The layer stored in a localized data path is:\n{}').format("\n".join(localizedDataPathLayers)))
+            else:
+                self.infoLocalizedLayersLabel.setText(self.tr('The layers stored in a localized data path are:\n{}').format("\n".join(localizedDataPathLayers)))
+            self.infoLocalizedLayersLabel.setVisible(True)
+            self.infoLocalizedPresentLabel.setVisible(True)
+        else:
+            self.infoLocalizedLayersLabel.setVisible(False)
+            self.infoLocalizedPresentLabel.setVisible(False)
+        self.infoGroupBox.setVisible(showInfoConfiguration or len(localizedDataPathLayers) > 0)
 
         project_configuration = ProjectConfiguration(self.project)
 
