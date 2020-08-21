@@ -63,7 +63,6 @@ class SynchronizeDialog(QDialog, DialogUi):
         qfield_folder = self.qfieldDir.text()
         self.preferences.set_value('importDirectoryProject', qfield_folder)
         try:
-            self.progress_group.setEnabled(True)
             current_import_file_checksum = import_file_checksum(qfield_folder)
             imported_files_checksums = import_checksums_of_project(qfield_folder)
 
@@ -98,8 +97,6 @@ class SynchronizeDialog(QDialog, DialogUi):
                 raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
             self.iface.messageBar().pushWarning('QFieldSync', str(e))
-        finally:
-            self.progress_group.setEnabled(False)
 
     @pyqtSlot(int, int)
     def update_total(self, current, layer_count):

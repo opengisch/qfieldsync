@@ -99,8 +99,6 @@ class PackageDialog(QDialog, DialogUi):
         self.manualDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
-        self.infoConfigurationLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        self.infoConfigurationLabel.linkActivated.connect(lambda: self.show_settings())
 
     def get_export_folder_from_dialog(self):
         """Get the export folder according to the inputs in the selected"""
@@ -151,9 +149,9 @@ class PackageDialog(QDialog, DialogUi):
             if not LayerSource(layer).is_configured:
                 showInfoConfiguration = True
             if layer.dataProvider() is not None:
-                md = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
-                if md is not None:
-                    decoded = md.decodeUri(layer.source())
+                metadata = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+                if metadata is not None:
+                    decoded = metadata.decodeUri(layer.source())
                     if "path" in decoded:
                         path = pathResolver.writePath(decoded["path"])
                         if path.startswith("localized:"):

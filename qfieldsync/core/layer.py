@@ -81,9 +81,9 @@ class LayerSource(object):
         self.storedInlocalizedDataPath = False
         if self.layer.dataProvider() is not None:
             pathResolver = QgsProject.instance().pathResolver()
-            md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
-            if md is not None:
-                decoded = md.decodeUri(self.layer.source())
+            metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if metadata is not None:
+                decoded = metadata.decodeUri(self.layer.source())
                 if "path" in decoded:
                     path = pathResolver.writePath(decoded["path"])
                     if path.startswith("localized:"):
@@ -139,9 +139,9 @@ class LayerSource(object):
     @property
     def is_file(self):
         if self.layer.dataProvider() is not None:
-            md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
-            if md is not None:
-                decoded = md.decodeUri(self.layer.source())
+            metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if metadata is not None:
+                decoded = metadata.decodeUri(self.layer.source())
                 if "path" in decoded:
                     if os.path.isfile(decoded["path"]):
                         return True
@@ -220,9 +220,9 @@ class LayerSource(object):
         layer_name = ''
         
         if self.layer.dataProvider() is not None:
-            md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
-            if md is not None:
-                decoded = md.decodeUri(self.layer.source())
+            metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if metadata is not None:
+                decoded = metadata.decodeUri(self.layer.source())
                 if "path" in decoded:
                     file_path = decoded["path"]
                 if "layerName" in decoded:
@@ -241,9 +241,9 @@ class LayerSource(object):
 
             new_source = ''
             if Qgis.QGIS_VERSION_INT >= 31200 and self.layer.dataProvider() is not None:
-                md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
-                if md is not None:
-                    new_source = md.encodeUri({"path":os.path.join(target_path, file_name),"layerName":layer_name})
+                metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+                if metadata is not None:
+                    new_source = metadata.encodeUri({"path":os.path.join(target_path, file_name),"layerName":layer_name})
             if new_source == '':
                 if self.layer.dataProvider() and self.layer.dataProvider().name == "spatialite":
                     uri = QgsDataSourceUri()
