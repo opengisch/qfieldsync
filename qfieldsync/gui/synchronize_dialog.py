@@ -51,16 +51,15 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.iface = iface
         self.preferences = Preferences()
         self.offline_editing = offline_editing
-        self.push_btn = QPushButton(self.tr('Synchronize'))
-        self.push_btn.clicked.connect(self.start_synchronization)
-        self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
+        self.button_box.button(QDialogButtonBox.Save).setText(self.tr('Synchronize'))
+        self.button_box.button(QDialogButtonBox.Save).clicked.connect(self.start_synchronization)
         self.qfieldDir.setText(self.preferences.value('importDirectoryProject') or self.preferences.value('importDirectory'))
         self.qfieldDir_button.clicked.connect(make_folder_selector(self.qfieldDir))
 
         self.offline_editing_done = False
 
     def start_synchronization(self):
-        self.push_btn.setEnabled(False)
+        self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
         qfield_folder = self.qfieldDir.text()
         self.preferences.set_value('importDirectoryProject', qfield_folder)
         try:

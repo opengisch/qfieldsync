@@ -70,12 +70,11 @@ class PackageDialog(QDialog, DialogUi):
         self.project = project
         self.qfield_preferences = Preferences()
         self.project_lbl.setText(get_project_title(self.project))
-        self.push_btn = QPushButton(self.tr('Create'))
-        self.push_btn.clicked.connect(self.package_project)
-        self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
+        self.button_box.button(QDialogButtonBox.Save).setText(self.tr('Create'))
+        self.button_box.button(QDialogButtonBox.Save).clicked.connect(self.package_project)
         self.button_box.button(QDialogButtonBox.Reset).setText(self.tr('Configure project...'))
         self.button_box.button(QDialogButtonBox.Reset).setIcon(QIcon())
-        self.button_box.button(QDialogButtonBox.Reset).clicked.connect(lambda: self.show_settings())
+        self.button_box.button(QDialogButtonBox.Reset).clicked.connect(self.show_settings)
         self.iface.mapCanvas().extentsChanged.connect(self.extent_changed)
         self.extent_changed()
 
@@ -109,7 +108,7 @@ class PackageDialog(QDialog, DialogUi):
         return self.manualDir.text()
 
     def package_project(self):
-        self.push_btn.setEnabled(False)
+        self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
         self.informationStack.setCurrentWidget(self.progressPage)
 
         export_folder = self.get_export_folder_from_dialog()

@@ -243,7 +243,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Reset</set>
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Save|QDialogButtonBox::Reset</set>
      </property>
     </widget>
    </item>
