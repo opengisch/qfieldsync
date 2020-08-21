@@ -253,7 +253,7 @@ class LayerSource(object):
                 else:
                     new_source = os.path.join(target_path, file_name)
                     if layer_name != '':
-                        new_source = new_source + '|' + layer_name
+                        new_source = "{}|{}".format(new_source, layer_name)
 
             self._change_data_source(new_source)
         return copied_files
