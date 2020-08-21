@@ -53,7 +53,8 @@ from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.core.cloud_api import CloudException, ProjectTransferrer, CloudNetworkAccessManager
+from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
+from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 
 
@@ -636,7 +637,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         assert self.current_cloud_project is not None, 'No project to download selected'
         assert self.current_cloud_project.local_dir, 'Cannot download a project without `local_dir` properly set'
 
-        self.project_transfer = ProjectTransferrer(self.network_manager, self.current_cloud_project)
+        self.project_transfer = CloudTransferrer(self.network_manager, self.current_cloud_project)
         self.transfer_dialog = CloudTransferDialog(self.project_transfer, self)
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
