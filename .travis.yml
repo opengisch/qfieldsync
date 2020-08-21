@@ -13,7 +13,7 @@ jobs:
     - stage: test
       name: Test on QGIS LTR 3.10
       env:
-        QGIS_TEST_VERSION="release-3_10"
+        QGIS_TEST_VERSION="final-3_10_9"
       script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
     - stage: test
