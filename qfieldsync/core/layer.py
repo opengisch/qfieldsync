@@ -7,7 +7,11 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsDataSourceUri,
     QgsMapLayer,
-    QgsReadWriteContext
+    QgsReadWriteContext,
+    QgsProject,
+    QgsProviderRegistry,
+    QgsProviderMetadata,
+    Qgis
 )
 
 from qfieldsync.utils.file_utils import slugify
@@ -74,6 +78,17 @@ class LayerSource(object):
         self._is_geometry_locked = None
         self.read_layer()
 
+        self.storedInlocalizedDataPath = False
+        if self.layer.dataProvider() is not None:
+            pathResolver = QgsProject.instance().pathResolver()
+            metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if metadata is not None:
+                decoded = metadata.decodeUri(self.layer.source())
+                if "path" in decoded:
+                    path = pathResolver.writePath(decoded["path"])
+                    if path.startswith("localized:"):
+                        self.storedInlocalizedDataPath = True
+
     def read_layer(self):
         self._action = self.layer.customProperty('QFieldSync/action')
         self._photo_naming = json.loads(self.layer.customProperty('QFieldSync/photo_naming') or '{}')
@@ -123,19 +138,20 @@ class LayerSource(object):
 
     @property
     def is_file(self):
-        # reading the part before | so it's valid when gpkg
-        if os.path.isfile(self.layer.source().split('|')[0]):
-            return True
-        elif os.path.isfile(QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).database()):
-            return True
-        else:
-            return False
+        if self.layer.dataProvider() is not None:
+            metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if metadata is not None:
+                decoded = metadata.decodeUri(self.layer.source())
+                if "path" in decoded:
+                    if os.path.isfile(decoded["path"]):
+                        return True
+        return False
 
     @property
     def available_actions(self):
         actions = list()
 
-        if self.is_file:
+        if self.is_file and not self.storedInlocalizedDataPath:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'copy')))
             actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'keep existent (copy if missing)')))
         else:
@@ -200,14 +216,19 @@ class LayerSource(object):
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
             return
 
-        layer_name_suffix = ''
-        # Shapefiles and GeoPackages have the path in the source
-        uri_parts = self.layer.source().split('|', 1)
-        file_path = uri_parts[0]
-        if len(uri_parts) > 1:
-            layer_name_suffix = uri_parts[1]
-        # Spatialite have the path in the table part of the uri
-        uri = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri())
+        file_path = ''
+        layer_name = ''
+        
+        if self.layer.dataProvider() is not None:
+            metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+            if metadata is not None:
+                decoded = metadata.decodeUri(self.layer.source())
+                if "path" in decoded:
+                    file_path = decoded["path"]
+                if "layerName" in decoded:
+                    layer_name = decoded["layerName"]
+        if file_path == '':
+            file_path = self.layer.source()
 
         if os.path.isfile(file_path):
             source_path, file_name = os.path.split(file_path)
@@ -218,24 +239,23 @@ class LayerSource(object):
                         (keep_existent is False or not os.path.isfile(dest_file)):
                     shutil.copy(os.path.join(source_path, basename + ext), dest_file)
 
-            new_source = os.path.join(target_path, file_name)
-            if layer_name_suffix:
-                new_source = new_source + '|' + layer_name_suffix
+            new_source = ''
+            if Qgis.QGIS_VERSION_INT >= 31200 and self.layer.dataProvider() is not None:
+                metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
+                if metadata is not None:
+                    new_source = metadata.encodeUri({"path":os.path.join(target_path, file_name),"layerName":layer_name})
+            if new_source == '':
+                if self.layer.dataProvider() and self.layer.dataProvider().name == "spatialite":
+                    uri = QgsDataSourceUri()
+                    uri.setDatabase(os.path.join(target_path, file_name))
+                    uri.setTable(layer_name)
+                    new_source = uri.uri()
+                else:
+                    new_source = os.path.join(target_path, file_name)
+                    if layer_name != '':
+                        new_source = "{}|{}".format(new_source, layer_name)
+
             self._change_data_source(new_source)
-        # Spatialite files have a uri
-        else:
-            file_path = uri.database()
-            if os.path.isfile(file_path):
-                source_path, file_name = os.path.split(file_path)
-                basename, extensions = get_file_extension_group(file_name)
-                for ext in extensions:
-                    dest_file = os.path.join(target_path, basename + ext)
-                    if os.path.exists(os.path.join(source_path, basename + ext)) and \
-                            (keep_existent is False or not os.path.isfile(dest_file)):
-                        shutil.copy(os.path.join(source_path, basename + ext),
-                                    dest_file)
-                uri.setDatabase(os.path.join(target_path, file_name))
-                self._change_data_source(uri.uri())
         return copied_files
 
     def _change_data_source(self, new_data_source):

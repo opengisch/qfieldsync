@@ -45,6 +45,8 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsProcessingContext,
     QgsMapLayer,
+    QgsProviderRegistry,
+    QgsProviderMetadata,
     QgsEditorWidgetSetup
 )
 import qgis
@@ -123,10 +125,22 @@ class OfflineConverter(QObject):
                                             self.project_configuration.base_map_mupp)
 
             # Loop through all layers and copy/remove/offline them
+            pathResolver = QgsProject.instance().pathResolver()
             copied_files = list()
             for current_layer_index, layer in enumerate(self.__layers):
                 self.total_progress_updated.emit(current_layer_index - len(self.__offline_layers), len(self.__layers),
                                                  self.trUtf8('Copying layers…'))
+
+                if layer.dataProvider() is not None:
+                    md = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+                    if md is not None:
+                        decoded = md.decodeUri(layer.source())
+                        if "path" in decoded:
+                            path = pathResolver.writePath(decoded["path"])
+                            if path.startswith("localized:"):
+                                # Layer stored in localized data path, skip
+                                continue
+
                 layer_source = LayerSource(layer)
 
                 if layer_source.action == SyncAction.OFFLINE:

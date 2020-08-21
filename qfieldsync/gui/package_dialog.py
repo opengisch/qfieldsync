@@ -32,6 +32,9 @@ from qgis.PyQt.QtCore import (
     pyqtSlot,
     Qt
 )
+from qgis.PyQt.QtGui import (
+    QIcon
+)
 from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QPushButton,
@@ -42,6 +45,8 @@ from qgis.PyQt.QtWidgets import (
 from qgis.core import (
     QgsProject,
     QgsApplication,
+    QgsProviderRegistry,
+    QgsProviderMetadata,
     Qgis
 )
 from qgis.PyQt.uic import loadUiType
@@ -65,9 +70,11 @@ class PackageDialog(QDialog, DialogUi):
         self.project = project
         self.qfield_preferences = Preferences()
         self.project_lbl.setText(get_project_title(self.project))
-        self.push_btn = QPushButton(self.tr('Create'))
-        self.push_btn.clicked.connect(self.package_project)
-        self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
+        self.button_box.button(QDialogButtonBox.Save).setText(self.tr('Create'))
+        self.button_box.button(QDialogButtonBox.Save).clicked.connect(self.package_project)
+        self.button_box.button(QDialogButtonBox.Reset).setText(self.tr('Configure project...'))
+        self.button_box.button(QDialogButtonBox.Reset).setIcon(QIcon())
+        self.button_box.button(QDialogButtonBox.Reset).clicked.connect(self.show_settings)
         self.iface.mapCanvas().extentsChanged.connect(self.extent_changed)
         self.extent_changed()
 
@@ -92,8 +99,6 @@ class PackageDialog(QDialog, DialogUi):
         self.manualDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
-        self.infoLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        self.infoLabel.linkActivated.connect(lambda: self.show_settings())
 
     def get_export_folder_from_dialog(self):
         """Get the export folder according to the inputs in the selected"""
@@ -101,7 +106,7 @@ class PackageDialog(QDialog, DialogUi):
         return self.manualDir.text()
 
     def package_project(self):
-        self.push_btn.setEnabled(False)
+        self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
         self.informationStack.setCurrentWidget(self.progressPage)
 
         export_folder = self.get_export_folder_from_dialog()
@@ -128,24 +133,41 @@ class PackageDialog(QDialog, DialogUi):
         """
         export_folder = self.get_export_folder_from_dialog()
 
-        result_label = QLabel(self.tr('Finished creating the project at {result_folder}. Please copy this folder to '
-                                      'your QField device.').format(
-            result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
-        result_label.setTextFormat(Qt.RichText)
-        result_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        result_label.linkActivated.connect(lambda: open_folder(export_folder))
-        result_label.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
-
-        self.iface.messageBar().pushWidget(result_label, Qgis.Info, 0)
+        result_message = self.tr('Finished creating the project at {result_folder}. Please copy this folder to '
+                                      'your QField device.').format(result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder))
+        self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
 
     def update_info_visibility(self):
         """
         Show the info label if there are unconfigured layers
         """
-        self.infoGroupBox.hide()
+        pathResolver = QgsProject.instance().pathResolver()
+        showInfoConfiguration = False
+        localizedDataPathLayers = []
         for layer in list(self.project.mapLayers().values()):
             if not LayerSource(layer).is_configured:
-                self.infoGroupBox.show()
+                showInfoConfiguration = True
+            if layer.dataProvider() is not None:
+                metadata = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+                if metadata is not None:
+                    decoded = metadata.decodeUri(layer.source())
+                    if "path" in decoded:
+                        path = pathResolver.writePath(decoded["path"])
+                        if path.startswith("localized:"):
+                            localizedDataPathLayers.append('- {} ({})'.format(layer.name(), path[10:]))
+
+        self.infoConfigurationLabel.setVisible(showInfoConfiguration)
+        if localizedDataPathLayers:
+            if len(localizedDataPathLayers) == 1:
+                self.infoLocalizedLayersLabel.setText(self.tr('The layer stored in a localized data path is:\n{}').format("\n".join(localizedDataPathLayers)))
+            else:
+                self.infoLocalizedLayersLabel.setText(self.tr('The layers stored in a localized data path are:\n{}').format("\n".join(localizedDataPathLayers)))
+            self.infoLocalizedLayersLabel.setVisible(True)
+            self.infoLocalizedPresentLabel.setVisible(True)
+        else:
+            self.infoLocalizedLayersLabel.setVisible(False)
+            self.infoLocalizedPresentLabel.setVisible(False)
+        self.infoGroupBox.setVisible(showInfoConfiguration or len(localizedDataPathLayers) > 0)
 
         project_configuration = ProjectConfiguration(self.project)
 
