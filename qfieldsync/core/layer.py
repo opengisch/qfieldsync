@@ -10,7 +10,8 @@ from qgis.core import (
     QgsReadWriteContext,
     QgsProject,
     QgsProviderRegistry,
-    QgsProviderMetadata
+    QgsProviderMetadata,
+    Qgis
 )
 
 from qfieldsync.utils.file_utils import slugify
@@ -244,9 +245,15 @@ class LayerSource(object):
                 if md is not None:
                     new_source = md.encodeUri({"path":os.path.join(target_path, file_name),"layerName":layer_name})
             if new_source == '':
-              new_source = os.path.join(target_path, file_name)
-              if layer_name != '':
-                  new_source = new_source + '|' + layer_name
+                if self.layer.dataProvider() and self.layer.dataProvider().name == "spatialite":
+                    uri = QgsDataSourceUri()
+                    uri.setDatabase(os.path.join(target_path, file_name))
+                    uri.setTable(layer_name)
+                    new_source = uri.uri()
+                else:
+                    new_source = os.path.join(target_path, file_name)
+                    if layer_name != '':
+                        new_source = new_source + '|' + layer_name
 
             self._change_data_source(new_source)
         return copied_files
