@@ -228,6 +228,10 @@ class OfflineConverter(QObject):
             QgsProject.instance().setFileName(original_project_path)
             QApplication.restoreOverrideCursor()
 
+        self.offline_editing.layerProgressUpdated.disconnect(self.on_offline_editing_next_layer)
+        self.offline_editing.progressModeSet.disconnect(self.on_offline_editing_max_changed)
+        self.offline_editing.progressUpdated.disconnect(self.offline_editing_task_progress)
+
         self.total_progress_updated.emit(100, 100, self.tr('Finished'))
 
     def createBaseMapLayer(self, map_theme, layer, tile_size, map_units_per_pixel):
