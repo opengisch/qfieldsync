@@ -239,12 +239,15 @@ class LayerSource(object):
                     shutil.copy(os.path.join(source_path, basename + ext), dest_file)
 
             new_source = ''
-            if self.layer.dataProvider() is not None:
+            if Qgis.QGIS_VERSION_INT >= 31200 and self.layer.dataProvider() is not None:
                 md = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
                 if md is not None:
                     new_source = md.encodeUri({"path":os.path.join(target_path, file_name),"layerName":layer_name})
             if new_source == '':
               new_source = os.path.join(target_path, file_name)
+              if layer_name != '':
+                  new_source = new_source + '|' + layer_name
+
             self._change_data_source(new_source)
         return copied_files
 
