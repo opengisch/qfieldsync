@@ -135,15 +135,9 @@ class PackageDialog(QDialog, DialogUi):
         """
         export_folder = self.get_export_folder_from_dialog()
 
-        result_label = QLabel(self.tr('Finished creating the project at {result_folder}. Please copy this folder to '
-                                      'your QField device.').format(
-            result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder)))
-        result_label.setTextFormat(Qt.RichText)
-        result_label.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        result_label.linkActivated.connect(lambda: open_folder(export_folder))
-        result_label.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
-
-        self.iface.messageBar().pushWidget(result_label, Qgis.Info, 0)
+        result_message = self.tr('Finished creating the project at {result_folder}. Please copy this folder to '
+                                      'your QField device.').format(result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder))
+        self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
 
     def update_info_visibility(self):
         """
