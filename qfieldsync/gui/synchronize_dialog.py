@@ -51,18 +51,20 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.iface = iface
         self.preferences = Preferences()
         self.offline_editing = offline_editing
-        self.button_box.button(QDialogButtonBox.Save).setText(self.tr('Synchronize'))
-        self.button_box.button(QDialogButtonBox.Save).clicked.connect(self.start_synchronization)
+        self.push_btn = QPushButton(self.tr('Synchronize'))
+        self.push_btn.clicked.connect(self.start_synchronization)
+        self.button_box.addButton(self.push_btn, QDialogButtonBox.ActionRole)
         self.qfieldDir.setText(self.preferences.value('importDirectoryProject') or self.preferences.value('importDirectory'))
         self.qfieldDir_button.clicked.connect(make_folder_selector(self.qfieldDir))
 
         self.offline_editing_done = False
 
     def start_synchronization(self):
-        self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
+        self.push_btn.setEnabled(False)
         qfield_folder = self.qfieldDir.text()
         self.preferences.set_value('importDirectoryProject', qfield_folder)
         try:
+            self.progress_group.setEnabled(True)
             current_import_file_checksum = import_file_checksum(qfield_folder)
             imported_files_checksums = import_checksums_of_project(qfield_folder)
 
@@ -97,6 +99,8 @@ class SynchronizeDialog(QDialog, DialogUi):
                 raise NoProjectFoundError(message)
         except NoProjectFoundError as e:
             self.iface.messageBar().pushWarning('QFieldSync', str(e))
+        finally:
+            self.progress_group.setEnabled(False)
 
     @pyqtSlot(int, int)
     def update_total(self, current, layer_count):
