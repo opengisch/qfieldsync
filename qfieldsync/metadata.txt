@@ -19,9 +19,7 @@ email=info@opengis.ch
 # Recommended items:
 
 changelog=
-    Release 3.1.10
-    --------------
-    * Support for Offline Layers with Value Relation widget
+    Enjoy the latest and greatest while we're hard at work improving the plugin.
     
     Check out the complete changelog on: https://github.com/opengisch/qfieldsync/releases
 
