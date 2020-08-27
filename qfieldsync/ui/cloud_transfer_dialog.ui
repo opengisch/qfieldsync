@@ -100,64 +100,12 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="ioPage">
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QLabel" name="totalProgressLabel">
-         <property name="text">
-          <string>Total</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QProgressBar" name="totalProgressBar">
-         <property name="value">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="layerProgressLabel">
-         <property name="text">
-          <string>Layer</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QProgressBar" name="layerProgressBar">
-         <property name="value">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="statusLabel">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="ioPageSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="filesPage">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QLabel" name="explanationLabel">
          <property name="text">
-          <string>Please select action to be applied on the files. If you check &quot;cloud&quot; it will result in local files being overwritten by their cloud version and vice versa. If a cloud radio button is disabled, it means the files does not exist on the cloud and will be uploaded anyway. The opposite goes if the &quot;local&quot; radio is disabled.</string>
+          <string>Please select action to be applied on the files. If you check &quot;cloud&quot; it will result in local files being overwritten by their cloud version and vice versa. If a cloud checkbox is disabled, it means the files does not exist on the cloud. The opposite goes if the &quot;local&quot; radio is disabled.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

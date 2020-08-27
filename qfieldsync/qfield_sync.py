@@ -127,7 +127,7 @@ class QFieldSync(object):
         # store warnings from last run
         self.last_action_warnings = []
 
-        self.network_manager = CloudNetworkAccessManager(self.offline_editing, self.iface.mainWindow())
+        self.network_manager = CloudNetworkAccessManager(self.iface.mainWindow())
         self.network_manager.token_changed.connect(self.update_qfield_sync_toolbar_icon)
         # TODO enable this and watch the world collapse
         # QgsProject().homePathChanged.connect(self.update_qfield_sync_toolbar_icon)

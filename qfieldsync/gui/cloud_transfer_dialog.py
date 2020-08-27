@@ -23,7 +23,7 @@
 import os
 from typing import Dict, List
 
-from qgis.PyQt.QtCore import Qt, QObject, QTimer
+from qgis.PyQt.QtCore import Qt, QObject
 from qgis.PyQt.QtGui import QShowEvent
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QTreeWidgetItem, QWidget, QCheckBox, QHBoxLayout, QHeaderView
 from qgis.PyQt.uic import loadUiType
@@ -69,28 +69,15 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.uploadProgressBar.setValue(0)
         self.downloadProgressBar.setValue(0)
 
-        self.project_transfer.offline_editing.progressStopped.connect(self.on_offline_editing_progress_stopped)
-        self.project_transfer.offline_editing.layerProgressUpdated.connect(self.on_offline_editing_layer_progress_updated)
-        self.project_transfer.offline_editing.progressModeSet.connect(self.on_offline_editing_progress_mode_set)
-        self.project_transfer.offline_editing.progressUpdated.connect(self.on_offline_editing_progress_updated)
 
-    
     def showEvent(self, event: QShowEvent) -> None:
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
 
         super().showEvent(event)
 
-        def offline_converter_start():
-            offline_converter = self.project_transfer.convert()
-            
-            offline_converter.total_progress_updated.connect(self._on_offline_converter_total_progress_updated)
-            offline_converter.task_progress_updated.connect(self._on_offline_converter_task_progress_updated)
-
-            self.build_files_tree()
-            self.stackedWidget.setCurrentWidget(self.filesPage)
-            self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
-
-        QTimer.singleShot(100, offline_converter_start)
+        self.build_files_tree()
+        self.stackedWidget.setCurrentWidget(self.filesPage)
+        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
 
 
     def build_files_tree(self):
@@ -204,16 +191,16 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.filesTree.setItemWidget(item, 1, local_checkbox_widget)
         self.filesTree.setItemWidget(item, 2, cloud_checkbox_widget)
 
-    def on_error(self, error: str) -> None:
-        self.errorLabel.setText(self.errorLabel.text() + '\n' + error)
+    def on_error(self, descr: str, error: Exception = None) -> None:
+        self.errorLabel.setText(self.errorLabel.text() + '\n' + descr)
 
     
     def on_upload_transfer_progress(self, fraction: float) -> None:
-        self.uploadProgressBar.setValue(fraction * 100)
+        self.uploadProgressBar.setValue(int(fraction * 100))
 
 
     def on_download_transfer_progress(self, fraction: float) -> None:
-        self.downloadProgressBar.setValue(fraction * 100)
+        self.downloadProgressBar.setValue(int(fraction * 100))
 
 
     def on_transfer_finished(self) -> None:

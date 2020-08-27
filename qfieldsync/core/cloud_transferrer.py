@@ -20,6 +20,7 @@
 """
 
 
+from functools import total_ordering
 from typing import List
 import shutil
 from pathlib import Path
@@ -27,22 +28,15 @@ from pathlib import Path
 from qgis.PyQt.QtCore import pyqtSignal, QObject
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.core import QgsProject
-from qgis.utils import iface
 
-from qfieldsync.core.project import ProjectConfiguration
-from qfieldsync.core.preferences import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager, CloudException
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile
-from qfieldsync.core.offline_converter import OfflineConverter
-from qfieldsync.utils.exceptions import NoProjectFoundError
-from qfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum, copy_images
-from qfieldsync.utils.qgis_utils import open_project, import_checksums_of_project
 
 
 class CloudTransferrer(QObject):
     # TODO show progress of individual files
     progress = pyqtSignal(float)
-    error = pyqtSignal(str)
+    error = pyqtSignal([str], [str, Exception])
     abort = pyqtSignal()
     finished = pyqtSignal()
     upload_progress = pyqtSignal(float)
@@ -77,37 +71,9 @@ class CloudTransferrer(QObject):
         self.temp_dir.joinpath('backup').mkdir()
         self.temp_dir.joinpath('upload').mkdir()
         self.temp_dir.joinpath('download').mkdir()
-        self.temp_dir.joinpath('export').mkdir()
-
-        for project_file in self.cloud_project.get_files():
-            project_file.export_dir = self.temp_dir.joinpath('export')
-
-        # TODO find a better way to obtain the offline editing
-        self.offline_editing = self.network_manager.offline_editing
 
         self.upload_finished.connect(self._on_upload_finished)
         self.download_finished.connect(self._on_download_finished)
-
-        self.import_qfield_project()
-
-
-    def __del__(self) -> None:
-        for project_file in self.cloud_project.get_files():
-            project_file.export_dir = None
-
-
-    def convert(self) -> OfflineConverter:
-        offline_convertor = OfflineConverter(
-            QgsProject.instance(), 
-            str(self.temp_dir.joinpath('export')), 
-            iface.mapCanvas().extent(),
-            self.offline_editing)
-
-        offline_convertor.convert()
-
-        self.cloud_project._refresh_files()
-
-        return offline_convertor
 
 
     def sync(self, files_to_upload: List[ProjectFile], files_to_download: List[ProjectFile]) -> None:
@@ -248,7 +214,7 @@ class CloudTransferrer(QObject):
         try:
             CloudNetworkAccessManager.handle_response(reply, False)
         except CloudException as err:
-            self.error.emit(self.tr('Downloading file "{}" failed: {}'.format(filename, str(err))))
+            self.error.emit(self.tr('Downloading file "{}" failed. Aborting...'.format(filename), err))
             self.abort_requests()
             return
 
@@ -273,6 +239,7 @@ class CloudTransferrer(QObject):
     def _on_download_finished(self) -> None:
         self.is_download_active = False
         self.is_finished = True
+        self.import_qfield_project()
         self.finished.emit()
 
 
@@ -316,39 +283,12 @@ class CloudTransferrer(QObject):
             shutil.copyfile(filename, self._files_to_download[relative_filename]['project_file'].local_path)
 
 
-    def import_qfield_project(self):
-        import_dir = str(self.temp_dir.joinpath('download'))
-
+    def import_qfield_project(self) -> None:
         try:
-            current_import_file_checksum = import_file_checksum(import_dir)
-            imported_files_checksums = import_checksums_of_project(import_dir)
-
-            if (imported_files_checksums and current_import_file_checksum and current_import_file_checksum in imported_files_checksums):
-                raise NoProjectFoundError(self.tr('Data from this file are already synchronized with the original project.'))
-
-            fallback_project_path = '/home/suricactus/Documents/GIS_Projects/kzl_benches/kzl_benches.qgs'
-            open_project(get_project_in_folder(import_dir))
-
-            self.offline_editing.synchronize()
-
-            original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
-            if original_project_path:
-                # TODO import the DCIM folder
-                # copy_images(os.path.join(import_dir, 'DCIM'),os.path.join(os.path.dirname(original_project_path), 'DCIM'))
-
-                if open_project(original_project_path):
-                    # save the data_file_checksum to the project and save it
-                    imported_files_checksums.append(import_file_checksum(import_dir))
-                    ProjectConfiguration(QgsProject.instance()).imported_files_checksums = imported_files_checksums
-                    QgsProject.instance().write()
-                    iface.messageBar().pushInfo('QFieldSync', self.tr('Opened original project {}'.format(original_project_path)))
-                else:
-                    iface.messageBar().pushInfo('QFieldSync', self.tr('The data has been synchronized successfully but the original project ({}) could not be opened'.format(original_project_path)))
-            else:
-                if open_project(fallback_project_path):
-                    iface.messageBar().pushInfo('QFieldSync', self.tr('No original project path found, opened the previous project file at "{}"'.format(fallback_project_path)))
-                else:
-                    iface.messageBar().pushInfo('QFieldSync', self.tr('No original project path found'))
-
-        except NoProjectFoundError as e:
-            iface.messageBar().pushWarning('QFieldSync', str(e))
+            self._temp_dir2main_dir(str(self.temp_dir.joinpath('download')))
+        except Exception as err:
+            self.error.emit('Failed to copy downloaded files to your project. Trying to rollback changes...', err)
+            try:
+                self._temp_dir2main_dir(str(self.temp_dir.joinpath('backup')))
+            except Exception as errInner:
+                self.error.emit('Failed to rollback the backup. You project might be corrupted! Please check ".qfieldsync/backup" directory and try to copy the files back manually.', errInner)
