@@ -155,16 +155,16 @@ class LayerSource(object):
         actions = list()
 
         if self.is_file and not self.storedInlocalizedDataPath:
-            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'copy')))
-            actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'keep existent (copy if missing)')))
+            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'Copy')))
+            actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'Keep Existent (Copy If Missing)')))
         else:
-            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'no action')))
+            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'No Action')))
 
         if self.layer.type() == QgsMapLayer.VectorLayer:
-            actions.append((SyncAction.OFFLINE, QCoreApplication.translate('LayerAction', 'offline editing')))
+            actions.append((SyncAction.OFFLINE, QCoreApplication.translate('LayerAction', 'Offline Editing')))
             actions.append((SyncAction.CLOUD, QCoreApplication.translate('LayerAction', 'Cloud')))
 
-        actions.append((SyncAction.REMOVE, QCoreApplication.translate('LayerAction', 'remove')))
+        actions.append((SyncAction.REMOVE, QCoreApplication.translate('LayerAction', 'Remove')))
 
         return actions
 
