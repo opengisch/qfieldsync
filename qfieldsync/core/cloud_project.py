@@ -189,10 +189,19 @@ class CloudProject:
     def is_cloud_project(project: QgsProject = None) -> bool:
         if project is None:
             project = QgsProject.instance()
+    
+        return CloudProject.get_cloud_project_id(project.homePath()) is not None
 
-        project_local_dirs = Preferences().value('qfieldCloudProjectLocalDirs')
 
-        return project.homePath() in project_local_dirs.values()
+    @staticmethod
+    def get_cloud_project_id(path: str) -> Optional[str]:
+        project_local_dirs: Dict[str, str] = Preferences().value('qfieldCloudProjectLocalDirs')
+
+        for project_id, project_path in project_local_dirs.items():
+            if project_path == path:
+                return project_id
+
+        return None
 
 
     @property
@@ -251,6 +260,30 @@ class CloudProject:
     @property
     def url(self) -> str:
         return 'https://qfield.cloud/projects/{}'.format(self.id)
+
+
+    @property
+    def local_project_file(self) -> Optional[ProjectFile]:
+        if not self.local_dir:
+            return None
+
+        project_filename = None
+
+        for path in Path(self.local_dir).rglob('*.qgs'):
+            project_filename = path
+
+        if project_filename is None:
+            for path in Path(self.local_dir).rglob('*.qgz'):
+                project_filename = path
+
+        if project_filename is None:
+            return None
+
+        for project_file in self.get_files():
+            if project_file.local_path == project_filename:
+                return project_file
+
+        return None
 
 
     def get_files(self, checkout_filter: Optional[ProjectFileCheckout] = None) -> List[ProjectFile]:
