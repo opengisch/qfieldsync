@@ -189,6 +189,31 @@
          </column>
         </widget>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="preferNoneButton">
+           <property name="text">
+            <string>Prefer None</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="preferLocalButton">
+           <property name="text">
+            <string>Prefer Local</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="preferCloudButton">
+           <property name="text">
+            <string>Prefer Cloud</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
     </widget>
