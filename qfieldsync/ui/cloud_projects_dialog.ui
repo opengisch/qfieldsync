@@ -209,7 +209,7 @@
            <string>Actions</string>
           </property>
           <property name="toolTip">
-           <string>Synchronize| Edit | Delete  </string>
+           <string>Synchronize| Edit | Delete | Open</string>
           </property>
          </column>
         </widget>
