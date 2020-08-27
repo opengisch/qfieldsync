@@ -20,7 +20,6 @@
 """
 
 
-from functools import total_ordering
 from typing import List
 import shutil
 from pathlib import Path
@@ -29,14 +28,14 @@ from qgis.PyQt.QtCore import pyqtSignal, QObject
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.core import QgsProject
 
-from qfieldsync.core.cloud_api import CloudNetworkAccessManager, CloudException
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile
 
 
 class CloudTransferrer(QObject):
     # TODO show progress of individual files
     progress = pyqtSignal(float)
-    error = pyqtSignal([str], [str, Exception])
+    error = pyqtSignal(str, Exception)
     abort = pyqtSignal()
     finished = pyqtSignal()
     upload_progress = pyqtSignal(float)
@@ -184,8 +183,8 @@ class CloudTransferrer(QObject):
     def _on_upload_file_finished(self, reply: QNetworkReply, filename: str) -> None:
         try:
             CloudNetworkAccessManager.handle_response(reply, False)
-        except CloudException as err:
-            self.error.emit(self.tr('Uploading file "{}" failed: {}'.format(filename, str(err))))
+        except Exception as err:
+            self.error.emit(self.tr('Uploading file "{}" failed.'.format(filename)), err)
             self.abort_requests()
             return
 
@@ -213,8 +212,8 @@ class CloudTransferrer(QObject):
     def _on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
         try:
             CloudNetworkAccessManager.handle_response(reply, False)
-        except CloudException as err:
-            self.error.emit(self.tr('Downloading file "{}" failed. Aborting...'.format(filename), err))
+        except Exception as err:
+            self.error.emit(self.tr('Downloading file "{}" failed. Aborting...'.format(filename)), err)
             self.abort_requests()
             return
 
