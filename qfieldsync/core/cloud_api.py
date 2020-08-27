@@ -167,16 +167,17 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
             'private': private,
         })
 
+
     def delete_project(self, project_id: str) -> QNetworkReply:
         """Delete an existing QFieldCloud project"""
 
         return self.cloud_delete(['projects', project_id])
 
 
-    def get_files(self, project_id: str, client: str = "qgis") -> QNetworkReply:
+    def get_files(self, project_id: str, client: str = 'qgis') -> QNetworkReply:
         """"Get project files and their versions"""
 
-        return self.cloud_get(['files', project_id], {"client": client})
+        return self.cloud_get(['files', project_id], {'client': client})
 
     def get_file(self, filename: str, local_filename: str, version: str = None) -> QNetworkReply:
         """"Download file"""
@@ -305,7 +306,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
             json_part = QHttpPart()
 
             json_part.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
-            json_part.setHeader(QNetworkRequest.ContentDispositionHeader, 'form-data; name=\"json\"')
+            json_part.setHeader(QNetworkRequest.ContentDispositionHeader, 'form-data; name="json"')
             json_part.setBody(json.dumps(payload).encode('utf-8'))
             
             multi_part.append(json_part)
@@ -316,7 +317,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
             with open(filename, 'rb') as file:
                 file_part = QHttpPart()
                 file_part.setBody(file.read())
-                file_part.setHeader(QNetworkRequest.ContentDispositionHeader, "form-data; name=\"file\"; filename=\"{}\"".format(filename))
+                file_part.setHeader(QNetworkRequest.ContentDispositionHeader, 'form-data; name="file"; filename="{}"'.format(filename))
 
                 multi_part.append(file_part)
 
