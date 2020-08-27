@@ -226,15 +226,14 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         reply.setParent(self)
 
         if local_filename is not None:
-            file = open(local_filename, 'wb')
-            reply.finished.connect(lambda: self._on_cloud_get_download_finished(reply, file=file))
+            reply.finished.connect(lambda: self._on_cloud_get_download_finished(reply, local_filename=local_filename))
 
         return reply
 
 
-    def _on_cloud_get_download_finished(self, reply: QNetworkReply, file: IO) -> None:
-        assert file.write(reply.readAll()) != -1, 'Error while writing to file "{}"'.format(file.name)
-        file.close()
+    def _on_cloud_get_download_finished(self, reply: QNetworkReply, local_filename: str) -> None:
+        with open(local_filename, 'wb') as file:
+            assert file.write(reply.readAll()) != -1, 'Error while writing to file "{}"'.format(local_filename)
 
 
     def cloud_post(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
@@ -315,13 +314,12 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         # now attach each file
         for filename in filenames:
             # this might be optimized by usung QFile and QHttpPart.setBodyDevice, but didn't work on the first
-            filedata = open(filename, 'rb').read()
+            with open(filename, 'rb') as file:
+                file_part = QHttpPart()
+                file_part.setBody(file.read())
+                file_part.setHeader(QNetworkRequest.ContentDispositionHeader, "form-data; name=\"file\"; filename=\"{}\"".format(filename))
 
-            file_part = QHttpPart()
-            file_part.setBody(filedata)
-            file_part.setHeader(QNetworkRequest.ContentDispositionHeader, "form-data; name=\"file\"; filename=\"{}\"".format(filename))
-
-            multi_part.append(file_part)
+                multi_part.append(file_part)
 
         reply = self.post(request, multi_part)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
