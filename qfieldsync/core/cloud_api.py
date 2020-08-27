@@ -36,7 +36,7 @@ from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
 )
-from qgis.core import QgsNetworkAccessManager, QgsProject, QgsOfflineEditing
+from qgis.core import QgsNetworkAccessManager, QgsProject
 
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.preferences import Preferences
@@ -62,14 +62,13 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
     
     token_changed = pyqtSignal()
 
-    def __init__(self, offline_editing: QgsOfflineEditing, parent=None) -> None:
+    def __init__(self, parent=None) -> None:
         """Constructor.
         """
         super(CloudNetworkAccessManager, self).__init__(parent=parent)
         self.url = 'http://dev.qfield.cloud/api/v1/'
         self._token = ''
         self.projects_cache = CloudProjectsCache(self, self)
-        self.offline_editing = offline_editing
 
 
     @staticmethod
