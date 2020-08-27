@@ -139,51 +139,6 @@ class ProjectFile:
             return hashlib.sha256(f.read()).hexdigest()
 
 
-    @property
-    def export_dir(self) -> Optional[str]:
-        return self._export_dir
-
-
-    @export_dir.setter
-    def export_dir(self, export_dir: Optional[Union[str, Path]]) -> None:
-        self._export_dir = str(export_dir)
-
-
-    @property
-    def export_size(self) -> Optional[int]:
-        if not self.export_path_exists:
-            return
-
-        return self.export_path.stat().st_size
-
-
-    @property
-    def export_path(self) -> Optional[Path]:
-        if not self._export_dir:
-            return
-
-        return Path(self._export_dir + '/' + self.name)
-
-
-    @property
-    def export_path_exists(self) -> bool:
-        if self.export_path:
-            return self.export_path.exists()
-
-        return False
-
-
-    @property
-    def export_sha256(self) -> Optional[str]:
-        if not self.export_path_exists:
-            return
-        
-        assert self.export_path
-
-        with open(self.export_path, 'rb') as f:
-            return hashlib.sha256(f.read()).hexdigest()
-
-
 class CloudProject:
 
     def __init__(self, project_data: Dict[str, Any]) -> None:
@@ -298,17 +253,15 @@ class CloudProject:
     def _refresh_files(self) -> None:
         self._files = {}
 
-        local_export_dir = str(Path(self.local_dir).joinpath('.qfieldsync', 'export')) if self.local_dir else None
-
         if self._cloud_files:
             for file_obj in self._cloud_files:
-                self._files[file_obj['name']] = ProjectFile(file_obj, local_dir=local_export_dir)
+                self._files[file_obj['name']] = ProjectFile(file_obj, local_dir=self.local_dir)
 
-        if local_export_dir:
-            local_filenames = [f for f in [str(f.relative_to(local_export_dir)) for f in Path(local_export_dir).glob('**/*')]]
+        if self.local_dir:
+            local_filenames = [f for f in [str(f.relative_to(self.local_dir)) for f in Path(self.local_dir).glob('**/*')] if not f.startswith('.qfieldsync')]
 
             for filename in local_filenames:
                 if filename in self._files:
                     continue
 
-                self._files[filename] = ProjectFile({'name': filename}, local_dir=local_export_dir)
+                self._files[filename] = ProjectFile({'name': filename}, local_dir=self.local_dir)
