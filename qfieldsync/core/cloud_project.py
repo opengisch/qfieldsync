@@ -185,6 +185,16 @@ class CloudProject:
             self._refresh_files()
 
 
+    @staticmethod
+    def is_cloud_project(project: QgsProject = None) -> bool:
+        if project is None:
+            project = QgsProject.instance()
+
+        project_local_dirs = Preferences().value('qfieldCloudProjectLocalDirs')
+
+        return project.homePath() in project_local_dirs.values()
+
+
     @property
     def id(self) -> str:
         return self._data['id']
