@@ -48,6 +48,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
 from qgis.core import QgsProject
+from qgis.utils import iface
 
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
@@ -112,6 +113,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsTable.cellDoubleClicked.connect(self.on_projects_table_cell_double_clicked)
         self.buttonBox.clicked.connect(self.on_button_box_clicked)
         self.projectsTable.selectionModel().selectionChanged.connect(self.on_projects_table_selection_changed)
+        self.localDirLineEdit.textChanged.connect(self.on_local_dir_line_edit_text_changed)
         self.localDirButton.clicked.connect(self.on_local_dir_button_clicked)
         self.localDirButton.setMenu(QMenu())
         self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
@@ -269,10 +271,23 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.close()
 
 
+    def on_local_dir_line_edit_text_changed(self) -> None:
+        local_dir = self.localDirLineEdit.text()
+        self.submitButton.setEnabled(False)
+
+        if local_dir == '' or self._is_local_dir_valid(local_dir):
+            self.localDirLineEdit.setStyleSheet('')
+            self.submitButton.setEnabled(True)
+        else:
+            self.localDirLineEdit.setStyleSheet('color: red;')
+            self.submitButton.setEnabled(False)
+
+        if self.current_cloud_project:
+            self.current_cloud_project.update_data({'local_dir': local_dir})
+
+
     def on_local_dir_button_clicked(self) -> None:
-        self.current_cloud_project.update_data({'local_dir': self.select_local_dir()})
-        self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
-        self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
+        self.localDirLineEdit.setText(self.select_local_dir())
 
 
     def on_logout_button_clicked(self) -> None:
@@ -345,6 +360,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_delete = QToolButton()
             btn_delete.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/delete.svg')))
             btn_delete.setToolTip(self.tr('Delete project'))
+            btn_launch = QToolButton()
+            btn_launch.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/launch.svg')))
+            btn_launch.setToolTip(self.tr('Open project'))
             btn_widget = QWidget()
             btn_layout = QHBoxLayout()
             btn_layout.setAlignment(Qt.AlignCenter)
@@ -352,11 +370,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_layout.addWidget(btn_sync)
             btn_layout.addWidget(btn_edit)
             btn_layout.addWidget(btn_delete)
+            btn_layout.addWidget(btn_launch)
             btn_widget.setLayout(btn_layout)
 
             btn_sync.clicked.connect(self.on_project_sync_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
             btn_edit.clicked.connect(self.on_project_edit_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
-            btn_delete.clicked.connect(self.onProjectDeleteButtonClicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
+            btn_delete.clicked.connect(self.on_project_delete_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
+            btn_launch.clicked.connect(self.on_project_launch_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
@@ -393,6 +413,39 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         reply.finished.connect(lambda: self.sync())
 
 
+    def launch(self) -> None:
+        assert self.current_cloud_project is not None
+
+        if self.current_cloud_project.cloud_files is not None:
+            project_filename = self.current_cloud_project.local_project_file
+
+            # no local project name found
+            if not project_filename:
+                iface.messageBar().pushInfo('QFieldSync', self.tr('Cannot find local project file. Please first synchronize.'))
+                return
+
+            # it is the current project, no need to reload
+            if str(project_filename.local_path) == QgsProject().instance().fileName():
+                iface.messageBar().pushInfo('QFieldSync', self.tr('Already loaded the selected project.'))
+                return
+
+            if QgsProject.instance().read(str(project_filename.local_path)):
+                selected_row_idx = self.projectsTable.selectedItems()[0].row()
+
+                for row_idx in range(self.projectsTable.rowCount()):
+                    font = QFont()
+
+                    if row_idx == selected_row_idx:
+                        font.setBold(True)
+
+                    self.projectsTable.item(row_idx, 0).setFont(font)
+                    self.projectsTable.item(row_idx, 1).setFont(font)
+
+
+        reply = self.network_manager.projects_cache.get_project_files(self.current_cloud_project.id)
+        reply.finished.connect(lambda: self.launch())
+
+
     def select_local_dir(self) -> Optional[str]:
         """
         ```
@@ -418,30 +471,31 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         ```
         """
 
-        assert self.current_cloud_project
-        assert self.current_cloud_project.cloud_files is not None
-
         local_dir = None
         initial_path = self.localDirLineEdit.text() or str(Path(QgsProject.instance().homePath()).parent) or self.default_local_dir
 
         # cloud project is empty, you can upload a local project into it
-        if len(self.current_cloud_project.cloud_files) == 0:
+        if self.current_cloud_project is None or (self.current_cloud_project.cloud_files is not None and len(self.current_cloud_project.cloud_files) == 0):
             while local_dir is None:
                 local_dir = QFileDialog.getExistingDirectory(self, self.tr('Upload local project to QFieldCloud'), initial_path)
 
                 if local_dir == '':
                     return
 
-                # not the most efficient scaninning twice the whole file tree for .qgs and .qgz, but at least readable
-                if len(glob.glob('{}/**/*.qgs'.format(local_dir))) > 1 or len(glob.glob('{}/**/*.qgz'.format(local_dir))) > 1:
-                    QMessageBox.warning(None, self.tr('Multiple QGIS projects'), self.tr('When QFieldCloud project has no remote files, the local checkout directory may contains no more than 1 QGIS project.'))
+                if not self._is_local_dir_valid(local_dir, True):
+                    QMessageBox.warning(None, self.tr('Multiple QGIS projects'), self.tr('When QFieldCloud project has no remote files, the local checkout directory may contain no more than 1 QGIS project.'))
                     local_dir = None
                     continue
 
                 break
 
+            return local_dir
+
         # cloud project exists and has files in it, so checkout in an empty dir
         else:
+            assert self.current_cloud_project
+            assert self.current_cloud_project.cloud_files is not None
+
             while local_dir is None:
                 local_dir = QFileDialog.getExistingDirectory(self, self.tr('Save QFieldCloud project at'), initial_path)
 
@@ -458,13 +512,37 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         return local_dir
 
 
+    def _is_local_dir_valid(self, local_dir: str, should_check_recursive: bool = False) -> bool:
+        """Checks whether the selected local dir is suitable for empty cloud project
+
+        Args:
+            local_dir (str): local directory
+            should_check_recursive (bool, optional): If True, it might take too much time to check recursive the whole file tree. Defaults to False.
+
+        Returns:
+            bool: whether the chosen local directory is suitable or not
+        """
+        if Path(local_dir).is_file():
+            return False
+
+        if (len(glob.glob('{}/**/*.qgs'.format(local_dir), recursive=should_check_recursive)) > 1 
+            or len(glob.glob('{}/**/*.qgz'.format(local_dir), recursive=should_check_recursive)) > 1):
+            return False
+
+        # already associated local dir with a cloud project
+        if CloudProject.get_cloud_project_id(local_dir) is not None:
+            return False
+
+        return True
+
+
     @select_table_row
     def on_project_sync_button_clicked(self, is_toggled: bool) -> None:
         self.sync()
 
 
     @select_table_row
-    def onProjectDeleteButtonClicked(self, is_toggled: bool) -> None:
+    def on_project_delete_button_clicked(self, is_toggled: bool) -> None:
         button_pressed = QMessageBox.question(
             self, 
             self.tr('Delete project'), 
@@ -477,6 +555,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         reply = self.network_manager.delete_project(self.current_cloud_project.id)
         reply.finished.connect(lambda: self.on_delete_project_reply_finished(reply))
+
+
+    @select_table_row
+    def on_project_launch_button_clicked(self, is_toggled: bool) -> None:
+        self.launch()
 
 
     @select_table_row
@@ -520,10 +603,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectNameLineEdit.setText('')
             self.projectDescriptionTextEdit.setPlainText('')
             self.projectIsPrivateCheckBox.setChecked(True)
-            self.localDirLabel.setEnabled(False)
-            self.localDirLineEdit.setEnabled(False)
-            self.localDirButton.setEnabled(False)
-            self.localDirLineEdit.setText('')
+
+            if CloudProject.is_cloud_project():
+                self.localDirLineEdit.setText('')
+            else:
+                self.localDirLineEdit.setText(QgsProject().instance().homePath())
+
         else:
             self.projectTabs.setTabEnabled(1, True)
             self.projectTabs.setTabEnabled(2, True)
@@ -532,9 +617,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectNameLineEdit.setText(self.current_cloud_project.name)
             self.projectDescriptionTextEdit.setPlainText(self.current_cloud_project.description)
             self.projectIsPrivateCheckBox.setChecked(self.current_cloud_project.is_private)
-            self.localDirLabel.setEnabled(True)
-            self.localDirLineEdit.setEnabled(True)
-            self.localDirButton.setEnabled(True)
             self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
             self.projectUrlLabelValue.setText('<a href="{url}">{url}</a>'.format(url=self.current_cloud_project.url))
             self.createdAtLabelValue.setText(QDateTime.fromString(self.current_cloud_project.created_at, Qt.ISODateWithMs).toString())
