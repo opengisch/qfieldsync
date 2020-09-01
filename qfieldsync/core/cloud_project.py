@@ -134,6 +134,7 @@ class ProjectFile:
             return
 
         assert self.local_path
+        assert self.local_path.is_file()
 
         with open(self.local_path, 'rb') as f:
             return hashlib.sha256(f.read()).hexdigest()
@@ -301,7 +302,7 @@ class CloudProject:
                 self._files[file_obj['name']] = ProjectFile(file_obj, local_dir=self.local_dir)
 
         if self.local_dir:
-            local_filenames = [f for f in [str(f.relative_to(self.local_dir)) for f in Path(self.local_dir).glob('**/*')] if not f.startswith('.qfieldsync')]
+            local_filenames = [f for f in [str(f.relative_to(self.local_dir)) for f in Path(self.local_dir).glob('**/*') if f.is_file()] if not f.startswith('.qfieldsync')]
 
             for filename in local_filenames:
                 if filename in self._files:
