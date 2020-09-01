@@ -62,7 +62,8 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
         self.network_manager = network_manager
         self.error = None
 
-        self.network_manager.token_changed.connect(self.on_network_manager_token_changed)
+        self.network_manager.authenticated.connect(lambda: self.refresh_icon())
+        self.network_manager.token_changed.connect(lambda: self.refresh_icon())
         self.network_manager.projects_cache.projects_updated.connect(lambda: self.refresh())
 
     def createChildren(self):
@@ -95,11 +96,15 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
         projects_overview_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')), self.tr('Projects Overview'), parent)
         projects_overview_action.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow()).show())
 
+        refresh_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Refresh projects', parent)
+        refresh_action.triggered.connect(lambda: self.network_manager.projects_cache.refresh())
+
         current_project_action = QAction(QIcon(), self.tr('Current Cloud Project'), parent)
         current_project_action.setEnabled(bool(currently_open_project))
         current_project_action.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow(), project=currently_open_project).show())
 
         actions.append(projects_overview_action)
+        actions.append(refresh_action)
         actions.append(current_project_action)
 
         return actions
@@ -111,15 +116,10 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
 
         dlg = CloudLoginDialog(self.network_manager)
         dlg.authenticate()
-        dlg.authenticated.connect(lambda: self.refresh_icon())
 
         return True
 
 
-    def on_network_manager_token_changed(self):
-        self.refresh_icon()
-
-    
     def refresh_icon(self):
         if self.network_manager.has_token():
             self.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')))
@@ -173,7 +173,6 @@ class QFieldSyncGroupItem(QgsDataCollectionItem):
     def actions(self, parent):
         actions = []
 
-        refresh = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Refresh projects', parent)
         create = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')), 'Create new project', parent)
 
         actions.append(refresh)

@@ -95,6 +95,7 @@ class QFieldSync(object):
 
         self.network_manager = CloudNetworkAccessManager(self.iface.mainWindow())
         self.network_manager.token_changed.connect(self.update_qfield_sync_toolbar_icon)
+        self.network_manager.authenticated.connect(self.update_qfield_sync_toolbar_icon)
         # TODO enable this and watch the world collapse
         # QgsProject().homePathChanged.connect(self.update_qfield_sync_toolbar_icon)
 
@@ -297,7 +298,6 @@ class QFieldSync(object):
         Show the QFieldCloud overview dialog.
         """
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow())
-        dlg.projects_refreshed.connect(lambda: self.update_qfield_sync_toolbar_icon())
         dlg.exec_()
 
     def show_cloud_project_details_dialog(self):
@@ -306,7 +306,6 @@ class QFieldSync(object):
         """
         cloud_project = self.network_manager.projects_cache.currently_open_project
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow(), cloud_project)
-        dlg.projects_refreshed.connect(lambda: self.update_qfield_sync_toolbar_icon())
         dlg.exec_()
 
     def sync_qfieldcloud_project(self):
@@ -318,7 +317,6 @@ class QFieldSync(object):
             return
 
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow(), project=currently_open_project)
-        dlg.projects_refreshed.connect(lambda: self.update_qfield_sync_toolbar_icon())
         dlg.sync()
 
 
@@ -355,7 +353,7 @@ class QFieldSync(object):
 
 
     def update_qfield_sync_toolbar_icon(self):
-        if self.network_manager.has_token() and self.network_manager.projects_cache.currently_open_project is not None:
+        if self.network_manager.has_token():
             self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud.svg')))
         else:
             self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud_off.svg')))
