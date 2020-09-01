@@ -525,6 +525,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if Path(local_dir).is_file():
             return False
 
+        return True
+
         if (len(glob.glob('{}/**/*.qgs'.format(local_dir), recursive=should_check_recursive)) > 1 
             or len(glob.glob('{}/**/*.qgz'.format(local_dir), recursive=should_check_recursive)) > 1):
             return False
