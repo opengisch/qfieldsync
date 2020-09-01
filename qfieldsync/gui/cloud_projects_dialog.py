@@ -326,7 +326,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsTable.setRowCount(0)
         self.projectsTable.setSortingEnabled(False)
 
-        if not self.network_manager.projects_cache.projects:
+        if self.network_manager.projects_cache.projects is None:
             self.network_manager.projects_cache.refresh()
             return
 
