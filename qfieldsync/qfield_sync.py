@@ -264,14 +264,14 @@ class QFieldSync(object):
 
     def show_preferences_dialog(self):
         dlg = PreferencesDialog(self.iface.mainWindow())
-        dlg.exec_()
+        dlg.show()
 
     def show_synchronize_dialog(self):
         """
         Synchronize from QField
         """
         dlg = SynchronizeDialog(self.iface, self.offline_editing, self.iface.mainWindow())
-        dlg.exec_()
+        dlg.show()
 
     def show_package_dialog(self):
         """
@@ -291,22 +291,22 @@ class QFieldSync(object):
         Show the project configuration dialog.
         """
         dlg = ProjectConfigurationDialog(self.iface, self.iface.mainWindow())
-        dlg.exec_()
+        dlg.show()
 
     def show_cloud_overview_dialog(self):
         """
         Show the QFieldCloud overview dialog.
         """
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow())
-        dlg.exec_()
+        dlg.show()
 
     def show_cloud_project_details_dialog(self):
         """
         Show the QFieldCloud project details dialog.
         """
-        cloud_project = self.network_manager.projects_cache.currently_open_project
-        dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow(), cloud_project)
-        dlg.exec_()
+        currently_open_project = self.network_manager.projects_cache.currently_open_project
+        dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow(), currently_open_project)
+        dlg.show_project_form()
 
     def sync_qfieldcloud_project(self):
         """Synchronize the current QFieldCloud project"""
