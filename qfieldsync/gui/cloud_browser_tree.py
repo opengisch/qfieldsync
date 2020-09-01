@@ -79,11 +79,13 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
 
         my_projects = QFieldSyncGroupItem(self, 'My projects', 'private', '../resources/cloud.svg', 1)
         my_projects.setState(QgsDataItem.Populated)
+        # my_projects.setCapabilities(my_projects.capabilities2() & QgsDataItem.Fast) # TODO freezes
         my_projects.refresh()
         items.append(my_projects)
 
         public_projects = QFieldSyncGroupItem(self, 'Public projects', 'public', '../resources/cloud.svg', 2)
         public_projects.setState(QgsDataItem.Populated)
+        # public_projects.setCapabilities(public_projects.capabilities2() & QgsDataItem.Fast) # TODO freezes
         public_projects.refresh()
         items.append(public_projects)
 
@@ -104,7 +106,8 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
         current_project_action.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow(), project=currently_open_project).show_project_form())
 
         actions.append(projects_overview_action)
-        actions.append(refresh_action)
+        # TODO if enabled, it causes freezing of the whole UI
+        # actions.append(refresh_action)
         actions.append(current_project_action)
 
         return actions
@@ -127,10 +130,6 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
             self.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_off.svg')))
 
         self.refresh()
-
-
-    def refresh_projects(self):
-        self.network_manager.projects_cache.refresh()
 
 
 class QFieldSyncGroupItem(QgsDataCollectionItem):
