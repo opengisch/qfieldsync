@@ -101,7 +101,7 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
 
         current_project_action = QAction(QIcon(), self.tr('Current Cloud Project'), parent)
         current_project_action.setEnabled(bool(currently_open_project))
-        current_project_action.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow(), project=currently_open_project).show())
+        current_project_action.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow(), project=currently_open_project).show_project_form())
 
         actions.append(projects_overview_action)
         actions.append(refresh_action)
@@ -174,8 +174,8 @@ class QFieldSyncGroupItem(QgsDataCollectionItem):
         actions = []
 
         create = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')), 'Create new project', parent)
+        create.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow()).show_project_form())
 
-        actions.append(refresh)
         actions.append(create)
 
         return actions
@@ -192,10 +192,10 @@ class QFieldSyncProjectItem(QgsDataItem):
         actions = []
 
         sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.png')), 'Sync', parent)
-        sync_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).ask_sync())
+        sync_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).sync())
 
         properties_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Project properties', parent)
-        properties_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).exec_())
+        properties_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).show_project_form())
 
         actions.append(sync_action)
         actions.append(properties_action)
