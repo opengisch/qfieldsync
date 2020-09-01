@@ -109,7 +109,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.authenticated.emit()
 
-        self.close()
+        self.done(QDialog.Accepted)
 
     def on_login_reply_finished(self, reply: QNetworkReply) -> None:
         if self.parent():
@@ -141,4 +141,4 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.authenticated.emit()
 
-        self.close()
+        self.done(QDialog.Accepted)
