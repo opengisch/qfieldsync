@@ -61,6 +61,7 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 class CloudNetworkAccessManager(QgsNetworkAccessManager):
     
     token_changed = pyqtSignal()
+    authenticated = pyqtSignal()
 
     def __init__(self, parent=None) -> None:
         """Constructor.
