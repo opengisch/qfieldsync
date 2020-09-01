@@ -83,6 +83,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         """Constructor."""
         super(CloudProjectsDialog, self).__init__(parent=parent)
         self.setupUi(self)
+        self.setWindowModality(Qt.WindowModal)
         self.preferences = Preferences()
         self.network_manager = network_manager
         self.current_cloud_project = project
@@ -130,9 +131,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectFilesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
-
-        if self.current_cloud_project:
-            self.show_project_form()
 
 
     def on_projects_cached_projects_started(self) -> None:
@@ -592,6 +590,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
 
     def show_project_form(self) -> None:
+        self.show()
+
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
         self.projectTabs.setCurrentWidget(self.projectFormTab)
 
@@ -725,7 +725,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog = CloudTransferDialog(self.project_transfer, self)
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
-        self.transfer_dialog.exec_()
+        self.transfer_dialog.show()
 
 
     def on_transfer_dialog_rejected(self) -> None:
