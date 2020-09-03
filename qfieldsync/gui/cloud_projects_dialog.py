@@ -132,6 +132,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectFilesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
 
+        self.projectFilesToggleExpandButton.clicked.connect(self.on_project_files_toggle_expand_button_clicked)
+
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
@@ -177,46 +179,98 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         print('on_projects_cached_project_files_error', project_id)
 
 
+    def on_project_files_toggle_expand_button_clicked(self) -> None:
+        should_expand = not self.projectFilesTree.topLevelItem(0).data(1, Qt.UserRole)
+        self.projectFilesTree.topLevelItem(0).setData(1, Qt.UserRole, should_expand)
+
+        for idx in range(self.projectFilesTree.topLevelItemCount()):
+            self.expand_state(self.projectFilesTree.topLevelItem(idx), should_expand)
+
+
+    def expand_state(self, item: QTreeWidgetItem, should_expand: bool) -> None:
+        item.setExpanded(should_expand)
+
+        for idx in range(item.childCount()):
+            child = item.child(idx)
+
+            if child.childCount() == 0:
+                continue
+
+            self.expand_state(child, should_expand)
+
+
     def on_projects_cached_project_files_updated(self, project_id: str) -> None:
         if not self.current_cloud_project or self.current_cloud_project.id != project_id:
             return
 
         self.projectFilesTab.setEnabled(True)
 
+
+        # NOTE algorithmic part
+        # ##########
+        # The "cloud_files" objects are assumed to be sorted alphabetically by name.
+        # First split filenames into parts. For example: '/home/ninja.file' will result into ['home', 'ninja.file'] parts.
+        # Then store pairs of the part and the corresponding QTreeWidgetItem in a stack. 
+        # Pop and push to the stack when the current filename part does not match the previous one.
+        # ##########
+        stack = []
+
         for project_file in self.current_cloud_project.get_files(ProjectFileCheckout.Cloud):
             assert isinstance(project_file.versions, list)
 
-            file_item = QTreeWidgetItem()
+            parts = tuple(project_file.path.parts)
+            for part_idx, part in enumerate(parts):
+                if len(stack) > part_idx and stack[part_idx][0] == part:
+                    continue
+                else:
+                    stack = stack[0:part_idx]
 
-            file_item.setText(0, project_file.name)
-            file_item.setText(1, str(project_file.size))
-            file_item.setTextAlignment(1, Qt.AlignRight)
-            file_item.setText(2, project_file.created_at)
+                item = QTreeWidgetItem()
+                item.setText(0, part)
 
-            for version_idx, version_obj in enumerate(project_file.versions):
-                version_item = QTreeWidgetItem()
+                stack.append((part, item))
 
-                version_item.setData(0, Qt.UserRole, version_obj)
-                version_item.setText(0, 'Version {}'.format(version_idx + 1))
-                version_item.setText(1, str(version_obj['size']))
-                version_item.setTextAlignment(1, Qt.AlignRight)
-                version_item.setText(2, version_obj['created_at'])
-                
-                save_as_btn = QPushButton()
-                save_as_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_download.svg')))
-                save_as_btn.clicked.connect(self.on_save_as_btn_version_clicked(project_file, version_idx))
-                save_as_widget = QWidget()
-                save_as_layout = QHBoxLayout()
-                save_as_layout.setAlignment(Qt.AlignCenter)
-                save_as_layout.setContentsMargins(0, 0, 0, 0)
-                save_as_layout.addWidget(save_as_btn)
-                save_as_widget.setLayout(save_as_layout)
+                if len(stack) == 1:
+                    self.projectFilesTree.addTopLevelItem(item)
+                else:
+                    stack[-2][1].addChild(stack[-1][1])
 
-                file_item.addChild(version_item)
+                # the length of the stack and the parts is equal for file entries
+                if len(stack) == len(parts):
+                    item.setToolTip(0, project_file.name)
+                    item.setData(0, Qt.UserRole, project_file)
+                    
+                    item.setText(1, str(project_file.size))
+                    item.setTextAlignment(1, Qt.AlignRight)
+                    item.setText(2, project_file.created_at)
 
-                self.projectFilesTree.setItemWidget(version_item, 3, save_as_widget)
+                    for version_idx, version_obj in enumerate(project_file.versions):
+                        version_item = QTreeWidgetItem()
 
-            self.projectFilesTree.addTopLevelItem(file_item)
+                        version_item.setData(0, Qt.UserRole, version_obj)
+                        version_item.setText(0, 'Version {}'.format(version_idx + 1))
+                        version_item.setText(1, str(version_obj['size']))
+                        version_item.setTextAlignment(1, Qt.AlignRight)
+                        version_item.setText(2, version_obj['created_at'])
+                        
+                        save_as_btn = QPushButton()
+                        save_as_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_download.svg')))
+                        save_as_btn.clicked.connect(self.on_save_as_btn_version_clicked(project_file, version_idx))
+                        save_as_widget = QWidget()
+                        save_as_layout = QHBoxLayout()
+                        save_as_layout.setAlignment(Qt.AlignCenter)
+                        save_as_layout.setContentsMargins(0, 0, 0, 0)
+                        save_as_layout.addWidget(save_as_btn)
+                        save_as_widget.setLayout(save_as_layout)
+
+                        item.addChild(version_item)
+
+                        self.projectFilesTree.setItemWidget(version_item, 3, save_as_widget)
+                else:
+                    item.setExpanded(True)
+
+                    # TODO make a fancy button that marks all the child items as checked or not
+        # NOTE END algorithmic part
 
 
     @closure
