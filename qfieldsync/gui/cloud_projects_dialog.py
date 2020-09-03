@@ -656,7 +656,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.current_cloud_project is None:
             self.projectTabs.setTabEnabled(1, False)
             self.projectTabs.setTabEnabled(2, False)
-            self.projectNameLineEdit.setText('')
+            self.projectNameLineEdit.setText(to_cloud_title(QgsProject.instance().title()))
             self.projectDescriptionTextEdit.setPlainText('')
             self.projectIsPrivateCheckBox.setChecked(True)
 
@@ -668,7 +668,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         else:
             self.projectTabs.setTabEnabled(1, True)
             self.projectTabs.setTabEnabled(2, True)
-            # TODO use current project name from project proterties by default
             # TODO validate project name to match QFieldCloudRequirements
             self.projectNameLineEdit.setText(self.current_cloud_project.name)
             self.projectDescriptionTextEdit.setPlainText(self.current_cloud_project.description)
