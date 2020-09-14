@@ -1,5 +1,4 @@
 import os
-from qfieldsync.core.cloud_project import CloudProject
 import shutil
 import json
 
@@ -70,9 +69,6 @@ class SyncAction(object):
     # remove from the project
     REMOVE = "remove"
 
-    # acts like "NO_ACTION", but the layer is going to be synced via deltas in QField
-    CLOUD = "cloud"
-
 
 class LayerSource(object):
 
@@ -128,14 +124,12 @@ class LayerSource(object):
 
     @property
     def default_action(self):
-        is_cloud_project = CloudProject.is_cloud_project()
-
         if self.is_file:
-            return SyncAction.CLOUD if is_cloud_project else SyncAction.NO_ACTION
+            return SyncAction.NO_ACTION 
         elif not self.is_supported:
             return SyncAction.REMOVE
         elif self.layer.providerType() == 'postgres':
-            return SyncAction.CLOUD if is_cloud_project else SyncAction.OFFLINE
+            return SyncAction.OFFLINE
         else:
             return SyncAction.NO_ACTION
 
@@ -157,23 +151,15 @@ class LayerSource(object):
     @property
     def available_actions(self):
         actions = list()
-        is_cloud_project = CloudProject.is_cloud_project()
 
-        if is_cloud_project:
-            if self.layer.type() == QgsMapLayer.VectorLayer:
-                actions.append((SyncAction.CLOUD, QCoreApplication.translate('LayerAction', 'Cloud')))
-
-            if not self.is_file:
-                actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'No Action')))
+        if self.is_file and not self.storedInlocalizedDataPath:
+            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'Copy')))
+            actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'Keep Existent (Copy If Missing)')))
         else:
-            if self.is_file and not self.storedInlocalizedDataPath:
-                actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'Copy')))
-                actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'Keep Existent (Copy If Missing)')))
-            else:
-                actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'No Action')))
+            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'No Action')))
 
-            if self.layer.type() == QgsMapLayer.VectorLayer:
-                actions.append((SyncAction.OFFLINE, QCoreApplication.translate('LayerAction', 'Offline Editing')))
+        if self.layer.type() == QgsMapLayer.VectorLayer:
+            actions.append((SyncAction.OFFLINE, QCoreApplication.translate('LayerAction', 'Offline Editing')))
 
         actions.append((SyncAction.REMOVE, QCoreApplication.translate('LayerAction', 'Remove')))
 
