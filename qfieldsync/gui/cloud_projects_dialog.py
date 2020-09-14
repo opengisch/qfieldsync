@@ -293,7 +293,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         reply = self.network_manager.get_file(
             self.current_cloud_project.id + '/' + str(project_file.name) + '/', 
             str(version_dest_filename), 
-            project_file.versions[version_idx]['created_at'])
+            project_file.versions[version_idx]['version_id'])
         reply.downloadProgress.connect(lambda r, t: self.on_download_file_progress(reply, r, t, project_file=project_file))
         reply.finished.connect(lambda: self.on_download_file_finished(reply, project_file=project_file))
 
