@@ -147,7 +147,7 @@ class OfflineConverter(QObject):
                     if self.project_configuration.offline_copy_only_aoi:
                         layer.selectByRect(self.extent)
                     self.__offline_layers.append(layer)
-                elif layer_source.action == SyncAction.NO_ACTION or layer_source.action == SyncAction.CLOUD:
+                elif layer_source.action == SyncAction.NO_ACTION:
                     copied_files = layer_source.copy(self.export_folder, copied_files)
                 elif layer_source.action == SyncAction.KEEP_EXISTENT:
                     layer_source.copy(self.export_folder, copied_files, True)
