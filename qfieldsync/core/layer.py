@@ -56,11 +56,14 @@ class SyncAction(object):
     # Take an offline editing copy of this layer
     OFFLINE = "offline"
 
-    # No action will in general leave the source untouched.
-    # For file based layers, the source
+    # No action for online DB layers
+    # - will in general leave the source untouched
+    NO_ACTION = "no_action"
+
+    # Copy action for file based layers
     # - will be made relative
     # - the file(s) will be copied
-    NO_ACTION = "no_action"
+    COPY = 'copy'
 
     # Keep already copied data or files if existent
     KEEP_EXISTENT = 'keep_existent'
@@ -124,7 +127,7 @@ class LayerSource(object):
     @property
     def default_action(self):
         if self.is_file:
-            return SyncAction.NO_ACTION 
+            return SyncAction.COPY
         elif not self.is_supported:
             return SyncAction.REMOVE
         elif self.layer.providerType() == 'postgres':
@@ -152,7 +155,7 @@ class LayerSource(object):
         actions = list()
 
         if self.is_file and not self.storedInlocalizedDataPath:
-            actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'Copy')))
+            actions.append((SyncAction.COPY, QCoreApplication.translate('LayerAction', 'Copy')))
             actions.append((SyncAction.KEEP_EXISTENT, QCoreApplication.translate('LayerAction', 'Keep Existent (Copy If Missing)')))
         else:
             actions.append((SyncAction.NO_ACTION, QCoreApplication.translate('LayerAction', 'No Action')))
