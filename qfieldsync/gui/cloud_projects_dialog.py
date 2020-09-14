@@ -251,7 +251,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         version_item.setText(0, 'Version {}'.format(version_idx + 1))
                         version_item.setText(1, str(version_obj['size']))
                         version_item.setTextAlignment(1, Qt.AlignRight)
-                        version_item.setText(2, version_obj['created_at'])
+                        version_item.setText(2, version_obj['last_modified'])
                         
                         save_as_btn = QPushButton()
                         save_as_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_download.svg')))
