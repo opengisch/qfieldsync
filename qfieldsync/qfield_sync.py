@@ -236,7 +236,7 @@ class QFieldSync(object):
 
         if Qgis.QGIS_VERSION_INT >= 31500:
             self.project_properties_factory = QFieldSyncProjectPropertiesFactory()
-            self.project_properties_factory.setTitle('QFieldSync')
+            self.project_properties_factory.setTitle('QField')
             self.iface.registerProjectPropertiesWidgetFactory(self.project_properties_factory)
 
         self.update_button_enabled_status()
