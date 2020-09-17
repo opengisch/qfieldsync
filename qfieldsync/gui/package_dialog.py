@@ -177,8 +177,11 @@ class PackageDialog(QDialog, DialogUi):
             self.informationStack.setCurrentWidget(self.progressPage)
 
     def show_settings(self):
-        dlg = ProjectConfigurationDialog(self.iface, self.iface.mainWindow())
-        dlg.exec_()
+        if Qgis.QGIS_VERSION_INT >= 31500:
+            self.iface.showProjectPropertiesDialog('QField')
+        else:
+            dlg = ProjectConfigurationDialog(self.iface.mainWindow())
+            dlg.exec_()
         self.update_info_visibility()
 
     @pyqtSlot(int, int, str)
