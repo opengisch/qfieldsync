@@ -22,24 +22,33 @@
 """
 
 import os
+
 from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.uic import loadUiType
-from qgis.gui import QgsFileWidget
+
+from qgis.gui import (
+    QgsOptionsWidgetFactory,
+    QgsOptionsPageWidget,
+    QgsFileWidget,
+)
+
 from qfieldsync.setting_manager import SettingDialog, UpdateMode
 from qfieldsync.core.preferences import Preferences
 
-DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/preferences_dialog.ui'))
+WidgetUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/preferences_widget.ui'))
 
 
-class PreferencesDialog(QDialog, DialogUi, SettingDialog):
+class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
 
     def __init__(self, parent=None):
         preferences = Preferences()
-        super(PreferencesDialog, self).__init__(parent=parent)
-        SettingDialog.__init__(self, setting_manager=preferences, mode=UpdateMode.DialogAccept)
+        SettingDialog.__init__(self, setting_manager=preferences)
+        super().__init__(parent, setting_manager=preferences)
         self.setupUi(self)
         self.init_widgets()
 
         self.setting_widget('importDirectory').widget.setStorageMode(QgsFileWidget.GetDirectory)
         self.setting_widget('exportDirectory').widget.setStorageMode(QgsFileWidget.GetDirectory)
 
+    def apply(self):
+        self.set_values_from_widgets()
