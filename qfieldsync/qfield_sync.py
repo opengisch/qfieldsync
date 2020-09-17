@@ -103,7 +103,7 @@ class QFieldSync(object):
         self.toolbar.setObjectName('QFieldSync')
 
         # instance of the map config widget factory, shown in layer properties
-        self.mapLayerConfigWidgetFactory = MapLayerConfigWidgetFactory('QField', QIcon(os.path.join(os.path.dirname(__file__), 'resources/icon.png')))
+        self.mapLayerConfigWidgetFactory = MapLayerConfigWidgetFactory('QField', QIcon(os.path.join(os.path.dirname(__file__), 'resources/qfield_logo.svg')))
 
         # instance of the QgsOfflineEditing
         self.offline_editing = QgsOfflineEditing()
