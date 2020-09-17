@@ -42,7 +42,7 @@ from qgis.gui import (
 )
 
 from qfieldsync.gui.package_dialog import PackageDialog
-from qfieldsync.gui.preferences_dialog import PreferencesDialog
+from qfieldsync.gui.preferences_widget import PreferencesWidget
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_widget import ProjectConfigurationWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
@@ -62,6 +62,18 @@ class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
 
     def createWidget(self, parent):
         return ProjectConfigurationWidget(parent)
+
+
+class QFieldSyncOptionsFactory(QgsOptionsWidgetFactory):
+
+    def __init__(self):
+        super(QgsOptionsWidgetFactory, self).__init__()
+
+    def icon(self):
+        return QIcon(os.path.join(os.path.dirname(__file__),'resources','qfield_logo.svg'))
+
+    def createWidget(self, parent):
+        return PreferencesWidget(parent)
 
 
 class QFieldSync(object):
@@ -238,6 +250,9 @@ class QFieldSync(object):
             self.project_properties_factory = QFieldSyncProjectPropertiesFactory()
             self.project_properties_factory.setTitle('QField')
             self.iface.registerProjectPropertiesWidgetFactory(self.project_properties_factory)
+        self.options_factory = QFieldSyncOptionsFactory()
+        self.options_factory.setTitle(self.tr('QField'))
+        self.iface.registerOptionsWidgetFactory(self.options_factory)
 
         self.update_button_enabled_status()
 
@@ -255,10 +270,10 @@ class QFieldSync(object):
 
         if Qgis.QGIS_VERSION_INT >= 31500:
             self.iface.unregisterProjectPropertiesWidgetFactory(self.project_properties_factory)
+        self.iface.unregisterOptionsWidgetFactory(self.options_factory)
 
     def show_preferences_dialog(self):
-        dlg = PreferencesDialog(self.iface.mainWindow())
-        dlg.exec_()
+        self.iface.showOptionsDialog(self.iface.mainWindow(), currentPage='QFieldPreferences')
 
     def show_synchronize_dialog(self):
         """
