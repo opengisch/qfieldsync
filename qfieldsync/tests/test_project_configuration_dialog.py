@@ -36,5 +36,5 @@ class ProjectConfigurationDialogTest(unittest.TestCase):
     def test_open_dialog(self):
         offline_editing = QgsOfflineEditing()
 
-        dlg = ProjectConfigurationDialog(self.iface)
+        dlg = ProjectConfigurationDialog()
         dlg.show()
