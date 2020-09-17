@@ -285,7 +285,7 @@ class QFieldSync(object):
         Show the project configuration dialog.
         """
         if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.showProjectPropertiesDialog('QFieldSync')
+            self.iface.showProjectPropertiesDialog('QField')
         else:
             dlg = ProjectConfigurationDialog(self.iface.mainWindow())
             dlg.exec_()
