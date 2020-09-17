@@ -34,13 +34,34 @@ from qgis.PyQt.QtCore import (
 )
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
-from qgis.core import QgsOfflineEditing, QgsProject
+from qgis.core import Qgis, QgsOfflineEditing, QgsProject
+
+from qgis.gui import (
+    QgsOptionsWidgetFactory,
+    QgsOptionsPageWidget,
+)
 
 from qfieldsync.gui.package_dialog import PackageDialog
 from qfieldsync.gui.preferences_dialog import PreferencesDialog
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
+from qfieldsync.gui.project_configuration_widget import ProjectConfigurationWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
+
+
+class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
+    """
+    Factory class for QFieldSync project properties widget
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def icon(self):
+        return QIcon(os.path.join(os.path.dirname(__file__),'resources','qfield_logo.svg'))
+
+    def createWidget(self, parent):
+        return ProjectConfigurationWidget(parent)
 
 
 class QFieldSync(object):
@@ -213,6 +234,11 @@ class QFieldSync(object):
 
         self.iface.registerMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
 
+        if Qgis.QGIS_VERSION_INT >= 31500:
+            self.project_properties_factory = QFieldSyncProjectPropertiesFactory()
+            self.project_properties_factory.setTitle('QFieldSync')
+            self.iface.registerProjectPropertiesWidgetFactory(self.project_properties_factory)
+
         self.update_button_enabled_status()
 
     def unload(self):
@@ -226,6 +252,9 @@ class QFieldSync(object):
         del self.toolbar
 
         self.iface.unregisterMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
+
+        if Qgis.QGIS_VERSION_INT >= 31500:
+            self.iface.unregisterProjectPropertiesWidgetFactory(self.project_properties_factory)
 
     def show_preferences_dialog(self):
         dlg = PreferencesDialog(self.iface.mainWindow())
@@ -255,8 +284,11 @@ class QFieldSync(object):
         """
         Show the project configuration dialog.
         """
-        dlg = ProjectConfigurationDialog(self.iface, self.iface.mainWindow())
-        dlg.exec_()
+        if Qgis.QGIS_VERSION_INT >= 31500:
+            self.iface.showProjectPropertiesDialog('QFieldSync')
+        else:
+            dlg = ProjectConfigurationDialog(self.iface.mainWindow())
+            dlg.exec_()
 
     def action_start(self):
         self.clear_last_action_warnings()
