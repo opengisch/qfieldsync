@@ -34,7 +34,7 @@ from qgis.PyQt.QtCore import (
 )
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
-from qgis.core import Qgis, QgsOfflineEditing, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsOfflineEditing, QgsProject
 
 from qgis.gui import (
     QgsOptionsWidgetFactory,
@@ -218,27 +218,31 @@ class QFieldSync(object):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         self.push_action = self.add_action(
-            os.path.join(os.path.dirname(__file__), 'resources/refresh.png'),
+            QIcon(os.path.join(os.path.dirname(__file__), 'resources/package.svg')),
             text=self.tr('Package for QField'),
             callback=self.show_package_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
-            os.path.join(os.path.dirname(__file__), 'resources/refresh-reverse.png'),
+            QIcon(os.path.join(os.path.dirname(__file__), 'resources/synchronize.svg')),
             text=self.tr('Synchronize from QField'),
             callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow())
 
         self.add_action(
-            os.path.join(os.path.dirname(__file__), './resources/icon.png'),
-            text=self.tr('Project Configuration'),
+            QIcon(os.path.join(os.path.dirname(__file__), './resources/project_properties.svg')),
+            text=self.tr('Configure Current Project'),
             callback=self.show_project_configuration_dialog,
             parent=self.iface.mainWindow(),
-            add_to_toolbar=False
         )
 
+        actions = self.iface.pluginMenu().actions()
+        for action in actions:
+            if action.text() == self.menu:
+                action.menu().addSeparator()
+
         self.add_action(
-            os.path.join(os.path.dirname(__file__), './resources/icon.png' ),
+            QgsApplication.getThemeIcon("/mActionOptions.svg"),
             text=self.tr('Preferences'),
             callback=self.show_preferences_dialog,
             parent=self.iface.mainWindow(),
