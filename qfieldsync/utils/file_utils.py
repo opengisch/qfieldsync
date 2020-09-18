@@ -31,6 +31,7 @@ from pathlib import Path
 
 from qfieldsync.utils.exceptions import NoProjectFoundError, QFieldSyncError
 
+from qgis.PyQt.QtCore import QCoreApplication
 
 def fileparts(fn, extension_dot=True):
     path = os.path.dirname(fn)
@@ -46,7 +47,7 @@ def fileparts(fn, extension_dot=True):
 def get_children_with_extension(parent, specified_ext, count=1):
     if not os.path.isdir(parent):
         raise QFieldSyncError(
-            "The directory {} could not be found".format(parent))
+            QCoreApplication.translate("QFieldFileUtils","The directory {} could not be found").format(parent))
 
     res = []
     extension_dot = specified_ext.startswith(".")
@@ -56,8 +57,8 @@ def get_children_with_extension(parent, specified_ext, count=1):
             res.append(os.path.join(parent, fn))
     if len(res) != count:
         raise QFieldSyncError(
-            "Expected {} children with extension {} under {}, got {}".format(
-                count, specified_ext, parent, len(res)))
+            QCoreApplication.translate("QFieldFileUtils","Expected {expected_count} children with extension {file_extension} under {parent}, got {real_count}").format(
+                expected_count=count, file_extension=specified_ext, parent=parent, real_count=len(res)))
 
     return res
 
