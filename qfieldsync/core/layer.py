@@ -166,11 +166,8 @@ class LayerSource(object):
 
     @property
     def is_supported(self):
-        # jpeg 2000
-        if self.layer.source().endswith(('jp2', 'jpx')):
-            return False
         # ecw raster
-        elif self.layer.source().endswith('ecw'):
+        if self.layer.source().endswith('ecw'):
             return False
         else:
             return True
@@ -189,13 +186,9 @@ class LayerSource(object):
 
     @property
     def warning(self):
-        if self.layer.source().endswith(('jp2', 'jpx')):
-            return QCoreApplication.translate('DataSourceWarning',
-                                              'JPEG2000 layers are not supported by QField.'
-                                              )
         if self.layer.source().endswith('ecw'):
             return QCoreApplication.translate('DataSourceWarning',
-                                              'ECW layers are not supported by QField.<br>')
+                                              'ECW layers are not supported by QField.')
         return None
 
     @property
