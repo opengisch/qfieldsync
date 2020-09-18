@@ -191,13 +191,11 @@ class LayerSource(object):
     def warning(self):
         if self.layer.source().endswith(('jp2', 'jpx')):
             return QCoreApplication.translate('DataSourceWarning',
-                                              'JPEG2000 layers are not supported by QField.<br>You can rasterize '
-                                              'them as basemap.'
+                                              'JPEG2000 layers are not supported by QField.'
                                               )
         if self.layer.source().endswith('ecw'):
             return QCoreApplication.translate('DataSourceWarning',
-                                              'ECW layers are not supported by QField.<br>You can rasterize them '
-                                              'as basemap.')
+                                              'ECW layers are not supported by QField.<br>')
         return None
 
     @property
