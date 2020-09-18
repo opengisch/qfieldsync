@@ -147,8 +147,13 @@ class OfflineConverter(QObject):
                                 continue
 
                 if layer_source.action == SyncAction.OFFLINE:
-                    if self.project_configuration.offline_copy_only_aoi:
+                    if self.project_configuration.offline_copy_only_aoi and not self.project_configuration.offline_copy_only_selected_features:
                         layer.selectByRect(self.extent)
+                    elif self.project_configuration.offline_copy_only_aoi and self.project_configuration.offline_copy_only_selected_features:
+                        # This option is only possible via API
+                        QgsApplication.instance().messageLog().logMessage(self.tr(
+                            'Both "Area of Interest" and "only selected features" options were enabled, tha latter takes precedence.'),
+                            'QFieldSync')
                     self.__offline_layers.append(layer)
                 elif layer_source.action == SyncAction.NO_ACTION:
                     copied_files = layer_source.copy(self.export_folder, copied_files)
@@ -173,9 +178,11 @@ class OfflineConverter(QObject):
                 gpkg_filename = "data.gpkg"
                 if self.__offline_layers:
                     offline_layer_ids = [l.id() for l in self.__offline_layers]
+                    only_selected = self.project_configuration.offline_copy_only_aoi or self.project_configuration.offline_copy_only_selected_features
                     if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
                                                                         offline_layer_ids,
-                                                                        self.project_configuration.offline_copy_only_aoi, self.offline_editing.GPKG):
+                                                                        only_selected,
+                                                                        self.offline_editing.GPKG):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             except AttributeError:
@@ -183,9 +190,10 @@ class OfflineConverter(QObject):
                 spatialite_filename = "data.sqlite"
                 if self.__offline_layers:
                     offline_layer_ids = [l.id() for l in self.__offline_layers]
+                    only_selected = self.project_configuration.offline_copy_only_aoi or self.project_configuration.offline_copy_only_selected_features
                     if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
                                                                         offline_layer_ids,
-                                                                        self.project_configuration.offline_copy_only_aoi):
+                                                                        only_selected):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             # Disable project options that could create problems on a portable

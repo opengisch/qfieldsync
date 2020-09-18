@@ -12,6 +12,7 @@ class ProjectProperties(object):
     BASE_MAP_TILE_SIZE = '/baseMapTileSize'
     BASE_MAP_MUPP = '/baseMapMupp'
     OFFLINE_COPY_ONLY_AOI = '/offlineCopyOnlyAoi'
+    OFFLINE_COPY_ONLY_SELECTED_FEATURES = '/offlineCopyOnlySelectedFeatures'
     ORIGINAL_PROJECT_PATH = '/originalProjectPath'
     IMPORTED_FILES_CHECKSUMS = '/importedFilesChecksums'
 
@@ -101,6 +102,16 @@ class ProjectConfiguration(object):
     @offline_copy_only_aoi.setter
     def offline_copy_only_aoi(self, value):
         self.project.writeEntry('qfieldsync', ProjectProperties.OFFLINE_COPY_ONLY_AOI, value)
+
+    @property
+    def offline_copy_only_selected_features(self):
+        offline_copy_only_selected_features, _ = self.project.readBoolEntry('qfieldsync',
+                                                                            ProjectProperties.OFFLINE_COPY_ONLY_SELECTED_FEATURES)
+        return offline_copy_only_selected_features
+
+    @offline_copy_only_selected_features.setter
+    def offline_copy_only_selected_features(self, value):
+        self.project.writeEntry('qfieldsync', ProjectProperties.OFFLINE_COPY_ONLY_SELECTED_FEATURES, value)
 
     @property
     def original_project_path(self):
