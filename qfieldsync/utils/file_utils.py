@@ -44,6 +44,10 @@ def fileparts(fn, extension_dot=True):
 
 
 def get_children_with_extension(parent, specified_ext, count=1):
+    if not os.path.isdir(parent):
+        raise QFieldSyncError(
+            "The directory {} could not be found".format(parent))
+
     res = []
     extension_dot = specified_ext.startswith(".")
     for fn in os.listdir(parent):
