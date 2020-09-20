@@ -131,6 +131,11 @@ class OfflineConverter(QObject):
                 self.total_progress_updated.emit(current_layer_index - len(self.__offline_layers), len(self.__layers),
                                                  self.trUtf8('Copying layers…'))
 
+                layer_source = LayerSource(layer)
+                if not layer_source.is_supported:
+                     project.removeMapLayer(layer)
+                     continue
+
                 if layer.dataProvider() is not None:
                     md = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
                     if md is not None:
@@ -140,8 +145,6 @@ class OfflineConverter(QObject):
                             if path.startswith("localized:"):
                                 # Layer stored in localized data path, skip
                                 continue
-
-                layer_source = LayerSource(layer)
 
                 if layer_source.action == SyncAction.OFFLINE:
                     if self.project_configuration.offline_copy_only_aoi:

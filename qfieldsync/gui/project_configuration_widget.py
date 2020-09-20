@@ -94,8 +94,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.layersTable.setSortingEnabled(False)
         for layer in self.project.mapLayers().values():
             layer_source = LayerSource(layer)
-            if not layer_source.is_supported:
-                self.unsupportedLayersList.append(layer_source)
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer.name())
@@ -121,6 +119,13 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
             self.layersTable.setCellWidget(count, 1, cbx_widget)
             self.layersTable.setCellWidget(count, 2, cmb)
+
+            if not layer_source.is_supported:
+                self.unsupportedLayersList.append(layer_source)
+                self.layersTable.item(count,0).setFlags(Qt.NoItemFlags)
+                self.layersTable.cellWidget(count,1).setEnabled(False)
+                self.layersTable.cellWidget(count,2).setEnabled(False)
+                cmb.setCurrentIndex(cmb.findData(SyncAction.REMOVE))
 
             # make sure layer_source is the same instance everywhere
             self.photoNamingTable.addLayerFields(layer_source)
@@ -156,17 +161,12 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.onlyOfflineCopyFeaturesInAoi.setChecked(self.__project_configuration.offline_copy_only_aoi)
 
         if self.unsupportedLayersList:
-            self.unsupportedLayers.setVisible(True)
+            self.unsupportedLayersLabel.setVisible(True)
 
-            unsupported_layers_text = '<b>{}</b><br>'.format(self.tr('Warning'))
-            unsupported_layers_text += self.tr("There are unsupported layers in your project. They will not be available on QField.")
-
-            unsupported_layers_text += '<ul>'
-            for layer in self.unsupportedLayersList:
-                unsupported_layers_text += '<li>' + '<b>' + layer.name + ':</b> ' + layer.warning
-            unsupported_layers_text += '<ul>'
-
-            self.unsupportedLayers.setText(unsupported_layers_text)
+            unsupported_layers_text = '<b>{}: </b>'.format(self.tr('Warning'))
+            unsupported_layers_text += self.tr("There are unsupported layers in your project which will not be available in QField.")
+            unsupported_layers_text += self.tr(" If needed, you can create a Base Map to include those layers in your packaged project.")
+            self.unsupportedLayersLabel.setText(unsupported_layers_text)
 
     def apply(self):
         """
