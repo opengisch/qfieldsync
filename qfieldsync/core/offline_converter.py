@@ -107,6 +107,11 @@ class OfflineConverter(QObject):
             original_layer_info = {}
             for layer in self.__layers:
                 original_layer_info[layer.id()] = (layer.source(), layer.name())
+            original_pk_fields_by_layer_name = {}
+            for layer in self.__layers:
+                if layer.type() == QgsMapLayer.VectorLayer:
+                    original_pk_fields_by_layer_name[layer.name()] = ','.join(
+                        [layer.fields()[x].name() for x in layer.primaryKeyAttributes()])
 
             self.total_progress_updated.emit(0, 1, self.trUtf8('Creating base map…'))
             # Create the base map before layers are removed
@@ -211,6 +216,19 @@ class OfflineConverter(QObject):
                 # check if value relations point to offline layers and adjust if necessary
                 for layer in project.mapLayers().values():
                     if layer.type() == QgsMapLayer.VectorLayer:
+
+                        # Before QGIS 3.14 the custom properties of a layer are not
+                        # kept into the new layer during the conversion to offline project
+                        # So we try to identify the new created layer by its name and
+                        # we set the custom properties again.
+                        if not layer.customProperty('QFieldSync/cloudPrimaryKeys'):
+                            original_layer_name = layer.name().rsplit(' ', 1)[0]
+                            stored_fields = original_pk_fields_by_layer_name.get(original_layer_name, None)
+                            if stored_fields:
+                                layer.setCustomProperty(
+                                    'QFieldSync/cloudPrimaryKeys',
+                                    stored_fields)
+
                         for field in layer.fields():
                             ews = field.editorWidgetSetup()
                             if ews.type() == 'ValueRelation':
