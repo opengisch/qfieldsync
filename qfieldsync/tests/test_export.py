@@ -94,7 +94,7 @@ class OfflineConverterTest(unittest.TestCase):
 
         exported_project = self.load_project(os.path.join(export_folder, 'project_qfield.qgs'))
         layer = exported_project.mapLayersByName('somedata (offline)')[0]
-        self.assertEqual(layer.customProperties().value('QFieldSync/cloudPrimaryKeys'), 'pk')
+        self.assertEqual(layer.customProperty('QFieldSync/cloudPrimaryKeys'), 'pk')
 
         shutil.rmtree(export_folder)
         shutil.rmtree(source_folder)
