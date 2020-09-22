@@ -107,11 +107,19 @@ class OfflineConverter(QObject):
             original_layer_info = {}
             for layer in self.__layers:
                 original_layer_info[layer.id()] = (layer.source(), layer.name())
+
+            # We store the pks of the original vector layers
+            # and we check that the primary key fields names don't
+            # have a comma in the name
             original_pk_fields_by_layer_name = {}
             for layer in self.__layers:
                 if layer.type() == QgsMapLayer.VectorLayer:
-                    original_pk_fields_by_layer_name[layer.name()] = ','.join(
-                        [layer.fields()[x].name() for x in layer.primaryKeyAttributes()])
+                    keys = []
+                    for idx in layer.primaryKeyAttributes():
+                        key = layer.fields()[idx].name()
+                        assert (',' not in key), 'Comma in field names not allowed'
+                        keys.append(key)
+                    original_pk_fields_by_layer_name[layer.name()] = ','.join(keys)
 
             self.total_progress_updated.emit(0, 1, self.trUtf8('Creating base map…'))
             # Create the base map before layers are removed
