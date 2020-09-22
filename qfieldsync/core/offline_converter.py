@@ -155,6 +155,12 @@ class OfflineConverter(QObject):
                             'Both "Area of Interest" and "only selected features" options were enabled, tha latter takes precedence.'),
                             'QFieldSync')
                     self.__offline_layers.append(layer)
+
+                    # Store the primary key field name(s) as comma separated custom property
+                    if layer.type() == QgsMapLayer.VectorLayer:
+                        key_fields = ','.join([layer.fields()[x].name() for x in layer.primaryKeyAttributes()])
+                        layer.setCustomProperty('QFieldSync/cloudPrimaryKeys', key_fields)
+
                 elif layer_source.action == SyncAction.NO_ACTION:
                     copied_files = layer_source.copy(self.export_folder, copied_files)
                 elif layer_source.action == SyncAction.KEEP_EXISTENT:
