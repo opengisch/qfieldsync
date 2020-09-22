@@ -108,6 +108,19 @@ class OfflineConverter(QObject):
             for layer in self.__layers:
                 original_layer_info[layer.id()] = (layer.source(), layer.name())
 
+            # We store the pks of the original vector layers
+            # and we check that the primary key fields names don't
+            # have a comma in the name
+            original_pk_fields_by_layer_name = {}
+            for layer in self.__layers:
+                if layer.type() == QgsMapLayer.VectorLayer:
+                    keys = []
+                    for idx in layer.primaryKeyAttributes():
+                        key = layer.fields()[idx].name()
+                        assert (',' not in key), 'Comma in field names not allowed'
+                        keys.append(key)
+                    original_pk_fields_by_layer_name[layer.name()] = ','.join(keys)
+
             self.total_progress_updated.emit(0, 1, self.trUtf8('Creating base map…'))
             # Create the base map before layers are removed
             if self.project_configuration.create_base_map:
@@ -155,6 +168,12 @@ class OfflineConverter(QObject):
                             'Both "Area of Interest" and "only selected features" options were enabled, tha latter takes precedence.'),
                             'QFieldSync')
                     self.__offline_layers.append(layer)
+
+                    # Store the primary key field name(s) as comma separated custom property
+                    if layer.type() == QgsMapLayer.VectorLayer:
+                        key_fields = ','.join([layer.fields()[x].name() for x in layer.primaryKeyAttributes()])
+                        layer.setCustomProperty('QFieldSync/sourceDataPrimaryKeys', key_fields)
+
                 elif layer_source.action == SyncAction.NO_ACTION:
                     copied_files = layer_source.copy(self.export_folder, copied_files)
                 elif layer_source.action == SyncAction.KEEP_EXISTENT:
@@ -205,6 +224,19 @@ class OfflineConverter(QObject):
                 # check if value relations point to offline layers and adjust if necessary
                 for layer in project.mapLayers().values():
                     if layer.type() == QgsMapLayer.VectorLayer:
+
+                        # Before QGIS 3.14 the custom properties of a layer are not
+                        # kept into the new layer during the conversion to offline project
+                        # So we try to identify the new created layer by its name and
+                        # we set the custom properties again.
+                        if not layer.customProperty('QFieldSync/cloudPrimaryKeys'):
+                            original_layer_name = layer.name().rsplit(' ', 1)[0]
+                            stored_fields = original_pk_fields_by_layer_name.get(original_layer_name, None)
+                            if stored_fields:
+                                layer.setCustomProperty(
+                                    'QFieldSync/sourceDataPrimaryKeys',
+                                    stored_fields)
+
                         for field in layer.fields():
                             ews = field.editorWidgetSetup()
                             if ews.type() == 'ValueRelation':

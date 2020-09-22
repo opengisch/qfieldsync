@@ -78,3 +78,23 @@ class OfflineConverterTest(unittest.TestCase):
         project = QgsProject.instance()
         self.assertTrue(project.read(path))
         return project
+
+    def test_primary_keys_custom_property(self):
+        source_folder = tempfile.mkdtemp()
+        export_folder = tempfile.mkdtemp()
+        shutil.copytree(
+            os.path.join(test_data_folder(), 'pk_project'),
+            os.path.join(source_folder,'pk_project'))
+
+        project = self.load_project(os.path.join(source_folder, 'pk_project', 'project.qgs'))
+        extent = QgsRectangle()
+        offline_editing = QgsOfflineEditing()
+        offline_converter = OfflineConverter(project, export_folder, extent, offline_editing)
+        offline_converter.convert()
+
+        exported_project = self.load_project(os.path.join(export_folder, 'project_qfield.qgs'))
+        layer = exported_project.mapLayersByName('somedata (offline)')[0]
+        self.assertEqual(layer.customProperty('QFieldSync/sourceDataPrimaryKeys'), 'pk')
+
+        shutil.rmtree(export_folder)
+        shutil.rmtree(source_folder)
