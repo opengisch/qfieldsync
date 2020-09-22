@@ -164,7 +164,7 @@ class OfflineConverter(QObject):
                     # Store the primary key field name(s) as comma separated custom property
                     if layer.type() == QgsMapLayer.VectorLayer:
                         key_fields = ','.join([layer.fields()[x].name() for x in layer.primaryKeyAttributes()])
-                        layer.setCustomProperty('QFieldSync/cloudPrimaryKeys', key_fields)
+                        layer.setCustomProperty('QFieldSync/sourceDataPrimaryKeys', key_fields)
 
                 elif layer_source.action == SyncAction.NO_ACTION:
                     copied_files = layer_source.copy(self.export_folder, copied_files)
@@ -226,7 +226,7 @@ class OfflineConverter(QObject):
                             stored_fields = original_pk_fields_by_layer_name.get(original_layer_name, None)
                             if stored_fields:
                                 layer.setCustomProperty(
-                                    'QFieldSync/cloudPrimaryKeys',
+                                    'QFieldSync/sourceDataPrimaryKeys',
                                     stored_fields)
 
                         for field in layer.fields():
