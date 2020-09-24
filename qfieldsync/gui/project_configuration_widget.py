@@ -36,7 +36,6 @@ from qfieldsync.core.layer import LayerSource, SyncAction
 from qfieldsync.core.project import ProjectProperties
 from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
-from qfieldsync.core.cloud_api import login, logout, create_project, ProjectUploader, get_error_reason
 from qfieldsync.utils.cloud_utils import to_cloud_title
 
 
