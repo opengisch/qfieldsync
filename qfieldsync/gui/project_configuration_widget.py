@@ -96,8 +96,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.layersTable.setSortingEnabled(False)
         for layer in self.project.mapLayers().values():
             layer_source = LayerSource(layer)
-            if not layer_source.is_supported:
-                self.unsupportedLayersList.append(layer_source)
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer.name())
@@ -123,6 +121,13 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
             self.layersTable.setCellWidget(count, 1, cbx_widget)
             self.layersTable.setCellWidget(count, 2, cmb)
+
+            if not layer_source.is_supported:
+                self.unsupportedLayersList.append(layer_source)
+                self.layersTable.item(count,0).setFlags(Qt.NoItemFlags)
+                self.layersTable.cellWidget(count,1).setEnabled(False)
+                self.layersTable.cellWidget(count,2).setEnabled(False)
+                cmb.setCurrentIndex(cmb.findData(SyncAction.REMOVE))
 
             # make sure layer_source is the same instance everywhere
             self.photoNamingTable.addLayerFields(layer_source)
