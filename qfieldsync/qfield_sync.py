@@ -43,7 +43,6 @@ from qfieldsync.gui.preferences_widget import PreferencesWidget
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 from qfieldsync.gui.project_configuration_widget import ProjectConfigurationWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
-from qfieldsync.gui.qfield_cloud_dialog import QFieldCloudDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_browser_tree import DataItemProvider
