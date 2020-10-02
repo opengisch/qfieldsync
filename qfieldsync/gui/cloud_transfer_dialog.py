@@ -270,23 +270,29 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
     def _file_tree_set_checkboxes(self, checkout: ProjectFileCheckout) -> None:
         for item_idx in range(self.filesTree.topLevelItemCount()):
-            item = self.filesTree.topLevelItem(item_idx)
+            self._file_tree_set_checkboxes_recursive(self.filesTree.topLevelItem(item_idx), checkout)
 
-            project_file = item.data(0, Qt.UserRole)
 
-            if project_file:
-                assert item.childCount() == 0
-            
-            local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
-            cloud_checkbox = self.filesTree.itemWidget(item, 2).children()[1]
+    def _file_tree_set_checkboxes_recursive(self, item: QTreeWidgetItem, checkout: ProjectFileCheckout) -> None:
+        project_file = item.data(0, Qt.UserRole)
 
-            if checkout == ProjectFileCheckout.Local and local_checkbox.isEnabled():
-                local_checkbox.setChecked(True)
-            elif checkout == ProjectFileCheckout.Cloud and cloud_checkbox.isEnabled():
-                cloud_checkbox.setChecked(True)
-            elif checkout == ProjectFileCheckout.LocalAndCloud:
-                local_checkbox.setChecked(False)
-                cloud_checkbox.setChecked(False)
-            elif checkout == ProjectFileCheckout.Deleted:
-                # Reserved for a better future
-                pass
+        if project_file:
+            assert item.childCount() == 0
+        else:
+            for child_idx in range(item.childCount()):
+                self._file_tree_set_checkboxes_recursive(item.child(child_idx), checkout)
+            return
+
+        local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
+        cloud_checkbox = self.filesTree.itemWidget(item, 2).children()[1]
+
+        if checkout == ProjectFileCheckout.Local and local_checkbox.isEnabled():
+            local_checkbox.setChecked(True)
+        elif checkout == ProjectFileCheckout.Cloud and cloud_checkbox.isEnabled():
+            cloud_checkbox.setChecked(True)
+        elif checkout == ProjectFileCheckout.LocalAndCloud:
+            local_checkbox.setChecked(False)
+            cloud_checkbox.setChecked(False)
+        elif checkout == ProjectFileCheckout.Deleted:
+            # Reserved for a better future
+            pass
