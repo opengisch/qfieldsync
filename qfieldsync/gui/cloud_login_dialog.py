@@ -23,7 +23,7 @@
 import os
 
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtWidgets import QWidget, QDialog
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
@@ -36,7 +36,7 @@ CloudLoginDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../u
 
 class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
-    def __init__(self, network_manager, parent=None):
+    def __init__(self, network_manager: CloudNetworkAccessManager, parent: QWidget = None) -> None:
         """Constructor.
         """
         super(CloudLoginDialog, self).__init__(parent=parent)
@@ -46,6 +46,12 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.loginButton.clicked.connect(self.on_login_button_clicked)
         self.cancelButton.clicked.connect(lambda: self.close())
+
+        for server_url in self.network_manager.server_urls():
+            self.serverUrlCmb.addItem(server_url)
+
+        if self.network_manager.url:
+            self.serverUrlCmb.setCurrentText(self.network_manager.url)
 
 
     def authenticate(self) -> None:
@@ -80,8 +86,11 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.loginButton.setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
 
+        server_url = self.serverUrlCmb.currentText()
         username = self.usernameLineEdit.text()
         password = self.passwordLineEdit.text()
+
+        self.network_manager.set_url(server_url)
 
         reply = self.network_manager.login(username, password)
         reply.finished.connect(lambda: self.on_login_reply_finished(reply))

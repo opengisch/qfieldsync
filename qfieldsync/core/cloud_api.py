@@ -19,8 +19,9 @@
  ***************************************************************************/
 """
 
-from typing import Any, Dict, IO, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 import json
+import re
 import requests
 import urllib.parse
 
@@ -67,9 +68,14 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         """Constructor.
         """
         super(CloudNetworkAccessManager, self).__init__(parent=parent)
-        self.url = 'http://dev.qfield.cloud/api/v1/'
+
+        self.preferences = Preferences()
+        self.url = ''
         self._token = ''
         self.projects_cache = CloudProjectsCache(self, self)
+
+        # use the default URL
+        self.set_url(self.preferences.value('qfieldCloudServerUrl'))
 
 
     @staticmethod
@@ -108,6 +114,29 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         return payload
 
 
+    @staticmethod
+    def server_urls() -> List[str]:
+        return [
+            'https://app.qfield.cloud/',
+            'https://dev.qfield.cloud/',
+            'http://localhost:8000/',
+        ]
+
+
+    def set_url(self, server_url: str) -> None:
+        if not server_url:
+            server_url = CloudNetworkAccessManager.server_urls()[0]
+
+        self.url = server_url
+        self.preferences.set_value('qfieldCloudServerUrl', server_url)
+
+
+    @property
+    def server_url(self):
+        url = self.url + '/api/v1/'
+        return re.sub(r'([^:]/)(/)+', r'\1', url)
+
+
     def login(self, username: str, password: str) -> QNetworkReply:
         """Login to QFieldCloud"""
         
@@ -141,7 +170,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         headers = {'Authorization': 'token {}'.format(self._token)}
         params = {'include-public': should_include_public}
 
-        response = requests.get(self.url + self._prepare_uri('projects'), headers=headers, params=params)
+        response = requests.get(self.server_url + self._prepare_uri('projects'), headers=headers, params=params)
         response.raise_for_status()
         
         return response.json()
@@ -202,7 +231,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
 
     def cloud_get(self, uri: Union[str, List[str]], params: Dict[str, Any] = {}, local_filename: str = None) -> QNetworkReply:
         """Issues a GET HTTP request"""
-        url = QUrl(self.url + self._prepare_uri(uri))
+        url = QUrl(self.server_url + self._prepare_uri(uri))
         query = QUrlQuery()
 
         assert isinstance(params, dict)
@@ -238,7 +267,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
 
 
     def cloud_post(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
-        url = QUrl(self.url + self._prepare_uri(uri))
+        url = QUrl(self.server_url + self._prepare_uri(uri))
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
@@ -256,7 +285,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
 
 
     def cloud_put(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
-        url = QUrl(self.url + self._prepare_uri(uri))
+        url = QUrl(self.server_url + self._prepare_uri(uri))
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
@@ -274,7 +303,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
 
 
     def cloud_delete(self, uri: Union[str, List[str]]) -> QNetworkReply:
-        url = QUrl(self.url + self._prepare_uri(uri))
+        url = QUrl(self.server_url + self._prepare_uri(uri))
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
@@ -291,7 +320,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
 
 
     def cloud_upload_files(self, uri: Union[str, List[str]], filenames: List[str], payload: Dict = None) -> QNetworkReply:
-        url = QUrl(self.url + self._prepare_uri(uri))
+        url = QUrl(self.server_url + self._prepare_uri(uri))
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
