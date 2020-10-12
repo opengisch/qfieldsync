@@ -27,9 +27,9 @@ from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
 
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.layer import LayerSource
 from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
+from qfieldsync.libqfieldsync.layer import LayerSource
 
 WidgetUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/map_layer_config_widget.ui'))
 

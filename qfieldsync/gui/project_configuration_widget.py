@@ -31,12 +31,11 @@ from qgis.gui import (
     QgsOptionsPageWidget,
 )
 
-from qfieldsync.core import ProjectConfiguration, OfflineConverter
-from qfieldsync.core.layer import LayerSource, SyncAction
-from qfieldsync.core.project import ProjectProperties
 from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.utils.cloud_utils import to_cloud_title
+
+from qfieldsync.libqfieldsync import (LayerSource, ProjectConfiguration, ProjectProperties, OfflineConverter)
 
 
 WidgetUi, _ = loadUiType(

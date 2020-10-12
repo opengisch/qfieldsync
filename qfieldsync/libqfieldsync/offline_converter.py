@@ -22,19 +22,12 @@
 import os
 import tempfile
 
-from qfieldsync.core.layer import LayerSource, SyncAction
-from qfieldsync.core.project import ProjectProperties, ProjectConfiguration
-from qfieldsync.utils.file_utils import copy_images
 from qgis.PyQt.QtCore import (
     Qt,
     QObject,
     pyqtSignal,
     pyqtSlot,
     QCoreApplication
-)
-from qgis.PyQt.QtWidgets import (
-    QApplication,
-    QMessageBox
 )
 from qgis.core import (
     QgsProject,
@@ -51,9 +44,13 @@ from qgis.core import (
 )
 import qgis
 
+from .layer import LayerSource, SyncAction
+from .project import ProjectProperties, ProjectConfiguration
+from .utils.file_utils import copy_images
 
 class OfflineConverter(QObject):
     progressStopped = pyqtSignal()
+    warning = pyqtSignal(str, str)
     task_progress_updated = pyqtSignal(int, int)
     total_progress_updated = pyqtSignal(int, int, str)
 
@@ -99,8 +96,7 @@ class OfflineConverter(QObject):
             if not os.path.exists(self.export_folder):
                 os.makedirs(self.export_folder)
 
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-
+            self.total_progress_updated.emit(0, 100, self.trUtf8('Converting project…'))
             self.__offline_layers = list()
             self.__layers = list(project.mapLayers().values())
 
@@ -125,7 +121,8 @@ class OfflineConverter(QObject):
             # Create the base map before layers are removed
             if self.project_configuration.create_base_map:
                 if 'processing' not in qgis.utils.plugins:
-                    QMessageBox.warning(None, self.tr('QFieldSync requires processing'), self.tr('Creating a basemap with QFieldSync requires the processing plugin to be enabled. Processing is not enabled on your system. Please go to Plugins > Manage and Install Plugins and enable processing.'))
+                    self.warning.emit(self.tr('QFieldSync requires processing'), self.tr('Creating a basemap with QFieldSync requires the processing plugin to be enabled. Processing is not enabled on your system. Please go to Plugins > Manage and Install Plugins and enable processing.'))
+                    self.total_progress_updated.emit(0, 0, self.trUtf8('Cancelled'))
                     return
 
                 if self.project_configuration.base_map_type == ProjectProperties.BaseMapType.SINGLE_LAYER:
@@ -269,7 +266,6 @@ class OfflineConverter(QObject):
             QCoreApplication.processEvents()
             QgsProject.instance().read(backup_project_path)
             QgsProject.instance().setFileName(original_project_path)
-            QApplication.restoreOverrideCursor()
 
         self.offline_editing.layerProgressUpdated.disconnect(self.on_offline_editing_next_layer)
         self.offline_editing.progressModeSet.disconnect(self.on_offline_editing_max_changed)

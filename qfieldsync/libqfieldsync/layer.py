@@ -14,7 +14,7 @@ from qgis.core import (
     Qgis
 )
 
-from qfieldsync.utils.file_utils import slugify
+from .utils.file_utils import slugify
 
 
 # When copying files, if any of the extension in any of the groups is found,

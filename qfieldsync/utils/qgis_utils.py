@@ -21,8 +21,8 @@
 
 from qgis.core import QgsProject
 
-from qfieldsync.utils.file_utils import fileparts, get_project_in_folder
-from qfieldsync.core.project import ProjectConfiguration
+from qfieldsync.libqfieldsync.utils.file_utils import fileparts, get_project_in_folder
+from qfieldsync.libqfieldsync import ProjectConfiguration
 
 
 def get_project_title(proj):
