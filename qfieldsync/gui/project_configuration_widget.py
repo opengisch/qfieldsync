@@ -31,13 +31,11 @@ from qgis.gui import (
     QgsOptionsPageWidget,
 )
 
-from qfieldsync.core import ProjectConfiguration, OfflineConverter
-from qfieldsync.core.layer import LayerSource, SyncAction
-from qfieldsync.core.project import ProjectProperties
-from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.utils.cloud_utils import to_cloud_title
+
+from qfieldsync.libqfieldsync import (LayerSource, ProjectConfiguration, ProjectProperties, OfflineConverter)
 
 
 WidgetUi, _ = loadUiType(
@@ -73,17 +71,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         """
         self.unsupportedLayersList = list()
 
-        self.photoNamingTable = PhotoNamingTableWidget()
-        self.photoNamingGroup.layout().addWidget(self.photoNamingTable)
         self.cloudLayersConfigWidget = LayersConfigWidget(self.project)
         self.cableLayersConfigWidget = LayersConfigWidget(self.project)
         self.cloudAdvancedSettings.layout().addWidget(self.cloudLayersConfigWidget)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
-
-
-        # Remove the tab when not yet suported in QGIS
-        if Qgis.QGIS_VERSION_INT < 31300:
-            self.photoNamingGroup.setVisible(False)
 
         # Load Map Themes
         for theme in self.project.mapThemeCollection().mapThemes():
@@ -134,11 +125,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             if layer_source.action != old_action or layer_source.is_geometry_locked != old_is_geometry_locked:
                 self.project.setDirty(True)
                 layer_source.apply()
-
-        # apply always the photo_namings (to store default values on first apply as well)
-        self.photoNamingTable.syncLayerSourceValues(should_apply=True)
-        if self.photoNamingTable.rowCount() > 0:
-            self.project.setDirty(True)
 
         self.__project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
         self.__project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
