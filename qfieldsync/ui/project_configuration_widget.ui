@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="exportTypeTabs">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -251,19 +251,24 @@
     </widget>
    </item>
    <item>
-    <widget class="QgsCollapsibleGroupBox" name="photoNamingGroup">
-     <property name="title">
-      <string>Photo Naming</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout"/>
-    </widget>
-   </item>
-   <item>
     <widget class="QCheckBox" name="onlyOfflineCopyFeaturesInAoi">
      <property name="text">
       <string>Only Copy Features in Area of Interest</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
