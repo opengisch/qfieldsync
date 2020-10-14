@@ -39,12 +39,13 @@ LayersConfigWidgetUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '..
 
 class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
     
-    def __init__(self, project, parent=None):
+    def __init__(self, project, use_cloud_actions, parent=None):
         """Constructor."""
         super(LayersConfigWidget, self).__init__(parent=parent)
         self.setupUi(self)
 
         self.project = project
+        self.use_cloud_actions = use_cloud_actions
 
         self.multipleToggleButton.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/visibility.svg')))
         self.toggleMenu = QMenu(self)
@@ -68,6 +69,23 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.reloadProject()
 
+    def get_available_actions(self, layer_source):
+        if self.use_cloud_actions:
+            return layer_source.available_cloud_actions
+        else:
+            return layer_source.available_actions
+
+    def get_layer_action(self, layer_source):
+        if self.use_cloud_actions:
+            return layer_source.cloud_action
+        else:
+            return layer_source.action
+
+    def set_layer_action(self, layer_source, action):
+        if self.use_cloud_actions:
+            layer_source.cloud_action = action
+        else:
+            layer_source.action = action
 
     def reloadProject(self):
         """
@@ -87,7 +105,8 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             self.layersTable.setItem(count, 0, item)
 
             cmb = QComboBox()
-            set_available_actions(cmb, layer_source)
+            available_actions = self.get_available_actions(layer_source)
+            set_available_actions(cmb, available_actions, self.get_layer_action(layer_source))
             
             cbx = QCheckBox()
             cbx.setEnabled(layer_source.can_lock_geometry)
@@ -141,11 +160,11 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             for i in range(self.layersTable.rowCount()):
                 item = self.layersTable.item(i, 0)
                 layer_source = item.data(Qt.UserRole)
-                old_action = layer_source.action
-                available_actions, _ = zip(*layer_source.available_actions)
+                old_action = self.get_layer_action(layer_source)
+                available_actions, _ = zip(*self.get_available_actions(layer_source))
                 if sync_action in available_actions:
-                    layer_source.action = sync_action
-                    if layer_source.action != old_action:
+                    self.set_layer_action(layer_source, sync_action)
+                    if self.get_layer_action(layer_source) != old_action:
                         self.project.setDirty(True)
                     layer_source.apply()
         # based on visibility
@@ -156,12 +175,31 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 node = root.findLayer(layer.id())
                 if node and node.isVisible() == visible:
                     layer_source = LayerSource(layer)
-                    old_action = layer_source.action
-                    available_actions, _ = zip(*layer_source.available_actions)
+                    old_action = self.get_layer_action(layer_source)
+                    available_actions, _ = zip(*self.get_available_actions(layer_source))
                     if sync_action in available_actions:
-                        layer_source.action = sync_action
-                        if layer_source.action != old_action:
+                        self.set_layer_action(layer_source, sync_action)
+                        if self.get_layer_action(layer_source) != old_action:
                             self.project.setDirty(True)
                         layer_source.apply()
 
         self.reloadProject()
+
+
+    def apply(self):
+        for i in range(self.layersTable.rowCount()):
+            item = self.layersTable.item(i, 0)
+            layer_source = item.data(Qt.UserRole)
+            cbx = self.layersTable.cellWidget(i, 1).layout().itemAt(0).widget()
+            cmb = self.layersTable.cellWidget(i, 2)
+
+            old_action = self.get_layer_action(layer_source)
+            old_is_geometry_locked = layer_source.can_lock_geometry and layer_source.is_geometry_locked
+            new_action = cmb.itemData(cmb.currentIndex())
+
+            self.set_layer_action(layer_source, new_action)
+            layer_source.is_geometry_locked = cbx.isChecked()
+
+            if new_action != old_action or layer_source.is_geometry_locked != old_is_geometry_locked:
+                self.project.setDirty(True)
+                layer_source.apply()
