@@ -40,6 +40,7 @@ class PhotoNamingTableWidget(QTableWidget):
         self.resizeColumnsToContents()
         self.setMinimumHeight(100)
         self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        # self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
 
     def addLayerFields(self, layer_source):
