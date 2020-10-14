@@ -32,10 +32,9 @@ from qgis.gui import (
 )
 
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
-from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.utils.cloud_utils import to_cloud_title
 
-from qfieldsync.libqfieldsync import (LayerSource, ProjectConfiguration, ProjectProperties, OfflineConverter)
+from qfieldsync.libqfieldsync import (LayerSource, ProjectConfiguration, ProjectProperties, OfflineConverter, SyncAction)
 
 
 WidgetUi, _ = loadUiType(
@@ -57,7 +56,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.project = QgsProject.instance()
         self.__project_configuration = ProjectConfiguration(self.project)
 
-
+        self.preferOnlineLayersRadioButton.toggled.connect(self.onLayerActionPreferenceChanged)
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
 
         self.reloadProject()
@@ -68,8 +67,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         """
         self.unsupportedLayersList = list()
 
-        self.cloudLayersConfigWidget = LayersConfigWidget(self.project)
-        self.cableLayersConfigWidget = LayersConfigWidget(self.project)
+        self.cloudLayersConfigWidget = LayersConfigWidget(self.project, True)
+        self.cableLayersConfigWidget = LayersConfigWidget(self.project, False)
         self.cloudAdvancedSettings.layout().addWidget(self.cloudLayersConfigWidget)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
 
@@ -94,6 +93,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
         self.tileSize.setText(str(self.__project_configuration.base_map_tile_size))
         self.onlyOfflineCopyFeaturesInAoi.setChecked(self.__project_configuration.offline_copy_only_aoi)
+        self.preferOnlineLayersRadioButton.setChecked(self.__project_configuration.layer_action_preference == 'online')
+        self.preferOfflineLayersRadioButton.setChecked(self.__project_configuration.layer_action_preference == 'offline')
 
         if self.unsupportedLayersList:
             self.unsupportedLayersLabel.setVisible(True)
@@ -103,25 +104,13 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             unsupported_layers_text += self.tr(" If needed, you can create a Base Map to include those layers in your packaged project.")
             self.unsupportedLayersLabel.setText(unsupported_layers_text)
 
+
     def apply(self):
         """
         Update layer configuration in project
         """
-        for i in range(self.layersTable.rowCount()):
-            item = self.layersTable.item(i, 0)
-            layer_source = item.data(Qt.UserRole)
-            cbx = self.layersTable.cellWidget(i, 1).layout().itemAt(0).widget()
-            cmb = self.layersTable.cellWidget(i, 2)
-
-            old_action = layer_source.action
-            old_is_geometry_locked = layer_source.can_lock_geometry and layer_source.is_geometry_locked
-
-            layer_source.action = cmb.itemData(cmb.currentIndex())
-            layer_source.is_geometry_locked = cbx.isChecked()
-
-            if layer_source.action != old_action or layer_source.is_geometry_locked != old_is_geometry_locked:
-                self.project.setDirty(True)
-                layer_source.apply()
+        self.cloudLayersConfigWidget.apply()
+        self.cableLayersConfigWidget.apply()
 
         self.__project_configuration.create_base_map = self.createBaseMapGroupBox.isChecked()
         self.__project_configuration.base_map_theme = self.mapThemeComboBox.currentText()
@@ -138,6 +127,30 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.__project_configuration.base_map_tile_size = int(self.tileSize.text())
 
         self.__project_configuration.offline_copy_only_aoi = self.onlyOfflineCopyFeaturesInAoi.isChecked()
+        self.__project_configuration.layer_action_preference = 'online' if self.preferOnlineLayersRadioButton.isChecked() else 'offline'
+
+
+    def onLayerActionPreferenceChanged(self):
+        prefer_online = self.preferOnlineLayersRadioButton.isChecked()
+
+        for i in range(self.cloudLayersConfigWidget.layersTable.rowCount()):
+            item = self.cloudLayersConfigWidget.layersTable.item(i, 0)
+            layer_source = item.data(Qt.UserRole)
+            cmb = self.cloudLayersConfigWidget.layersTable.cellWidget(i, 2)
+
+            # it would be annoying to change the action on removed layers
+            if cmb.itemData(cmb.currentIndex()) == SyncAction.REMOVE:
+                continue
+
+            old_cloud_action = layer_source.cloud_action
+            idx, cloud_action = layer_source.prefered_cloud_action(prefer_online)
+
+            if cloud_action is not None and old_cloud_action != cloud_action:
+                cmb.setCurrentIndex(idx)
+                layer_source.cloud_action = cmb.itemData(cmb.currentIndex()) 
+                layer_source.apply()
+                self.project.setDirty(True)
+
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():

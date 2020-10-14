@@ -22,42 +22,21 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="exportTypeTabs">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
      <widget class="QWidget" name="cloudExportTab">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <attribute name="title">
        <string>QFieldCloud</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetMinAndMaxSize</enum>
-       </property>
        <item row="3" column="0" colspan="2">
         <widget class="QgsCollapsibleGroupBox" name="cloudAdvancedSettings">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="title">
           <string>Advanced Settings</string>
          </property>
          <property name="collapsed">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="saveCheckedState">
           <bool>true</bool>
@@ -73,7 +52,7 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QRadioButton" name="preferOnlineLayersRadioButton_2">
+        <widget class="QRadioButton" name="preferOnlineLayersRadioButton">
          <property name="text">
           <string>Prefer Online Layers</string>
          </property>
