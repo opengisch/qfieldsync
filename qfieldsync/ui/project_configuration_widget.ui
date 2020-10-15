@@ -30,6 +30,13 @@
        <string>QFieldCloud</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="1">
+        <widget class="QRadioButton" name="preferOfflineLayersRadioButton">
+         <property name="text">
+          <string>Prefer offline layers</string>
+         </property>
+        </widget>
+       </item>
        <item row="3" column="0" colspan="2">
         <widget class="QgsCollapsibleGroupBox" name="cloudAdvancedSettings">
          <property name="title">
@@ -44,22 +51,28 @@
          <layout class="QVBoxLayout" name="verticalLayout_4"/>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QRadioButton" name="preferOfflineLayersRadioButton">
-         <property name="text">
-          <string>Prefer Offline Layers</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QRadioButton" name="preferOnlineLayersRadioButton">
          <property name="text">
-          <string>Prefer Online Layers</string>
+          <string>Prefer online layers</string>
          </property>
          <property name="checked">
           <bool>true</bool>
          </property>
         </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -86,7 +99,7 @@
       <item row="0" column="0">
        <widget class="QRadioButton" name="singleLayerRadioButton">
         <property name="text">
-         <string>Single Layer</string>
+         <string>Single layer</string>
         </property>
         <attribute name="buttonGroup">
          <string notr="true">buttonGroup</string>
@@ -219,7 +232,7 @@
       <item row="0" column="1">
        <widget class="QRadioButton" name="mapThemeRadioButton">
         <property name="text">
-         <string>Map Theme</string>
+         <string>Map theme</string>
         </property>
         <attribute name="buttonGroup">
          <string notr="true">buttonGroup</string>
@@ -230,10 +243,19 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="onlyOfflineCopyFeaturesInAoi">
-     <property name="text">
-      <string>Only Copy Features in Area of Interest</string>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Advanced Settings</string>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QCheckBox" name="onlyOfflineCopyFeaturesInAoi">
+        <property name="text">
+         <string>Only copy features in area of interest</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
