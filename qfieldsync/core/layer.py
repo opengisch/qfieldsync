@@ -207,19 +207,21 @@ class LayerSource(object):
             # Copy will also be called on non-file layers like WMS. In this case, just do nothing.
             return
 
+        parts = None
         file_path = ''
-        layer_name = ''
-        
+        suffix = ''
+        uri_parts = self.layer.source().split('|', 1)
+        if len(uri_parts) > 1:
+            suffix = uri_parts[1]
+
         if self.layer.dataProvider() is not None:
             metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
             if metadata is not None:
-                decoded = metadata.decodeUri(self.layer.source())
-                if "path" in decoded:
-                    file_path = decoded["path"]
-                if "layerName" in decoded:
-                    layer_name = decoded["layerName"]
+                parts = metadata.decodeUri(self.layer.source())
+                if "path" in parts:
+                    file_path = parts["path"]
         if file_path == '':
-            file_path = self.layer.source()
+            file_path = uri_parts[0]
 
         if os.path.isfile(file_path):
             source_path, file_name = os.path.split(file_path)
@@ -234,17 +236,18 @@ class LayerSource(object):
             if Qgis.QGIS_VERSION_INT >= 31200 and self.layer.dataProvider() is not None:
                 metadata = QgsProviderRegistry.instance().providerMetadata(self.layer.dataProvider().name())
                 if metadata is not None:
-                    new_source = metadata.encodeUri({"path":os.path.join(target_path, file_name),"layerName":layer_name})
+                    parts["path"] = os.path.join(target_path, file_name)
+                    new_source = metadata.encodeUri(parts)
             if new_source == '':
                 if self.layer.dataProvider() and self.layer.dataProvider().name == "spatialite":
                     uri = QgsDataSourceUri()
                     uri.setDatabase(os.path.join(target_path, file_name))
-                    uri.setTable(layer_name)
+                    uri.setTable(parts["layerName"])
                     new_source = uri.uri()
                 else:
                     new_source = os.path.join(target_path, file_name)
-                    if layer_name != '':
-                        new_source = "{}|{}".format(new_source, layer_name)
+                    if suffix != '':
+                        new_source = "{}|{}".format(new_source, suffix)
 
             self._change_data_source(new_source)
         return copied_files
