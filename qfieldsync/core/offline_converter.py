@@ -201,9 +201,9 @@ class OfflineConverter(QObject):
                     if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
                                                                         offline_layer_ids,
                                                                         only_selected,
-                                                                        self.offline_editing.GPKG):
+                                                                        self.offline_editing.GPKG,
+                                                                        ''):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
-
             except AttributeError:
                 # Run the offline plugin for spatialite
                 spatialite_filename = "data.sqlite"
@@ -212,7 +212,9 @@ class OfflineConverter(QObject):
                     only_selected = self.project_configuration.offline_copy_only_aoi or self.project_configuration.offline_copy_only_selected_features
                     if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
                                                                         offline_layer_ids,
-                                                                        only_selected):
+                                                                        only_selected,
+                                                                        self.offline_editing.SpatiaLite,
+                                                                        ''):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             # Disable project options that could create problems on a portable
