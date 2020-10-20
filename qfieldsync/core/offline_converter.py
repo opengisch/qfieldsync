@@ -202,7 +202,7 @@ class OfflineConverter(QObject):
                                                                         offline_layer_ids,
                                                                         only_selected,
                                                                         self.offline_editing.GPKG,
-                                                                        ''):
+                                                                        None):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
             except AttributeError:
                 # Run the offline plugin for spatialite
@@ -214,7 +214,7 @@ class OfflineConverter(QObject):
                                                                         offline_layer_ids,
                                                                         only_selected,
                                                                         self.offline_editing.SpatiaLite,
-                                                                        ''):
+                                                                        None):
                         raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             # Disable project options that could create problems on a portable
