@@ -37,6 +37,7 @@ from qgis.PyQt.QtWidgets import (
     QMessageBox
 )
 from qgis.core import (
+    Qgis,
     QgsProject,
     QgsRasterLayer,
     QgsCubicRasterResampler,
@@ -198,22 +199,38 @@ class OfflineConverter(QObject):
                 if self.__offline_layers:
                     offline_layer_ids = [l.id() for l in self.__offline_layers]
                     only_selected = self.project_configuration.offline_copy_only_aoi or self.project_configuration.offline_copy_only_selected_features
-                    if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
-                                                                        offline_layer_ids,
-                                                                        only_selected,
-                                                                        self.offline_editing.GPKG):
-                        raise Exception(self.tr("Error trying to convert layers to offline layers"))
-
+                    if Qgis.QGIS_VERSION_INT < 31601:
+                        if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
+                                                                            offline_layer_ids,
+                                                                            only_selected,
+                                                                            self.offline_editing.GPKG):
+                            raise Exception(self.tr("Error trying to convert layers to offline layers"))
+                    else:
+                        if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
+                                                                            offline_layer_ids,
+                                                                            only_selected,
+                                                                            self.offline_editing.GPKG,
+                                                                            None):
+                            raise Exception(self.tr("Error trying to convert layers to offline layers"))
             except AttributeError:
                 # Run the offline plugin for spatialite
                 spatialite_filename = "data.sqlite"
                 if self.__offline_layers:
                     offline_layer_ids = [l.id() for l in self.__offline_layers]
                     only_selected = self.project_configuration.offline_copy_only_aoi or self.project_configuration.offline_copy_only_selected_features
-                    if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
-                                                                        offline_layer_ids,
-                                                                        only_selected):
-                        raise Exception(self.tr("Error trying to convert layers to offline layers"))
+                    if Qgis.QGIS_VERSION_INT < 31601:
+                        if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
+                                                                            offline_layer_ids,
+                                                                            only_selected,
+                                                                            self.offline_editing.SpatiaLite):
+                            raise Exception(self.tr("Error trying to convert layers to offline layers"))
+                    else:
+                        if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
+                                                                            offline_layer_ids,
+                                                                            only_selected,
+                                                                            self.offline_editing.SpatiaLite,
+                                                                            None):
+                            raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
             # Disable project options that could create problems on a portable
             # project with offline layers
@@ -237,28 +254,29 @@ class OfflineConverter(QObject):
                                     'QFieldSync/sourceDataPrimaryKeys',
                                     stored_fields)
 
-                        for field in layer.fields():
-                            ews = field.editorWidgetSetup()
-                            if ews.type() == 'ValueRelation':
-                                widget_config = ews.config()
-                                online_layer_id = widget_config['Layer']
-                                if project.mapLayer(online_layer_id):
-                                    continue
+                        if Qgis.QGIS_VERSION_INT < 31601:
+                            for field in layer.fields():
+                                ews = field.editorWidgetSetup()
+                                if ews.type() == 'ValueRelation':
+                                    widget_config = ews.config()
+                                    online_layer_id = widget_config['Layer']
+                                    if project.mapLayer(online_layer_id):
+                                        continue
 
-                                layer_id = None
-                                loose_layer_id = None
-                                for offline_layer in project.mapLayers().values():
-                                    if offline_layer.customProperty('remoteSource') == original_layer_info[online_layer_id][0]:
-                                        #  First try strict matching: the offline layer should have a "remoteSource" property
-                                        layer_id = offline_layer.id()
-                                        break
-                                    elif offline_layer.name().startswith(original_layer_info[online_layer_id][1] + ' '):
-                                        #  If that did not work, go with loose matching
-                                        #    The offline layer should start with the online layer name + a translated version of " (offline)"
-                                        loose_layer_id = offline_layer.id()
-                                widget_config['Layer'] = layer_id or loose_layer_id
-                                offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
-                                layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
+                                    layer_id = None
+                                    loose_layer_id = None
+                                    for offline_layer in project.mapLayers().values():
+                                        if offline_layer.customProperty('remoteSource') == original_layer_info[online_layer_id][0]:
+                                            #  First try strict matching: the offline layer should have a "remoteSource" property
+                                            layer_id = offline_layer.id()
+                                            break
+                                        elif offline_layer.name().startswith(original_layer_info[online_layer_id][1] + ' '):
+                                            #  If that did not work, go with loose matching
+                                            #    The offline layer should start with the online layer name + a translated version of " (offline)"
+                                            loose_layer_id = offline_layer.id()
+                                    widget_config['Layer'] = layer_id or loose_layer_id
+                                    offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
+                                    layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(project_path)

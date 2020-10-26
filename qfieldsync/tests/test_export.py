@@ -25,7 +25,7 @@ import tempfile
 
 from qfieldsync.core.offline_converter import OfflineConverter
 from qfieldsync.tests.utilities import test_data_folder
-from qgis.core import QgsProject, QgsRectangle, QgsOfflineEditing
+from qgis.core import Qgis, QgsProject, QgsRectangle, QgsOfflineEditing
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 
@@ -93,7 +93,10 @@ class OfflineConverterTest(unittest.TestCase):
         offline_converter.convert()
 
         exported_project = self.load_project(os.path.join(export_folder, 'project_qfield.qgs'))
-        layer = exported_project.mapLayersByName('somedata (offline)')[0]
+        if Qgis.QGIS_VERSION_INT < 31601:
+            layer = exported_project.mapLayersByName('somedata (offline)')[0]
+        else:
+            layer = exported_project.mapLayersByName('somedata')[0]
         self.assertEqual(layer.customProperty('QFieldSync/sourceDataPrimaryKeys'), 'pk')
 
         shutil.rmtree(export_folder)
