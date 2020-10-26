@@ -225,10 +225,10 @@ class OfflineConverter(QObject):
                                                                             self.offline_editing.SpatiaLite):
                             raise Exception(self.tr("Error trying to convert layers to offline layers"))
                     else:
-                        if not self.offline_editing.convertToOfflineProject(self.export_folder, gpkg_filename,
+                        if not self.offline_editing.convertToOfflineProject(self.export_folder, spatialite_filename,
                                                                             offline_layer_ids,
                                                                             only_selected,
-                                                                            self.offline_editing.GPKG,
+                                                                            self.offline_editing.SpatiaLite,
                                                                             None):
                             raise Exception(self.tr("Error trying to convert layers to offline layers"))
 
