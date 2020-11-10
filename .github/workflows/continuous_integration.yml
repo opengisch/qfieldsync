@@ -50,8 +50,9 @@ jobs:
           sudo pip install qgis-plugin-ci
       - name: Release
         run: |
-          qgis-plugin-ci package ${GITHUB_REF##*/} --transifex-token ${TX_TOKEN} --plugin-repo-url https://github.com/opengisch/qfieldsync
-          # qgis-plugin-ci release ${GITHUB_REF##*/} --transifex-token ${TX_TOKEN} --github-token ${GITHUB_TOKEN} --osgeo-username ${OSGEO_USERNAME} --osgeo-password ${OSGEO_PASSWORD}
+          # qgis-plugin-ci package ${GITHUB_REF##*/} --transifex-token ${TX_TOKEN} --plugin-repo-url https://github.com/opengisch/qfieldsync
+          qgis-plugin-ci release ${GITHUB_REF##*/} --transifex-token ${TX_TOKEN} --github-token ${GITHUB_TOKEN} --osgeo-username ${OSGEO_USERNAME} --osgeo-password ${OSGEO_PASSWORD}
+          ls -la
       - name: Upload release assets
         uses: AButler/upload-release-assets@v2.0
         if: ${{ github.event_name == 'release' }}
