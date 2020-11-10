@@ -1,0 +1,79 @@
+name: Continuous integration
+
+on:
+  push:
+    branches:
+      - master
+      - release-**
+  pull_request:
+    branches:
+      - '**'
+  release:
+    types: ['prereleased', 'released']
+
+jobs:
+  # Run unit tests
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        qgis_version: [final-3_10_9, latest]
+    env:
+      QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Test on QGIS LTR 3.
+        run: |
+          echo ${QGIS_TEST_VERSION}
+          docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
+
+  release:
+    runs-on: ubuntu-20.04
+    env:
+      OSGEO_USERNAME: mkuhn
+      OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TX_TOKEN: ${{ secrets.TX_TOKEN }}
+      GITHUB_REF: ${{ github.ref }}
+    if: ${{ github.event_name == 'release' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt update && sudo apt install qttools5-dev-tools qt5-default
+          sudo pip install qgis-plugin-ci
+      - name: Release
+        run: |
+          qgis-plugin-ci package ${GITHUB_REF##*/} --transifex-token ${TX_TOKEN} --plugin-repo-url https://github.com/opengisch/qfieldsync
+          # qgis-plugin-ci release ${GITHUB_REF##*/} --transifex-token ${TX_TOKEN} --github-token ${GITHUB_TOKEN} --osgeo-username ${OSGEO_USERNAME} --osgeo-password ${OSGEO_PASSWORD}
+      - name: Upload release assets
+        uses: AButler/upload-release-assets@v2.0
+        if: ${{ github.event_name == 'release' }}
+        with:
+          files: ./qfieldsync.${${GITHUB_REF##*/}:1}.zip
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${GITHUB_REF##*/}
+
+  translations:
+    runs-on: ubuntu-20.04
+    env:
+      TX_TOKEN: ${{ secrets.TX_TOKEN }}
+    if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: sudo pip install qgis-plugin-ci
+      - name: 🌍 Push translations
+        run: |
+          echo "$TX_TOKEN" | md5sum
+          echo "" | md5sum
+          qgis-plugin-ci push-translation ${TX_TOKEN}
