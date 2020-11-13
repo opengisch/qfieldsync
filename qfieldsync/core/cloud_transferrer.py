@@ -74,6 +74,8 @@ class CloudTransferrer(QObject):
         self.upload_finished.connect(self._on_upload_finished)
         self.download_finished.connect(self._on_download_finished)
 
+        self.network_manager.logout_success.connect(self._on_logout_success)
+
 
     def sync(self, files_to_upload: List[ProjectFile], files_to_download: List[ProjectFile]) -> None:
         assert not self.is_started
@@ -182,7 +184,7 @@ class CloudTransferrer(QObject):
 
     def _on_upload_file_finished(self, reply: QNetworkReply, filename: str) -> None:
         try:
-            CloudNetworkAccessManager.handle_response(reply, False)
+            self.network_manager.handle_response(reply, False)
         except Exception as err:
             self.error.emit(self.tr('Uploading file "{}" failed.'.format(filename)), err)
             self.abort_requests()
@@ -211,7 +213,7 @@ class CloudTransferrer(QObject):
 
     def _on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
         try:
-            CloudNetworkAccessManager.handle_response(reply, False)
+            self.network_manager.handle_response(reply, False)
         except Exception as err:
             self.error.emit(self.tr('Downloading file "{}" failed. Aborting...'.format(filename)), err)
             self.abort_requests()
@@ -291,3 +293,10 @@ class CloudTransferrer(QObject):
                 self._temp_dir2main_dir(str(self.temp_dir.joinpath('backup')))
             except Exception as errInner:
                 self.error.emit('Failed to rollback the backup. You project might be corrupted! Please check ".qfieldsync/backup" directory and try to copy the files back manually.', errInner)
+
+
+    def _on_logout_success(self) -> None:
+        self.projectsTable.setRowCount(0)
+        self.abort_requests()
+
+        self.close()

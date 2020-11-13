@@ -94,11 +94,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if not self.network_manager.has_token():
             login_dlg = CloudLoginDialog(self.network_manager, self)
             login_dlg.authenticate()
-            login_dlg.accepted.connect(lambda: self.welcomeLabelValue.setText(self.network_manager.username))
+            login_dlg.accepted.connect(lambda: self.welcomeLabelValue.setText(self.network_manager.auth().config('username')))
             login_dlg.accepted.connect(lambda: self.network_manager.projects_cache.refresh())
             login_dlg.rejected.connect(lambda: self.close())
         else:
-            self.welcomeLabelValue.setText(self.network_manager.username)
+            self.welcomeLabelValue.setText(self.network_manager.auth().config('username'))
 
         if self.network_manager.url == self.network_manager.server_urls()[0]:
             self.welcomeLabelValue.setToolTip(self.tr(f'You are logged in with the following username'))
@@ -125,6 +125,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
         self.localDirButton.menu().addAction(self.use_current_project_directory_action)
 
+        self.network_manager.logout_success.connect(self._on_logout_success)
+        self.network_manager.logout_failed.connect(self._on_logout_failed)
         self.network_manager.projects_cache.projects_started.connect(self.on_projects_cached_projects_started)
         self.network_manager.projects_cache.projects_error.connect(self.on_projects_cached_projects_error)
         self.network_manager.projects_cache.projects_updated.connect(self.on_projects_cached_projects_updated)
@@ -161,7 +163,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projects_refreshed.emit()
         self.show_projects()
 
-        print('on_projects_cached_projects_updated')
+        print('on_projects_cached_projects_updated', self)
 
 
     def on_projects_cached_project_files_started(self, project_id: str) -> None:
@@ -175,7 +177,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_projects_cached_project_files_error(self, project_id: str, error: str) -> None:
         self.projectFilesTab.setEnabled(True)
 
-        if self.current_cloud_project.id != project_id:
+        if self.current_cloud_project and self.current_cloud_project.id != project_id:
             return
 
         self.feedbackLabel.setText('Obtaining project files list failed: {}'.format(error))
@@ -310,7 +312,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_download_file_finished(self, reply: QNetworkReply, project_file: ProjectFile) -> None:
         try:
-            CloudNetworkAccessManager.handle_response(reply, False)
+            self.network_manager.handle_response(reply, False)
         except CloudException as err:
             self.feedbackLabel.setText(self.tr('Downloading file "{}" failed: {}'.format(project_file.name, str(err))))
             self.feedbackLabel.setVisible(True)
@@ -350,26 +352,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_logout_button_clicked(self) -> None:
         self.logoutButton.setEnabled(False)
         self.feedbackLabel.setVisible(False)
-
-        reply = self.network_manager.logout()
-        reply.finished.connect(lambda: self.on_logout_reply_finished(reply))
-
-
-    def on_logout_reply_finished(self, reply: QNetworkReply) -> None:
-        try:
-            CloudNetworkAccessManager.json_object(reply)
-        except CloudException as err:
-            self.feedbackLabel.setText('Logout failed: {}'.format(str(err)))
-            self.feedbackLabel.setVisible(True)
-            self.logoutButton.setEnabled(True)
-            return
-
-        self.projectsTable.setRowCount(0)
-        self.network_manager.set_token('')
-
-        self.preferences.set_value('qfieldCloudLastToken', '')
-
-        self.close()
+        self.network_manager.logout()
 
 
     def on_refresh_button_clicked(self) -> None:
@@ -630,7 +613,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setEnabled(True)
 
         try:
-            CloudNetworkAccessManager.handle_response(reply, False)
+            self.network_manager.handle_response(reply, False)
         except CloudException as err:
             self.feedbackLabel.setText(self.tr('Project delete failed: {}').format(str(err)))
             self.feedbackLabel.setVisible(True)
@@ -654,8 +637,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
         self.projectTabs.setCurrentWidget(self.projectFormTab)
 
+        username = self.network_manager.auth().config('username')
+
         self.projectOwnerComboBox.clear()
-        self.projectOwnerComboBox.addItem(self.network_manager.username, self.network_manager.username)
+        self.projectOwnerComboBox.addItem(username, username)
         self.projectFilesTree.clear()
 
         if self.current_cloud_project is None:
@@ -733,7 +718,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsFormPage.setEnabled(True)
 
         try:
-            payload = CloudNetworkAccessManager.json_object(reply)
+            payload = self.network_manager.json_object(reply)
         except CloudException as err:
             self.feedbackLabel.setText('Project create failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
@@ -755,7 +740,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsFormPage.setEnabled(True)
 
         try:
-            CloudNetworkAccessManager.json_object(reply)
+            self.network_manager.json_object(reply)
         except CloudException as err:
             self.feedbackLabel.setText('Project update failed: {}'.format(str(err)))
             self.feedbackLabel.setVisible(True)
@@ -799,3 +784,15 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog.close()
         self.project_transfer = None
         self.transfer_dialog = None
+
+
+    def _on_logout_success(self) -> None:
+        self.projectsTable.setRowCount(0)
+
+        self.close()
+
+
+    def _on_logout_failed(self, err: str) -> None:
+        self.feedbackLabel.setText('Logout failed: {}'.format(str(err)))
+        self.feedbackLabel.setVisible(True)
+        self.logoutButton.setEnabled(True)
