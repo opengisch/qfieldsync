@@ -171,13 +171,17 @@ class CloudProject:
 
             self._preferences.set_value('qfieldCloudProjectLocalDirs', new_value)
 
-        # NOTE the cloud_files value is a list and may be in any order, so it is always assume that if the key is present in the new data, then there is a change
+        # NOTE the cloud_files value is a list and may be in any order, so always assume that if the key is present in the new data, then there is a change
         if 'cloud_files' in new_data:
             self._cloud_files = self._data.get('cloud_files')
             
             del self._data['cloud_files']
 
             if isinstance(self._cloud_files, list):
+                self._preferences.set_value('qfieldCloudLastProjectFiles', {
+                    **self._preferences.value('qfieldCloudLastProjectFiles'),
+                    self.id: [cloud_file['name'] for cloud_file in self._cloud_files],
+                })
                 self._cloud_files = sorted(self._cloud_files, key=lambda f: f['name'])
             else:
                 assert self._cloud_files is None

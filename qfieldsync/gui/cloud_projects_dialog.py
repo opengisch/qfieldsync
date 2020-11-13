@@ -779,7 +779,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.project_transfer:
             self.project_transfer.abort_requests()
 
-        self.transfer_dialog.close()
+        if self.transfer_dialog:
+            self.transfer_dialog.close()
+
         self.project_transfer = None
         self.transfer_dialog = None
 
