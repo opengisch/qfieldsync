@@ -22,7 +22,7 @@ from requests import HTTPError
 
 from qgis.PyQt.QtCore import Qt, QTemporaryDir
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem, QToolButton, QComboBox, QCheckBox, QMenu, QAction, QWidget, QHBoxLayout
+from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
 
 from qgis.core import QgsProject, QgsMapLayerProxyModel, Qgis, QgsOfflineEditing
@@ -67,9 +67,14 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         """
         self.unsupportedLayersList = list()
 
+        infoLabel = QLabel()
+        infoLabel.setPixmap(QIcon.fromTheme('info').pixmap(16, 16))
+        infoLabel.setToolTip(self.tr('To improve the overall user experience with QFieldCloud, it is recommended that all vector layers use UUID as primary key.'))
+
         self.cloudLayersConfigWidget = LayersConfigWidget(self.project, True)
         self.cableLayersConfigWidget = LayersConfigWidget(self.project, False)
         self.cloudAdvancedSettings.layout().addWidget(self.cloudLayersConfigWidget)
+        self.cloudExportTab.layout().addWidget(infoLabel, 0, 2)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
 
         # Load Map Themes
