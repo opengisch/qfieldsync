@@ -50,8 +50,13 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         for server_url in self.network_manager.server_urls():
             self.serverUrlCmb.addItem(server_url)
 
-        if self.network_manager.url:
-            self.serverUrlCmb.setCurrentText(self.network_manager.url)
+        url, username, password = self.network_manager.auth()
+        remember_me = self.preferences.value('qfieldCloudRememberMe')
+
+        self.serverUrlCmb.setCurrentText(url or self.network_manager.url)
+        self.usernameLineEdit.setText(username)
+        self.passwordLineEdit.setText(password)
+        self.rememberMeCheckBox.setChecked(remember_me)
 
 
     def authenticate(self) -> None:
@@ -77,8 +82,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             reply = self.network_manager.get_user(last_token)
             reply.finished.connect(lambda: self.on_get_user_reply_finished(reply))
         else:
-            if not self.usernameLineEdit.text():
-                self.usernameLineEdit.setText(self.preferences.value('qfieldCloudLastUsername'))
             self.show()
 
 
@@ -90,7 +93,10 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         username = self.usernameLineEdit.text()
         password = self.passwordLineEdit.text()
 
+        self.network_manager.set_auth(server_url, username, password)
         self.network_manager.set_url(server_url)
+        
+        self.preferences.set_value('qfieldCloudRememberMe', self.rememberMeCheckBox.isChecked())
 
         reply = self.network_manager.login(username, password)
         reply.finished.connect(lambda: self.on_login_reply_finished(reply))
@@ -102,7 +108,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.setEnabled(True)
 
         try:
-            CloudNetworkAccessManager.json_object(reply)
+            resp = CloudNetworkAccessManager.json_object(reply)
+            self.network_manager.username = resp['username']
         except CloudException as err:
             self.preferences.set_value('qfieldCloudLastToken', '')
             self.network_manager.set_token('')
@@ -118,6 +125,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.network_manager.authenticated.emit()
 
         self.done(QDialog.Accepted)
+
 
     def on_login_reply_finished(self, reply: QNetworkReply) -> None:
         if self.parent():
@@ -137,11 +145,10 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             return
 
         self.network_manager.set_token(payload['token'])
+        self.network_manager.username = payload['username']
 
         if self.rememberMeCheckBox.isChecked():
             self.preferences.set_value('qfieldCloudLastToken', payload['token'])
-
-        self.preferences.set_value('qfieldCloudLastUsername', payload['username'])
 
         self.usernameLineEdit.setEnabled(False)
         self.passwordLineEdit.setEnabled(False)

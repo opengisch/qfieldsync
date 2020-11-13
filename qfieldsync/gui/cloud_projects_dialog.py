@@ -94,11 +94,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if not self.network_manager.has_token():
             login_dlg = CloudLoginDialog(self.network_manager, self)
             login_dlg.authenticate()
-            login_dlg.accepted.connect(lambda: self.welcomeLabelValue.setText(self.preferences.value('qfieldCloudLastUsername')))
+            login_dlg.accepted.connect(lambda: self.welcomeLabelValue.setText(self.network_manager.username))
             login_dlg.accepted.connect(lambda: self.network_manager.projects_cache.refresh())
             login_dlg.rejected.connect(lambda: self.close())
         else:
-            self.welcomeLabelValue.setText(self.preferences.value('qfieldCloudLastUsername'))
+            self.welcomeLabelValue.setText(self.network_manager.username)
 
         if self.network_manager.has_token():
             self.show_projects()
@@ -650,7 +650,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectTabs.setCurrentWidget(self.projectFormTab)
 
         self.projectOwnerComboBox.clear()
-        self.projectOwnerComboBox.addItem(self.preferences.value('qfieldCloudLastUsername'), self.preferences.value('qfieldCloudLastUsername'))
+        self.projectOwnerComboBox.addItem(self.network_manager.username, self.network_manager.username)
         self.projectFilesTree.clear()
 
         if self.current_cloud_project is None:

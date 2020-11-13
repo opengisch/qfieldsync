@@ -1,5 +1,5 @@
 import os
-from qfieldsync.setting_manager import SettingManager, Scope, String, Dictionary, List
+from qfieldsync.setting_manager import SettingManager, Scope, String, Dictionary, Bool
 
 pluginName = "QFieldSync"
 
@@ -14,4 +14,5 @@ class Preferences(SettingManager):
         self.add_setting(Dictionary('qfieldCloudProjectLocalDirs', Scope.Global, {}))
         self.add_setting(String('qfieldCloudLastToken', Scope.Global, ''))
         self.add_setting(String('qfieldCloudServerUrl', Scope.Global, ''))
-        self.add_setting(String('qfieldCloudLastUsername', Scope.Global, ''))
+        self.add_setting(String('qfieldCloudAuthcfg', Scope.Global, ''))
+        self.add_setting(Bool('qfieldCloudRememberMe', Scope.Global, True))

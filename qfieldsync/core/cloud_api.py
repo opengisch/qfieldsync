@@ -19,11 +19,12 @@
  ***************************************************************************/
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 import json
 import re
 import requests
 import urllib.parse
+
 
 from qgis.PyQt.QtCore import (
     QObject,
@@ -37,7 +38,7 @@ from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
 )
-from qgis.core import QgsNetworkAccessManager, QgsProject
+from qgis.core import QgsNetworkAccessManager, QgsProject, QgsAuthMethodConfig, QgsApplication
 
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.preferences import Preferences
@@ -72,6 +73,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         self.preferences = Preferences()
         self.url = ''
         self._token = ''
+        self._username = ''
         self.projects_cache = CloudProjectsCache(self, self)
 
         # use the default URL
@@ -123,6 +125,50 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         ]
 
 
+    def auth(self) -> Tuple[str, str, str]:
+        url = self.url
+        auth_manager = QgsApplication.authManager()
+
+        if not auth_manager.masterPasswordHashInDatabase():
+            return url, '', ''
+
+        authcfg = self.preferences.value('qfieldCloudAuthcfg')
+        cfg = QgsAuthMethodConfig()
+        auth_manager.loadAuthenticationConfig(authcfg, cfg, True)
+        url = cfg.uri()
+        username = cfg.config('username')
+        password = cfg.config('password')
+
+        return url, username, password
+
+
+    def set_auth(self, url: str, username: str, password: str) -> None:
+        if self.url != url:
+            self.set_url(url)
+
+        authcfg = self.preferences.value('qfieldCloudAuthcfg')
+        cfg = QgsAuthMethodConfig()
+        auth_manager = QgsApplication.authManager()
+        auth_manager.setMasterPassword()
+        auth_manager.loadAuthenticationConfig(authcfg, cfg, True)
+
+        print(authcfg, cfg.id())
+
+        if cfg.id():
+            cfg.setUri(url)
+            cfg.setConfig('username', username)
+            cfg.setConfig('password', password)
+            auth_manager.updateAuthenticationConfig(cfg)
+        else:
+            cfg.setMethod('Basic')
+            cfg.setName('qfieldcloud')
+            cfg.setUri(url)
+            cfg.setConfig('username', username)
+            cfg.setConfig('password', password)
+            auth_manager.storeAuthenticationConfig(cfg)
+            self.preferences.set_value('qfieldCloudAuthcfg', cfg.id())
+
+
     def set_url(self, server_url: str) -> None:
         if not server_url:
             server_url = CloudNetworkAccessManager.server_urls()[0]
@@ -135,6 +181,16 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
     def server_url(self):
         url = self.url + '/api/v1/'
         return re.sub(r'([^:]/)(/)+', r'\1', url)
+
+
+    @property
+    def username(self) -> str:
+        return self._username
+
+
+    @username.setter
+    def username(self, username: str) -> None:
+        self._username = username
 
 
     def login(self, username: str, password: str) -> QNetworkReply:
