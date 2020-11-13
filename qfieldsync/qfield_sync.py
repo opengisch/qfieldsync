@@ -128,7 +128,7 @@ class QFieldSync(object):
 
         self.network_manager = CloudNetworkAccessManager(self.iface.mainWindow())
         self.network_manager.token_changed.connect(self.update_qfield_sync_toolbar_icon)
-        self.network_manager.authenticated.connect(self.update_qfield_sync_toolbar_icon)
+        self.network_manager.login_success.connect(self.update_qfield_sync_toolbar_icon)
         # TODO enable this and watch the world collapse
         # QgsProject().homePathChanged.connect(self.update_qfield_sync_toolbar_icon)
 

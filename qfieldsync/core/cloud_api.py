@@ -50,6 +50,7 @@ class CloudException(Exception):
         super(CloudException, self).__init__(exception)
         self.reply = reply
         self.parent = exception
+        self.httpCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
 
 
 def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
@@ -63,7 +64,9 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 class CloudNetworkAccessManager(QgsNetworkAccessManager):
     
     token_changed = pyqtSignal()
-    authenticated = pyqtSignal()
+    login_success = pyqtSignal()
+    logout_success = pyqtSignal()
+    logout_failed = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         """Constructor.
@@ -80,12 +83,14 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         self.set_url(self.preferences.value('qfieldCloudServerUrl'))
 
 
-    @staticmethod
-    def handle_response(reply: QNetworkReply, should_parse_json: bool = True) -> Optional[Union[List, Dict]]:
+    def handle_response(self, reply: QNetworkReply, should_parse_json: bool = True) -> Optional[Union[List, Dict]]:
         payload_str = ''
 
         error = from_reply(reply)
         if error:
+            if error.httpCode == 401 and not self.is_login_active:
+                self.set_token('', True)
+                self.logout_success.emit()
             raise error
 
         if not should_parse_json:
@@ -98,18 +103,16 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
             raise CloudException(reply, error) from error
 
 
-    @staticmethod
-    def json_object(reply: QNetworkReply) -> Dict[str, Any]:
-        payload = CloudNetworkAccessManager.handle_response(reply)
+    def json_object(self, reply: QNetworkReply) -> Dict[str, Any]:
+        payload = self.handle_response(reply, True)
 
         assert isinstance(payload, dict)
 
         return payload
 
 
-    @staticmethod
-    def json_array(reply: QNetworkReply) -> List[Any]:
-        payload = CloudNetworkAccessManager.handle_response(reply)
+    def json_array(self, reply: QNetworkReply) -> List[Any]:
+        payload = self.handle_response(reply, True)
 
         assert isinstance(payload, list)
 
@@ -125,7 +128,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         ]
 
 
-    def auth(self) -> Tuple[str, str, str]:
+    def auth(self) -> QgsAuthMethodConfig:
         url = self.url
         auth_manager = QgsApplication.authManager()
 
@@ -135,14 +138,11 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         authcfg = self.preferences.value('qfieldCloudAuthcfg')
         cfg = QgsAuthMethodConfig()
         auth_manager.loadAuthenticationConfig(authcfg, cfg, True)
-        url = cfg.uri()
-        username = cfg.config('username')
-        password = cfg.config('password')
 
-        return url, username, password
+        return cfg
 
-
-    def set_auth(self, url: str, username: str, password: str) -> None:
+    
+    def set_auth(self, url, **kwargs: str) -> None:
         if self.url != url:
             self.set_url(url)
 
@@ -152,19 +152,21 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         auth_manager.setMasterPassword()
         auth_manager.loadAuthenticationConfig(authcfg, cfg, True)
 
-        print(authcfg, cfg.id())
-
         if cfg.id():
             cfg.setUri(url)
-            cfg.setConfig('username', username)
-            cfg.setConfig('password', password)
+
+            for key, value in kwargs.items():
+                cfg.setConfig(key, value)
+
             auth_manager.updateAuthenticationConfig(cfg)
         else:
             cfg.setMethod('Basic')
             cfg.setName('qfieldcloud')
             cfg.setUri(url)
-            cfg.setConfig('username', username)
-            cfg.setConfig('password', password)
+
+            for key, value in kwargs.items():
+                cfg.setConfig(key, value)
+
             auth_manager.storeAuthenticationConfig(cfg)
             self.preferences.set_value('qfieldCloudAuthcfg', cfg.id())
 
@@ -183,23 +185,17 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         return re.sub(r'([^:]/)(/)+', r'\1', url)
 
 
-    @property
-    def username(self) -> str:
-        return self._username
-
-
-    @username.setter
-    def username(self, username: str) -> None:
-        self._username = username
-
-
     def login(self, username: str, password: str) -> QNetworkReply:
         """Login to QFieldCloud"""
-        
-        return self.cloud_post('auth/login/', {
+        self.is_login_active = True
+
+        reply = self.cloud_post('auth/login/', {
             'username': username,
             'password': password,
         })
+        reply.finished.connect(lambda: self._on_login_finished(reply))
+
+        return reply
 
 
     def get_user(self, token: str) -> QNetworkReply:
@@ -212,7 +208,10 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
     def logout(self) -> QNetworkReply:
         """Logout to QFieldCloud"""
 
-        return self.cloud_post('auth/logout/')
+        reply = self.cloud_post('auth/logout/')
+        reply.finished.connect(lambda: self._on_logout_finished(reply))
+
+        return reply
 
 
     def get_projects(self, should_include_public: bool = False) -> QNetworkReply:
@@ -271,8 +270,11 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         return self.cloud_get('files/' + filename, local_filename=local_filename, params={'version': version,'client':'qgis'})
 
 
-    def set_token(self, token: str) -> None:
-        """Sets QFieldCloud authentication token to be used by all the following requests. Set to `None` to disable token authentication."""
+    def set_token(self, token: str, update_auth: bool = False) -> None:
+        """Sets QFieldCloud authentication token to be used by all the following requests. Set to empty string to disable token authentication."""
+        if update_auth:
+            self.set_auth(self.url, token=token)
+
         if self._token == token:
             return
 
@@ -432,6 +434,18 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         return encoded_uri
 
 
+    def _on_logout_finished(self, reply: QNetworkReply) -> None:
+        try:
+            self.json_object(reply)
+            self.set_token('', True)
+            self.logout_success.emit()
+        except CloudException as err:
+            self.logout_failed.emit(str(err))
+            return
+
+    def _on_login_finished(self, reply: QNetworkReply) -> None:
+        self.is_login_active = False
+
 
 class CloudProjectsCache(QObject):
 
@@ -528,7 +542,7 @@ class CloudProjectsCache(QObject):
         self._projects_reply = None
 
         try:
-            payload = CloudNetworkAccessManager.json_array(reply)
+            payload = self.network_manager.json_array(reply)
         except Exception as err:
             self.projects_error.emit(str(err))
             return
@@ -545,7 +559,7 @@ class CloudProjectsCache(QObject):
         assert project_id
 
         try:
-            payload = CloudNetworkAccessManager.json_array(reply)
+            payload = self.network_manager.json_array(reply)
         except Exception as err:
             self.project_files_error.emit(project_id, str(err))
             return
