@@ -100,7 +100,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         else:
             self.welcomeLabelValue.setText(self.network_manager.username)
 
-        self.welcomeLabelValue.setToolTip(self.tr(f'You are logged in with the following username at {self.network_manager.url}'))
+        if self.network_manager.url == self.network_manager.server_urls()[0]:
+            self.welcomeLabelValue.setToolTip(self.tr(f'You are logged in with the following username'))
+        else:
+            self.welcomeLabelValue.setToolTip(self.tr(f'You are logged in with the following username at {self.network_manager.url}'))
 
         if self.network_manager.has_token():
             self.show_projects()
