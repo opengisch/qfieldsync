@@ -557,17 +557,17 @@ class CloudProjectsCache(QObject):
 
     def _on_get_project_files_reply_finished(self, reply: QNetworkReply, project_id: str = None) -> None:
         assert project_id
-
-        try:
-            payload = self.network_manager.json_array(reply)
-        except Exception as err:
-            self.project_files_error.emit(project_id, str(err))
-            return
-
+        
         cloud_project = self.find_project(project_id)
 
         if not cloud_project:
             return
+
+        try:
+            payload = self.network_manager.json_array(reply)
+        except Exception as err:
+            payload = None
+            self.project_files_error.emit(project_id, str(err))
 
         cloud_project.update_data({'cloud_files': payload})
 

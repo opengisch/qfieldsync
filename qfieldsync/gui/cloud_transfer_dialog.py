@@ -90,15 +90,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # ##########
         stack = []
 
-        for project_file in self.project_transfer.cloud_project.get_files():
-            # don't attempt to sync files that are the same both locally and remote
-            if project_file.sha256 == project_file.local_sha256:
-                continue
-
-            # ignore local files that are not in the temp directory
-            if project_file.checkout & ProjectFileCheckout.Local and not project_file.local_path_exists:
-                continue
-
+        for project_file in self.project_transfer.cloud_project.files_to_sync:
             parts = tuple(project_file.path.parts)
             for part_idx, part in enumerate(parts):
                 if len(stack) > part_idx and stack[part_idx][0] == part:
@@ -190,6 +182,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.filesTree.setItemWidget(item, 1, local_checkbox_widget)
         self.filesTree.setItemWidget(item, 2, cloud_checkbox_widget)
+
 
     def on_error(self, descr: str, error: Exception = None) -> None:
         self.errorLabel.setText(self.errorLabel.text() + '\n' + descr)
