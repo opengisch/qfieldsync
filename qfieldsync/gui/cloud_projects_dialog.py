@@ -111,28 +111,28 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.use_current_project_directory_action = QAction(QIcon(), self.tr('Use Current Project Directory'))
         self.use_current_project_directory_action.triggered.connect(self.on_use_current_project_directory_action_triggered)
 
-        self.createButton.clicked.connect(self.on_create_button_clicked)
-        self.refreshButton.clicked.connect(self.on_refresh_button_clicked)
-        self.backButton.clicked.connect(self.on_back_button_clicked)
-        self.submitButton.clicked.connect(self.on_submit_button_clicked)
-        self.logoutButton.clicked.connect(self.on_logout_button_clicked)
-        self.projectsTable.cellDoubleClicked.connect(self.on_projects_table_cell_double_clicked)
-        self.buttonBox.clicked.connect(self.on_button_box_clicked)
-        self.projectsTable.selectionModel().selectionChanged.connect(self.on_projects_table_selection_changed)
-        self.localDirLineEdit.textChanged.connect(self.on_local_dir_line_edit_text_changed)
-        self.localDirButton.clicked.connect(self.on_local_dir_button_clicked)
+        self.createButton.clicked.connect(lambda: self.on_create_button_clicked())
+        self.refreshButton.clicked.connect(lambda: self.on_refresh_button_clicked())
+        self.backButton.clicked.connect(lambda: self.on_back_button_clicked())
+        self.submitButton.clicked.connect(lambda: self.on_submit_button_clicked())
+        self.logoutButton.clicked.connect(lambda: self.on_logout_button_clicked())
+        self.projectsTable.cellDoubleClicked.connect(lambda: self.on_projects_table_cell_double_clicked())
+        self.buttonBox.clicked.connect(lambda: self.on_button_box_clicked())
+        self.projectsTable.selectionModel().selectionChanged.connect(lambda: self.on_projects_table_selection_changed())
+        self.localDirLineEdit.textChanged.connect(lambda: self.on_local_dir_line_edit_text_changed())
+        self.localDirButton.clicked.connect(lambda: self.on_local_dir_button_clicked())
         self.localDirButton.setMenu(QMenu())
         self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
         self.localDirButton.menu().addAction(self.use_current_project_directory_action)
 
-        self.network_manager.logout_success.connect(self._on_logout_success)
-        self.network_manager.logout_failed.connect(self._on_logout_failed)
-        self.network_manager.projects_cache.projects_started.connect(self.on_projects_cached_projects_started)
-        self.network_manager.projects_cache.projects_error.connect(self.on_projects_cached_projects_error)
-        self.network_manager.projects_cache.projects_updated.connect(self.on_projects_cached_projects_updated)
-        self.network_manager.projects_cache.project_files_started.connect(self.on_projects_cached_project_files_started)
-        self.network_manager.projects_cache.project_files_error.connect(self.on_projects_cached_project_files_error)
-        self.network_manager.projects_cache.project_files_updated.connect(self.on_projects_cached_project_files_updated)
+        self.network_manager.logout_success.connect(lambda: self._on_logout_success())
+        self.network_manager.logout_failed.connect(lambda err: self._on_logout_failed(err))
+        self.network_manager.projects_cache.projects_started.connect(lambda: self.on_projects_cached_projects_started())
+        self.network_manager.projects_cache.projects_error.connect(lambda err: self.on_projects_cached_projects_error(err))
+        self.network_manager.projects_cache.projects_updated.connect(lambda: self.on_projects_cached_projects_updated())
+        self.network_manager.projects_cache.project_files_started.connect(lambda project_id: self.on_projects_cached_project_files_started(project_id))
+        self.network_manager.projects_cache.project_files_error.connect(lambda project_id, error: self.on_projects_cached_project_files_error(project_id, error))
+        self.network_manager.projects_cache.project_files_updated.connect(lambda project_id: self.on_projects_cached_project_files_updated(project_id))
 
         self.projectFilesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.projectFilesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -326,7 +326,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.localDirLineEdit.setText(QgsProject.instance().homePath())
 
 
-    def on_button_box_clicked(self, _button: QAbstractButton) -> None:
+    def on_button_box_clicked(self) -> None:
         self.close()
 
 
@@ -622,7 +622,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
 
-    def on_projects_table_cell_double_clicked(self, _row: int, _col: int) -> None:
+    def on_projects_table_cell_double_clicked(self) -> None:
         self.show_project_form()
 
 
@@ -752,7 +752,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
 
-    def on_projects_table_selection_changed(self, _new_selection, _old_selection) -> None:
+    def on_projects_table_selection_changed(self) -> None:
         if self.projectsTable.selectionModel().hasSelection():
             row_idx = self.projectsTable.currentRow()
             self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
