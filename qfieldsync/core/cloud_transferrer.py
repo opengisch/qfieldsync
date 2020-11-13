@@ -60,6 +60,7 @@ class CloudTransferrer(QObject):
         self.is_finished = False
         self.is_upload_active = False
         self.is_download_active = False
+        self.is_project_list_update_active = False
         self.replies = []
         self.temp_dir = Path(QgsProject.instance().homePath()).joinpath('.qfieldsync')
 
@@ -234,6 +235,7 @@ class CloudTransferrer(QObject):
 
     def _on_upload_finished(self) -> None:
         self.is_upload_active = False
+        self._update_project_files_list()
         self._download()
 
 
@@ -241,7 +243,23 @@ class CloudTransferrer(QObject):
         self.is_download_active = False
         self.is_finished = True
         self.import_qfield_project()
-        self.finished.emit()
+
+        if not self.is_project_list_update_active:
+            self.finished.emit()
+
+
+    def _update_project_files_list(self) -> None:
+        self.is_project_list_update_active = True
+
+        reply = self.network_manager.projects_cache.get_project_files(self.cloud_project.id)
+        reply.finished.connect(lambda: self._on_update_project_files_list_finished())
+
+
+    def _on_update_project_files_list_finished(self) -> None:
+        self.is_project_list_update_active = False
+
+        if not self.is_download_active:
+            self.finished.emit()
 
 
     def abort_requests(self) -> None:

@@ -446,6 +446,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             if not self.current_cloud_project.local_dir:
                 return
 
+            if len(list(self.current_cloud_project.files_to_sync)) == 0:
+                iface.messageBar().pushInfo('QFieldSync', self.tr('Everything is already in sync!'))
+                return
+
             self.show_sync_popup()
             return
 

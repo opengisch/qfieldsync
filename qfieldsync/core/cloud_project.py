@@ -22,7 +22,7 @@
 
 from enum import IntFlag
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, Union
 import hashlib
 
 from qgis.core import QgsProject
@@ -249,6 +249,20 @@ class CloudProject:
     @property
     def cloud_files(self) -> Optional[List]:
         return self._cloud_files
+
+
+    @property
+    def files_to_sync(self) -> Iterator[ProjectFile]:
+        for project_file in self.get_files():
+            # don't attempt to sync files that are the same both locally and remote
+            if project_file.sha256 == project_file.local_sha256:
+                continue
+
+            # ignore local files that are not in the temp directory
+            if project_file.checkout & ProjectFileCheckout.Local and not project_file.local_path_exists:
+                continue
+
+            yield project_file
 
 
     @property
