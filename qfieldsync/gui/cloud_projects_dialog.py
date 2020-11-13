@@ -776,7 +776,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
 
     def on_transfer_dialog_rejected(self) -> None:
-        self.project_transfer.abort_requests()
+        if self.project_transfer:
+            self.project_transfer.abort_requests()
+
         self.transfer_dialog.close()
         self.project_transfer = None
         self.transfer_dialog = None
