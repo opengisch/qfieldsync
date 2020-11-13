@@ -105,7 +105,7 @@
        <item>
         <widget class="QLabel" name="explanationLabel">
          <property name="text">
-          <string>Please select action to be applied on the files. If you check &quot;cloud&quot; it will result in local files being overwritten by their cloud version and vice versa. If a cloud checkbox is disabled, it means the files does not exist on the cloud. The opposite goes if the &quot;local&quot; radio is disabled.</string>
+          <string>Please select action to be applied on the files. Choosing &quot;local&quot; or &quot;cloud&quot; will result the respective file version to be considered the truth and will overwrite any other existing version of the file.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -133,6 +133,11 @@
          <column>
           <property name="text">
            <string>Cloud</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Detail</string>
           </property>
          </column>
         </widget>
