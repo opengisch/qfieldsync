@@ -81,7 +81,7 @@ class ProjectFile:
 
 
     @property
-    def checkout(self):
+    def checkout(self) -> ProjectFileCheckout:
         checkout = ProjectFileCheckout.Deleted
 
         if self.local_path and self.local_path.exists():

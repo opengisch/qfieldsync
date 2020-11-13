@@ -20,8 +20,9 @@
  *                                                                         *
  ***************************************************************************/
 """
-import os
 from typing import Dict, List
+import os
+from enum import Enum
 
 from qgis.PyQt.QtCore import Qt, QObject
 from qgis.PyQt.QtGui import QShowEvent
@@ -34,6 +35,14 @@ from qfieldsync.core.cloud_project import ProjectFile, ProjectFileCheckout
 
 CloudTransferDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_transfer_dialog.ui'))
 
+
+class ProjectFileAction(Enum):
+    NoAction = 0
+    Delete = 1
+    UploadAndCreate = 2
+    UploadAndReplace = 3
+    DownloadAndCreate = 4
+    DownloadAndReplace = 5
 
 class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
@@ -52,6 +61,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.filesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.filesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.filesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.filesTree.expandAll()
 
         self.setWindowTitle(self.tr('Synchronizing project "{}"').format(self.project_transfer.cloud_project.name))
@@ -125,7 +135,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
 
-        files: Dict[str, List[ProjectFile]] = {'to_upload': [], 'to_download': []}
+        files: Dict[str, List[ProjectFile]] = {'to_upload': [], 'to_download': [], 'to_delete': []}
 
         for item_idx in range(self.filesTree.topLevelItemCount()):
             item = self.filesTree.topLevelItem(item_idx)
@@ -133,7 +143,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.traverse_tree_item(item, files)
             
         self.stackedWidget.setCurrentWidget(self.progressPage)
-        self.project_transfer.sync(files['to_upload'], files['to_download'])
+        self.project_transfer.sync(files['to_upload'], files['to_download'], files['to_delete'])
 
 
     def traverse_tree_item(self, item: QTreeWidgetItem, files: Dict[str, List[ProjectFile]]) -> None:
@@ -142,10 +152,18 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         if project_file:
             assert item.childCount() == 0
 
-            if self.filesTree.itemWidget(item, 1).children()[1].isChecked():
-                files['to_upload'].append(project_file)
-            elif self.filesTree.itemWidget(item, 2).children()[1].isChecked():
+            project_file_action = self.project_file_action(item)
+
+            if project_file_action == ProjectFileAction.Delete:
+                files['to_delete'].append(project_file)
+            elif project_file_action == ProjectFileAction.DownloadAndCreate or project_file_action == ProjectFileAction.DownloadAndReplace:
                 files['to_download'].append(project_file)
+            elif project_file_action == ProjectFileAction.UploadAndCreate or project_file_action == ProjectFileAction.UploadAndReplace:
+                files['to_upload'].append(project_file)
+            elif project_file_action == ProjectFileAction.NoAction:
+                pass
+            else:
+                raise Exception(f'Unknown project file action {project_file_action}')
 
             return
 
@@ -159,7 +177,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         is_local_checked = is_local_enabled
 
         local_checkbox = QCheckBox()
-        local_checkbox.setEnabled(is_local_enabled)
         local_checkbox.setChecked(is_local_checked)
         local_checkbox.toggled.connect(lambda _is_checked: self.on_local_checkbox_toggled(item))
         local_checkbox_widget = QWidget()
@@ -170,7 +187,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         local_checkbox_widget.setLayout(local_checkbox_layout)
 
         cloud_checkbox = QCheckBox()
-        cloud_checkbox.setEnabled(is_cloud_enabled)
         cloud_checkbox.setChecked(is_cloud_enabled and not is_local_checked)
         cloud_checkbox.toggled.connect(lambda _is_checked: self.on_cloud_checkbox_toggled(item))
         cloud_checkbox_widget = QWidget()
@@ -182,6 +198,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.filesTree.setItemWidget(item, 1, local_checkbox_widget)
         self.filesTree.setItemWidget(item, 2, cloud_checkbox_widget)
+
+        self.update_detail(item)
 
 
     def on_error(self, descr: str, error: Exception = None) -> None:
@@ -202,21 +220,77 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
 
     def on_local_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
+        project_file = item.data(0, Qt.UserRole)
+        is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
+
         local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
         cloud_checkbox = self.filesTree.itemWidget(item, 2).children()[1]
-        is_checked = local_checkbox.isChecked()
 
-        if cloud_checkbox.isEnabled() and is_checked:
+        if local_checkbox.isChecked():
             cloud_checkbox.setChecked(False)
+
+        self.update_detail(item)
 
 
     def on_cloud_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
+        project_file = item.data(0, Qt.UserRole)
+        is_local_enabled = project_file.local_path_exists
+
         local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
         cloud_checkbox = self.filesTree.itemWidget(item, 2).children()[1]
-        is_checked = cloud_checkbox.isChecked()
 
-        if local_checkbox.isEnabled() and is_checked:
+        if cloud_checkbox.isChecked():
             local_checkbox.setChecked(False)
+
+        self.update_detail(item)
+
+
+    def project_file_action(self, item: QTreeWidgetItem) -> ProjectFileAction:
+        project_file = item.data(0, Qt.UserRole)
+        is_local_enabled = project_file.local_path_exists
+        is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
+        local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
+        cloud_checkbox = self.filesTree.itemWidget(item, 2).children()[1]
+
+        if local_checkbox.isChecked():
+            if is_cloud_enabled:
+                if is_local_enabled:
+                    return ProjectFileAction.UploadAndReplace
+                else:
+                    return ProjectFileAction.Delete
+            else:
+                return ProjectFileAction.UploadAndCreate
+        elif cloud_checkbox.isChecked():
+            if is_local_enabled:
+                if is_cloud_enabled:
+                    return ProjectFileAction.DownloadAndReplace
+                else:
+                    return ProjectFileAction.Delete
+            else:
+                return ProjectFileAction.DownloadAndCreate
+
+        return ProjectFileAction.NoAction
+
+
+    def update_detail(self, item: QTreeWidgetItem) -> None:
+        project_file_action = self.project_file_action(item)
+
+        if project_file_action == ProjectFileAction.NoAction:
+            detail = self.tr('No action')
+        elif project_file_action == ProjectFileAction.UploadAndCreate:
+            detail = self.tr('Create file on the cloud')
+        elif project_file_action == ProjectFileAction.UploadAndReplace:
+            detail = self.tr('Upload and replace local file to the cloud')
+        elif project_file_action == ProjectFileAction.DownloadAndCreate:
+            detail = self.tr('Download file from the cloud')
+        elif project_file_action == ProjectFileAction.DownloadAndReplace:
+            detail = self.tr('Download and replace local file from the cloud')
+        elif project_file_action == ProjectFileAction.Delete:
+            detail = detail = self.tr('Delete file')
+        else:
+            raise Exception(f'Unknown project file action {project_file_action}')
+
+        item.setText(3, detail)
 
 
     def _on_offline_converter_total_progress_updated(self, current: int, total: int, message: str) -> None:

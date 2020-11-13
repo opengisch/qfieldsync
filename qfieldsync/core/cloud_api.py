@@ -264,10 +264,15 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
 
         return self.cloud_get(['files', project_id], {'client': client})
 
+
     def get_file(self, filename: str, local_filename: str, version: str = None) -> QNetworkReply:
         """"Download file"""
 
-        return self.cloud_get('files/' + filename, local_filename=local_filename, params={'version': version,'client':'qgis'})
+        return self.cloud_get('files/' + filename, local_filename=local_filename, params={'version': version})
+
+
+    def delete_file(self, filename: str) -> QNetworkReply:
+        return self.cloud_delete('files/' + filename)
 
 
     def set_token(self, token: str, update_auth: bool = False) -> None:

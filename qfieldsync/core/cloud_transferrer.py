@@ -29,7 +29,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.core import QgsProject
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
-from qfieldsync.core.cloud_project import CloudProject, ProjectFile
+from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 
 
 class CloudTransferrer(QObject):
@@ -42,6 +42,7 @@ class CloudTransferrer(QObject):
     download_progress = pyqtSignal(float)
     upload_finished = pyqtSignal()
     download_finished = pyqtSignal()
+    delete_finished = pyqtSignal()
 
 
     def __init__(self, network_manager: CloudNetworkAccessManager, cloud_project: CloudProject) -> None:
@@ -51,15 +52,18 @@ class CloudTransferrer(QObject):
         self.cloud_project = cloud_project
         self._files_to_upload = {}
         self._files_to_download = {}
+        self._files_to_delete = {}
         self.upload_files_finished = 0
         self.upload_bytes_total_files_only = 0
         self.download_files_finished = 0
         self.download_bytes_total_files_only = 0
+        self.delete_files_finished = 0
         self.is_aborted = False
         self.is_started = False
         self.is_finished = False
         self.is_upload_active = False
         self.is_download_active = False
+        self.is_delete_active = False
         self.is_project_list_update_active = False
         self.replies = []
         self.temp_dir = Path(QgsProject.instance().homePath()).joinpath('.qfieldsync')
@@ -78,7 +82,7 @@ class CloudTransferrer(QObject):
         self.network_manager.logout_success.connect(self._on_logout_success)
 
 
-    def sync(self, files_to_upload: List[ProjectFile], files_to_download: List[ProjectFile]) -> None:
+    def sync(self, files_to_upload: List[ProjectFile], files_to_download: List[ProjectFile], files_to_delete: List[ProjectFile]) -> None:
         assert not self.is_started
         
         self.is_started = True
@@ -101,6 +105,14 @@ class CloudTransferrer(QObject):
                 'temp_filename': temp_filename,
             }
         
+        # prepare the files to be delete, both locally and remotely
+        for project_file in files_to_delete:
+            filename = project_file.name
+
+            self._files_to_delete[filename] = {
+                'project_file': project_file,
+            }
+
         # prepare the files to be downloaded, download them in a temporary destination
         for project_file in files_to_download:
             filename = project_file.name
@@ -143,6 +155,34 @@ class CloudTransferrer(QObject):
             reply.finished.connect(lambda: self._on_upload_file_finished(reply, filename=filename))
 
             self.replies.append(reply)
+
+
+    def _delete(self) -> None:
+        self.is_delete_active = True
+
+        # nothing to delete
+        if len(self._files_to_delete) == 0:
+            self.delete_finished.emit()
+            # NOTE check _on_delete_finished
+            return
+
+        for filename in self._files_to_delete:
+            project_file = self._files_to_delete[filename]['project_file']
+
+            if project_file.checkout == ProjectFileCheckout.Local:
+                self.delete_files_finished += 1
+                Path(project_file.local_path).unlink()
+
+            if project_file.checkout & ProjectFileCheckout.Cloud:
+                if project_file.checkout & ProjectFileCheckout.Local:
+                    Path(project_file.local_path).unlink()
+
+                reply = self.network_manager.delete_file(self.cloud_project.id + '/' + str(filename) + '/')
+                reply.finished.connect(lambda: self._on_delete_file_finished(reply, filename=filename))
+
+        # in case all the files to delete were local only
+        if self.delete_files_finished == len(self._files_to_delete):
+            self.delete_finished.emit()
 
 
     def _download(self) -> None:
@@ -212,6 +252,18 @@ class CloudTransferrer(QObject):
         self.download_progress.emit(fraction)
 
 
+    def _on_delete_file_finished(self, reply: QNetworkReply, filename: str) -> None:
+        self.delete_files_finished += 1
+
+        try:
+            self.network_manager.handle_response(reply, False)
+        except Exception as err:
+            self.error.emit(self.tr(f'Deleting file "{filename}" failed.'), err)
+
+        if self.delete_files_finished == len(self._files_to_delete):
+            self.delete_finished.emit()
+
+
     def _on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
         try:
             self.network_manager.handle_response(reply, False)
@@ -233,9 +285,15 @@ class CloudTransferrer(QObject):
             self.download_finished.emit()
             return
 
+
     def _on_upload_finished(self) -> None:
         self.is_upload_active = False
         self._update_project_files_list()
+        self._delete()
+
+
+    def _on_delete_finished(self) -> None:
+        self.is_delete_active = False
         self._download()
 
 
