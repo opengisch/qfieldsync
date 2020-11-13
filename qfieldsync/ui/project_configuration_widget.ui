@@ -29,7 +29,17 @@
       <attribute name="title">
        <string>QFieldCloud</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,1,0">
+       <item row="0" column="0">
+        <widget class="QRadioButton" name="preferOnlineLayersRadioButton">
+         <property name="text">
+          <string>Prefer online layers</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="1">
         <widget class="QRadioButton" name="preferOfflineLayersRadioButton">
          <property name="text">
@@ -37,7 +47,20 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="4" column="0" colspan="3">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="0" colspan="3">
         <widget class="QgsCollapsibleGroupBox" name="cloudAdvancedSettings">
          <property name="title">
           <string>Advanced Settings</string>
@@ -50,29 +73,6 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4"/>
         </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QRadioButton" name="preferOnlineLayersRadioButton">
-         <property name="text">
-          <string>Prefer online layers</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
