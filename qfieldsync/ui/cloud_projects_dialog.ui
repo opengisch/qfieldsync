@@ -37,9 +37,6 @@
             <bold>true</bold>
            </font>
           </property>
-          <property name="toolTip">
-           <string>You are logged in with the following username</string>
-          </property>
          </widget>
         </item>
         <item>
