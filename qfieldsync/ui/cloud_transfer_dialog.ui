@@ -105,7 +105,7 @@
        <item>
         <widget class="QLabel" name="explanationLabel">
          <property name="text">
-          <string>Please select action to be applied on the files. Choosing &quot;local&quot; or &quot;cloud&quot; will result the respective file version to be considered the truth and will overwrite any other existing version of the file.</string>
+          <string>Please select action to be applied on the files. Checking &quot;local&quot; or &quot;cloud&quot; will mark it as a single source of truth and will overwrite the file on any other storage.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
