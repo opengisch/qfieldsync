@@ -20,7 +20,7 @@
 """
 
 
-from typing import List, Union
+from typing import Callable, List, Union
 import shutil
 import sqlite3
 from pathlib import Path
@@ -153,8 +153,8 @@ class CloudTransferrer(QObject):
             temp_filename = self._files_to_upload[filename]['temp_filename']
 
             reply = self.network_manager.cloud_upload_files('files/' + self.cloud_project.id + '/' + filename, filenames=[str(temp_filename)])
-            reply.uploadProgress.connect(lambda s, t: self._on_upload_file_progress(reply, s, t, filename=filename))
-            reply.finished.connect(lambda: self._on_upload_file_finished(reply, filename=filename))
+            reply.uploadProgress.connect(self._on_upload_file_progress_wrapper(reply, filename))
+            reply.finished.connect(self._on_upload_file_finished_wrapper(reply, filename))
 
             self.replies.append(reply)
 
@@ -180,7 +180,7 @@ class CloudTransferrer(QObject):
                     Path(project_file.local_path).unlink()
 
                 reply = self.network_manager.delete_file(self.cloud_project.id + '/' + str(filename) + '/')
-                reply.finished.connect(lambda: self._on_delete_file_finished(reply, filename=filename))
+                reply.finished.connect(self._on_delete_file_finished_wrapper(reply, filename))
 
         # in case all the files to delete were local only
         if self.delete_files_finished == len(self._files_to_delete):
@@ -203,10 +203,17 @@ class CloudTransferrer(QObject):
             temp_filename = self._files_to_download[filename]['temp_filename']
 
             reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_filename))
-            reply.downloadProgress.connect(lambda r, t: self._on_download_file_progress(reply, r, t, filename=filename))
-            reply.finished.connect(lambda: self._on_download_file_finished(reply, filename=filename, temp_filename=temp_filename))
+            reply.downloadProgress.connect(self._on_download_file_progress_wrapper(reply,filename))
+            reply.finished.connect(self._on_download_file_finished_wrapper(reply, filename, temp_filename))
 
             self.replies.append(reply)
+
+
+    def _on_upload_file_progress_wrapper(self, reply: QNetworkReply, filename: str) -> Callable:
+        def cb(bytes_sent: int, bytes_total: int) -> None:
+            self._on_upload_file_progress(reply, bytes_sent, bytes_total, filename)
+
+        return cb
 
 
     def _on_upload_file_progress(self, reply: QNetworkReply, bytes_sent: int, bytes_total: int, filename: str) -> None:
@@ -225,11 +232,18 @@ class CloudTransferrer(QObject):
         self.upload_progress.emit(fraction)
 
 
+    def _on_upload_file_finished_wrapper(self, reply: QNetworkReply, filename: str) -> Callable:
+        def cb() -> None:
+            self._on_upload_file_finished(reply, filename)
+
+        return cb
+
+
     def _on_upload_file_finished(self, reply: QNetworkReply, filename: str) -> None:
         try:
             self.network_manager.handle_response(reply, False)
         except Exception as err:
-            self.error.emit(self.tr('Uploading file "{}" failed.'.format(filename)), err)
+            self.error.emit(self.tr(f'Uploading file "{filename}" failed: {err}'), err)
             self.abort_requests()
             return
 
@@ -242,7 +256,14 @@ class CloudTransferrer(QObject):
             return
 
 
-    def _on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, filename: str = '') -> None:
+    def _on_download_file_progress_wrapper(self, reply: QNetworkReply, filename: str) -> Callable:
+        def cb(bytes_received: int, bytes_total: int) -> None:
+            self._on_download_file_progress(reply, bytes_received, bytes_total, filename)
+
+        return cb
+
+
+    def _on_download_file_progress(self, reply: QNetworkReply, bytes_received: int, bytes_total: int, filename: str) -> None:
         self._files_to_download[filename]['bytes_transferred'] = bytes_received
         self._files_to_download[filename]['bytes_total'] = bytes_total
 
@@ -252,6 +273,13 @@ class CloudTransferrer(QObject):
         fraction = min(bytes_received_sum / bytes_total_sum, 1) if self.download_bytes_total_files_only > 0 else 1
 
         self.download_progress.emit(fraction)
+
+
+    def _on_delete_file_finished_wrapper(self, reply: QNetworkReply, filename: str) -> Callable:
+        def cb() -> None:
+            self._on_delete_file_finished(reply, filename)
+
+        return cb
 
 
     def _on_delete_file_finished(self, reply: QNetworkReply, filename: str) -> None:
@@ -266,18 +294,25 @@ class CloudTransferrer(QObject):
             self.delete_finished.emit()
 
 
-    def _on_download_file_finished(self, reply: QNetworkReply, filename: str = '', temp_filename: str = '') -> None:
+    def _on_download_file_finished_wrapper(self, reply: QNetworkReply, filename: str, temp_filename: str) -> Callable:
+        def cb() -> None:
+            self._on_download_file_finished(reply, filename, temp_filename)
+
+        return cb
+
+
+    def _on_download_file_finished(self, reply: QNetworkReply, filename: str, temp_filename: str) -> None:
         try:
             self.network_manager.handle_response(reply, False)
         except Exception as err:
-            self.error.emit(self.tr('Downloading file "{}" failed. Aborting...'.format(filename)), err)
+            self.error.emit(self.tr(f'Downloading file "{filename}" failed. Aborting...'), err)
             self.abort_requests()
             return
 
         self.download_files_finished += 1
 
         if not Path(temp_filename).exists():
-            self.error.emit(self.tr('Downloaded file "{}" not found!'.format(temp_filename)))
+            self.error.emit(self.tr(f'Downloaded file "{temp_filename}" not found!'))
             self.abort_requests()
             return
 
