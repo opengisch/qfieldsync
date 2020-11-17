@@ -97,7 +97,7 @@ class CloudTransferrer(QObject):
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(project_file.local_path, temp_filename)
 
-            self.upload_bytes_total_files_only += project_file.local_size
+            self.upload_bytes_total_files_only += project_file.local_size or 0
             self._files_to_upload[filename] = {
                 'project_file': project_file,
                 'bytes_total': project_file.local_size,
@@ -120,7 +120,7 @@ class CloudTransferrer(QObject):
             temp_filename = self.temp_dir.joinpath('download', filename)
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
 
-            self.download_bytes_total_files_only += project_file.size
+            self.download_bytes_total_files_only += project_file.size or 0
             self._files_to_download[filename] = {
                 'project_file': project_file,
                 'bytes_total': project_file.size,
