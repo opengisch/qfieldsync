@@ -326,4 +326,10 @@ class CloudProject:
                 if filename in self._files:
                     continue
 
+                if filename.endswith(('.gpkg-shm', '.gpkg-wal')):
+                    continue
+
+                if filename.endswith(('.qgs~', '.qgz~')):
+                    continue
+
                 self._files[filename] = ProjectFile({'name': filename}, local_dir=self.local_dir)

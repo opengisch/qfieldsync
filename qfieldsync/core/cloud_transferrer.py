@@ -20,14 +20,16 @@
 """
 
 
-from typing import List
+from typing import List, Union
 import shutil
+import sqlite3
 from pathlib import Path
 
 from qgis.PyQt.QtCore import pyqtSignal, QObject
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.core import QgsProject
 
+from qfieldsync.libqfieldsync.utils.file_utils import copy_multifile
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 
@@ -95,7 +97,7 @@ class CloudTransferrer(QObject):
 
             temp_filename = self.temp_dir.joinpath('upload', filename)
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(project_file.local_path, temp_filename)
+            copy_multifile(project_file.local_path, temp_filename)
 
             self.upload_bytes_total_files_only += project_file.local_size or 0
             self._files_to_upload[filename] = {
@@ -341,8 +343,8 @@ class CloudTransferrer(QObject):
             if project_file.local_path and project_file.local_path.exists():
                 dest = self.temp_dir.joinpath('backup', project_file.path)
                 dest.parent.mkdir(parents=True, exist_ok=True)
-                
-                shutil.copyfile(project_file.local_path, dest)
+
+                copy_multifile(project_file.local_path, dest)
 
 
     def _temp_dir2main_dir(self, subdir: str) -> None:
@@ -355,9 +357,27 @@ class CloudTransferrer(QObject):
                 filename.mkdir(parents=True, exist_ok=True)
                 continue
 
-            relative_filename = str(Path(filename).relative_to(subdir_path))
+            source_filename = str(Path(filename).relative_to(subdir_path))
+            dest_filename = str(self._files_to_download[source_filename]['project_file'].local_path)
 
-            shutil.copyfile(filename, self._files_to_download[relative_filename]['project_file'].local_path)
+            if source_filename.endswith(('.gpkg-shm', '.gpkg-wal')):
+                for suffix in ('-shm', '-wal'):
+                    source_path = Path(str(self.local_path) + suffix)
+                    dest_path = Path(str(dest_filename) + suffix)
+
+                    if source_path.exists():
+                        shutil.copyfile(source_path, dest_path)
+                    else:
+                        dest_path.unlink()
+
+            shutil.copyfile(filename, dest_filename)
+
+
+    def flush_gpkg(self, filename: Union[str, Path]) -> None:
+        conn = sqlite3.connect(filename)
+        
+        with conn:
+            conn.execute('PRAGMA wal_checkpoint')
 
 
     def import_qfield_project(self) -> None:
@@ -372,7 +392,4 @@ class CloudTransferrer(QObject):
 
 
     def _on_logout_success(self) -> None:
-        self.projectsTable.setRowCount(0)
         self.abort_requests()
-
-        self.close()
