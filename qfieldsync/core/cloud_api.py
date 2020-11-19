@@ -133,7 +133,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         auth_manager = QgsApplication.authManager()
 
         if not auth_manager.masterPasswordHashInDatabase():
-            return url, '', ''
+            return QgsAuthMethodConfig()
 
         authcfg = self.preferences.value('qfieldCloudAuthcfg')
         cfg = QgsAuthMethodConfig()
