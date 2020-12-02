@@ -58,10 +58,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.project_transfer.download_progress.connect(self.on_download_transfer_progress)
         self.project_transfer.finished.connect(self.on_transfer_finished)
 
-        self.filesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.filesTree.header().setSectionResizeMode(0, QHeaderView.Interactive)
         self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.filesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.filesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.filesTree.header().setSectionResizeMode(3, QHeaderView.Stretch)
         self.filesTree.expandAll()
 
         self.setWindowTitle(self.tr('Synchronizing project "{}"').format(self.project_transfer.cloud_project.name))
