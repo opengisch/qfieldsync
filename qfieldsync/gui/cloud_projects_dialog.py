@@ -43,7 +43,7 @@ from qgis.PyQt.QtWidgets import (
     QPushButton,
     QHeaderView,
 )
-from qgis.PyQt.QtGui import QIcon, QFont
+from qgis.PyQt.QtGui import QIcon, QFont, QPalette, QColor
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
@@ -397,26 +397,27 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_edit = QToolButton()
             btn_edit.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')))
             btn_edit.setToolTip(self.tr('Edit project data'))
-            btn_delete = QToolButton()
-            btn_delete.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/delete.svg')))
-            btn_delete.setToolTip(self.tr('Delete project'))
             btn_launch = QToolButton()
             btn_launch.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/launch.svg')))
             btn_launch.setToolTip(self.tr('Open project'))
+            btn_delete = QToolButton()
+            btn_delete.setPalette(QPalette(QColor('red')))
+            btn_delete.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/delete.svg')))
+            btn_delete.setToolTip(self.tr('Delete QFieldCloud project'))
             btn_widget = QWidget()
             btn_layout = QHBoxLayout()
             btn_layout.setAlignment(Qt.AlignCenter)
             btn_layout.setContentsMargins(0, 0, 0, 0)
             btn_layout.addWidget(btn_sync)
             btn_layout.addWidget(btn_edit)
-            btn_layout.addWidget(btn_delete)
             btn_layout.addWidget(btn_launch)
+            btn_layout.addWidget(btn_delete)
             btn_widget.setLayout(btn_layout)
 
             btn_sync.clicked.connect(self.on_project_sync_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
             btn_edit.clicked.connect(self.on_project_edit_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
-            btn_delete.clicked.connect(self.on_project_delete_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
             btn_launch.clicked.connect(self.on_project_launch_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
+            btn_delete.clicked.connect(self.on_project_delete_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
@@ -591,8 +592,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_project_delete_button_clicked(self, is_toggled: bool) -> None:
         button_pressed = QMessageBox.question(
             self, 
-            self.tr('Delete project'), 
-            self.tr('Are you sure you want to delete project "{}"?').format(self.current_cloud_project.name))
+            self.tr('Delete QFieldCloud project'), 
+            self.tr('Are you sure you want to delete the QFieldCloud project "{}"? Nevertheless, your local files will remain.').format(self.current_cloud_project.name))
 
         if button_pressed != QMessageBox.Yes:
             return
