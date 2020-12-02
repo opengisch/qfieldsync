@@ -26,7 +26,7 @@ import glob
 from pathlib import Path
 from typing import Optional
 
-from qgis.PyQt.QtCore import pyqtSignal, Qt, QItemSelectionModel, QDateTime
+from qgis.PyQt.QtCore import pyqtSignal, Qt, QItemSelectionModel, QDateTime, QRegularExpression
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QToolButton,
@@ -43,7 +43,7 @@ from qgis.PyQt.QtWidgets import (
     QPushButton,
     QHeaderView,
 )
-from qgis.PyQt.QtGui import QIcon, QFont, QPalette, QColor
+from qgis.PyQt.QtGui import QIcon, QFont, QPalette, QColor, QRegularExpressionValidator
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
@@ -110,6 +110,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.use_current_project_directory_action = QAction(QIcon(), self.tr('Use Current Project Directory'))
         self.use_current_project_directory_action.triggered.connect(self.on_use_current_project_directory_action_triggered)
+
+        self.projectNameLineEdit.setValidator(QRegularExpressionValidator(QRegularExpression('^[a-zA-Z][-a-zA-Z0-9_]{2,}$')))
 
         self.createButton.clicked.connect(lambda: self.on_create_button_clicked())
         self.refreshButton.clicked.connect(lambda: self.on_refresh_button_clicked())
