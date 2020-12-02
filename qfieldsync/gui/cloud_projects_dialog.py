@@ -43,7 +43,7 @@ from qgis.PyQt.QtWidgets import (
     QPushButton,
     QHeaderView,
 )
-from qgis.PyQt.QtGui import QIcon, QFont, QPalette, QColor, QRegularExpressionValidator
+from qgis.PyQt.QtGui import QIcon, QFont, QPalette, QColor, QValidator, QRegularExpressionValidator
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
@@ -696,6 +696,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             'private': self.projectIsPrivateCheckBox.isChecked(),
             'local_dir': self.localDirLineEdit.text()
         }
+
+        if self.projectNameLineEdit.validator().validate(cloud_project_data['name'], 0)[0] != QValidator.Acceptable:
+            QMessageBox.warning(None, self.tr('Invalid project name'), self.tr('You cannot create a new project without setting a valid name first.'))
+            return
 
         self.projectsFormPage.setEnabled(False)
         self.feedbackLabel.setVisible(True)
