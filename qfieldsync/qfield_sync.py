@@ -238,24 +238,9 @@ class QFieldSync(object):
             callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow())
 
-        self.add_action(
-            QIcon(os.path.join(os.path.dirname(__file__), './resources/project_properties.svg')),
-            text=self.tr('Configure Current Project'),
-            callback=self.show_project_configuration_dialog,
-            parent=self.iface.mainWindow(),
-        )
-
         actions = self.iface.pluginMenu().actions()
-        for action in actions:
-            if action.text() == self.menu:
-                action.menu().addSeparator()
-
-        self.add_action(
-            QgsApplication.getThemeIcon("/mActionOptions.svg"),
-            text=self.tr('Preferences'),
-            callback=self.show_preferences_dialog,
-            parent=self.iface.mainWindow(),
-            add_to_toolbar=False)
+        qfield_action = [action for action in actions if action.text() == self.menu][0]
+        qfield_action.menu().addSeparator()
 
         self.cloud_projects_overview_action = self.add_action(
             os.path.join(os.path.dirname(__file__), './resources/cloud.svg'),
@@ -268,6 +253,22 @@ class QFieldSync(object):
             os.path.join(os.path.dirname(__file__), './resources/cloud.svg'),
             text=self.tr('Current Project Properties'),
             callback=self.show_cloud_project_details_dialog,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False)
+
+        qfield_action.menu().addSeparator()
+
+        self.add_action(
+            QIcon(os.path.join(os.path.dirname(__file__), './resources/project_properties.svg')),
+            text=self.tr('Configure Current Project'),
+            callback=self.show_project_configuration_dialog,
+            parent=self.iface.mainWindow(),
+        )
+
+        self.add_action(
+            QgsApplication.getThemeIcon("/mActionOptions.svg"),
+            text=self.tr('Preferences'),
+            callback=self.show_preferences_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
 
@@ -297,9 +298,7 @@ class QFieldSync(object):
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginMenu(
-                self.tr('&QFieldSync'),
-                action)
+            self.iface.removePluginMenu(self.tr('&QFieldSync'), action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
