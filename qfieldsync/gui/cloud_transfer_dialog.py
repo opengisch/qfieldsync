@@ -311,7 +311,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             cloud_icon = 'file_add-green.svg'
             arrow_icon = 'arrow_forward-green'
         elif project_file_action == ProjectFileAction.UploadAndReplace:
-            detail = self.tr('Upload and replace file on the cloud')
+            detail = self.tr('Upload (will replace file on the cloud)')
             cloud_icon = 'file_refresh-orange.svg'
             arrow_icon = 'arrow_forward-orange'
         elif project_file_action == ProjectFileAction.DownloadAndCreate:
@@ -319,7 +319,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             local_icon = 'file_add-green.svg'
             arrow_icon = 'arrow_back-green.svg'
         elif project_file_action == ProjectFileAction.DownloadAndReplace:
-            detail = self.tr('Download and replace local file')
+            detail = self.tr('Download (will replace local file)')
             local_icon = 'file_refresh-orange.svg'
             arrow_icon = 'arrow_back-orange.svg'
         elif project_file_action == ProjectFileAction.DeleteCloud:
