@@ -203,6 +203,14 @@
          </column>
          <column>
           <property name="text">
+           <string>Local</string>
+          </property>
+          <property name="toolTip">
+           <string>Whether the file has a local configured local directory</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
            <string>Actions</string>
           </property>
           <property name="toolTip">

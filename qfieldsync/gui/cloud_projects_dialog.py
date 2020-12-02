@@ -380,28 +380,45 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             item.setData(Qt.UserRole, cloud_project)
             item.setData(Qt.EditRole, cloud_project.name)
 
-            cbx = QCheckBox()
-            cbx.setEnabled(False)
-            cbx.setChecked(cloud_project.is_private)
+            cbx_private = QCheckBox()
+            cbx_private.setEnabled(False)
+            cbx_private.setChecked(cloud_project.is_private)
             # # it's more UI friendly when the checkbox is centered, an ugly workaround to achieve it
-            cbx_widget = QWidget()
-            cbx_layout = QHBoxLayout()
-            cbx_layout.setAlignment(Qt.AlignCenter)
-            cbx_layout.setContentsMargins(0, 0, 0, 0)
-            cbx_layout.addWidget(cbx)
-            cbx_widget.setLayout(cbx_layout)
+            cbx_private_widget = QWidget()
+            cbx_private_layout = QHBoxLayout()
+            cbx_private_layout.setAlignment(Qt.AlignCenter)
+            cbx_private_layout.setContentsMargins(0, 0, 0, 0)
+            cbx_private_layout.addWidget(cbx_private)
+            cbx_private_widget.setLayout(cbx_private_layout)
             # NOTE the margin is not updated when the table column is resized, so better rely on the code above
-            # cbx.setStyleSheet("margin-left:50%; margin-right:50%;")
+            # cbx_private.setStyleSheet("margin-left:50%; margin-right:50%;")
+
+            cbx_local = QCheckBox()
+            cbx_local.setEnabled(False)
+            cbx_local.setChecked(bool(cloud_project.local_dir))
+            # # it's more UI friendly when the checkbox is centered, an ugly workaround to achieve it
+            cbx_local_widget = QWidget()
+            cbx_local_layout = QHBoxLayout()
+            cbx_local_layout.setAlignment(Qt.AlignCenter)
+            cbx_local_layout.setContentsMargins(0, 0, 0, 0)
+            cbx_local_layout.addWidget(cbx_local)
+            cbx_local_widget.setLayout(cbx_local_layout)
+            if bool(cloud_project.local_dir):
+                cbx_local_widget.setToolTip(str(cloud_project.local_dir))
+            else:
+                cbx_local_widget.setToolTip(self.tr('No local dir configured'))
+            # NOTE the margin is not updated when the table column is resized, so better rely on the code above
+            # cbx_local.setStyleSheet("margin-left:50%; margin-right:50%;")
 
             btn_sync = QToolButton()
             btn_sync.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')))
             btn_sync.setToolTip(self.tr('Synchronize with QFieldCloud'))
             btn_edit = QToolButton()
             btn_edit.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')))
-            btn_edit.setToolTip(self.tr('Edit project data'))
+            btn_edit.setToolTip(self.tr('Edit project details'))
             btn_launch = QToolButton()
             btn_launch.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/launch.svg')))
-            btn_launch.setToolTip(self.tr('Open project'))
+            btn_launch.setToolTip(self.tr('Open project "{}"').format(cloud_project.local_project_file))
             btn_delete = QToolButton()
             btn_delete.setPalette(QPalette(QColor('red')))
             btn_delete.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/delete.svg')))
@@ -416,6 +433,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_layout.addWidget(btn_delete)
             btn_widget.setLayout(btn_layout)
 
+            if cloud_project.local_project_file is None:
+                btn_launch.setToolTip(self.tr('Cannot open project since no local .qgs or .qgz project file found'))
+                btn_launch.setEnabled(False)
+
             btn_sync.clicked.connect(self.on_project_sync_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
             btn_edit.clicked.connect(self.on_project_edit_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
             btn_launch.clicked.connect(self.on_project_launch_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
@@ -423,8 +444,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
-            self.projectsTable.setCellWidget(count, 2, cbx_widget)
-            self.projectsTable.setCellWidget(count, 3, btn_widget)
+            self.projectsTable.setCellWidget(count, 2, cbx_private_widget)
+            self.projectsTable.setCellWidget(count, 3, cbx_local_widget)
+            self.projectsTable.setCellWidget(count, 4, btn_widget)
 
             font = QFont()
 
