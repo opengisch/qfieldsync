@@ -651,6 +651,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectFilesTree.clear()
 
         if self.current_cloud_project is None:
+            self.submitButton.setText(self.tr('Create new project'))
             self.projectTabs.setTabEnabled(1, False)
             self.projectTabs.setTabEnabled(2, False)
             self.projectNameLineEdit.setText(to_cloud_title(QgsProject.instance().title()))
@@ -663,6 +664,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.localDirLineEdit.setText(QgsProject().instance().homePath())
 
         else:
+            self.submitButton.setText(self.tr('Update project details'))
             self.projectTabs.setTabEnabled(1, True)
             self.projectTabs.setTabEnabled(2, True)
             # TODO validate project name to match QFieldCloudRequirements
