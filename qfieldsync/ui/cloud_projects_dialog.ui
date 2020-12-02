@@ -206,7 +206,7 @@
            <string>Local</string>
           </property>
           <property name="toolTip">
-           <string>Whether the file has a local configured local directory</string>
+           <string>Whether the file has a configured local directory</string>
           </property>
          </column>
          <column>
