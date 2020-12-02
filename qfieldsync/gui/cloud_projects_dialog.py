@@ -738,7 +738,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             return
 
         # save `local_dir` configuration permanently, `CloudProject` constructor does this for free
-        _project = CloudProject({
+        project = CloudProject({
             **payload,
             'local_dir': local_dir,
         })
@@ -746,7 +746,15 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setCurrentWidget(self.projectsListPage)
         self.feedbackLabel.setVisible(False)
 
-        self.network_manager.projects_cache.refresh()
+        reply = self.network_manager.projects_cache.refresh()
+        reply.finished.connect(lambda: self.on_create_project_finished_projects_refreshed(project.id))
+
+
+    def on_create_project_finished_projects_refreshed(self, project_id: str) -> None:
+        self.current_cloud_project = self.network_manager.projects_cache.find_project(project_id)
+
+        self.launch()
+        self.sync()
 
 
     def on_update_project_finished(self, reply: QNetworkReply) -> None:
