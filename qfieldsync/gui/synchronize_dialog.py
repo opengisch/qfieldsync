@@ -32,10 +32,10 @@ from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
 
-from qfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.utils.qgis_utils import open_project, import_checksums_of_project
 from qfieldsync.utils.qt_utils import make_folder_selector
 
+from qfieldsync.libqfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder, import_file_checksum, copy_images
 from qfieldsync.libqfieldsync import ProjectConfiguration
 
