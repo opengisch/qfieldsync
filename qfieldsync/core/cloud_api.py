@@ -57,7 +57,26 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
     if reply.error() == QNetworkReply.NoError:
         return None
 
-    return CloudException(reply, Exception('[HTTP-{}/QT-{}] {}'.format(reply.attribute(QNetworkRequest.HttpStatusCodeAttribute), reply.error(), reply.errorString())))
+    message = ''
+    try:
+        payload = str(reply.readAll())
+
+        try:
+            resp = json.loads(payload)
+            if resp.get('code'):
+                message = f'[{resp["code"]}] {resp["message"]}'
+            else:
+                message = resp['detail']
+        except:
+            if payload:
+                message = payload[:500] + '...'
+    except:
+        pass
+
+    if not message:
+        message = '[HTTP-{}/QT-{}] {}'.format(reply.attribute(QNetworkRequest.HttpStatusCodeAttribute), reply.error(), reply.errorString())
+
+    return CloudException(reply, Exception(message))
 
 
 
