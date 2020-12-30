@@ -69,7 +69,10 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
                 message = resp['detail']
         except:
             if payload:
-                message = payload[:500] + '...'
+                message = payload[:500] 
+
+                if len(payload) > 500:
+                    message += '…'
     except:
         pass
 
