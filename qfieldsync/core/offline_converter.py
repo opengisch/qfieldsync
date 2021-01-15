@@ -254,29 +254,29 @@ class OfflineConverter(QObject):
                                     'QFieldSync/sourceDataPrimaryKeys',
                                     stored_fields)
 
-                        if Qgis.QGIS_VERSION_INT < 31601:
-                            for field in layer.fields():
-                                ews = field.editorWidgetSetup()
-                                if ews.type() == 'ValueRelation':
-                                    widget_config = ews.config()
-                                    online_layer_id = widget_config['Layer']
-                                    if project.mapLayer(online_layer_id):
-                                        continue
+                        for field in layer.fields():
+                            ews = field.editorWidgetSetup()
+                            if ews.type() == 'ValueRelation':
+                                widget_config = ews.config()
+                                online_layer_id = widget_config['Layer']
+                                if project.mapLayer(online_layer_id):
+                                    continue
 
-                                    layer_id = None
-                                    loose_layer_id = None
-                                    for offline_layer in project.mapLayers().values():
-                                        if offline_layer.customProperty('remoteSource') == original_layer_info[online_layer_id][0]:
-                                            #  First try strict matching: the offline layer should have a "remoteSource" property
-                                            layer_id = offline_layer.id()
-                                            break
-                                        elif offline_layer.name().startswith(original_layer_info[online_layer_id][1] + ' '):
-                                            #  If that did not work, go with loose matching
-                                            #    The offline layer should start with the online layer name + a translated version of " (offline)"
-                                            loose_layer_id = offline_layer.id()
-                                    widget_config['Layer'] = layer_id or loose_layer_id
-                                    offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
-                                    layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
+                                layer_id = None
+                                loose_layer_id = None
+                                for offline_layer in project.mapLayers().values():
+                                    if offline_layer.customProperty('remoteSource') == original_layer_info[online_layer_id][0]:
+                                        #  First try strict matching: the offline layer should have a "remoteSource" property
+                                        layer_id = offline_layer.id()
+                                        break
+                                    elif Qgis.QGIS_VERSION_INT < 31601 and offline_layer.name().startswith(original_layer_info[online_layer_id][1] + ' ') or \
+                                            Qgis.QGIS_VERSION_INT >= 31601 and offline_layer.name() == original_layer_info[online_layer_id][1]:
+                                        #  If that did not work, go with loose matching
+                                        #  On older versions (<31601) the offline layer should start with the online layer name + a translated version of " (offline)"
+                                        loose_layer_id = offline_layer.id()
+                                widget_config['Layer'] = layer_id or loose_layer_id
+                                offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
+                                layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(project_path)
