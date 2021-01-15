@@ -270,7 +270,7 @@ class OfflineConverter(QObject):
                                         layer_id = offline_layer.id()
                                         break
                                     elif Qgis.QGIS_VERSION_INT < 31601 and offline_layer.name().startswith(original_layer_info[online_layer_id][1] + ' ') or \
-                                            Qgis.QGIS_VERSION_INT >= 31601 and offline_layer_name() == original_layer_info[online_layer_id][1]:
+                                            Qgis.QGIS_VERSION_INT >= 31601 and offline_layer.name() == original_layer_info[online_layer_id][1]:
                                         #  If that did not work, go with loose matching
                                         #  On older versions (<31601) the offline layer should start with the online layer name + a translated version of " (offline)"
                                         loose_layer_id = offline_layer.id()
