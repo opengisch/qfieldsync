@@ -83,7 +83,7 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 
 
 
-class CloudNetworkAccessManager(QgsNetworkAccessManager):
+class CloudNetworkAccessManager(QObject):
     
     token_changed = pyqtSignal()
     login_success = pyqtSignal()
@@ -100,6 +100,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         self._token = ''
         self._username = ''
         self.projects_cache = CloudProjectsCache(self, self)
+        self._nam = QgsNetworkAccessManager.instance()
 
         # use the default URL
         self.set_url(self.preferences.value('qfieldCloudServerUrl'))
@@ -336,7 +337,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
 
-        reply = self.get(request)
+        reply = self._nam.get(request)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -362,7 +363,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
 
         payload_bytes = b'' if payload is None else json.dumps(payload).encode('utf-8')
-        reply = self.post(request, payload_bytes)
+        reply = self._nam.post(request, payload_bytes)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -380,7 +381,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
 
         payload_bytes = b'' if payload is None else json.dumps(payload).encode('utf-8')
-        reply = self.put(request, payload_bytes)
+        reply = self._nam.put(request, payload_bytes)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -397,7 +398,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
 
-        reply = self.deleteResource(request)
+        reply = self._nam.deleteResource(request)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -436,7 +437,7 @@ class CloudNetworkAccessManager(QgsNetworkAccessManager):
 
                 multi_part.append(file_part)
 
-        reply = self.post(request, multi_part)
+        reply = self._nam.post(request, multi_part)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
         multi_part.setParent(reply)
