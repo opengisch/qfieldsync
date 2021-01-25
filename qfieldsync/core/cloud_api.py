@@ -534,12 +534,16 @@ class CloudProjectsCache(QObject):
 
         return self._projects_reply
 
-    
+
     def refresh_not_async(self) -> None:
+        '''Projects are requested in synchronous manner.
+        The function name is cumbersome to discourage it's potential user.
+        Better use `refresh()`
+        '''
         self.projects_started.emit()
-        
+
         payload = self.network_manager.get_projects_not_async()
-        
+
         self._projects = []
 
         for project_data in payload:
