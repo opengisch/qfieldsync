@@ -24,6 +24,7 @@ from enum import IntFlag
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Union
 import hashlib
+import sqlite3
 
 from qgis.core import QgsProject
 
@@ -139,6 +140,16 @@ class ProjectFile:
         with open(self.local_path, 'rb') as f:
             return hashlib.sha256(f.read()).hexdigest()
 
+    def flush(self) -> None:
+        if not self._local_dir:
+            return
+
+        if self.name.endswith('.gpkg'):
+            if Path(str(self.local_path) + '-wal').stat().st_size > 0:
+                conn = sqlite3.connect(str(self.local_path))
+
+                with conn:
+                    conn.execute('PRAGMA wal_checkpoint')
 
 class CloudProject:
 
@@ -258,6 +269,8 @@ class CloudProject:
     @property
     def files_to_sync(self) -> Iterator[ProjectFile]:
         for project_file in self.get_files():
+            project_file.flush()
+
             # don't attempt to sync files that are the same both locally and remote
             if project_file.sha256 == project_file.local_sha256:
                 continue

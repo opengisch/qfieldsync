@@ -22,7 +22,6 @@
 
 from typing import Callable, List, Union
 import shutil
-import sqlite3
 from pathlib import Path
 
 from qgis.PyQt.QtCore import pyqtSignal, QObject
@@ -94,11 +93,9 @@ class CloudTransferrer(QObject):
         for project_file in files_to_upload:
             assert project_file.local_path
 
+            project_file.flush()
+
             filename = project_file.name
-
-            if filename.endswith('.gpkg'):
-                self.flush_gpkg(filename)
-
             temp_filename = self.temp_dir.joinpath('upload', filename)
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
             copy_multifile(project_file.local_path, temp_filename)
@@ -410,14 +407,6 @@ class CloudTransferrer(QObject):
                         dest_path.unlink()
 
             shutil.copyfile(filename, dest_filename)
-
-
-    def flush_gpkg(self, filename: Union[str, Path]) -> None:
-        conn = sqlite3.connect(filename)
-        
-        with conn:
-            conn.execute('PRAGMA wal_checkpoint')
-
 
     def import_qfield_project(self) -> None:
         try:
