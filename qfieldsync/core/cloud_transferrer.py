@@ -95,6 +95,9 @@ class CloudTransferrer(QObject):
 
             filename = project_file.name
 
+            if filename.endswith('.gpkg'):
+                self.flush_gpkg(filename)
+
             temp_filename = self.temp_dir.joinpath('upload', filename)
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
             copy_multifile(project_file.local_path, temp_filename)
