@@ -182,10 +182,13 @@ class CloudProject:
 
             self._preferences.set_value('qfieldCloudProjectLocalDirs', new_value)
 
+            if self._local_dir:
+                Path(self._local_dir).mkdir(exist_ok=True, parents=True)
+
         # NOTE the cloud_files value is a list and may be in any order, so always assume that if the key is present in the new data, then there is a change
         if 'cloud_files' in new_data:
             self._cloud_files = self._data.get('cloud_files')
-            
+
             del self._data['cloud_files']
 
             if isinstance(self._cloud_files, list):
