@@ -186,14 +186,17 @@ class QFieldSyncProjectItem(QgsDataItem):
         super(QFieldSyncProjectItem, self).__init__(QgsDataItem.Collection, parent, project.name, '/QFieldSync/project/' + project.id)
         self.project = project
 
+    def _create_dialog(self) -> CloudProjectsDialog:
+        return CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project)
+
     def actions(self, parent):
         actions = []
 
-        sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.png')), 'Sync', parent)
-        sync_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).sync())
+        sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')), 'Sync', parent)
+        sync_action.triggered.connect(lambda: self._create_dialog().sync())
 
         properties_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Project properties', parent)
-        properties_action.triggered.connect(lambda: CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).show_project_form())
+        properties_action.triggered.connect(lambda: self._create_dialog().show_project_form())
 
         actions.append(sync_action)
         actions.append(properties_action)
@@ -201,5 +204,5 @@ class QFieldSyncProjectItem(QgsDataItem):
         return actions
 
     def handleDoubleClick(self):
-        CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).show_project_form()
+        self._create_dialog().show_project_form()
         return True

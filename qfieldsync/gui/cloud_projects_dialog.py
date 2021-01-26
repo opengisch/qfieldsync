@@ -454,6 +454,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def sync(self) -> None:
         assert self.current_cloud_project is not None
 
+        # keep this to make it work, explain it later...
+        self.current_cloud_project.name
+
         if self.current_cloud_project.cloud_files is not None:
             if not self.current_cloud_project.local_dir:
                 self.current_cloud_project.update_data({'local_dir': self.select_local_dir()})
@@ -462,7 +465,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 return
 
             if len(list(self.current_cloud_project.files_to_sync)) == 0:
-                iface.messageBar().pushInfo('QFieldSync', self.tr('Everything is already in sync!'))
+                iface.messageBar().pushInfo(f'QFieldSync "{self.current_cloud_project.name}":', self.tr('Everything is already in sync!'))
                 return
 
             self.show_sync_popup()
@@ -480,12 +483,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             # no local project name found
             if not project_filename:
-                iface.messageBar().pushInfo('QFieldSync', self.tr('Cannot find local project file. Please first synchronize.'))
+                iface.messageBar().pushInfo(f'QFieldSync "{self.current_cloud_project.name}":', self.tr('Cannot find local project file. Please first synchronize.'))
                 return
 
             # it is the current project, no need to reload
             if str(project_filename.local_path) == QgsProject().instance().fileName():
-                iface.messageBar().pushInfo('QFieldSync', self.tr('Already loaded the selected project.'))
+                iface.messageBar().pushInfo(f'QFieldSync "{self.current_cloud_project.name}":', self.tr('Already loaded the selected project.'))
                 return
 
             if QgsProject.instance().read(str(project_filename.local_path)):
