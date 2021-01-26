@@ -22,9 +22,9 @@
 """
 import os
 import functools
-import glob
 from pathlib import Path
-from typing import Optional
+from enum import Enum
+from typing import Optional, Tuple
 
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QItemSelectionModel, QDateTime, QRegularExpression
 from qgis.PyQt.QtWidgets import (
@@ -37,7 +37,6 @@ from qgis.PyQt.QtWidgets import (
     QTreeWidgetItem,
     QFileDialog,
     QMessageBox,
-    QAbstractButton,
     QMenu,
     QAction,
     QPushButton,
@@ -60,6 +59,11 @@ from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 
 
 CloudProjectsDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_projects_dialog.ui'))
+
+class LocalDirFeedback(Enum):
+    Error = 'error'
+    Warning = 'warning'
+    Success = 'success'
 
 
 def select_table_row(func):
@@ -140,9 +144,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectFilesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
-
-        self.projectFilesToggleExpandButton.clicked.connect(self.on_project_files_toggle_expand_button_clicked)
-
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
@@ -316,17 +317,21 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_button_box_clicked(self) -> None:
         self.close()
 
-
     def on_local_dir_line_edit_text_changed(self) -> None:
         local_dir = self.localDirLineEdit.text()
         self.submitButton.setEnabled(False)
 
-        if local_dir == '' or self._is_local_dir_valid(local_dir):
-            self.localDirLineEdit.setStyleSheet('')
-            self.submitButton.setEnabled(True)
+        feedback, feedback_msg = self.local_dir_feedback(local_dir)
+        self.localDirFeedbackLabel.setText(feedback_msg)
+
+        if feedback == LocalDirFeedback.Error:
+            self.localDirFeedbackLabel.setStyleSheet('color: red;')
+        elif feedback == LocalDirFeedback.Warning:
+            self.localDirFeedbackLabel.setStyleSheet('color: orange;')
         else:
-            self.localDirLineEdit.setStyleSheet('color: red;')
-            self.submitButton.setEnabled(False)
+            self.localDirFeedbackLabel.setStyleSheet('color: green;')
+
+        self.submitButton.setEnabled(True)
 
         if self.current_cloud_project:
             self.current_cloud_project.update_data({'local_dir': local_dir})
@@ -345,6 +350,33 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_refresh_button_clicked(self) -> None:
         self.network_manager.projects_cache.refresh()
 
+    def local_dir_feedback(self, local_dir, empty_ok=True, exiting_ok=True) -> Tuple[LocalDirFeedback, str]:
+        if not local_dir:
+            return LocalDirFeedback.Error, self.tr('Please select local directory where the project to be stored.')
+        elif not Path(local_dir).is_dir():
+            return LocalDirFeedback.Warning, self.tr('The entered path is not an existing directory. It will be created after you submit this form.')
+        elif len(CloudProject.project_files(local_dir)) == 0:
+            message = self.tr('The entered path does not contain a QGIS project file yet.')
+            status = LocalDirFeedback.Warning
+
+            if empty_ok:
+                status = LocalDirFeedback.Success
+                message += ' '
+                message += self.tr('You can always add one later.')
+
+            return status, message
+        elif len(CloudProject.project_files(local_dir)) == 1:
+            message = self.tr('The entered path contains one QGIS project file.')
+            status = LocalDirFeedback.Warning
+
+            if exiting_ok:
+                status = LocalDirFeedback.Success
+                message += ' '
+                message += self.tr('Exactly as it should be.')
+
+            return status, message
+        else:
+            return LocalDirFeedback.Error, self.tr('Multiple project files have been found in the directory. Please leave exactly one QGIS project in the root directory.')
 
     def show_projects(self) -> None:
         self.feedbackLabel.setText('')
@@ -454,7 +486,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def sync(self) -> None:
         assert self.current_cloud_project is not None
 
-        # keep this to make it work, explain it later...
+        # keep this to make it work, explain it later…
         self.current_cloud_project.name
 
         if self.current_cloud_project.cloud_files is not None:
@@ -539,17 +571,25 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         # cloud project is empty, you can upload a local project into it
         if self.current_cloud_project is None or (self.current_cloud_project.cloud_files is not None and len(self.current_cloud_project.cloud_files) == 0):
             while local_dir is None:
-                local_dir = QFileDialog.getExistingDirectory(self, self.tr('Upload local project to QFieldCloud'), initial_path)
+                local_dir = QFileDialog.getExistingDirectory(self, self.tr('Upload local project to QFieldCloud…'), initial_path)
 
                 if local_dir == '':
                     return
 
-                if not self._is_local_dir_valid(local_dir, True):
-                    QMessageBox.warning(None, self.tr('Multiple QGIS projects'), self.tr('When QFieldCloud project has no remote files, the local checkout directory may contain no more than 1 QGIS project.'))
-                    local_dir = None
-                    continue
+                feedback, feedback_msg = self.local_dir_feedback(local_dir, empty_ok=False)
+                title = self.tr('Cannot upload local QFieldSync directory')
 
-                break
+                # all is good, we can continue
+                if feedback == LocalDirFeedback.Success:
+                    break
+
+                if feedback == LocalDirFeedback.Error:
+                    QMessageBox.critical(self, title, feedback_msg)
+                elif feedback == LocalDirFeedback.Warning:
+                    QMessageBox.warning(self, title, feedback_msg)
+
+                local_dir = None
+                continue
 
             return local_dir
 
@@ -559,46 +599,30 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             assert self.current_cloud_project.cloud_files is not None
 
             while local_dir is None:
-                local_dir = QFileDialog.getExistingDirectory(self, self.tr('Save QFieldCloud project at'), initial_path)
+                local_dir = QFileDialog.getExistingDirectory(self, self.tr('Save QFieldCloud project to…'), initial_path)
 
                 if local_dir == '':
                     return
 
-                if len(os.listdir(local_dir)) > 0:
-                    QMessageBox.warning(None, self.tr('QFieldSync checkout requires empty directory'), self.tr('When QFieldCloud project contains remote files the checkout destination needs to be an empty directory.'))
-                    local_dir = None
-                    continue
+                # when the dir is empty, all is good. But if not there are some file, we need to ask the user to confirm what to do
+                if list(Path(local_dir).iterdir()):
+                    buttons = QMessageBox.Ok | QMessageBox.Abort
+                    feedback, feedback_msg = self.local_dir_feedback(local_dir, exiting_ok=False)
+                    title = self.tr('QFieldSync checkout prefers an empty directory')
+                    answer = None
+
+                    if feedback == LocalDirFeedback.Error:
+                        answer = QMessageBox.critical(self, title, feedback_msg, buttons)
+                    elif feedback == LocalDirFeedback.Warning:
+                        answer = QMessageBox.warning(self, title, feedback_msg, buttons)
+
+                    if answer == QMessageBox.Abort:
+                        local_dir = None
+                        continue
 
                 break
 
         return local_dir
-
-
-    def _is_local_dir_valid(self, local_dir: str, should_check_recursive: bool = False) -> bool:
-        """Checks whether the selected local dir is suitable for empty cloud project
-
-        Args:
-            local_dir (str): local directory
-            should_check_recursive (bool, optional): If True, it might take too much time to check recursive the whole file tree. Defaults to False.
-
-        Returns:
-            bool: whether the chosen local directory is suitable or not
-        """
-        if Path(local_dir).is_file():
-            return False
-
-        return True
-
-        if (len(glob.glob('{}/**/*.qgs'.format(local_dir), recursive=should_check_recursive)) > 1 
-            or len(glob.glob('{}/**/*.qgz'.format(local_dir), recursive=should_check_recursive)) > 1):
-            return False
-
-        # already associated local dir with a cloud project
-        if CloudProject.get_cloud_project_id(local_dir) is not None:
-            return False
-
-        return True
-
 
     @select_table_row
     def on_project_sync_button_clicked(self, is_toggled: bool) -> None:

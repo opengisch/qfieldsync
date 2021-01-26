@@ -191,6 +191,14 @@ class CloudProject:
 
 
     @staticmethod
+    def project_files(path: str) -> List[str]:
+        project_filenames = []
+        project_filenames += list(Path(path).glob('*.qgs'))
+        project_filenames += list(Path(path).glob('*.qgz'))
+
+        return project_filenames
+
+    @staticmethod
     def get_cloud_project_id(path: str) -> Optional[str]:
         project_local_dirs: Dict[str, str] = Preferences().value('qfieldCloudProjectLocalDirs')
 
@@ -274,13 +282,10 @@ class CloudProject:
 
     @property
     def root_project_files(self) -> List[str]:
-        project_filenames = []
-
         if self.local_dir:
-            project_filenames += list(Path(self.local_dir).glob('*.qgs'))
-            project_filenames += list(Path(self.local_dir).glob('*.qgz'))
-
-        return project_filenames
+            return CloudProject.project_files(self.local_dir)
+        else:
+            return []
 
     @property
     def local_project_file(self) -> Optional[ProjectFile]:
