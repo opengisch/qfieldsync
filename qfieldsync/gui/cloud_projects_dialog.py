@@ -680,7 +680,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectDescriptionTextEdit.setPlainText('')
             self.projectIsPrivateCheckBox.setChecked(True)
 
-            if CloudProject.is_cloud_project():
+            if CloudProject.get_cloud_project_id(QgsProject.instance().homePath()):
                 self.localDirLineEdit.setText('')
             else:
                 self.localDirLineEdit.setText(QgsProject().instance().homePath())
