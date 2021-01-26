@@ -252,7 +252,7 @@ class CloudNetworkAccessManager(QObject):
 
         response = requests.get(self.server_url + self._prepare_uri('projects'), headers=headers, params=params)
         response.raise_for_status()
-        
+
         return response.json()
 
 
@@ -611,6 +611,9 @@ class CloudProjectsCache(QObject):
                 self._fs_watcher.addPath(project.local_dir)
 
     def _on_get_projects_reply_finished(self, reply: QNetworkReply) -> None:
+        if reply.error() == QNetworkReply.OperationCanceledError:
+            return
+
         self._projects_reply = None
 
         try:
@@ -629,7 +632,7 @@ class CloudProjectsCache(QObject):
 
     def _on_get_project_files_reply_finished(self, reply: QNetworkReply, project_id: str = None) -> None:
         assert project_id
-        
+
         cloud_project = self.find_project(project_id)
 
         if not cloud_project:
