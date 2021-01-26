@@ -83,10 +83,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.preferLocalButton.clicked.connect(self._on_prefer_local_button_clicked)
         self.preferCloudButton.clicked.connect(self._on_prefer_cloud_button_clicked)
 
-        self.uploadProgressBar.setValue(0)
-        self.downloadProgressBar.setValue(0)
-
-
     def showEvent(self, event: QShowEvent) -> None:
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
 
@@ -117,6 +113,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
                 item = QTreeWidgetItem()
                 item.setText(0, part)
+                item.setExpanded(True)
 
                 stack.append((part, item))
 
@@ -148,8 +145,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             item = self.filesTree.topLevelItem(item_idx)
 
             self.traverse_tree_item(item, files)
-            
-        self.stackedWidget.setCurrentWidget(self.progressPage)
+
+        self.show_progress_page(files)
+
         self.project_transfer.sync(files['to_upload'], files['to_download'], files['to_delete'])
 
 
@@ -410,3 +408,50 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         elif checkout == ProjectFileCheckout.Deleted:
             # Reserved for a better future
             pass
+
+    def show_progress_page(self, files: Dict[str, List[ProjectFile]]) -> None:
+        total_delete_count = 0
+        local_delete_count = 0
+        cloud_delete_count = 0
+        download_count = len(files['to_download'])
+        upload_count = len(files['to_upload'])
+
+        for f in files['to_delete']:
+            total_delete_count += 1
+
+            if f.checkout & ProjectFileCheckout.Local:
+                local_delete_count += 1
+            elif f.checkout & ProjectFileCheckout.Local:
+                cloud_delete_count += 1
+
+        upload_message = ''
+        if upload_count or cloud_delete_count:
+            if upload_count:
+                upload_message += self.tr('{} file(s) to overwrite on the cloud.'.format(upload_count))
+            if cloud_delete_count:
+                upload_message += self.tr('{} file(s) to delete on QFieldCloud.'.format(cloud_delete_count))
+
+            self.uploadProgressBar.setValue(0)
+            self.uploadProgressBar.setEnabled(True)
+        else:
+            self.uploadProgressBar.setValue(100)
+            self.uploadProgressBar.setEnabled(False)
+            upload_message = self.tr('Nothing to do on the cloud.')
+        self.uploadProgressFeedbackLabel.setText(upload_message)
+
+        download_message = ''
+        if download_count or local_delete_count:
+            if download_count:
+                download_message += self.tr('{} file(s) to overwrite locally.'.format(download_count))
+            if local_delete_count:
+                download_message += self.tr('{} file(s) to delete locally.'.format(local_delete_count))
+
+            self.downloadProgressBar.setValue(0)
+            self.downloadProgressBar.setEnabled(True)
+        else:
+            self.downloadProgressBar.setValue(100)
+            self.downloadProgressBar.setEnabled(False)
+            download_message = self.tr('Nothing to do locally.')
+        self.downloadProgressFeedbackLabel.setText(download_message)
+
+        self.stackedWidget.setCurrentWidget(self.progressPage)
