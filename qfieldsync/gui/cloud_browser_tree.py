@@ -199,3 +199,7 @@ class QFieldSyncProjectItem(QgsDataItem):
         actions.append(properties_action)
 
         return actions
+
+    def handleDoubleClick(self):
+        CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project).show_project_form()
+        return True
