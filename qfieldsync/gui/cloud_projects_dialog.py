@@ -149,32 +149,20 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.feedbackLabel.setVisible(False)
         self.feedbackLabel.setText('')
 
-        print('on_projects_cached_projects_started')
-
-
     def on_projects_cached_projects_error(self, error: str) -> None:
         self.projectsStack.setEnabled(True)
         self.feedbackLabel.setVisible(True)
         self.feedbackLabel.setText(error)
-
-        print('on_projects_cached_projects_error')
-
 
     def on_projects_cached_projects_updated(self) -> None:
         self.projectsStack.setEnabled(True)
         self.projects_refreshed.emit()
         self.show_projects()
 
-        print('on_projects_cached_projects_updated', self)
-
-
     def on_projects_cached_project_files_started(self, project_id: str) -> None:
         self.projectFilesTab.setEnabled(False)
         self.feedbackLabel.setVisible(False)
         self.feedbackLabel.setText('')
-
-        print('on_projects_cached_project_files_started', project_id)
-
 
     def on_projects_cached_project_files_error(self, project_id: str, error: str) -> None:
         self.projectFilesTab.setEnabled(True)
@@ -184,9 +172,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.feedbackLabel.setText('Obtaining project files list failed: {}'.format(error))
         self.feedbackLabel.setVisible(True)
-
-        print('on_projects_cached_project_files_error', project_id)
-
 
     def on_project_files_toggle_expand_button_clicked(self) -> None:
         should_expand = not self.projectFilesTree.topLevelItem(0).data(1, Qt.UserRole)
