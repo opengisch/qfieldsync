@@ -27,7 +27,6 @@ from pathlib import Path
 
 from qgis.PyQt.QtCore import pyqtSignal, QObject
 from qgis.PyQt.QtNetwork import QNetworkReply
-from qgis.core import QgsProject
 
 from qfieldsync.libqfieldsync.utils.file_utils import copy_multifile
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
@@ -49,6 +48,7 @@ class CloudTransferrer(QObject):
 
     def __init__(self, network_manager: CloudNetworkAccessManager, cloud_project: CloudProject) -> None:
         super(CloudTransferrer, self).__init__(parent=None)
+        assert cloud_project.local_dir
 
         self.network_manager = network_manager
         self.cloud_project = cloud_project
@@ -68,7 +68,7 @@ class CloudTransferrer(QObject):
         self.is_delete_active = False
         self.is_project_list_update_active = False
         self.replies = []
-        self.temp_dir = Path(QgsProject.instance().homePath()).joinpath('.qfieldsync')
+        self.temp_dir = Path(cloud_project.local_dir).joinpath('.qfieldsync')
 
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
