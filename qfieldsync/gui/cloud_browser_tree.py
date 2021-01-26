@@ -150,9 +150,8 @@ class QFieldSyncGroupItem(QgsDataCollectionItem):
         projects: List[CloudProject] = self.network_manager.projects_cache.projects
 
         if projects is None:
-            try: 
+            try:
                 # TODO try to be make it Fast Fertile
-                # TODO try using QgsNetworkAccessManager
                 self.network_manager.projects_cache.refresh_not_async()
             except Exception as err:
                 return []
