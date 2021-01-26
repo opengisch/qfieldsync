@@ -103,6 +103,7 @@ class CloudNetworkAccessManager(QObject):
         self._username = ''
         self.projects_cache = CloudProjectsCache(self, self)
         self._nam = QgsNetworkAccessManager.instance()
+        self.is_login_active = False
 
         # use the default URL
         self.set_url(self.preferences.value('qfieldCloudServerUrl'))

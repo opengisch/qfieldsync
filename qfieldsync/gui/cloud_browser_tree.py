@@ -50,7 +50,7 @@ class DataItemProvider(QgsDataItemProvider):
             root_item = QFieldSyncRootItem(self.network_manager)
             return root_item
         else:
-            return 
+            return
 
 
 class QFieldSyncRootItem(QgsDataCollectionItem):
@@ -115,6 +115,9 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
 
     def handleDoubleClick(self):
         if self.network_manager.has_token():
+            return False
+
+        if self.network_manager.is_login_active:
             return False
 
         dlg = CloudLoginDialog(self.network_manager)
@@ -184,10 +187,13 @@ class QFieldSyncProjectItem(QgsDataItem):
 
     def __init__(self, parent, project):
         super(QFieldSyncProjectItem, self).__init__(QgsDataItem.Collection, parent, project.name, '/QFieldSync/project/' + project.id)
-        self.project = project
+        self.project_id = project.id
 
     def _create_dialog(self) -> CloudProjectsDialog:
-        return CloudProjectsDialog(self.parent().parent().network_manager, iface.mainWindow(), project=self.project)
+        network_manager = self.parent().parent().network_manager
+        # it is important to get the project like this, because if the project list is refreshed, here we will store an old reference
+        project = network_manager.projects_cache.find_project(self.project_id)
+        return CloudProjectsDialog(network_manager, iface.mainWindow(), project=project)
 
     def actions(self, parent):
         actions = []
