@@ -20,7 +20,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-import os
 import functools
 from pathlib import Path
 from enum import Enum
@@ -58,7 +57,7 @@ from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 
 
-CloudProjectsDialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/cloud_projects_dialog.ui'))
+CloudProjectsDialogUi, _ = loadUiType(str(Path(__file__).parent.joinpath('../ui/cloud_projects_dialog.ui')))
 
 class LocalDirFeedback(Enum):
     Error = 'error'
@@ -249,7 +248,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         version_item.setText(2, version_obj['last_modified'])
                         
                         save_as_btn = QPushButton()
-                        save_as_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud_download.svg')))
+                        save_as_btn.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/cloud_download.svg'))))
                         save_as_btn.clicked.connect(self.on_save_as_btn_version_clicked(project_file, version_idx))
                         save_as_widget = QWidget()
                         save_as_layout = QHBoxLayout()
@@ -428,16 +427,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             # cbx_local.setStyleSheet("margin-left:50%; margin-right:50%;")
 
             btn_sync = QToolButton()
-            btn_sync.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')))
+            btn_sync.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/cloud.svg'))))
             btn_sync.setToolTip(self.tr('Synchronize with QFieldCloud'))
             btn_edit = QToolButton()
-            btn_edit.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')))
+            btn_edit.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/edit.svg'))))
             btn_edit.setToolTip(self.tr('Edit project details'))
             btn_launch = QToolButton()
-            btn_launch.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/launch.svg')))
+            btn_launch.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/launch.svg'))))
             btn_delete = QToolButton()
             btn_delete.setPalette(QPalette(QColor('red')))
-            btn_delete.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/delete.svg')))
+            btn_delete.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/delete.svg'))))
             btn_delete.setToolTip(self.tr('Delete QFieldCloud project'))
             btn_widget = QWidget()
             btn_layout = QHBoxLayout()
