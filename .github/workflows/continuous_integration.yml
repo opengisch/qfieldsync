@@ -10,6 +10,12 @@ on:
       - '**'
   release:
     types: ['prereleased', 'released']
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or SHA to checkout
+        required: true
+        default: 'master'
 
 jobs:
   # Run unit tests
@@ -56,6 +62,32 @@ jobs:
           files: ./qfieldsync.${GITHUB_REF##*/}.zip
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${GITHUB_REF##*/}
+
+  package:
+    runs-on: ubuntu-20.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TX_TOKEN: ${{ secrets.TX_TOKEN }}
+      GITHUB_REF: ${{ github.ref }}
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          ref: ${{ github.event.inputs.ref }}
+      - name: Install dependencies
+        run: |
+          sudo apt update && sudo apt install qttools5-dev-tools qt5-default
+          sudo pip install qgis-plugin-ci
+      - name: Release
+        run: |
+          qgis-plugin-ci package ${{ github.event.inputs.ref }} --transifex-token ${TX_TOKEN}
+      - name: Upload release assets
+        uses: actions/upload-artifact@v2
+        with:
+          name: qfieldsync.${{ github.event.inputs.ref }}.zip
+          path: ./qfieldsync.${{ github.event.inputs.ref }}.zip
 
   translations:
     runs-on: ubuntu-20.04
