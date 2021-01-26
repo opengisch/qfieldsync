@@ -187,7 +187,7 @@ class CloudProject:
                 assert self._cloud_files is None
 
         if 'cloud_files' in new_data or 'local_dir' in new_data:
-            self._refresh_files()
+            self.refresh_files()
 
 
     @staticmethod
@@ -312,7 +312,7 @@ class CloudProject:
         return [file for file in self._files.values() if file.checkout & checkout_filter]
 
 
-    def _refresh_files(self) -> None:
+    def refresh_files(self) -> None:
         self._files = {}
 
         if self._cloud_files:

@@ -31,6 +31,7 @@ from qgis.PyQt.QtCore import (
     pyqtSignal,
     QUrl,
     QUrlQuery,
+    QFileSystemWatcher,
 )
 from qgis.PyQt.QtNetwork import (
     QNetworkRequest,
@@ -505,10 +506,13 @@ class CloudProjectsCache(QObject):
         self.preferences = Preferences()
         self.network_manager = network_manager
         self._error_reason = ''
-        self._projects = None
-        self._projects_reply = None
+        self._projects: Optional[List[CloudProject]] = None
+        self._projects_reply: Optional[QNetworkReply] = None
+        self._fs_watcher = QFileSystemWatcher()
+        self._fs_watcher.directoryChanged.connect(self._on_directory_changed)
 
         self.network_manager.token_changed.connect(self._on_token_changed)
+        self.projects_updated.connect(self._on_projects_updated)
 
         if self.network_manager.has_token():
             self.refresh()
@@ -584,6 +588,11 @@ class CloudProjectsCache(QObject):
             if project.id == project_id:
                 return project
 
+    def refresh_filesystem_watchers(self) -> None:
+        self._fs_watcher.removePaths(self._fs_watcher.directories())
+
+        if self._projects:
+            self._fs_watcher.addPaths([p.local_dir for p in self._projects if p.local_dir])
 
     def _on_get_projects_reply_finished(self, reply: QNetworkReply) -> None:
         self._projects_reply = None
@@ -627,3 +636,15 @@ class CloudProjectsCache(QObject):
 
         if self.network_manager.has_token():
             self.refresh()
+
+    def _on_projects_updated(self) -> None:
+        self.refresh_filesystem_watchers()
+
+    def _on_directory_changed(self, dirpath: str) -> None:
+        print('CHANGED', dirpath)
+        if not self._projects:
+            return
+
+        for project in self._projects:
+            if dirpath == project.local_dir:
+                project.refresh_files()
