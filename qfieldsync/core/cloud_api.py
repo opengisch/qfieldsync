@@ -320,6 +320,8 @@ class CloudNetworkAccessManager(QObject):
         url = QUrl(self.server_url + self._prepare_uri(uri))
         query = QUrlQuery()
 
+        self._clear_cloud_cookies(url)
+
         assert isinstance(params, dict)
 
         for param, value in params.items():
@@ -355,6 +357,8 @@ class CloudNetworkAccessManager(QObject):
     def cloud_post(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
         url = QUrl(self.server_url + self._prepare_uri(uri))
 
+        self._clear_cloud_cookies(url)
+
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
@@ -372,6 +376,8 @@ class CloudNetworkAccessManager(QObject):
 
     def cloud_put(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
         url = QUrl(self.server_url + self._prepare_uri(uri))
+
+        self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
@@ -391,6 +397,8 @@ class CloudNetworkAccessManager(QObject):
     def cloud_delete(self, uri: Union[str, List[str]]) -> QNetworkReply:
         url = QUrl(self.server_url + self._prepare_uri(uri))
 
+        self._clear_cloud_cookies(url)
+
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
@@ -407,6 +415,8 @@ class CloudNetworkAccessManager(QObject):
 
     def cloud_upload_files(self, uri: Union[str, List[str]], filenames: List[str], payload: Dict = None) -> QNetworkReply:
         url = QUrl(self.server_url + self._prepare_uri(uri))
+
+        self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
@@ -473,6 +483,11 @@ class CloudNetworkAccessManager(QObject):
 
     def _on_login_finished(self, reply: QNetworkReply) -> None:
         self.is_login_active = False
+
+    def _clear_cloud_cookies(self, url: str) -> None:
+        '''When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired'''
+        for cookie in self._nam.cookieJar().cookiesForUrl(url):
+            self._nam.cookieJar().deleteCookie(cookie)
 
 
 class CloudProjectsCache(QObject):
