@@ -24,6 +24,7 @@ import json
 import re
 import requests
 import urllib.parse
+from pathlib import Path
 
 
 from qgis.PyQt.QtCore import (
@@ -588,11 +589,26 @@ class CloudProjectsCache(QObject):
             if project.id == project_id:
                 return project
 
-    def refresh_filesystem_watchers(self) -> None:
+    def refresh_filesystem_watchers(self, _dirpath: str = '') -> None:
+        # TODO in theory we can update only the _dirpath. There are gothas with links etc, better keep it KISS for now
         self._fs_watcher.removePaths(self._fs_watcher.directories())
 
         if self._projects:
-            self._fs_watcher.addPaths([p.local_dir for p in self._projects if p.local_dir])
+            for project in self._projects:
+                if not project.local_dir:
+                    continue
+
+                project_dirpath = Path(project.local_dir)
+                for project_child_dirpath in project_dirpath.glob('**/'):
+                    project_child_dirname = str(project_child_dirpath)
+
+                    # ignore QFieldSync caches
+                    if project_child_dirname.startswith(str(project_dirpath.joinpath('.qfieldsync'))):
+                        continue
+
+                    self._fs_watcher.addPath(project_child_dirname)
+
+                self._fs_watcher.addPath(project.local_dir)
 
     def _on_get_projects_reply_finished(self, reply: QNetworkReply) -> None:
         self._projects_reply = None
@@ -641,9 +657,10 @@ class CloudProjectsCache(QObject):
         self.refresh_filesystem_watchers()
 
     def _on_directory_changed(self, dirpath: str) -> None:
-        print('CHANGED', dirpath)
         if not self._projects:
             return
+
+        self.refresh_filesystem_watchers(dirpath)
 
         for project in self._projects:
             if dirpath == project.local_dir:
