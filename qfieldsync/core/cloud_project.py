@@ -191,14 +191,6 @@ class CloudProject:
 
 
     @staticmethod
-    def is_cloud_project(project: QgsProject = None) -> bool:
-        if project is None:
-            project = QgsProject.instance()
-    
-        return CloudProject.get_cloud_project_id(project.homePath()) is not None
-
-
-    @staticmethod
     def get_cloud_project_id(path: str) -> Optional[str]:
         project_local_dirs: Dict[str, str] = Preferences().value('qfieldCloudProjectLocalDirs')
 
@@ -273,7 +265,7 @@ class CloudProject:
     def is_current_qgis_project(self) -> bool:
         project_home_path = QgsProject.instance().homePath()
 
-        return len(project_home_path) > 0 and self.local_dir == QgsProject.instance().homePath()
+        return len(project_home_path) > 0 and self.local_dir == project_home_path
 
 
     @property
