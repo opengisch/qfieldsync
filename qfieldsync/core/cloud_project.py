@@ -272,30 +272,26 @@ class CloudProject:
     def url(self) -> str:
         return 'https://qfield.cloud/projects/{}'.format(self.id)
 
+    @property
+    def root_project_files(self) -> List[str]:
+        project_filenames = []
+
+        if self.local_dir:
+            project_filenames += list(Path(self.local_dir).glob('*.qgs'))
+            project_filenames += list(Path(self.local_dir).glob('*.qgz'))
+
+        return project_filenames
 
     @property
     def local_project_file(self) -> Optional[ProjectFile]:
-        if not self.local_dir:
-            return None
-
-        project_filename = None
-
-        for path in Path(self.local_dir).rglob('*.qgs'):
-            project_filename = path
-
-        if project_filename is None:
-            for path in Path(self.local_dir).rglob('*.qgz'):
-                project_filename = path
-
-        if project_filename is None:
+        if len(self.root_project_files) != 1:
             return None
 
         for project_file in self.get_files():
-            if project_file.local_path == project_filename:
+            if project_file.local_path == self.root_project_files[0]:
                 return project_file
 
         return None
-
 
     def get_files(self, checkout_filter: Optional[ProjectFileCheckout] = None) -> List[ProjectFile]:
         if checkout_filter is None:

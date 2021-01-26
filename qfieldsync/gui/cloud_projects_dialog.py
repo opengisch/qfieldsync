@@ -418,7 +418,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_edit.setToolTip(self.tr('Edit project details'))
             btn_launch = QToolButton()
             btn_launch.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/launch.svg')))
-            btn_launch.setToolTip(self.tr('Open project "{}"').format(cloud_project.local_project_file))
             btn_delete = QToolButton()
             btn_delete.setPalette(QPalette(QColor('red')))
             btn_delete.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/delete.svg')))
@@ -433,8 +432,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_layout.addWidget(btn_delete)
             btn_widget.setLayout(btn_layout)
 
-            if cloud_project.local_project_file is None:
+            root_project_files = cloud_project.root_project_files
+            if len(root_project_files) == 1:
+                btn_launch.setToolTip(self.tr('Open project "{}"').format(root_project_files[0]))
+            elif len(root_project_files) == 0:
                 btn_launch.setToolTip(self.tr('Cannot open project since no local .qgs or .qgz project file found'))
+                btn_launch.setEnabled(False)
+            else:
+                btn_launch.setToolTip(self.tr('Multiple .qgs or .qgz project files found in the project directory'))
                 btn_launch.setEnabled(False)
 
             btn_sync.clicked.connect(self.on_project_sync_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
