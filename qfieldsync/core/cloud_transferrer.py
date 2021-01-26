@@ -79,6 +79,7 @@ class CloudTransferrer(QObject):
         self.temp_dir.joinpath('download').mkdir()
 
         self.upload_finished.connect(self._on_upload_finished)
+        self.delete_finished.connect(self._on_delete_finished)
         self.download_finished.connect(self._on_download_finished)
 
         self.network_manager.logout_success.connect(self._on_logout_success)
