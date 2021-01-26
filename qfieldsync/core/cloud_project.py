@@ -186,7 +186,7 @@ class CloudProject:
             else:
                 assert self._cloud_files is None
 
-        if 'cloud_files' in new_data or 'local_dir' in new_data:
+        if 'cloud_files' in new_data or 'local_dir' in new_data or not self._files:
             self.refresh_files()
 
 
