@@ -79,6 +79,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
         self.unsupportedLayersList = list()
 
+        self.photoNamingTable = PhotoNamingTableWidget()
+        self.photoNamingTab.layout().addWidget(self.photoNamingTable)
+
         self.reloadProject()
 
     def reloadProject(self):
@@ -87,8 +90,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         """
         self.unsupportedLayersList = list()
 
-        self.photoNamingTable = PhotoNamingTableWidget()
-        self.photoNamingTab.layout().addWidget(self.photoNamingTable)
+        self.photoNamingTable.setRowCount(0)
 
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
