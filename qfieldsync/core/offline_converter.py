@@ -89,7 +89,7 @@ class OfflineConverter(QObject):
         original_project = project
 
         original_project_path = project.fileName()
-        project_filename, _ = os.path.splitext(os.path.basename(original_project_path))
+        project_filename = project.baseName()
 
         # Write a backup of the current project to a temporary file
         project_backup_folder = tempfile.mkdtemp()
