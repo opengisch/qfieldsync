@@ -533,6 +533,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     self.projectsTable.item(row_idx, 0).setFont(font)
                     self.projectsTable.item(row_idx, 1).setFont(font)
 
+            return
 
         reply = self.network_manager.projects_cache.get_project_files(self.current_cloud_project.id)
         reply.finished.connect(lambda: self.launch())
