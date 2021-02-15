@@ -523,12 +523,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 return
 
             if QgsProject.instance().read(str(project_filename.local_path)):
-                selected_row_idx = self.projectsTable.selectedItems()[0].row()
-
                 for row_idx in range(self.projectsTable.rowCount()):
+                    cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
                     font = QFont()
 
-                    if row_idx == selected_row_idx:
+                    if cloud_project == self.current_cloud_project:
                         font.setBold(True)
 
                     self.projectsTable.item(row_idx, 0).setFont(font)
