@@ -145,7 +145,8 @@ class ProjectFile:
             return
 
         if self.name.endswith('.gpkg'):
-            if Path(str(self.local_path) + '-wal').stat().st_size > 0:
+            path = Path(str(self.local_path) + '-wal')
+            if path.exists() and path.stat().st_size > 0:
                 conn = sqlite3.connect(str(self.local_path))
 
                 with conn:
