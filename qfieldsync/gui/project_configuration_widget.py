@@ -136,6 +136,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
 
     def onLayerActionPreferenceChanged(self):
+        '''Triggered when prefer online or offline radio buttons have been changed'''
         prefer_online = self.preferOnlineLayersRadioButton.isChecked()
 
         for i in range(self.cloudLayersConfigWidget.layersTable.rowCount()):
@@ -147,15 +148,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             if cmb.itemData(cmb.currentIndex()) == SyncAction.REMOVE:
                 continue
 
-            old_cloud_action = layer_source.cloud_action
-            idx, cloud_action = layer_source.prefered_cloud_action(prefer_online)
-
-            if cloud_action is not None and old_cloud_action != cloud_action:
-                cmb.setCurrentIndex(idx)
-                layer_source.cloud_action = cmb.itemData(cmb.currentIndex()) 
-                layer_source.apply()
-                self.project.setDirty(True)
-
+            idx, _cloud_action = layer_source.prefered_cloud_action(prefer_online)
+            cmb.setCurrentIndex(idx)
+            layer_source.cloud_action = cmb.itemData(cmb.currentIndex())
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():
