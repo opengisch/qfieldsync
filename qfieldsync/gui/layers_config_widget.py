@@ -39,13 +39,14 @@ LayersConfigWidgetUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '..
 
 class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
     
-    def __init__(self, project, use_cloud_actions, parent=None):
+    def __init__(self, project, use_cloud_actions, layer_sources, parent=None):
         """Constructor."""
         super(LayersConfigWidget, self).__init__(parent=parent)
         self.setupUi(self)
 
         self.project = project
         self.use_cloud_actions = use_cloud_actions
+        self.layer_sources = layer_sources
 
         self.multipleToggleButton.setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/visibility.svg')))
         self.toggleMenu = QMenu(self)
@@ -95,13 +96,12 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        for layer in self.project.mapLayers().values():
-            layer_source = LayerSource(layer)
+        for layer_source in self.layer_sources:
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
-            item = QTableWidgetItem(layer.name())
+            item = QTableWidgetItem(layer_source.layer.name())
             item.setData(Qt.UserRole, layer_source)
-            item.setData(Qt.EditRole, layer.name())
+            item.setData(Qt.EditRole, layer_source.layer.name())
             self.layersTable.setItem(count, 0, item)
 
             cmb = QComboBox()
@@ -155,6 +155,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         elif action in (self.addAllOfflineAction, self.addVisibleOfflineAction):
             sync_action = SyncAction.OFFLINE
 
+        is_project_dirty = False
         # all layers
         if action in (self.removeAllAction, self.addAllCopyAction, self.addAllOfflineAction):
             for i in range(self.layersTable.rowCount()):
@@ -167,6 +168,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                     if self.get_layer_action(layer_source) != old_action:
                         self.project.setDirty(True)
                     layer_source.apply()
+                    is_project_dirty |= layer_source.apply()
         # based on visibility
         elif action in (self.removeHiddenAction, self.addVisibleCopyAction, self.addVisibleOfflineAction):
             visible = Qt.Unchecked if action == self.removeHiddenAction else Qt.Checked
@@ -182,24 +184,27 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                         if self.get_layer_action(layer_source) != old_action:
                             self.project.setDirty(True)
                         layer_source.apply()
+                        is_project_dirty |= layer_source.apply()
+
+        if is_project_dirty:
+            self.project.setDirty(True)
 
         self.reloadProject()
 
 
     def apply(self):
+        is_project_dirty = False
+
         for i in range(self.layersTable.rowCount()):
             item = self.layersTable.item(i, 0)
             layer_source = item.data(Qt.UserRole)
             cbx = self.layersTable.cellWidget(i, 1).layout().itemAt(0).widget()
             cmb = self.layersTable.cellWidget(i, 2)
 
-            old_action = self.get_layer_action(layer_source)
-            old_is_geometry_locked = layer_source.can_lock_geometry and layer_source.is_geometry_locked
-            new_action = cmb.itemData(cmb.currentIndex())
-
-            self.set_layer_action(layer_source, new_action)
+            self.set_layer_action(layer_source, cmb.itemData(cmb.currentIndex()))
             layer_source.is_geometry_locked = cbx.isChecked()
 
-            if new_action != old_action or layer_source.is_geometry_locked != old_is_geometry_locked:
-                self.project.setDirty(True)
-                layer_source.apply()
+            is_project_dirty |= layer_source.apply()
+
+        if is_project_dirty:
+            self.project.setDirty(True)
