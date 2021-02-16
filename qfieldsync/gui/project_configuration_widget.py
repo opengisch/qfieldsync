@@ -74,8 +74,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         infoLabel.setPixmap(QIcon.fromTheme('info').pixmap(16, 16))
         infoLabel.setToolTip(self.tr('To improve the overall user experience with QFieldCloud, it is recommended that all vector layers use UUID as primary key.'))
 
-        self.cloudLayersConfigWidget = LayersConfigWidget(self.project, True)
-        self.cableLayersConfigWidget = LayersConfigWidget(self.project, False)
+        layer_sources = [LayerSource(l) for l in QgsProject.instance().mapLayers().values()]
+        self.cloudLayersConfigWidget = LayersConfigWidget(self.project, True, layer_sources)
+        self.cableLayersConfigWidget = LayersConfigWidget(self.project, False, layer_sources)
         self.cloudAdvancedSettings.layout().addWidget(self.cloudLayersConfigWidget)
         self.cloudExportTab.layout().addWidget(infoLabel, 0, 2)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
