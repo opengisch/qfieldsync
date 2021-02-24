@@ -314,7 +314,7 @@ class OfflineConverter(QObject):
         params = {
             'EXTENT': extent_string,
             'MAP_THEME': map_theme,
-            'LAYER': layer,
+            'LAYERS': [layer],
             'MAP_UNITS_PER_PIXEL': map_units_per_pixel,
             'TILE_SIZE': tile_size,
             'MAKE_BACKGROUND_TRANSPARENT': False,
