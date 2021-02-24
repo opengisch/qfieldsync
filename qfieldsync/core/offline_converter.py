@@ -310,10 +310,13 @@ class OfflineConverter(QObject):
                                              self.extent.yMaximum())
 
         alg = QgsApplication.instance().processingRegistry().createAlgorithmById('qgis:rasterize')
-
+        
+        # passing the LAYER and LAYERS parameters since QGIS 3.10 uses the LAYER parameter and 3.16+ uses the LAYERS parameter instead
+        # keeping both ensures backward compatibility
         params = {
             'EXTENT': extent_string,
             'MAP_THEME': map_theme,
+            'LAYER': layer,
             'LAYERS': [layer],
             'MAP_UNITS_PER_PIXEL': map_units_per_pixel,
             'TILE_SIZE': tile_size,
