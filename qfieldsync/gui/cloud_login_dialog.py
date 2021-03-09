@@ -119,6 +119,9 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.loginButton.setEnabled(True)
             return
 
+        server_url = self.serverUrlCmb.currentText()
+
+        self.network_manager.set_auth(server_url, username=payload['username'])
         self.network_manager.set_token(payload['token'], self.rememberMeCheckBox.isChecked())
 
         self.usernameLineEdit.setEnabled(False)
