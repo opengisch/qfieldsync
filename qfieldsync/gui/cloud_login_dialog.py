@@ -22,7 +22,8 @@
 """
 import os
 
-from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import QWidget, QDialog
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
@@ -57,6 +58,10 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.usernameLineEdit.setText(cfg.config('username'))
         self.passwordLineEdit.setText(cfg.config('password'))
         self.rememberMeCheckBox.setChecked(remember_me)
+        
+        self.qfieldCloudIcon.setAlignment(Qt.AlignHCenter)
+        self.qfieldCloudIcon.setPixmap(QPixmap(os.path.join(os.path.dirname(__file__), '../resources/qfieldcloud_logo.png')))
+        self.qfieldCloudIcon.setMinimumSize(289, 250)
 
 
     def authenticate(self) -> None:
