@@ -40,6 +40,7 @@ from qgis.PyQt.QtWidgets import (
     QAction,
     QPushButton,
     QHeaderView,
+    QSizePolicy
 )
 from qgis.PyQt.QtGui import QIcon, QFont, QPalette, QColor, QValidator, QRegularExpressionValidator
 from qgis.PyQt.QtNetwork import QNetworkReply
@@ -427,17 +428,26 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             # cbx_local.setStyleSheet("margin-left:50%; margin-right:50%;")
 
             btn_sync = QToolButton()
-            btn_sync.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/cloud.svg'))))
+            btn_sync.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/sync.svg'))))
             btn_sync.setToolTip(self.tr('Synchronize with QFieldCloud'))
+            btn_sync.setMinimumSize(24, 24)
+            btn_sync.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_edit = QToolButton()
             btn_edit.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/edit.svg'))))
             btn_edit.setToolTip(self.tr('Edit project details'))
+            btn_edit.setMinimumSize(24, 24)
+            btn_edit.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_launch = QToolButton()
             btn_launch.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/launch.svg'))))
+            btn_launch.setToolTip(self.tr(' Open project'))
+            btn_launch.setMinimumSize(24, 24)
+            btn_launch.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_delete = QToolButton()
             btn_delete.setPalette(QPalette(QColor('red')))
             btn_delete.setIcon(QIcon(str(Path(__file__).parent.joinpath('../resources/delete.svg'))))
             btn_delete.setToolTip(self.tr('Delete QFieldCloud project'))
+            btn_delete.setMinimumSize(24, 24)
+            btn_delete.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_widget = QWidget()
             btn_layout = QHBoxLayout()
             btn_layout.setAlignment(Qt.AlignCenter)
