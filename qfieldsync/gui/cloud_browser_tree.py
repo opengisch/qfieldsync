@@ -201,7 +201,7 @@ class QFieldSyncProjectItem(QgsDataItem):
         sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/sync.svg')), 'Synchronize Project', parent)
         sync_action.triggered.connect(lambda: self._create_dialog().sync())
 
-        properties_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')), 'Project Properties', parent)
+        properties_action = QAction(QIcon(), 'Project Properties', parent)
         properties_action.triggered.connect(lambda: self._create_dialog().show_project_form())
 
         actions.append(sync_action)

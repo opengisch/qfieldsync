@@ -244,14 +244,14 @@ class QFieldSync(object):
 
         self.cloud_projects_overview_action = self.add_action(
             os.path.join(os.path.dirname(__file__), './resources/cloud.svg'),
-            text=self.tr('Projects Overview'),
+            text=self.tr('QFieldCloud Projects Overview'),
             callback=self.show_cloud_overview_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
 
         self.cloud_current_project_action = self.add_action(
-            os.path.join(os.path.dirname(__file__), './resources/cloud.svg'),
-            text=self.tr('Current Project Properties'),
+            QIcon(),
+            text=self.tr('Current QFieldCloud Project Properties'),
             callback=self.show_cloud_project_details_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False)
