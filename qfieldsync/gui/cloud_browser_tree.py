@@ -98,7 +98,7 @@ class QFieldSyncRootItem(QgsDataCollectionItem):
         projects_overview_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')), self.tr('Projects Overview'), parent)
         projects_overview_action.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow()).show())
 
-        refresh_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Refresh projects', parent)
+        refresh_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Refresh Projects', parent)
         refresh_action.triggered.connect(lambda: self.network_manager.projects_cache.refresh())
 
         current_project_action = QAction(QIcon(), self.tr('Current Cloud Project'), parent)
@@ -174,7 +174,7 @@ class QFieldSyncGroupItem(QgsDataCollectionItem):
     def actions(self, parent):
         actions = []
 
-        create = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')), 'Create new project', parent)
+        create = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')), 'Create New Project', parent)
         create.triggered.connect(lambda: CloudProjectsDialog(self.network_manager, iface.mainWindow()).show_project_form())
 
         actions.append(create)
@@ -198,10 +198,10 @@ class QFieldSyncProjectItem(QgsDataItem):
     def actions(self, parent):
         actions = []
 
-        sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/cloud.svg')), 'Sync', parent)
+        sync_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/sync.svg')), 'Synchronize Project', parent)
         sync_action.triggered.connect(lambda: self._create_dialog().sync())
 
-        properties_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/refresh.png')), 'Project properties', parent)
+        properties_action = QAction(QIcon(os.path.join(os.path.dirname(__file__), '../resources/edit.svg')), 'Project Properties', parent)
         properties_action.triggered.connect(lambda: self._create_dialog().show_project_form())
 
         actions.append(sync_action)
