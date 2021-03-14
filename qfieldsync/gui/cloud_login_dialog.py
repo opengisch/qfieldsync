@@ -24,7 +24,7 @@ import os
 
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
-from qgis.PyQt.QtWidgets import QWidget, QDialog
+from qgis.PyQt.QtWidgets import QWidget, QDialog, QDialogButtonBox
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.uic import loadUiType
 
@@ -45,9 +45,12 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.preferences = Preferences()
         self.network_manager = network_manager
 
-        self.loginButton.clicked.connect(self.on_login_button_clicked)
-        self.cancelButton.clicked.connect(lambda: self.close())
+        self.buttonBox.button(QDialogButtonBox.Ok).setText(self.tr('Log In'))
+        self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self.on_login_button_clicked)
+        self.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(lambda: self.close())
 
+        self.serverUrlLabel.setVisible(False)
+        self.serverUrlCmb.setVisible(False)
         for server_url in self.network_manager.server_urls():
             self.serverUrlCmb.addItem(server_url)
 
@@ -61,14 +64,18 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         
         self.qfieldCloudIcon.setAlignment(Qt.AlignHCenter)
         self.qfieldCloudIcon.setPixmap(QPixmap(os.path.join(os.path.dirname(__file__), '../resources/qfieldcloud_logo.png')))
-        self.qfieldCloudIcon.setMinimumSize(289, 250)
+        self.qfieldCloudIcon.setMinimumSize(175, 180)
+        self.qfieldCloudIcon.mouseDoubleClickEvent = lambda event: self.toggleServerUrlVisibility()
 
+    def toggleServerUrlVisibility(self):
+        self.serverUrlLabel.setVisible(not self.serverUrlLabel.isVisible())
+        self.serverUrlCmb.setVisible(not self.serverUrlCmb.isVisible())
 
     def authenticate(self) -> None:
         self.usernameLineEdit.setEnabled(True)
         self.passwordLineEdit.setEnabled(True)
         self.rememberMeCheckBox.setEnabled(True)
-        self.loginButton.setEnabled(True)
+        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
         if self.parent():
             self.parent().setEnabled(False)
@@ -80,7 +87,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.usernameLineEdit.setEnabled(False)
             self.passwordLineEdit.setEnabled(False)
             self.rememberMeCheckBox.setEnabled(False)
-            self.loginButton.setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
             self.network_manager.set_url(cfg.uri())
             self.network_manager.set_auth(self.network_manager.url, token='')
@@ -92,7 +99,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
 
     def on_login_button_clicked(self) -> None:
-        self.loginButton.setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
 
         server_url = self.serverUrlCmb.currentText()
@@ -121,7 +128,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.usernameLineEdit.setEnabled(True)
             self.passwordLineEdit.setEnabled(True)
             self.rememberMeCheckBox.setEnabled(True)
-            self.loginButton.setEnabled(True)
+            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
             return
 
         server_url = self.serverUrlCmb.currentText()
