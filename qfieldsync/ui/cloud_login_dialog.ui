@@ -6,14 +6,46 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>148</height>
+    <width>380</width>
+    <height>390</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>QFieldCloud Login Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="qfieldCloudIcon">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="qfieldCloudIntro">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>The easiest way to transfer your project from QGIS to your devices! &lt;a href=&quot;https://qfield.cloud/&quot;&gt;Learn more about QFieldCloud&lt;/a&gt;.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QWidget" name="loginFormGroup" native="true">
      <layout class="QFormLayout" name="formLayout_3">
@@ -55,42 +87,11 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <layout class="QHBoxLayout" name="loginFormButtonsLayout" stretch="0,0,0,0">
-        <item>
-         <widget class="QCheckBox" name="rememberMeCheckBox">
-          <property name="text">
-           <string>Remember Me</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="loginFormButtonsSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="loginButton">
-          <property name="text">
-           <string>Login</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="cancelButton">
-          <property name="text">
-           <string>Cancel</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+	   <widget class="QCheckBox" name="rememberMeCheckBox">
+        <property name="text">
+         <string>Remember Me</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="usernameLabel">
@@ -120,6 +121,26 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
     </widget>
    </item>
   </layout>
