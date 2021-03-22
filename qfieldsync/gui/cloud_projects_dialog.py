@@ -854,7 +854,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_transfer_dialog_accepted(self) -> None:
         QgsProject().instance().reloadAllLayers()
 
-        self.transfer_dialog.close()
+        if self.transfer_dialog:
+            self.transfer_dialog.close()
+
         self.project_transfer = None
         self.transfer_dialog = None
 
