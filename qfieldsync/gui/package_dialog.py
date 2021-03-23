@@ -45,7 +45,6 @@ from qgis.core import (
     QgsProject,
     QgsApplication,
     QgsProviderRegistry,
-    QgsProviderMetadata,
     Qgis
 )
 from qgis.PyQt.uic import loadUiType
