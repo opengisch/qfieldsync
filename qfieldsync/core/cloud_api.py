@@ -22,6 +22,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 import json
 import re
+from PyQt5.QtNetwork import QSslPreSharedKeyAuthenticator
 import requests
 import urllib.parse
 from pathlib import Path
@@ -291,10 +292,16 @@ class CloudNetworkAccessManager(QObject):
         return self.cloud_get(['files', project_id], {'client': client})
 
 
-    def get_file(self, filename: str, local_filename: str, version: str = None) -> QNetworkReply:
+    def get_file(self, url: QUrl, local_filename: str, version: str = None) -> QNetworkReply:
         """"Download file"""
 
-        return self.cloud_get('files/' + filename, local_filename=local_filename, params={'version': version})
+        return self.cloud_get(url, local_filename=local_filename, params={'version': version})
+
+
+    def get_file_request(self, filename: str, version: str = None) -> QNetworkReply:
+        """"Download file"""
+
+        return self.cloud_get('files/' + filename, params={'version': version})
 
 
     def delete_file(self, filename: str) -> QNetworkReply:
@@ -318,10 +325,11 @@ class CloudNetworkAccessManager(QObject):
         return self._token is not None and len(self._token) > 0
 
 
-    def cloud_get(self, uri: Union[str, List[str]], params: Dict[str, Any] = {}, local_filename: str = None) -> QNetworkReply:
+    def cloud_get(self, uri: Union[str, List[str], QUrl], params: Dict[str, Any] = {}, local_filename: str = None) -> QNetworkReply:
         """Issues a GET HTTP request"""
-        url = QUrl(self.server_url + self._prepare_uri(uri))
-        query = QUrlQuery()
+        url = self._prepare_uri(uri)
+
+        query = QUrlQuery(url.query())
 
         self._clear_cloud_cookies(url)
 
@@ -336,11 +344,25 @@ class CloudNetworkAccessManager(QObject):
         url.setQuery(query)
 
         request = QNetworkRequest(url)
-        request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
+        request.setAttribute(QNetworkRequest.RedirectPolicyAttribute, QNetworkRequest.NoLessSafeRedirectPolicy)
         request.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
 
         if self._token:
             request.setRawHeader(b'Authorization', 'Token {}'.format(self._token).encode('utf-8'))
+
+        reply = self._nam.get(request)
+        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.setParent(self)
+
+        if local_filename is not None:
+            reply.finished.connect(lambda: self._on_cloud_get_download_finished(reply, local_filename=local_filename))
+
+        return reply
+
+
+    def get(self, url: QUrl, local_filename: str = None) -> QNetworkReply:
+        request = QNetworkRequest(url)
+        request.setAttribute(QNetworkRequest.RedirectPolicyAttribute, QNetworkRequest.UserVerifiedRedirectPolicy)
 
         reply = self._nam.get(request)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
@@ -358,7 +380,7 @@ class CloudNetworkAccessManager(QObject):
 
 
     def cloud_post(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
-        url = QUrl(self.server_url + self._prepare_uri(uri))
+        url = self._prepare_uri(uri)
 
         self._clear_cloud_cookies(url)
 
@@ -378,7 +400,7 @@ class CloudNetworkAccessManager(QObject):
 
 
     def cloud_put(self, uri: Union[str, List[str]], payload: Dict = None) -> QNetworkReply:
-        url = QUrl(self.server_url + self._prepare_uri(uri))
+        url = self._prepare_uri(uri)
 
         self._clear_cloud_cookies(url)
 
@@ -398,7 +420,7 @@ class CloudNetworkAccessManager(QObject):
 
 
     def cloud_delete(self, uri: Union[str, List[str]]) -> QNetworkReply:
-        url = QUrl(self.server_url + self._prepare_uri(uri))
+        url = self._prepare_uri(uri)
 
         self._clear_cloud_cookies(url)
 
@@ -417,7 +439,7 @@ class CloudNetworkAccessManager(QObject):
 
 
     def cloud_upload_files(self, uri: Union[str, List[str]], filenames: List[str], payload: Dict = None) -> QNetworkReply:
-        url = QUrl(self.server_url + self._prepare_uri(uri))
+        url = self._prepare_uri(uri)
 
         self._clear_cloud_cookies(url)
 
@@ -458,7 +480,10 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
 
-    def _prepare_uri(self, uri: Union[str, List[str]]) -> str:
+    def _prepare_uri(self, uri: Union[str, List[str], QUrl]) -> QUrl:
+        if isinstance(uri, QUrl):
+            return uri
+
         if isinstance(uri, str):
             encoded_uri = uri
         else:
@@ -472,7 +497,7 @@ class CloudNetworkAccessManager(QObject):
         if encoded_uri[-1] != '/':
             encoded_uri += '/'
         
-        return encoded_uri
+        return QUrl(self.server_url + encoded_uri)
 
 
     def _on_logout_finished(self, reply: QNetworkReply) -> None:
@@ -487,10 +512,30 @@ class CloudNetworkAccessManager(QObject):
     def _on_login_finished(self, reply: QNetworkReply) -> None:
         self.is_login_active = False
 
-    def _clear_cloud_cookies(self, url: str) -> None:
+    def _clear_cloud_cookies(self, url: QUrl) -> None:
         '''When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired'''
         for cookie in self._nam.cookieJar().cookiesForUrl(url):
             self._nam.cookieJar().deleteCookie(cookie)
+
+
+class CloudReply:
+    finished = pyqtSignal()
+    sslErrors = pyqtSignal()
+    projects_error = pyqtSignal(str)
+    downloadProgress = pyqtSignal(int, int)
+    encrypted = pyqtSignal()
+    errorOccurred = pyqtSignal(QNetworkReply.NetworkError)
+    finished = pyqtSignal()
+    metaDataChanged = pyqtSignal()
+    preSharedKeyAuthenticationRequired = pyqtSignal(QSslPreSharedKeyAuthenticator)
+    redirectAllowed = pyqtSignal()
+    redirected = pyqtSignal(QUrl)
+    sslErrors = pyqtSignal(list)
+    uploadProgress = pyqtSignal(int, int)
+
+    def __init__(self, reply: QNetworkReply):
+        self.rawReply = QNetworkReply
+        # self.redi
 
 
 class CloudProjectsCache(QObject):
