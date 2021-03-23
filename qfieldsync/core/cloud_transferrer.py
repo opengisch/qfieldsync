@@ -23,6 +23,7 @@
 from typing import Callable, List, Union
 import shutil
 from pathlib import Path
+from PyQt5.QtCore import QUrl
 
 from qgis.PyQt.QtCore import pyqtSignal, QObject
 from qgis.PyQt.QtNetwork import QNetworkReply
@@ -67,6 +68,8 @@ class CloudTransferrer(QObject):
         self.is_delete_active = False
         self.is_project_list_update_active = False
         self.replies = []
+        self.redirects_data = []
+        self.redirects = []
         self.temp_dir = Path(cloud_project.local_dir).joinpath('.qfieldsync')
 
         if self.temp_dir.exists():
@@ -200,14 +203,46 @@ class CloudTransferrer(QObject):
             self.download_finished.emit()
             return
 
+        def on_redirected_wrapper(reply: QNetworkReply, filename: str, temp_filename: str) -> Callable:
+            def on_redirected(url: QUrl) -> None:
+                reply.abort()
+
+                self.redirects_data.append([url, filename, temp_filename])
+
+                if len(self.redirects) != len(self._files_to_download):
+                    return
+
+                self._request_redirects()
+
+            return on_redirected
+
+        def on_finished_wrapper(reply: QNetworkReply, filename: str) -> Callable:
+            def on_finished() -> None:
+                try:
+                    self.network_manager.handle_response(reply, False)
+                except Exception as err:
+                    self.error.emit(self.tr(f'Downloading file "{filename}" failed. Aborting...'), err)
+                    self.abort_requests()
+
+            return on_finished
+
         for filename in self._files_to_download:
             temp_filename = self._files_to_download[filename]['temp_filename']
 
-            reply = self.network_manager.get_file(self.cloud_project.id + '/' + str(filename) + '/', str(temp_filename))
-            reply.downloadProgress.connect(self._on_download_file_progress_wrapper(reply,filename))
+            reply = self.network_manager.get_file_request(self.cloud_project.id + '/' + str(filename) + '/')
+            self.replies.append(reply)
+
+            reply.redirected.connect(on_redirected_wrapper(reply, filename, temp_filename))
+            reply.finished.connect(on_finished_wrapper(reply, filename))
+
+
+    def _request_redirects(self):
+        for url, filename, temp_filename in self.redirects_data:
+            reply = self.network_manager.get(url, str(temp_filename))
+            reply.downloadProgress.connect(self._on_download_file_progress_wrapper(reply, filename))
             reply.finished.connect(self._on_download_file_finished_wrapper(reply, filename, temp_filename))
 
-            self.replies.append(reply)
+            self.redirects.append(reply)
 
 
     def _on_upload_file_progress_wrapper(self, reply: QNetworkReply, filename: str) -> Callable:
@@ -365,6 +400,10 @@ class CloudTransferrer(QObject):
         self.is_aborted = True
 
         for reply in self.replies:
+            if not reply.isFinished():
+                reply.abort()
+
+        for reply, _, _ in self.redirects:
             if not reply.isFinished():
                 reply.abort()
 
