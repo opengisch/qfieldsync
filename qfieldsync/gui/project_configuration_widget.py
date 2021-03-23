@@ -56,7 +56,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.project = QgsProject.instance()
         self.__project_configuration = ProjectConfiguration(self.project)
 
-        self.preferOnlineLayersRadioButton.toggled.connect(self.onLayerActionPreferenceChanged)
+        self.preferOnlineLayersRadioButton.clicked.connect(self.onLayerActionPreferenceChanged)
+        self.preferOfflineLayersRadioButton.clicked.connect(self.onLayerActionPreferenceChanged)
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
 
         self.reloadProject()
@@ -149,7 +150,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             if cmb.itemData(cmb.currentIndex()) == SyncAction.REMOVE:
                 continue
 
-            idx, _cloud_action = layer_source.prefered_cloud_action(prefer_online)
+            idx, _cloud_action = layer_source.preferred_cloud_action(prefer_online)
             cmb.setCurrentIndex(idx)
             layer_source.cloud_action = cmb.itemData(cmb.currentIndex())
 
