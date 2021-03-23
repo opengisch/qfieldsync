@@ -23,7 +23,8 @@
 import functools
 from pathlib import Path
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
+from PyQt5.QtCore import QUrl
 
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QItemSelectionModel, QDateTime, QRegularExpression
 from qgis.PyQt.QtWidgets import (
@@ -285,17 +286,36 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if not version_dest_filename:
             return
 
-        reply = self.network_manager.get_file(
-            self.current_cloud_project.id + '/' + str(project_file.name) + '/', 
-            str(version_dest_filename), 
+        def on_redirected_wrapper() -> Callable:
+            def on_redirected(url: QUrl) -> None:
+                reply = self.network_manager.get(url, version_dest_filename)
+                reply.downloadProgress.connect(lambda r, t: self.on_download_file_progress(reply, r, t, project_file=project_file))
+                reply.finished.connect(lambda: self.on_download_file_finished(reply, project_file=project_file))
+
+            return on_redirected
+
+        def on_finished_wrapper(reply: QNetworkReply) -> Callable:
+            def on_finished():
+                try:
+                    self.network_manager.handle_response(reply, False)
+                except CloudException as err:
+                    self.feedbackLabel.setText(self.tr('Downloading file "{}" failed: {}'.format(project_file.name, str(err))))
+                    self.feedbackLabel.setVisible(True)
+                    return
+
+            return on_finished
+
+        reply = self.network_manager.get_file_request(
+            self.current_cloud_project.id + '/' + str(project_file.name) + '/',
             project_file.versions[version_idx]['version_id'])
-        reply.downloadProgress.connect(lambda r, t: self.on_download_file_progress(reply, r, t, project_file=project_file))
-        reply.finished.connect(lambda: self.on_download_file_finished(reply, project_file=project_file))
+
+        reply.redirected.connect(on_redirected_wrapper())
+        reply.finished.connect(on_finished_wrapper(reply))
 
 
     def on_download_file_progress(self, _reply: QNetworkReply, bytes_received: int, bytes_total: int, project_file: ProjectFile) -> None:
         self.feedbackLabel.setVisible(True)
-        self.feedbackLabel.setText(self.tr('Downloading file "{}" at {}%…').format(project_file.name, int((bytes_total / bytes_received) * 100)))
+        self.feedbackLabel.setText(self.tr('Downloading file "{}" at {}%…').format(project_file.name, int((bytes_received / bytes_total) * 100)))
 
 
     def on_download_file_finished(self, reply: QNetworkReply, project_file: ProjectFile) -> None:
