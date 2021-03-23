@@ -720,7 +720,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectDescriptionTextEdit.setPlainText(self.current_cloud_project.description)
             self.projectIsPrivateCheckBox.setChecked(self.current_cloud_project.is_private)
             self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
-            self.projectUrlLabelValue.setText('<a href="{url}">{url}</a>'.format(url=self.current_cloud_project.url))
+            self.projectUrlLabelValue.setText('<a href="{url}">{url}</a>'.format(url=(self.network_manager.url + self.current_cloud_project.url)))
             self.createdAtLabelValue.setText(QDateTime.fromString(self.current_cloud_project.created_at, Qt.ISODateWithMs).toString())
             self.updatedAtLabelValue.setText(QDateTime.fromString(self.current_cloud_project.updated_at, Qt.ISODateWithMs).toString())
             self.lastSyncedAtLabelValue.setText(QDateTime.fromString(self.current_cloud_project.updated_at, Qt.ISODateWithMs).toString())

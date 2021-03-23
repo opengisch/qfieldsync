@@ -292,10 +292,9 @@ class CloudProject:
 
         return len(project_home_path) > 0 and self.local_dir == project_home_path
 
-
     @property
     def url(self) -> str:
-        return 'https://qfield.cloud/projects/{}'.format(self.id)
+        return f'{self.owner}/{self.name}'
 
     @property
     def root_project_files(self) -> List[str]:
