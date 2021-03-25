@@ -68,7 +68,7 @@ class CloudTransferrer(QObject):
         self.is_delete_active = False
         self.is_project_list_update_active = False
         self.replies = []
-        self.redirects_data = []
+        self.redirects_data = {}
         self.redirects = []
         self.temp_dir = Path(cloud_project.local_dir).joinpath('.qfieldsync')
 
@@ -205,11 +205,11 @@ class CloudTransferrer(QObject):
 
         def on_redirected_wrapper(reply: QNetworkReply, filename: str, temp_filename: str) -> Callable:
             def on_redirected(url: QUrl) -> None:
+                self.redirects_data[reply] = [url, filename, temp_filename]
+
                 reply.abort()
 
-                self.redirects_data.append([url, filename, temp_filename])
-
-                if len(self.redirects) != len(self._files_to_download):
+                if len(self.redirects_data) != len(self._files_to_download):
                     return
 
                 self._request_redirects()
@@ -218,6 +218,10 @@ class CloudTransferrer(QObject):
 
         def on_finished_wrapper(reply: QNetworkReply, filename: str) -> Callable:
             def on_finished() -> None:
+                # it has been redirected
+                if self.redirects_data.get(reply):
+                    return
+
                 try:
                     self.network_manager.handle_response(reply, False)
                 except Exception as err:
@@ -237,7 +241,7 @@ class CloudTransferrer(QObject):
 
 
     def _request_redirects(self):
-        for url, filename, temp_filename in self.redirects_data:
+        for url, filename, temp_filename in self.redirects_data.values():
             reply = self.network_manager.get(url, str(temp_filename))
             reply.downloadProgress.connect(self._on_download_file_progress_wrapper(reply, filename))
             reply.finished.connect(self._on_download_file_finished_wrapper(reply, filename, temp_filename))
