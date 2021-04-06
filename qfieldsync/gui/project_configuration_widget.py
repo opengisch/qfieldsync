@@ -147,7 +147,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         for i in range(self.cloudLayersConfigWidget.layersTable.rowCount()):
             item = self.cloudLayersConfigWidget.layersTable.item(i, 0)
             layer_source = item.data(Qt.UserRole)
-            cmb = self.cloudLayersConfigWidget.layersTable.cellWidget(i, 2)
+            cmb = self.cloudLayersConfigWidget.layersTable.cellWidget(i, 1)
 
             # it would be annoying to change the action on removed layers
             if cmb.itemData(cmb.currentIndex()) == SyncAction.REMOVE:
