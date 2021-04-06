@@ -21,9 +21,13 @@
  ***************************************************************************/
 """
 import os
+from typing import Callable
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.uic import properties
 
-from qgis.core import QgsProject
+from qgis.core import Qgis, QgsProject
 
+from qgis.utils import iface
 from qgis.PyQt.uic import loadUiType
 from qgis.PyQt.QtWidgets import QWidget
 
@@ -107,28 +111,18 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             cmb = QComboBox()
             available_actions = self.get_available_actions(layer_source)
             set_available_actions(cmb, available_actions, self.get_layer_action(layer_source))
-            
-            cbx = QCheckBox()
-            cbx.setEnabled(layer_source.can_lock_geometry)
-            cbx.setChecked(layer_source.is_geometry_locked)
-            # it's more UI friendly when the checkbox is centered, an ugly workaround to achieve it
-            cbx_widget = QWidget()
-            cbx_layout = QHBoxLayout()
-            cbx_layout.setAlignment(Qt.AlignCenter)
-            cbx_layout.setContentsMargins(0, 0, 0, 0)
-            cbx_layout.addWidget(cbx)
-            cbx_widget.setLayout(cbx_layout)
-            # NOTE the margin is not updated when the table column is resized, so better rely on the code above
-            # cbx.setStyleSheet("margin-left:50%; margin-right:50%;")
 
-            self.layersTable.setCellWidget(count, 1, cbx_widget)
-            self.layersTable.setCellWidget(count, 2, cmb)
+            properties_btn = QPushButton()
+            properties_btn.setText(self.tr("Properties"))
+            properties_btn.clicked.connect(self.propertiesBtn_clicked(layer_source))
+
+            self.layersTable.setCellWidget(count, 1, cmb)
+            self.layersTable.setCellWidget(count, 2, properties_btn)
 
             if not layer_source.is_supported:
                 self.unsupportedLayersList.append(layer_source)
                 self.layersTable.item(count,0).setFlags(Qt.NoItemFlags)
                 self.layersTable.cellWidget(count,1).setEnabled(False)
-                self.layersTable.cellWidget(count,2).setEnabled(False)
                 cmb.setCurrentIndex(cmb.findData(SyncAction.REMOVE))
 
         self.layersTable.resizeColumnsToContents()
@@ -143,6 +137,16 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             unsupported_layers_text += self.tr(" If needed, you can create a Base Map to include those layers in your packaged project.")
             self.unsupportedLayersLabel.setText(unsupported_layers_text)
 
+
+    def propertiesBtn_clicked(self, layer_source: LayerSource) -> Callable:
+        def clicked_callback() -> None:
+            print(Qgis.QGIS_VERSION_INT)
+            if Qgis.QGIS_VERSION_INT >= 31900:
+                iface.showLayerProperties(layer_source.layer, 'QFieldLayerSettingsPage')
+            else:
+                iface.showLayerProperties(layer_source.layer)
+
+        return clicked_callback
 
     def toggleMenu_triggered(self, action):
         """
@@ -198,11 +202,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         for i in range(self.layersTable.rowCount()):
             item = self.layersTable.item(i, 0)
             layer_source = item.data(Qt.UserRole)
-            cbx = self.layersTable.cellWidget(i, 1).layout().itemAt(0).widget()
-            cmb = self.layersTable.cellWidget(i, 2)
+            cmb = self.layersTable.cellWidget(i, 1)
 
             self.set_layer_action(layer_source, cmb.itemData(cmb.currentIndex()))
-            layer_source.is_geometry_locked = cbx.isChecked()
 
             is_project_dirty |= layer_source.apply()
 
