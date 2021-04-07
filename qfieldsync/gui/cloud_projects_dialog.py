@@ -240,11 +240,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     item.setTextAlignment(1, Qt.AlignRight)
                     item.setText(2, project_file.created_at)
 
+                    versions_count = len(project_file.versions)
                     for version_idx, version_obj in enumerate(project_file.versions):
                         version_item = QTreeWidgetItem()
 
                         version_item.setData(0, Qt.UserRole, version_obj)
-                        version_item.setText(0, 'Version {}'.format(version_idx + 1))
+                        version_item.setText(0, 'Version {}'.format(versions_count - version_idx))
                         version_item.setText(1, str(version_obj['size']))
                         version_item.setTextAlignment(1, Qt.AlignRight)
                         version_item.setText(2, version_obj['last_modified'])
