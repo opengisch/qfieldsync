@@ -696,6 +696,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_create_button_clicked(self) -> None:
         self.projectsTable.clearSelection()
+        self.current_cloud_project = None
         self.show_project_form()
 
 
