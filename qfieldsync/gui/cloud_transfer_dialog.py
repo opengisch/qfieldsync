@@ -73,6 +73,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.filesTree.model().setHeaderData(1, Qt.Horizontal, "", Qt.DisplayRole)
         self.filesTree.model().setHeaderData(2, Qt.Horizontal, "", Qt.DisplayRole)
         self.filesTree.model().setHeaderData(3, Qt.Horizontal, "", Qt.DisplayRole)
+        # The following does not change the icon alignment:
+        # self.filesTree.model().setHeaderData(1, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
+        # self.filesTree.model().setHeaderData(3, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
 
         self.setWindowTitle(self.tr('Synchronizing project "{}"').format(self.project_transfer.cloud_project.name))
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
