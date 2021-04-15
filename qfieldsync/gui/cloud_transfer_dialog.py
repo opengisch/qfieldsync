@@ -70,6 +70,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.filesTree.model().setHeaderData(1, Qt.Horizontal, make_icon('computer.svg'), Qt.DecorationRole)
         self.filesTree.model().setHeaderData(3, Qt.Horizontal, make_icon('cloud.svg'), Qt.DecorationRole)
+        self.filesTree.model().setHeaderData(1, Qt.Horizontal, "", Qt.DisplayRole)
+        self.filesTree.model().setHeaderData(2, Qt.Horizontal, "", Qt.DisplayRole)
+        self.filesTree.model().setHeaderData(3, Qt.Horizontal, "", Qt.DisplayRole)
 
         self.setWindowTitle(self.tr('Synchronizing project "{}"').format(self.project_transfer.cloud_project.name))
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
