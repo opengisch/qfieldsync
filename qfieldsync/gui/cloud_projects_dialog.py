@@ -69,12 +69,10 @@ class LocalDirFeedback(Enum):
 
 def select_table_row(func):
     @functools.wraps(func)
-    def closure(self, table_widget, row_idx):
+    def closure(self, cloud_project):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            index = table_widget.model().index(row_idx, 0)
-            table_widget.setCurrentIndex(index)
-            table_widget.selectionModel().select(index, QItemSelectionModel.ClearAndSelect|QItemSelectionModel.Rows)
+            self.current_cloud_project = cloud_project
             return func(self, *args, **kwargs)
         return wrapper
 
@@ -145,6 +143,15 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectFilesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.projectFilesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+
+    @property
+    def current_cloud_project(self) -> CloudProject:
+        return self._current_cloud_project
+
+    @current_cloud_project.setter
+    def current_cloud_project(self, value: CloudProject):
+        self._current_cloud_project = value
+        self.update_project_table_selection()
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
@@ -489,10 +496,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 btn_launch.setToolTip(self.tr('Multiple .qgs or .qgz project files found in the project directory'))
                 btn_launch.setEnabled(False)
 
-            btn_sync.clicked.connect(self.on_project_sync_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
-            btn_edit.clicked.connect(self.on_project_edit_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
-            btn_launch.clicked.connect(self.on_project_launch_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
-            btn_delete.clicked.connect(self.on_project_delete_button_clicked(self.projectsTable, count)) # pylint: disable=too-many-function-args
+            btn_sync.clicked.connect(self.on_project_sync_button_clicked(cloud_project)) # pylint: disable=too-many-function-args
+            btn_edit.clicked.connect(self.on_project_edit_button_clicked(cloud_project)) # pylint: disable=too-many-function-args
+            btn_launch.clicked.connect(self.on_project_launch_button_clicked(cloud_project)) # pylint: disable=too-many-function-args
+            btn_delete.clicked.connect(self.on_project_delete_button_clicked(cloud_project)) # pylint: disable=too-many-function-args
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
@@ -500,17 +507,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectsTable.setCellWidget(count, 3, cbx_local_widget)
             self.projectsTable.setCellWidget(count, 4, btn_widget)
 
-            font = QFont()
-
-            if cloud_project.is_current_qgis_project:
-                font.setBold(True)
-
-            self.projectsTable.item(count, 0).setFont(font)
-            self.projectsTable.item(count, 1).setFont(font)
-
         self.projectsTable.resizeColumnsToContents()
         self.projectsTable.sortByColumn(2, Qt.AscendingOrder)
         self.projectsTable.setSortingEnabled(True)
+        self.update_project_table_selection()
 
 
     def sync(self) -> None:
@@ -554,15 +554,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 return
 
             if QgsProject.instance().read(str(project_filename.local_path)):
-                for row_idx in range(self.projectsTable.rowCount()):
-                    cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
-                    font = QFont()
-
-                    if cloud_project == self.current_cloud_project:
-                        font.setBold(True)
-
-                    self.projectsTable.item(row_idx, 0).setFont(font)
-                    self.projectsTable.item(row_idx, 1).setFont(font)
+                self.update_project_table_selection()
 
             return
 
@@ -818,6 +810,26 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         reply = self.network_manager.projects_cache.refresh()
         reply.finished.connect(lambda: self.on_create_project_finished_projects_refreshed(project.id))
 
+    def update_project_table_selection(self) -> None:
+        project_filename = None
+        font = QFont()
+
+        for row_idx in range(self.projectsTable.rowCount()):
+            cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
+            project_filename = cloud_project.local_project_file
+
+            if project_filename and str(project_filename.local_path) == QgsProject().instance().fileName():
+                font.setBold(True)
+            else:
+                font.setBold(False)
+
+            self.projectsTable.item(row_idx, 0).setFont(font)
+            self.projectsTable.item(row_idx, 1).setFont(font)
+
+            if cloud_project == self.current_cloud_project:
+                index = self.projectsTable.model().index(row_idx, 0)
+                self.projectsTable.setCurrentIndex(index)
+                self.projectsTable.selectionModel().select(index, QItemSelectionModel.ClearAndSelect|QItemSelectionModel.Rows)
 
     def on_create_project_finished_projects_refreshed(self, project_id: str) -> None:
         self.current_cloud_project = self.network_manager.projects_cache.find_project(project_id)
