@@ -439,6 +439,10 @@ class CloudTransferrer(QObject):
             source_filename = str(Path(filename).relative_to(subdir_path))
             dest_filename = str(self._files_to_download[source_filename]['project_file'].local_path)
 
+            dest_path = Path(dest_filename)
+            if not dest_path.parent.exists():
+                dest_path.parent.mkdir(parents=True)
+
             if source_filename.endswith(('.gpkg-shm', '.gpkg-wal')):
                 for suffix in ('-shm', '-wal'):
                     source_path = Path(str(self.local_path) + suffix)

@@ -135,6 +135,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 else:
                     # TODO make a fancy button that marks all the child items as checked or not
                     pass
+        self.filesTree.expandAll()
         # NOTE END algorithmic part
 
 
