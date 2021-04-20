@@ -50,6 +50,7 @@ from qgis.core import (
     QgsProviderMetadata,
     QgsEditorWidgetSetup
 )
+
 import qgis
 
 
@@ -57,6 +58,7 @@ class OfflineConverter(QObject):
     progressStopped = pyqtSignal()
     task_progress_updated = pyqtSignal(int, int)
     total_progress_updated = pyqtSignal(int, int, str)
+    message_emitted = pyqtSignal(str, Qgis.MessageLevel)
 
     def __init__(self, project, export_folder, extent, offline_editing):
         super(OfflineConverter, self).__init__(parent=None)
@@ -259,6 +261,12 @@ class OfflineConverter(QObject):
                             if ews.type() == 'ValueRelation':
                                 widget_config = ews.config()
                                 online_layer_id = widget_config['Layer']
+                                if not online_layer_id:
+                                    self.message_emitted.emit(
+                                        f'For field "{field.name()}" in layer "{layer.name()}", the value relation widget has no layer set',
+                                        Qgis.MessageLevel.Warning
+                                    )
+                                    continue
                                 if project.mapLayer(online_layer_id):
                                     continue
 

@@ -119,6 +119,7 @@ class PackageDialog(QDialog, DialogUi):
         # progress connections
         offline_convertor.total_progress_updated.connect(self.update_total)
         offline_convertor.task_progress_updated.connect(self.update_task)
+        offline_convertor.message_emitted.connect(lambda message, level: self.iface.messageBar().pushMessage('QFieldSync', message, level))
 
         offline_convertor.convert()
         self.do_post_offline_convert_action()
