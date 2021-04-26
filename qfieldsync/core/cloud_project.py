@@ -294,7 +294,7 @@ class CloudProject:
 
     @property
     def url(self) -> str:
-        return f'{self.owner}/{self.name}'
+        return f'a/{self.owner}/{self.name}'
 
     @property
     def root_project_files(self) -> List[str]:
