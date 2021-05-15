@@ -27,14 +27,14 @@
    <item row="0" column="0">
     <widget class="QLabel" name="cloudLayerActionLabel">
      <property name="text">
-      <string>Cloud Layer Action</string>
+      <string>Cloud layer action</string>
      </property>
     </widget>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="cableLayerActionLabel">
      <property name="text">
-      <string>Cable Layer Action</string>
+      <string>Cable layer action</string>
      </property>
     </widget>
    </item>
@@ -44,7 +44,7 @@
       <string>When enabled, this option disables adding and deleting features, as well as modifying the geometries of existing features.</string>
      </property>
      <property name="text">
-      <string>Lock Geometries</string>
+      <string>Lock geometries</string>
      </property>
     </widget>
    </item>
