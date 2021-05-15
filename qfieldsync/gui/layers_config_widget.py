@@ -25,7 +25,7 @@ from typing import Callable
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.uic import properties
 
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis, QgsProject, QgsMapLayerModel
 
 from qgis.utils import iface
 from qgis.PyQt.uic import loadUiType
@@ -106,6 +106,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             item = QTableWidgetItem(layer_source.layer.name())
             item.setData(Qt.UserRole, layer_source)
             item.setData(Qt.EditRole, layer_source.layer.name())
+            item.setIcon(QgsMapLayerModel.iconForLayer(layer_source.layer))
             self.layersTable.setItem(count, 0, item)
 
             cmb = QComboBox()
