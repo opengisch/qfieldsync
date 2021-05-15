@@ -100,8 +100,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme))
         layer = QgsProject.instance().mapLayer(self.__project_configuration.base_map_layer)
         self.layerComboBox.setLayer(layer)
-        self.mapUnitsPerPixel.setText(str(self.__project_configuration.base_map_mupp))
-        self.tileSize.setText(str(self.__project_configuration.base_map_tile_size))
+        self.mapUnitsPerPixel.setValue(self.__project_configuration.base_map_mupp)
+        self.tileSize.setValue(self.__project_configuration.base_map_tile_size)
         self.onlyOfflineCopyFeaturesInAoi.setChecked(self.__project_configuration.offline_copy_only_aoi)
         self.preferOnlineLayersRadioButton.setChecked(self.__project_configuration.layer_action_preference == 'online')
         self.preferOfflineLayersRadioButton.setChecked(self.__project_configuration.layer_action_preference == 'offline')
@@ -133,8 +133,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         else:
             self.__project_configuration.base_map_type = ProjectProperties.BaseMapType.MAP_THEME
 
-        self.__project_configuration.base_map_mupp = float(self.mapUnitsPerPixel.text())
-        self.__project_configuration.base_map_tile_size = int(self.tileSize.text())
+        self.__project_configuration.base_map_mupp = float(self.mapUnitsPerPixel.value())
+        self.__project_configuration.base_map_tile_size = self.tileSize.value()
 
         self.__project_configuration.offline_copy_only_aoi = self.onlyOfflineCopyFeaturesInAoi.isChecked()
         self.__project_configuration.layer_action_preference = 'online' if self.preferOnlineLayersRadioButton.isChecked() else 'offline'
