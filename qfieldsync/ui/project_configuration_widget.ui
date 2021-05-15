@@ -63,7 +63,7 @@
        <item row="3" column="0" colspan="3">
         <widget class="QgsCollapsibleGroupBox" name="cloudAdvancedSettings">
          <property name="title">
-          <string>Advanced Settings</string>
+          <string>Individual Layers Settings</string>
          </property>
          <property name="collapsed">
           <bool>true</bool>
@@ -243,9 +243,18 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QgsCollapsibleGroupBox" name="groupBox">
      <property name="title">
       <string>Advanced Settings</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <property name="saveCollapsedState">
+      <bool>true</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
