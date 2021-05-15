@@ -69,7 +69,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         
         # insert the table as a second row only for vector layers
         if Qgis.QGIS_VERSION_INT >= 31300 and layer.type() == QgsMapLayer.VectorLayer:
-            self.layout().insertRow(2, self.tr('Photo Naming'), self.photoNamingTable)
+            self.layout().insertRow(2, self.tr('Photo naming'), self.photoNamingTable)
             self.photoNamingTable.setEnabled(self.photoNamingTable.rowCount() > 0)
 
 
