@@ -63,7 +63,7 @@
        <item row="3" column="0" colspan="3">
         <widget class="QgsCollapsibleGroupBox" name="cloudAdvancedSettings">
          <property name="title">
-          <string>Advanced Settings</string>
+          <string>Individual Layers Settings</string>
          </property>
          <property name="collapsed">
           <bool>true</bool>
@@ -109,7 +109,7 @@
       <item row="1" column="0" colspan="2">
        <widget class="QStackedWidget" name="baseMapTypeStack">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -119,7 +119,7 @@
         </property>
         <widget class="QWidget" name="mapThemePage">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -151,7 +151,7 @@
         </widget>
         <widget class="QWidget" name="singleLayerPage">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -184,35 +184,53 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="tileSize">
+       <widget class="QgsSpinBox" name="tileSize">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>Rendering will happen in tiles. This number determines the width and height (in pixels) that will be rendered per tile.</string>
         </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly</set>
+        <property name="suffix">
+         <string> px</string>
         </property>
-        <property name="text">
-         <string>1024</string>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10240</number>
+        </property>
+        <property name="value">
+         <number>1024</number>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="mapUnitsPerPixel">
+       <widget class="QgsDoubleSpinBox" name="mapUnitsPerPixel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</string>
         </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhFormattedNumbersOnly</set>
+        <property name="suffix">
+         <string> mupp</string>
         </property>
-        <property name="text">
-         <string>100</string>
+        <property name="value">
+         <string>100.0</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="mapUnitsPerPixelLabel">
         <property name="text">
-         <string>Map Units per Pixel</string>
+         <string>Map units per pixel</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -222,7 +240,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="tileSizeLabel">
         <property name="text">
-         <string>Tile Size</string>
+         <string>Tile size</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -243,9 +261,18 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QgsCollapsibleGroupBox" name="groupBox">
      <property name="title">
       <string>Advanced Settings</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <property name="saveCollapsedState">
+      <bool>true</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -284,6 +311,16 @@
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
    <header>qgsmaplayercombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>qgsspinbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsDoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>qgsdoublespinbox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
