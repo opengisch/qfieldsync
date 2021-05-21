@@ -48,7 +48,8 @@ from qgis.core import (
     QgsMapLayer,
     QgsProviderRegistry,
     QgsProviderMetadata,
-    QgsEditorWidgetSetup
+    QgsEditorWidgetSetup,
+    QgsValueRelationFieldFormatter,
 )
 
 import qgis
@@ -109,7 +110,7 @@ class OfflineConverter(QObject):
 
             original_layer_info = {}
             for layer in self.__layers:
-                original_layer_info[layer.id()] = (layer.source(), layer.name())
+                original_layer_info[layer.id()] = (layer.source(), layer.name(), layer.fields())
 
             # We store the pks of the original vector layers
             # and we check that the primary key fields names don't
@@ -242,6 +243,12 @@ class OfflineConverter(QObject):
 
                 # check if value relations point to offline layers and adjust if necessary
                 for layer in project.mapLayers().values():
+                    layer_source = LayerSource(layer)
+                    (
+                        original_layer_source,
+                        original_layer_name,
+                        original_layer_fields,
+                    ) = original_layer_info[layer.customProperty("remoteLayerId")]
                     if layer.type() == QgsMapLayer.VectorLayer:
 
                         # Before QGIS 3.14 the custom properties of a layer are not
@@ -256,14 +263,27 @@ class OfflineConverter(QObject):
                                     'QFieldSync/sourceDataPrimaryKeys',
                                     stored_fields)
 
-                        for field in layer.fields():
+                        for field_name in layer_source.visible_fields_names():
+                            if field_name not in original_layer_fields.names():
+                                # handles the `fid` column, that is present only for gpkg
+                                continue
+
+                            field = original_layer_fields.field(field_name)
                             ews = field.editorWidgetSetup()
+
                             if ews.type() == 'ValueRelation':
                                 widget_config = ews.config()
                                 online_layer_id = widget_config['Layer']
-                                if not online_layer_id:
+
+                                if online_layer_id not in original_layer_info:
+                                    offline_referenced_layer = QgsValueRelationFieldFormatter.resolveLayer(widget_config, project)
+
+                                    if offline_referenced_layer:
+                                        online_layer_id = offline_referenced_layer.customProperty("remoteLayerId")
+
+                                if online_layer_id not in original_layer_info:
                                     self.message_emitted.emit(
-                                        f'For field "{field.name()}" in layer "{layer.name()}", the value relation widget has no layer set',
+                                        self.tr('Field "{}" in layer "{}" has no configured layer in the value relation widget.').format(field.name(), layer.name()),
                                         Qgis.MessageLevel.Warning
                                     )
                                     continue
