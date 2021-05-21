@@ -244,11 +244,7 @@ class OfflineConverter(QObject):
                 # check if value relations point to offline layers and adjust if necessary
                 for layer in project.mapLayers().values():
                     layer_source = LayerSource(layer)
-                    (
-                        original_layer_source,
-                        original_layer_name,
-                        original_layer_fields,
-                    ) = original_layer_info[layer.customProperty("remoteLayerId")]
+
                     if layer.type() == QgsMapLayer.VectorLayer:
 
                         # Before QGIS 3.14 the custom properties of a layer are not
@@ -262,6 +258,13 @@ class OfflineConverter(QObject):
                                 layer.setCustomProperty(
                                     'QFieldSync/sourceDataPrimaryKeys',
                                     stored_fields)
+                            original_layer_fields = layer.fields()
+                        else:
+                            (
+                                original_layer_source,
+                                original_layer_name,
+                                original_layer_fields,
+                            ) = original_layer_info[layer.customProperty("remoteLayerId")]
 
                         for field_name in layer_source.visible_fields_names():
                             if field_name not in original_layer_fields.names():
