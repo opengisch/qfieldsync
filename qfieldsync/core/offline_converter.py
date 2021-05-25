@@ -112,7 +112,11 @@ class OfflineConverter(QObject):
 
             original_layer_info = {}
             for layer in self.__layers:
-                original_layer_info[layer.id()] = (layer.source(), layer.name(), layer.fields())
+                original_layer_info[layer.id()] = (
+                    layer.source(),
+                    layer.name(),
+                    layer.fields() if hasattr(layer, 'fields') else None
+                )
 
             # We store the pks of the original vector layers
             # and we check that the primary key fields names don't
