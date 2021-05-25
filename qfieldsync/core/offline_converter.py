@@ -283,32 +283,32 @@ class OfflineConverter(QObject):
 
                             if ews.type() == 'ValueRelation':
                                 widget_config = ews.config()
-                                online_layer_id = widget_config['Layer']
+                                online_referenced_layer_id = widget_config['Layer']
 
-                                if online_layer_id not in original_layer_info:
+                                if online_referenced_layer_id not in original_layer_info:
                                     offline_referenced_layer = QgsValueRelationFieldFormatter.resolveLayer(widget_config, project)
 
                                     if offline_referenced_layer:
-                                        online_layer_id = offline_referenced_layer.customProperty("remoteLayerId")
+                                        online_referenced_layer_id = offline_referenced_layer.customProperty("remoteLayerId")
 
-                                if online_layer_id not in original_layer_info:
+                                if online_referenced_layer_id not in original_layer_info:
                                     self.message_emitted.emit(
                                         self.tr('Field "{}" in layer "{}" has no configured layer in the value relation widget.').format(field.name(), layer.name()),
                                         Qgis.MessageLevel.Warning
                                     )
                                     continue
-                                if project.mapLayer(online_layer_id):
+                                if project.mapLayer(online_referenced_layer_id):
                                     continue
 
                                 layer_id = None
                                 loose_layer_id = None
                                 for offline_layer in project.mapLayers().values():
-                                    if offline_layer.customProperty('remoteSource') == original_layer_info[online_layer_id][0]:
+                                    if offline_layer.customProperty('remoteSource') == original_layer_info[online_referenced_layer_id][0]:
                                         #  First try strict matching: the offline layer should have a "remoteSource" property
                                         layer_id = offline_layer.id()
                                         break
-                                    elif Qgis.QGIS_VERSION_INT < 31601 and offline_layer.name().startswith(original_layer_info[online_layer_id][1] + ' ') or \
-                                            Qgis.QGIS_VERSION_INT >= 31601 and offline_layer.name() == original_layer_info[online_layer_id][1]:
+                                    elif Qgis.QGIS_VERSION_INT < 31601 and offline_layer.name().startswith(original_layer_info[online_referenced_layer_id][1] + ' ') or \
+                                            Qgis.QGIS_VERSION_INT >= 31601 and offline_layer.name() == original_layer_info[online_referenced_layer_id][1]:
                                         #  If that did not work, go with loose matching
                                         #  On older versions (<31601) the offline layer should start with the online layer name + a translated version of " (offline)"
                                         loose_layer_id = offline_layer.id()
