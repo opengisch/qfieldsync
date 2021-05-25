@@ -407,7 +407,7 @@ class CloudTransferrer(QObject):
             if not reply.isFinished():
                 reply.abort()
 
-        for reply, _, _ in self.redirects:
+        for reply in self.redirects:
             if not reply.isFinished():
                 reply.abort()
 
