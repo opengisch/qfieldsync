@@ -48,7 +48,8 @@ from qgis.core import (
     QgsMapLayer,
     QgsProviderRegistry,
     QgsProviderMetadata,
-    QgsEditorWidgetSetup
+    QgsEditorWidgetSetup,
+    QgsValueRelationFieldFormatter,
 )
 
 import qgis
@@ -64,6 +65,7 @@ class OfflineConverter(QObject):
         super(OfflineConverter, self).__init__(parent=None)
         self.__max_task_progress = 0
         self.__offline_layers = list()
+        self.__offline_layer_names = list()
         self.__convertor_progress = None  # for processing feedback
         self.__layers = list()
 
@@ -105,11 +107,12 @@ class OfflineConverter(QObject):
             QApplication.setOverrideCursor(Qt.WaitCursor)
 
             self.__offline_layers = list()
+            self.__offline_layer_names = list()
             self.__layers = list(project.mapLayers().values())
 
             original_layer_info = {}
             for layer in self.__layers:
-                original_layer_info[layer.id()] = (layer.source(), layer.name())
+                original_layer_info[layer.id()] = (layer.source(), layer.name(), layer.fields())
 
             # We store the pks of the original vector layers
             # and we check that the primary key fields names don't
@@ -171,6 +174,7 @@ class OfflineConverter(QObject):
                             'Both "Area of Interest" and "only selected features" options were enabled, tha latter takes precedence.'),
                             'QFieldSync')
                     self.__offline_layers.append(layer)
+                    self.__offline_layer_names.append(layer.name())
 
                     # Store the primary key field name(s) as comma separated custom property
                     if layer.type() == QgsMapLayer.VectorLayer:
@@ -242,6 +246,8 @@ class OfflineConverter(QObject):
 
                 # check if value relations point to offline layers and adjust if necessary
                 for layer in project.mapLayers().values():
+                    layer_source = LayerSource(layer)
+
                     if layer.type() == QgsMapLayer.VectorLayer:
 
                         # Before QGIS 3.14 the custom properties of a layer are not
@@ -255,15 +261,35 @@ class OfflineConverter(QObject):
                                 layer.setCustomProperty(
                                     'QFieldSync/sourceDataPrimaryKeys',
                                     stored_fields)
+                            original_layer_fields = layer.fields()
+                        else:
+                            (
+                                original_layer_source,
+                                original_layer_name,
+                                original_layer_fields,
+                            ) = original_layer_info[layer.customProperty("remoteLayerId")]
 
-                        for field in layer.fields():
+                        for field_name in layer_source.visible_fields_names():
+                            if field_name not in original_layer_fields.names():
+                                # handles the `fid` column, that is present only for gpkg
+                                continue
+
+                            field = original_layer_fields.field(field_name)
                             ews = field.editorWidgetSetup()
+
                             if ews.type() == 'ValueRelation':
                                 widget_config = ews.config()
                                 online_layer_id = widget_config['Layer']
-                                if not online_layer_id:
+
+                                if online_layer_id not in original_layer_info:
+                                    offline_referenced_layer = QgsValueRelationFieldFormatter.resolveLayer(widget_config, project)
+
+                                    if offline_referenced_layer:
+                                        online_layer_id = offline_referenced_layer.customProperty("remoteLayerId")
+
+                                if online_layer_id not in original_layer_info:
                                     self.message_emitted.emit(
-                                        f'For field "{field.name()}" in layer "{layer.name()}", the value relation widget has no layer set',
+                                        self.tr('Field "{}" in layer "{}" has no configured layer in the value relation widget.').format(field.name(), layer.name()),
                                         Qgis.MessageLevel.Warning
                                     )
                                     continue
@@ -350,7 +376,7 @@ class OfflineConverter(QObject):
 
     @pyqtSlot(int, int)
     def on_offline_editing_next_layer(self, layer_index, layer_count):
-        msg = self.trUtf8('Packaging layer {layer_name}…').format(layer_name=self.__offline_layers[layer_index - 1].name())
+        msg = self.trUtf8('Packaging layer {layer_name}…').format(layer_name=self.__offline_layer_names[layer_index - 1])
         self.total_progress_updated.emit(layer_index, layer_count, msg)
 
     @pyqtSlot('QgsOfflineEditing::ProgressMode', int)

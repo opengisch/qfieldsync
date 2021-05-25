@@ -11,7 +11,8 @@ from qgis.core import (
     QgsProject,
     QgsProviderRegistry,
     QgsProviderMetadata,
-    Qgis
+    Qgis,
+    QgsAttributeEditorField,
 )
 
 from qfieldsync.utils.file_utils import slugify
@@ -270,3 +271,18 @@ class LayerSource(object):
         # reload layer definition
         self.layer.readLayerXml(map_layer_element, context)
         self.layer.reload()
+
+    def visible_fields_names(self, items = None):
+        if items is None:
+            items = self.layer.editFormConfig().tabs()
+
+        fields = self.layer.fields()
+        result = []
+
+        for item in items:
+            if hasattr(item, 'children'):
+                result += self.visible_fields_names(item.children())
+            elif isinstance(item, QgsAttributeEditorField):
+                result.append(fields.at(item.idx()).name())
+
+        return result
