@@ -314,7 +314,7 @@ class OfflineConverter(QObject):
                                         loose_layer_id = offline_layer.id()
                                 widget_config['Layer'] = layer_id or loose_layer_id
                                 offline_ews = QgsEditorWidgetSetup(ews.type(), widget_config)
-                                layer.setEditorWidgetSetup(layer.fields().indexOf(field.name()), offline_ews)
+                                layer.setEditorWidgetSetup(original_layer_fields.indexOf(field.name()), offline_ews)
 
             # Now we have a project state which can be saved as offline project
             QgsProject.instance().write(project_path)
