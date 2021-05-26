@@ -283,6 +283,7 @@ class LayerSource(object):
             if hasattr(item, 'children'):
                 result += self.visible_fields_names(item.children())
             elif isinstance(item, QgsAttributeEditorField):
-                result.append(fields.at(item.idx()).name())
+                if item.idx() >= 0:
+                    result.append(fields.at(item.idx()).name())
 
         return result
