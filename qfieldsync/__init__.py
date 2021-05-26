@@ -25,7 +25,9 @@
 from __future__ import absolute_import
 
 import os
+
 import qgis.utils
+
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
@@ -36,4 +38,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
 
     from qfieldsync.qfield_sync import QFieldSync
+
     return QFieldSync(iface)

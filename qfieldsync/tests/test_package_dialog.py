@@ -20,15 +20,16 @@
 """
 
 
+from qgis.core import QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
-from qgis.core import QgsOfflineEditing, QgsProject
+
 from qfieldsync.gui.package_dialog import PackageDialog
 
 start_app()
 
-class PackageDialogTest(unittest.TestCase):
 
+class PackageDialogTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.iface = get_iface()

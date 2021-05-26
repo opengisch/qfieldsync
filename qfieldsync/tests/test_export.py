@@ -23,11 +23,12 @@ import os
 import shutil
 import tempfile
 
-from qfieldsync.libqfieldsync import OfflineConverter
-from qfieldsync.tests.utilities import test_data_folder
-from qgis.core import Qgis, QgsProject, QgsRectangle, QgsOfflineEditing
+from qgis.core import Qgis, QgsOfflineEditing, QgsProject, QgsRectangle
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
+
+from qfieldsync.libqfieldsync import OfflineConverter
+from qfieldsync.tests.utilities import test_data_folder
 
 start_app()
 
@@ -43,33 +44,39 @@ class OfflineConverterTest(unittest.TestCase):
     def test_copy(self):
         source_folder = tempfile.mkdtemp()
         export_folder = tempfile.mkdtemp()
-        shutil.copytree(os.path.join(test_data_folder(), 'simple_project'), os.path.join(source_folder,
-                                                                                         'simple_project'))
+        shutil.copytree(
+            os.path.join(test_data_folder(), "simple_project"),
+            os.path.join(source_folder, "simple_project"),
+        )
 
-        project = self.load_project(os.path.join(source_folder, 'simple_project', 'project.qgs'))
+        project = self.load_project(
+            os.path.join(source_folder, "simple_project", "project.qgs")
+        )
         extent = QgsRectangle()
         offline_editing = QgsOfflineEditing()
-        offline_converter = OfflineConverter(project, export_folder, extent, offline_editing)
+        offline_converter = OfflineConverter(
+            project, export_folder, extent, offline_editing
+        )
         offline_converter.convert()
 
         files = os.listdir(export_folder)
 
-        self.assertIn('project_qfield.qgs', files)
-        self.assertIn('france_parts_shape.shp', files)
-        self.assertIn('france_parts_shape.dbf', files)
-        self.assertIn('curved_polys.gpkg', files)
-        self.assertIn('spatialite.db', files)
+        self.assertIn("project_qfield.qgs", files)
+        self.assertIn("france_parts_shape.shp", files)
+        self.assertIn("france_parts_shape.dbf", files)
+        self.assertIn("curved_polys.gpkg", files)
+        self.assertIn("spatialite.db", files)
 
         dcim_folder = os.path.join(export_folder, "DCIM")
         dcim_files = os.listdir(dcim_folder)
-        self.assertIn('qfield-photo_1.jpg', dcim_files)
-        self.assertIn('qfield-photo_2.jpg', dcim_files)
-        self.assertIn('qfield-photo_3.jpg', dcim_files)
+        self.assertIn("qfield-photo_1.jpg", dcim_files)
+        self.assertIn("qfield-photo_2.jpg", dcim_files)
+        self.assertIn("qfield-photo_3.jpg", dcim_files)
         dcim_subfolder = os.path.join(dcim_folder, "subfolder")
         dcim_subfiles = os.listdir(dcim_subfolder)
-        self.assertIn('qfield-photo_sub_1.jpg', dcim_subfiles)
-        self.assertIn('qfield-photo_sub_2.jpg', dcim_subfiles)
-        self.assertIn('qfield-photo_sub_3.jpg', dcim_subfiles)
+        self.assertIn("qfield-photo_sub_1.jpg", dcim_subfiles)
+        self.assertIn("qfield-photo_sub_2.jpg", dcim_subfiles)
+        self.assertIn("qfield-photo_sub_3.jpg", dcim_subfiles)
 
         shutil.rmtree(export_folder)
         shutil.rmtree(source_folder)
@@ -83,21 +90,28 @@ class OfflineConverterTest(unittest.TestCase):
         source_folder = tempfile.mkdtemp()
         export_folder = tempfile.mkdtemp()
         shutil.copytree(
-            os.path.join(test_data_folder(), 'pk_project'),
-            os.path.join(source_folder,'pk_project'))
+            os.path.join(test_data_folder(), "pk_project"),
+            os.path.join(source_folder, "pk_project"),
+        )
 
-        project = self.load_project(os.path.join(source_folder, 'pk_project', 'project.qgs'))
+        project = self.load_project(
+            os.path.join(source_folder, "pk_project", "project.qgs")
+        )
         extent = QgsRectangle()
         offline_editing = QgsOfflineEditing()
-        offline_converter = OfflineConverter(project, export_folder, extent, offline_editing)
+        offline_converter = OfflineConverter(
+            project, export_folder, extent, offline_editing
+        )
         offline_converter.convert()
 
-        exported_project = self.load_project(os.path.join(export_folder, 'project_qfield.qgs'))
+        exported_project = self.load_project(
+            os.path.join(export_folder, "project_qfield.qgs")
+        )
         if Qgis.QGIS_VERSION_INT < 31601:
-            layer = exported_project.mapLayersByName('somedata (offline)')[0]
+            layer = exported_project.mapLayersByName("somedata (offline)")[0]
         else:
-            layer = exported_project.mapLayersByName('somedata')[0]
-        self.assertEqual(layer.customProperty('QFieldSync/sourceDataPrimaryKeys'), 'pk')
+            layer = exported_project.mapLayersByName("somedata")[0]
+        self.assertEqual(layer.customProperty("QFieldSync/sourceDataPrimaryKeys"), "pk")
 
         shutil.rmtree(export_folder)
         shutil.rmtree(source_folder)
