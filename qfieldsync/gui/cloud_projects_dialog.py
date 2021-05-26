@@ -608,7 +608,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_launch.setIcon(
                 QIcon(str(Path(__file__).parent.joinpath("../resources/launch.svg")))
             )
-            btn_launch.setToolTip(self.tr(" Open project"))
+            btn_launch.setToolTip(self.tr("Open project"))
             btn_launch.setMinimumSize(24, 24)
             btn_launch.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_delete = QToolButton()
@@ -616,7 +616,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_delete.setIcon(
                 QIcon(str(Path(__file__).parent.joinpath("../resources/delete.svg")))
             )
-            btn_delete.setToolTip(self.tr("Delete QFieldCloud project"))
+            btn_delete.setToolTip(
+                self.tr("Delete QFieldCloud project (files are kept locally)")
+            )
             btn_delete.setMinimumSize(24, 24)
             btn_delete.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_widget = QWidget()
