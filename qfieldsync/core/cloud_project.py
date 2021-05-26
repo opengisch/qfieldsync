@@ -248,7 +248,12 @@ class CloudProject:
 
     @property
     def local_dir(self) -> Optional[str]:
-        return self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
+        dirname = self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
+
+        if not dirname or not Path(dirname).exists():
+            return None
+
+        return dirname
 
     # TODO remove this, use `get_files` instead
     @property
