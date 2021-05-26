@@ -19,14 +19,16 @@
  ***************************************************************************/
 """
 import os
+from functools import partial
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtGui import QIcon, QPixmap
-from functools import partial
 
 
 def selectFolder(line_edit_widget):
-    line_edit_widget.setText(QtWidgets.QFileDialog.getExistingDirectory(directory=line_edit_widget.text()))
+    line_edit_widget.setText(
+        QtWidgets.QFileDialog.getExistingDirectory(directory=line_edit_widget.text())
+    )
 
 
 def make_folder_selector(widget):
@@ -34,8 +36,10 @@ def make_folder_selector(widget):
 
 
 def make_icon(icon_name):
-    return QIcon(os.path.join(os.path.dirname(__file__), '..', 'resources', icon_name))
+    return QIcon(os.path.join(os.path.dirname(__file__), "..", "resources", icon_name))
 
 
 def make_pixmap(icon_name):
-    return QPixmap(os.path.join(os.path.dirname(__file__), '..', 'resources', icon_name))
+    return QPixmap(
+        os.path.join(os.path.dirname(__file__), "..", "resources", icon_name)
+    )

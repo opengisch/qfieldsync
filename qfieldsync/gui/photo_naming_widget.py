@@ -23,9 +23,8 @@
 
 from qgis.core import QgsMapLayer
 from qgis.gui import QgsFieldExpressionWidget
-
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractScrollArea
+from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
 
 
 class PhotoNamingTableWidget(QTableWidget):
@@ -33,15 +32,18 @@ class PhotoNamingTableWidget(QTableWidget):
         super(PhotoNamingTableWidget, self).__init__()
 
         self.setColumnCount(3)
-        self.setHorizontalHeaderLabels([self.tr('Layer'), self.tr('Field'), self.tr('Naming Expression')])
-        self.horizontalHeaderItem(2).setToolTip(self.tr('Enter expression for a file path with the extension .jpg'))
+        self.setHorizontalHeaderLabels(
+            [self.tr("Layer"), self.tr("Field"), self.tr("Naming Expression")]
+        )
+        self.horizontalHeaderItem(2).setToolTip(
+            self.tr("Enter expression for a file path with the extension .jpg")
+        )
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.resizeColumnsToContents()
         self.setMinimumHeight(100)
         self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         # self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-
 
     def addLayerFields(self, layer_source):
         layer = layer_source.layer
@@ -53,7 +55,7 @@ class PhotoNamingTableWidget(QTableWidget):
             row = self.rowCount()
             ews = layer.editorWidgetSetup(i)
 
-            if ews.type() == 'ExternalResource':
+            if ews.type() == "ExternalResource":
                 # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
                 self.insertRow(row)
                 item = QTableWidgetItem(layer.name())
@@ -71,10 +73,8 @@ class PhotoNamingTableWidget(QTableWidget):
 
         self.resizeColumnsToContents()
 
-
     def setLayerColumnHidden(self, is_hidden):
         self.setColumnHidden(0, is_hidden)
-
 
     def syncLayerSourceValues(self, should_apply=False):
         for i in range(self.rowCount()):

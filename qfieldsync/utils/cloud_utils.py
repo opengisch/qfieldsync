@@ -24,7 +24,7 @@ import re
 
 
 def to_cloud_title(title):
-    return re.sub('[^A-Za-z0-9-_]','_', title)
+    return re.sub("[^A-Za-z0-9-_]", "_", title)
 
 
 def closure(cb):
