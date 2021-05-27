@@ -294,13 +294,9 @@
              <property name="title">
               <string>Online Project Settings</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout" columnstretch="1,4">
-              <item row="0" column="0">
-               <widget class="QLabel" name="projectNameLabel">
-                <property name="text">
-                 <string>Name</string>
-                </property>
-               </widget>
+             <layout class="QGridLayout" name="gridLayout" columnstretch="1,4,0,0">
+              <item row="1" column="1">
+               <widget class="QPlainTextEdit" name="projectDescriptionTextEdit"/>
               </item>
               <item row="0" column="1">
                <widget class="QLineEdit" name="projectNameLineEdit">
@@ -313,26 +309,6 @@
                <widget class="QLabel" name="projectDescriptionLabel">
                 <property name="text">
                  <string>Description</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QPlainTextEdit" name="projectDescriptionTextEdit"/>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="projectOwnerLabel">
-                <property name="text">
-                 <string>Owner</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QComboBox" name="projectOwnerComboBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
                 </property>
                </widget>
               </item>
@@ -365,6 +341,48 @@
                  </spacer>
                 </item>
                </layout>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="projectOwnerLabel">
+                <property name="text">
+                 <string>Owner</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <layout class="QHBoxLayout" name="projectOwner">
+                <item>
+                 <widget class="QComboBox" name="projectOwnerComboBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="projectOwnerRefreshButton">
+                  <property name="toolTip">
+                   <string>Refresh the list of available project owners</string>
+                  </property>
+                  <property name="text">
+                   <string>Back</string>
+                  </property>
+                  <property name="icon">
+                   <iconset>
+                    <normaloff>../resources/refresh.svg</normaloff>../resources/refresh.svg</iconset>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="projectNameLabel">
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>

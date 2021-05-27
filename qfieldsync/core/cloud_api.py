@@ -285,6 +285,11 @@ class CloudNetworkAccessManager(QObject):
 
         return self.cloud_delete(["projects", project_id])
 
+    def get_user_organizations(self, username: str) -> QNetworkReply:
+        """Gets the available projects for the owner dropdown menu"""
+
+        return self.cloud_get(["users", username, "organizations"])
+
     def get_files(self, project_id: str, client: str = "qgis") -> QNetworkReply:
         """"Get project files and their versions"""
 
