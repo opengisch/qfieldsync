@@ -238,8 +238,7 @@ class QFieldSync(object):
             callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow())
 
-        actions = self.iface.pluginMenu().actions()
-        qfield_action = [action for action in actions if action.text() == self.menu][0]
+        qfield_action = self.get_qfield_action()
         qfield_action.menu().addSeparator()
 
         self.cloud_projects_overview_action = self.add_action(
@@ -298,7 +297,7 @@ class QFieldSync(object):
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginMenu(self.tr('&QFieldSync'), action)
+            self.iface.removePluginMenu(self.menu, action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
@@ -408,3 +407,21 @@ class QFieldSync(object):
             self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud.svg')))
         else:
             self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud_off.svg')))
+
+    def get_qfield_action(self) -> QAction:
+        actions = self.iface.pluginMenu().actions()
+        result_actions = [
+            action
+            for action in actions
+            if action.text() == self.menu
+        ]
+
+        # OSX does not support & in the menu title
+        if not result_actions:
+            result_actions = [
+                action
+                for action in actions
+                if action.text() == self.menu.replace("&", "")
+            ]
+
+        return result_actions[0]
