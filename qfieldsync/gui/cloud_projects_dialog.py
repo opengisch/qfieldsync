@@ -608,6 +608,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             return
 
         for cloud_project in self.network_manager.projects_cache.projects:
+            if cloud_project.user_role_origin == "public":
+                continue
+
             count = self.projectsTable.rowCount()
             self.projectsTable.insertRow(count)
 
