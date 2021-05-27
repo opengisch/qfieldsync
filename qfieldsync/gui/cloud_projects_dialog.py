@@ -956,6 +956,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
         self.projectTabs.setCurrentWidget(self.projectFormTab)
         self.projectFilesTree.clear()
+        self.projectNameLineEdit.setEnabled(True)
+        self.projectDescriptionTextEdit.setEnabled(True)
+        self.projectIsPrivateCheckBox.setEnabled(True)
+        self.projectOwnerComboBox.setEnabled(True)
 
         self.refresh_project_owners_combobox()
         self.request_refresh_project_owners_combobox()
@@ -1008,6 +1012,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     self.current_cloud_project.updated_at, Qt.ISODateWithMs
                 ).toString()
             )
+
+            if self.current_cloud_project.user_role not in ("admin", "manager"):
+                self.projectNameLineEdit.setEnabled(False)
+                self.projectDescriptionTextEdit.setEnabled(False)
+                self.projectIsPrivateCheckBox.setEnabled(False)
+                self.projectOwnerComboBox.setEnabled(False)
 
             self.network_manager.projects_cache.get_project_files(
                 self.current_cloud_project.id
