@@ -247,6 +247,14 @@ class CloudProject:
         return self._data["updated_at"]
 
     @property
+    def user_role(self) -> str:
+        return self._data["user_role"]
+
+    @property
+    def user_role_origin(self) -> str:
+        return self._data["user_role_origin"]
+
+    @property
     def local_dir(self) -> Optional[str]:
         dirname = self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
 
