@@ -70,8 +70,6 @@ class PackageDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.Reset).clicked.connect(
             self.show_settings
         )
-        self.iface.mapCanvas().extentsChanged.connect(self.extent_changed)
-        self.extent_changed()
 
         self.devices = None
         # self.refresh_devices()
@@ -104,7 +102,6 @@ class PackageDialog(QDialog, DialogUi):
 
     def package_project(self):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
-        self.informationStack.setCurrentWidget(self.progressPage)
 
         export_folder = self.get_export_folder_from_dialog()
         area_of_interest = (
@@ -202,16 +199,6 @@ class PackageDialog(QDialog, DialogUi):
             showInfoConfiguration or len(localizedDataPathLayers) > 0
         )
 
-        project_configuration = ProjectConfiguration(self.project)
-
-        if (
-            project_configuration.offline_copy_only_aoi
-            or project_configuration.create_base_map
-        ):
-            self.informationStack.setCurrentWidget(self.selectExtentPage)
-        else:
-            self.informationStack.setCurrentWidget(self.progressPage)
-
     def show_settings(self):
         if Qgis.QGIS_VERSION_INT >= 31500:
             self.iface.showProjectPropertiesDialog("QField")
@@ -228,13 +215,6 @@ class PackageDialog(QDialog, DialogUi):
     def update_task(self, progress, max_progress):
         self.layerProgressBar.setMaximum(max_progress)
         self.layerProgressBar.setValue(progress)
-
-    def extent_changed(self):
-        extent = self.iface.mapCanvas().extent()
-        self.xMinLabel.setText(str(extent.xMinimum()))
-        self.xMaxLabel.setText(str(extent.xMaximum()))
-        self.yMinLabel.setText(str(extent.yMinimum()))
-        self.yMaxLabel.setText(str(extent.yMaximum()))
 
     def show_warning(self, _, message):
         # Most messages from the offline editing plugin are not important enough to show in the message bar.
