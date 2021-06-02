@@ -51,6 +51,7 @@ class PackageDialog(QDialog, DialogUi):
         self.offline_editing = offline_editing
         self.project = project
         self.qfield_preferences = Preferences()
+        self.__project_configuration = ProjectConfiguration(self.project)
         self.project_lbl.setText(get_project_title(self.project))
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
@@ -106,13 +107,24 @@ class PackageDialog(QDialog, DialogUi):
         self.informationStack.setCurrentWidget(self.progressPage)
 
         export_folder = self.get_export_folder_from_dialog()
+        area_of_interest = (
+            self.__project_configuration.area_of_interest
+            if self.__project_configuration.area_of_interest
+            else self.iface.mapCanvas().extent().asWktPolygon()
+        )
+        area_of_interest_crs = (
+            self.__project_configuration.area_of_interest_crs
+            if self.__project_configuration.area_of_interest_crs
+            else QgsProject.instance().crs().authid()
+        )
 
         self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
 
         offline_convertor = OfflineConverter(
             self.project,
             export_folder,
-            self.iface.mapCanvas().extent(),
+            area_of_interest,
+            area_of_interest_crs,
             self.offline_editing,
         )
 
