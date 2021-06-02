@@ -22,42 +22,26 @@
 """
 import os
 
-from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
-from qgis.PyQt.QtCore import (
-    pyqtSlot,
-    Qt
-)
-from qgis.PyQt.QtGui import (
-    QIcon
-)
-from qgis.PyQt.QtWidgets import (
-    QApplication,
-    QMessageBox,
-    QDialogButtonBox,
-    QPushButton,
-    QLabel,
-    QSizePolicy,
-    QDialog
-)
-from qgis.core import (
-    QgsProject,
-    QgsApplication,
-    QgsProviderRegistry,
-    Qgis
-)
+from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
+from qgis.PyQt.QtCore import Qt, pyqtSlot
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
+
+from qfieldsync.core.preferences import Preferences
+from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
+from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
+from qfieldsync.libqfieldsync.utils.file_utils import fileparts
+
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import make_folder_selector
-from qfieldsync.core.preferences import Preferences
 
-from qfieldsync.libqfieldsync.utils.file_utils import fileparts, open_folder
-from qfieldsync.libqfieldsync import (LayerSource, ProjectConfiguration, OfflineConverter)
-
-DialogUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/package_dialog.ui'))
+DialogUi, _ = loadUiType(
+    os.path.join(os.path.dirname(__file__), "../ui/package_dialog.ui")
+)
 
 
 class PackageDialog(QDialog, DialogUi):
-
     def __init__(self, iface, project, offline_editing, parent=None):
         """Constructor."""
         super(PackageDialog, self).__init__(parent=parent)
@@ -68,11 +52,23 @@ class PackageDialog(QDialog, DialogUi):
         self.project = project
         self.qfield_preferences = Preferences()
         self.project_lbl.setText(get_project_title(self.project))
-        self.button_box.button(QDialogButtonBox.Save).setText(self.tr('Create'))
-        self.button_box.button(QDialogButtonBox.Save).clicked.connect(self.package_project)
-        self.button_box.button(QDialogButtonBox.Reset).setText(self.tr('Configure current project...'))
-        self.button_box.button(QDialogButtonBox.Reset).setIcon(QIcon(os.path.join(os.path.dirname(__file__), '../resources/project_properties.svg')))
-        self.button_box.button(QDialogButtonBox.Reset).clicked.connect(self.show_settings)
+        self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
+        self.button_box.button(QDialogButtonBox.Save).clicked.connect(
+            self.package_project
+        )
+        self.button_box.button(QDialogButtonBox.Reset).setText(
+            self.tr("Configure current project...")
+        )
+        self.button_box.button(QDialogButtonBox.Reset).setIcon(
+            QIcon(
+                os.path.join(
+                    os.path.dirname(__file__), "../resources/project_properties.svg"
+                )
+            )
+        )
+        self.button_box.button(QDialogButtonBox.Reset).clicked.connect(
+            self.show_settings
+        )
         self.iface.mapCanvas().extentsChanged.connect(self.extent_changed)
         self.extent_changed()
 
@@ -88,11 +84,13 @@ class PackageDialog(QDialog, DialogUi):
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
-        export_folder_path = self.qfield_preferences.value('exportDirectoryProject')
+        export_folder_path = self.qfield_preferences.value("exportDirectoryProject")
         if not export_folder_path:
             project_fn = QgsProject.instance().fileName()
             export_folder_name = fileparts(project_fn)[1]
-            export_folder_path = os.path.join(self.qfield_preferences.value('exportDirectory'), export_folder_name)
+            export_folder_path = os.path.join(
+                self.qfield_preferences.value("exportDirectory"), export_folder_name
+            )
 
         self.manualDir.setText(export_folder_path)
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
@@ -109,15 +107,21 @@ class PackageDialog(QDialog, DialogUi):
 
         export_folder = self.get_export_folder_from_dialog()
 
-        self.qfield_preferences.set_value('exportDirectoryProject', export_folder)
+        self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
 
-        offline_convertor = OfflineConverter(self.project, export_folder, self.iface.mapCanvas().extent(),
-                                             self.offline_editing)
+        offline_convertor = OfflineConverter(
+            self.project,
+            export_folder,
+            self.iface.mapCanvas().extent(),
+            self.offline_editing,
+        )
 
         # progress connections
         offline_convertor.total_progress_updated.connect(self.update_total)
         offline_convertor.task_progress_updated.connect(self.update_task)
-        offline_convertor.warning.connect(lambda title, body: QMessageBox.warning(None, title, body))
+        offline_convertor.warning.connect(
+            lambda title, body: QMessageBox.warning(None, title, body)
+        )
 
         offline_convertor.convert()
         self.do_post_offline_convert_action()
@@ -132,8 +136,12 @@ class PackageDialog(QDialog, DialogUi):
         """
         export_folder = self.get_export_folder_from_dialog()
 
-        result_message = self.tr('Finished creating the project at {result_folder}. Please copy this folder to '
-                                      'your QField device.').format(result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder))
+        result_message = self.tr(
+            "Finished creating the project at {result_folder}. Please copy this folder to "
+            "your QField device."
+        ).format(
+            result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder)
+        )
         self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
 
     def update_info_visibility(self):
@@ -147,37 +155,54 @@ class PackageDialog(QDialog, DialogUi):
             if not LayerSource(layer).is_configured:
                 showInfoConfiguration = True
             if layer.dataProvider() is not None:
-                metadata = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+                metadata = QgsProviderRegistry.instance().providerMetadata(
+                    layer.dataProvider().name()
+                )
                 if metadata is not None:
                     decoded = metadata.decodeUri(layer.source())
                     if "path" in decoded:
                         path = pathResolver.writePath(decoded["path"])
                         if path.startswith("localized:"):
-                            localizedDataPathLayers.append('- {} ({})'.format(layer.name(), path[10:]))
+                            localizedDataPathLayers.append(
+                                "- {} ({})".format(layer.name(), path[10:])
+                            )
 
         self.infoConfigurationLabel.setVisible(showInfoConfiguration)
         if localizedDataPathLayers:
             if len(localizedDataPathLayers) == 1:
-                self.infoLocalizedLayersLabel.setText(self.tr('The layer stored in a localized data path is:\n{}').format("\n".join(localizedDataPathLayers)))
+                self.infoLocalizedLayersLabel.setText(
+                    self.tr("The layer stored in a localized data path is:\n{}").format(
+                        "\n".join(localizedDataPathLayers)
+                    )
+                )
             else:
-                self.infoLocalizedLayersLabel.setText(self.tr('The layers stored in a localized data path are:\n{}').format("\n".join(localizedDataPathLayers)))
+                self.infoLocalizedLayersLabel.setText(
+                    self.tr(
+                        "The layers stored in a localized data path are:\n{}"
+                    ).format("\n".join(localizedDataPathLayers))
+                )
             self.infoLocalizedLayersLabel.setVisible(True)
             self.infoLocalizedPresentLabel.setVisible(True)
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
             self.infoLocalizedPresentLabel.setVisible(False)
-        self.infoGroupBox.setVisible(showInfoConfiguration or len(localizedDataPathLayers) > 0)
+        self.infoGroupBox.setVisible(
+            showInfoConfiguration or len(localizedDataPathLayers) > 0
+        )
 
         project_configuration = ProjectConfiguration(self.project)
 
-        if project_configuration.offline_copy_only_aoi or project_configuration.create_base_map:
+        if (
+            project_configuration.offline_copy_only_aoi
+            or project_configuration.create_base_map
+        ):
             self.informationStack.setCurrentWidget(self.selectExtentPage)
         else:
             self.informationStack.setCurrentWidget(self.progressPage)
 
     def show_settings(self):
         if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.showProjectPropertiesDialog('QField')
+            self.iface.showProjectPropertiesDialog("QField")
         else:
             dlg = ProjectConfigurationDialog(self.iface.mainWindow())
             dlg.exec_()
@@ -211,4 +236,4 @@ class PackageDialog(QDialog, DialogUi):
     def show_warning(self, _, message):
         # Most messages from the offline editing plugin are not important enough to show in the message bar.
         # In case we find important ones in the future, we need to filter them.
-        QgsApplication.instance().messageLog().logMessage(message, 'QFieldSync')
+        QgsApplication.instance().messageLog().logMessage(message, "QFieldSync")

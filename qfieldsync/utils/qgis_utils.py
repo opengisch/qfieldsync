@@ -23,8 +23,8 @@ from pathlib import Path
 
 from qgis.core import QgsProject
 
-from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder
 from qfieldsync.libqfieldsync import ProjectConfiguration
+from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder
 
 
 def get_project_title(project: QgsProject) -> str:

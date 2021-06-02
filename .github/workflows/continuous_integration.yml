@@ -18,6 +18,23 @@ on:
         default: 'master'
 
 jobs:
+  code_check:
+    name: Code check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Check code formatting
+        run: |
+          pipenv install pre_commit
+          pipenv run python -m pre_commit run --all-files
+
   # Run unit tests
   test:
     runs-on: ubuntu-20.04

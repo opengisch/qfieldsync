@@ -19,9 +19,7 @@
 """
 
 from qgis.gui import QgsGui
-
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QDialogButtonBox
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout
 
 from qfieldsync.gui.project_configuration_widget import ProjectConfigurationWidget
 
@@ -39,13 +37,13 @@ class ProjectConfigurationDialog(QDialog):
         QgsGui.instance().enableAutoGeometryRestore(self)
 
         self.setWindowTitle("QFieldSync Project Properties")
-        
+
         self.projectConfigurationWidget = ProjectConfigurationWidget(self)
-        
+
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(lambda: self.onAccepted())
         self.buttonBox.rejected.connect(self.reject)
-        
+
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.projectConfigurationWidget)
         self.layout.addWidget(self.buttonBox)

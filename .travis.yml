@@ -23,7 +23,7 @@ jobs:
       script: docker-compose -f .docker/docker-compose.travis.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
     - stage: deploy
-      name: Release 
+      name: Release
       if: tag IS present
       install:
         - pip install qgis-plugin-ci
