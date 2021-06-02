@@ -19,12 +19,18 @@
 """
 import os
 
-from qgis.core import QgsMapLayerProxyModel, QgsProject
-from qgis.gui import QgsOptionsPageWidget
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsMapLayerProxyModel,
+    QgsPolygon,
+    QgsProject,
+)
+from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
+from qgis.utils import iface
 
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
 from qfieldsync.libqfieldsync import (
@@ -52,6 +58,32 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
         self.project = QgsProject.instance()
         self.__project_configuration = ProjectConfiguration(self.project)
+        self.areaOfInterestExtentWidget = QgsExtentWidget(self)
+        self.areaOfInterestExtentWidget.setToolTip(
+            self.tr("Leave null to use the current project zoom extent.")
+        )
+        self.areaOfInterestExtentWidget.setMapCanvas(iface.mapCanvas())
+        self.areaOfInterestExtentWidget.setNullValueAllowed(True)
+
+        if self.__project_configuration.area_of_interest_crs:
+            self.areaOfInterestExtentWidget.setOutputCrs(
+                QgsCoordinateReferenceSystem(
+                    self.__project_configuration.area_of_interest_crs
+                )
+            )
+
+        geom = QgsPolygon()
+        if self.__project_configuration.area_of_interest and geom.fromWkt(
+            self.__project_configuration.area_of_interest,
+        ):
+            self.areaOfInterestExtentWidget.setOutputExtentFromUser(
+                geom.boundingBox(),
+                self.areaOfInterestExtentWidget.outputCrs(),
+            )
+
+        self.advancedSettingsGroupBox.layout().addWidget(
+            self.areaOfInterestExtentWidget, 0, 1
+        )
 
         self.preferOnlineLayersRadioButton.clicked.connect(
             self.onLayerActionPreferenceChanged
@@ -176,6 +208,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.__project_configuration.offline_copy_only_aoi = (
             self.onlyOfflineCopyFeaturesInAoi.isChecked()
         )
+        if self.areaOfInterestExtentWidget.isValid():
+            self.__project_configuration.area_of_interest = (
+                self.areaOfInterestExtentWidget.outputExtent().asWktPolygon()
+            )
+            self.__project_configuration.area_of_interest_crs = (
+                self.areaOfInterestExtentWidget.outputCrs().authid()
+            )
+        else:
+            self.__project_configuration.area_of_interest = ""
+            self.__project_configuration.area_of_interest_crs = ""
+
         self.__project_configuration.layer_action_preference = (
             "online" if self.preferOnlineLayersRadioButton.isChecked() else "offline"
         )
