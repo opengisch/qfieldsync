@@ -54,7 +54,11 @@ class OfflineConverterTest(unittest.TestCase):
         )
         offline_editing = QgsOfflineEditing()
         offline_converter = OfflineConverter(
-            project, export_folder, "", "", offline_editing
+            project,
+            export_folder,
+            "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
+            QgsProject.instance().crs().authid(),
+            offline_editing,
         )
         offline_converter.convert()
 
@@ -100,8 +104,8 @@ class OfflineConverterTest(unittest.TestCase):
         offline_converter = OfflineConverter(
             project,
             export_folder,
-            "",
-            "",
+            "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
+            QgsProject.instance().crs().authid(),
             offline_editing,
         )
         offline_converter.convert()
