@@ -51,6 +51,7 @@ class PackageDialog(QDialog, DialogUi):
         self.offline_editing = offline_editing
         self.project = project
         self.qfield_preferences = Preferences()
+        self.__project_configuration = ProjectConfiguration(self.project)
         self.project_lbl.setText(get_project_title(self.project))
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
@@ -69,8 +70,6 @@ class PackageDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.Reset).clicked.connect(
             self.show_settings
         )
-        self.iface.mapCanvas().extentsChanged.connect(self.extent_changed)
-        self.extent_changed()
 
         self.devices = None
         # self.refresh_devices()
@@ -103,16 +102,26 @@ class PackageDialog(QDialog, DialogUi):
 
     def package_project(self):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
-        self.informationStack.setCurrentWidget(self.progressPage)
 
         export_folder = self.get_export_folder_from_dialog()
+        area_of_interest = (
+            self.__project_configuration.area_of_interest
+            if self.__project_configuration.area_of_interest
+            else self.iface.mapCanvas().extent().asWktPolygon()
+        )
+        area_of_interest_crs = (
+            self.__project_configuration.area_of_interest_crs
+            if self.__project_configuration.area_of_interest_crs
+            else QgsProject.instance().crs().authid()
+        )
 
         self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
 
         offline_convertor = OfflineConverter(
             self.project,
             export_folder,
-            self.iface.mapCanvas().extent(),
+            area_of_interest,
+            area_of_interest_crs,
             self.offline_editing,
         )
 
@@ -190,16 +199,6 @@ class PackageDialog(QDialog, DialogUi):
             showInfoConfiguration or len(localizedDataPathLayers) > 0
         )
 
-        project_configuration = ProjectConfiguration(self.project)
-
-        if (
-            project_configuration.offline_copy_only_aoi
-            or project_configuration.create_base_map
-        ):
-            self.informationStack.setCurrentWidget(self.selectExtentPage)
-        else:
-            self.informationStack.setCurrentWidget(self.progressPage)
-
     def show_settings(self):
         if Qgis.QGIS_VERSION_INT >= 31500:
             self.iface.showProjectPropertiesDialog("QField")
@@ -223,14 +222,6 @@ class PackageDialog(QDialog, DialogUi):
     def update_task(self, progress, max_progress):
         self.layerProgressBar.setMaximum(max_progress)
         self.layerProgressBar.setValue(progress)
-
-    @pyqtSlot()
-    def extent_changed(self):
-        extent = self.iface.mapCanvas().extent()
-        self.xMinLabel.setText(str(extent.xMinimum()))
-        self.xMaxLabel.setText(str(extent.xMaximum()))
-        self.yMinLabel.setText(str(extent.yMinimum()))
-        self.yMaxLabel.setText(str(extent.yMaximum()))
 
     @pyqtSlot(str, str)
     def show_warning(self, _, message):

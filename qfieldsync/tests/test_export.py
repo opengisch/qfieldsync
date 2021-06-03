@@ -23,7 +23,7 @@ import os
 import shutil
 import tempfile
 
-from qgis.core import Qgis, QgsOfflineEditing, QgsProject, QgsRectangle
+from qgis.core import Qgis, QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 
@@ -52,10 +52,13 @@ class OfflineConverterTest(unittest.TestCase):
         project = self.load_project(
             os.path.join(source_folder, "simple_project", "project.qgs")
         )
-        extent = QgsRectangle()
         offline_editing = QgsOfflineEditing()
         offline_converter = OfflineConverter(
-            project, export_folder, extent, offline_editing
+            project,
+            export_folder,
+            "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
+            QgsProject.instance().crs().authid(),
+            offline_editing,
         )
         offline_converter.convert()
 
@@ -97,10 +100,13 @@ class OfflineConverterTest(unittest.TestCase):
         project = self.load_project(
             os.path.join(source_folder, "pk_project", "project.qgs")
         )
-        extent = QgsRectangle()
         offline_editing = QgsOfflineEditing()
         offline_converter = OfflineConverter(
-            project, export_folder, extent, offline_editing
+            project,
+            export_folder,
+            "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
+            QgsProject.instance().crs().authid(),
+            offline_editing,
         )
         offline_converter.convert()
 

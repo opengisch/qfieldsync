@@ -247,8 +247,21 @@ class CloudProject:
         return self._data["updated_at"]
 
     @property
+    def user_role(self) -> str:
+        return self._data["user_role"]
+
+    @property
+    def user_role_origin(self) -> str:
+        return self._data["user_role_origin"]
+
+    @property
     def local_dir(self) -> Optional[str]:
-        return self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
+        dirname = self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
+
+        if not dirname or not Path(dirname).exists():
+            return None
+
+        return dirname
 
     # TODO remove this, use `get_files` instead
     @property

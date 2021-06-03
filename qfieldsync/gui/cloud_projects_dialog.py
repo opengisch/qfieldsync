@@ -23,7 +23,7 @@
 import functools
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from PyQt5.QtCore import QUrl
 from qgis.core import QgsProject
@@ -69,6 +69,7 @@ from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
+from qfieldsync.utils.permissions import can_change_project_owner
 
 CloudProjectsDialogUi, _ = loadUiType(
     str(Path(__file__).parent.joinpath("../ui/cloud_projects_dialog.ui"))
@@ -172,6 +173,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.localDirLineEdit.textChanged.connect(
             lambda: self.on_local_dir_line_edit_text_changed()
+        )
+        self.projectOwnerRefreshButton.clicked.connect(
+            lambda: self.on_project_owner_refresh_button_clicked()
         )
         self.localDirButton.clicked.connect(lambda: self.on_local_dir_button_clicked())
         self.localDirButton.setMenu(QMenu())
@@ -495,6 +499,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_local_dir_button_clicked(self) -> None:
         self.localDirLineEdit.setText(self.select_local_dir())
 
+    def on_project_owner_refresh_button_clicked(self) -> None:
+        self.request_refresh_project_owners_combobox()
+
+    def on_get_user_organizations_finished(self, reply: QNetworkReply) -> None:
+        try:
+            payload = self.network_manager.json_array(reply)
+            self.refresh_project_owners_combobox(payload)
+        except Exception:
+            self.feedbackLabel.setText(self.tr("Failed to refresh project owners."))
+
     def on_logout_button_clicked(self) -> None:
         self.logoutButton.setEnabled(False)
         self.feedbackLabel.setVisible(False)
@@ -502,6 +516,47 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_refresh_button_clicked(self) -> None:
         self.network_manager.projects_cache.refresh()
+
+    def refresh_project_owners_combobox(
+        self, organizations: List[Dict[str, Any]] = []
+    ) -> None:
+        username = self.network_manager.auth().config("username")
+        selected_value = username
+        is_project_owner_select_enabled = True
+
+        if self.current_cloud_project:
+            selected_value = self.current_cloud_project.owner
+            is_project_owner_select_enabled = can_change_project_owner(
+                self.current_cloud_project
+            )
+
+        self.projectOwnerComboBox.clear()
+        self.projectOwnerComboBox.setEnabled(is_project_owner_select_enabled)
+        self.projectOwnerRefreshButton.setEnabled(is_project_owner_select_enabled)
+        self.projectOwnerComboBox.addItem(username, username)
+
+        if organizations:
+            for org in organizations:
+                self.projectOwnerComboBox.addItem(org["username"], org["username"])
+
+        selected_value_idx = self.projectOwnerComboBox.findData(selected_value)
+        if selected_value_idx == -1:
+            selected_value_idx = 0
+            self.projectOwnerComboBox.insertItem(
+                selected_value_idx,
+                selected_value,
+                selected_value,
+            )
+
+        self.projectOwnerComboBox.setCurrentIndex(selected_value_idx)
+
+    def request_refresh_project_owners_combobox(self) -> None:
+        self.projectOwnerRefreshButton.setEnabled(False)
+
+        reply = self.network_manager.get_user_organizations(
+            self.network_manager.auth().config("username")
+        )
+        reply.finished.connect(lambda: self.on_get_user_organizations_finished(reply))
 
     def local_dir_feedback(
         self, local_dir, empty_ok=True, exiting_ok=True
@@ -553,6 +608,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             return
 
         for cloud_project in self.network_manager.projects_cache.projects:
+            if cloud_project.user_role_origin == "public":
+                continue
+
             count = self.projectsTable.rowCount()
             self.projectsTable.insertRow(count)
 
@@ -608,7 +666,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_launch.setIcon(
                 QIcon(str(Path(__file__).parent.joinpath("../resources/launch.svg")))
             )
-            btn_launch.setToolTip(self.tr(" Open project"))
+            btn_launch.setToolTip(self.tr("Open project"))
             btn_launch.setMinimumSize(24, 24)
             btn_launch.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_delete = QToolButton()
@@ -616,7 +674,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             btn_delete.setIcon(
                 QIcon(str(Path(__file__).parent.joinpath("../resources/delete.svg")))
             )
-            btn_delete.setToolTip(self.tr("Delete QFieldCloud project"))
+            btn_delete.setToolTip(
+                self.tr("Delete QFieldCloud project (files are kept locally)")
+            )
             btn_delete.setMinimumSize(24, 24)
             btn_delete.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             btn_widget = QWidget()
@@ -895,12 +955,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
         self.projectTabs.setCurrentWidget(self.projectFormTab)
-
-        username = self.network_manager.auth().config("username")
-
-        self.projectOwnerComboBox.clear()
-        self.projectOwnerComboBox.addItem(username, username)
         self.projectFilesTree.clear()
+        self.projectNameLineEdit.setEnabled(True)
+        self.projectDescriptionTextEdit.setEnabled(True)
+        self.projectIsPrivateCheckBox.setEnabled(True)
+        self.projectOwnerComboBox.setEnabled(True)
+
+        self.refresh_project_owners_combobox()
+        self.request_refresh_project_owners_combobox()
 
         if self.current_cloud_project is None:
             self.submitButton.setText(self.tr("Create new project"))
@@ -951,15 +1013,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 ).toString()
             )
 
-            index = self.projectOwnerComboBox.findData(self.current_cloud_project.owner)
-
-            if index == -1:
-                self.projectOwnerComboBox.insertItem(
-                    0,
-                    self.current_cloud_project.owner,
-                    self.current_cloud_project.owner,
-                )
-                self.projectOwnerComboBox.setCurrentIndex(0)
+            if self.current_cloud_project.user_role not in ("admin", "manager"):
+                self.projectNameLineEdit.setEnabled(False)
+                self.projectDescriptionTextEdit.setEnabled(False)
+                self.projectIsPrivateCheckBox.setEnabled(False)
+                self.projectOwnerComboBox.setEnabled(False)
 
             self.network_manager.projects_cache.get_project_files(
                 self.current_cloud_project.id
@@ -1134,6 +1192,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_transfer_dialog_accepted(self) -> None:
         QgsProject().instance().reloadAllLayers()
+        self.show_projects()
 
         if self.transfer_dialog:
             self.transfer_dialog.close()
