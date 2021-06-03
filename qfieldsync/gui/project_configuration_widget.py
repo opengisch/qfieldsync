@@ -62,8 +62,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.areaOfInterestExtentWidget.setToolTip(
             self.tr("Leave null to use the current project zoom extent.")
         )
-        self.areaOfInterestExtentWidget.setMapCanvas(iface.mapCanvas())
         self.areaOfInterestExtentWidget.setNullValueAllowed(True)
+
+        if iface:
+            self.areaOfInterestExtentWidget.setMapCanvas(iface.mapCanvas())
 
         if self.__project_configuration.area_of_interest_crs:
             self.areaOfInterestExtentWidget.setOutputCrs(
