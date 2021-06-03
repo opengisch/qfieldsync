@@ -8,7 +8,7 @@
 
 [general]
 name=QField Sync
-qgisMinimumVersion=3.10
+qgisMinimumVersion=3.16
 description=Sync your projects to QField
 version=dev
 author=OPENGIS.ch
