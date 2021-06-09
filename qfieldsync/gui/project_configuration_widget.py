@@ -84,7 +84,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             )
 
         self.advancedSettingsGroupBox.layout().addWidget(
-            self.areaOfInterestExtentWidget, 0, 1
+            self.areaOfInterestExtentWidget, 1, 1
         )
 
         self.preferOnlineLayersRadioButton.clicked.connect(
@@ -129,6 +129,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.mapThemeComboBox.addItem(theme)
 
         self.layerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.digitizingLogsLayerComboBox.setFilters(QgsMapLayerProxyModel.PointLayer)
+        self.digitizingLogsLayerComboBox.setAllowEmptyLayer(True)
 
         self.__project_configuration = ProjectConfiguration(self.project)
         self.createBaseMapGroupBox.setChecked(
@@ -146,10 +148,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.mapThemeComboBox.setCurrentIndex(
             self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme)
         )
+
         layer = QgsProject.instance().mapLayer(
             self.__project_configuration.base_map_layer
         )
         self.layerComboBox.setLayer(layer)
+
+        digitizingLogsLayer = QgsProject.instance().mapLayer(
+            self.__project_configuration.digitizing_logs_layer
+        )
+        self.digitizingLogsLayerComboBox.setLayer(digitizingLogsLayer)
+
         self.mapUnitsPerPixel.setValue(self.__project_configuration.base_map_mupp)
         self.tileSize.setValue(self.__project_configuration.base_map_tile_size)
         self.onlyOfflineCopyFeaturesInAoi.setChecked(
@@ -190,6 +199,14 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         try:
             self.__project_configuration.base_map_layer = (
                 self.layerComboBox.currentLayer().id()
+            )
+        except AttributeError:
+            pass
+        try:
+            self.__project_configuration.digitizing_logs_layer = (
+                self.digitizingLogsLayerComboBox.currentLayer().id()
+                if self.digitizingLogsLayerComboBox.currentLayer()
+                else ""
             )
         except AttributeError:
             pass
