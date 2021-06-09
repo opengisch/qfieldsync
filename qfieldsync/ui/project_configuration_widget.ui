@@ -38,7 +38,7 @@
       <item row="0" column="0">
       <widget class="QLabel" name="labelDigitizingLogsLayer">
       <property name="text">
-       <string>Digitizing Logs Layer</string>
+       <string>Digitizing logs layer</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
