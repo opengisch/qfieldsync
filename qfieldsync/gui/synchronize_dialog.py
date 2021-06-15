@@ -54,7 +54,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.offline_editing = offline_editing
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Synchronize"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
-            self.start_synchronization
+            lambda: self.start_synchronization()
         )
         self.qfieldDir.setText(
             self.preferences.value("importDirectoryProject")
