@@ -23,7 +23,7 @@
 import os
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
-from qgis.PyQt.QtCore import Qt, pyqtSlot
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType

@@ -24,7 +24,6 @@ import os
 from pathlib import Path
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
 
