@@ -442,15 +442,15 @@ class QFieldSync(object):
                 QIcon(os.path.join(os.path.dirname(__file__), "./resources/cloud.svg"))
             )
         else:
-            self.qfield_cloud_sync_btn.setIcon(QIcon(os.path.join(os.path.dirname(__file__), './resources/cloud_off.svg')))
+            self.qfield_cloud_sync_btn.setIcon(
+                QIcon(
+                    os.path.join(os.path.dirname(__file__), "./resources/cloud_off.svg")
+                )
+            )
 
     def get_qfield_action(self) -> QAction:
         actions = self.iface.pluginMenu().actions()
-        result_actions = [
-            action
-            for action in actions
-            if action.text() == self.menu
-        ]
+        result_actions = [action for action in actions if action.text() == self.menu]
 
         # OSX does not support & in the menu title
         if not result_actions:

@@ -95,9 +95,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         )
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
 
-        self.photoNamingTable = PhotoNamingTableWidget()
-        self.photoNamingTab.layout().addWidget(self.photoNamingTable)
-
         self.reloadProject()
 
     def reloadProject(self):

@@ -27,7 +27,6 @@ from qgis.core import QgsProject
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.project import ProjectConfiguration
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.libqfieldsync import ProjectConfiguration
 from qfieldsync.libqfieldsync.utils.exceptions import NoProjectFoundError
