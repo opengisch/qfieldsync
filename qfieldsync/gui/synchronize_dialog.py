@@ -21,7 +21,6 @@
  ***************************************************************************/
 """
 import os
-from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -98,21 +97,17 @@ class SynchronizeDialog(QDialog, DialogUi):
         except NoProjectFoundError as e:
             self.iface.messageBar().pushWarning('QFieldSync', str(e))
 
-    @pyqtSlot(int, int)
     def update_total(self, current, layer_count):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
 
-    @pyqtSlot(int)
     def update_value(self, progress):
         self.layerProgressBar.setValue(progress)
 
-    @pyqtSlot('QgsOfflineEditing::ProgressMode', int)
     def update_mode(self, _, mode_count):
         self.layerProgressBar.setMaximum(mode_count)
         self.layerProgressBar.setValue(0)
 
-    @pyqtSlot()
     def update_done(self):
         self.offline_editing.progressStopped.disconnect(self.update_done)
         self.offline_editing.layerProgressUpdated.disconnect(self.update_total)

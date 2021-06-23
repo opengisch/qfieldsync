@@ -29,7 +29,6 @@ from qfieldsync.core import (
 )
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qgis.PyQt.QtCore import (
-    pyqtSlot,
     Qt
 )
 from qgis.PyQt.QtGui import (
@@ -185,18 +184,15 @@ class PackageDialog(QDialog, DialogUi):
             dlg.exec_()
         self.update_info_visibility()
 
-    @pyqtSlot(int, int, str)
     def update_total(self, current, layer_count, message):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
         self.statusLabel.setText(message)
 
-    @pyqtSlot(int, int)
     def update_task(self, progress, max_progress):
         self.layerProgressBar.setMaximum(max_progress)
         self.layerProgressBar.setValue(progress)
 
-    @pyqtSlot()
     def extent_changed(self):
         extent = self.iface.mapCanvas().extent()
         self.xMinLabel.setText(str(extent.xMinimum()))
@@ -204,7 +200,6 @@ class PackageDialog(QDialog, DialogUi):
         self.yMinLabel.setText(str(extent.yMinimum()))
         self.yMaxLabel.setText(str(extent.yMaximum()))
 
-    @pyqtSlot(str, str)
     def show_warning(self, _, message):
         # Most messages from the offline editing plugin are not important enough to show in the message bar.
         # In case we find important ones in the future, we need to filter them.
