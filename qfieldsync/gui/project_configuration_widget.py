@@ -242,7 +242,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
                     layer_source.apply()
         # based on visibility
         elif action in (self.remove_hidden_action, self.add_visible_copy_action, self.add_visible_offline_action):
-            visible = Qt.Unchecked if action == self.remove_hidden_action else Qt.Checked
+            visible = action != self.remove_hidden_action
             root = QgsProject.instance().layerTreeRoot()
             for layer in QgsProject.instance().mapLayers().values():
                 node = root.findLayer(layer.id())
