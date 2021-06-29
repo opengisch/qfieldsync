@@ -204,7 +204,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             self.addVisibleCopyAction,
             self.addVisibleOfflineAction,
         ):
-            visible = Qt.Unchecked if action == self.removeHiddenAction else Qt.Checked
+            visible = action != self.removeHiddenAction
             root = QgsProject.instance().layerTreeRoot()
             for layer in QgsProject.instance().mapLayers().values():
                 node = root.findLayer(layer.id())
