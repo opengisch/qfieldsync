@@ -108,6 +108,12 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         else:
             layer_source.action = action
 
+    def get_default_action(self, layer_source):
+        if self.use_cloud_actions:
+            return layer_source.default_cloud_action
+        else:
+            return layer_source.default_action
+
     def reloadProject(self):
         """
         Load all layers from the map layer registry into the table.
@@ -174,7 +180,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         Toggles usage of layers
         :param action: the menu action that triggered this
         """
-        sync_action = SyncAction.NO_ACTION
+        sync_action = None
         if action in (self.removeHiddenAction, self.removeAllAction):
             sync_action = SyncAction.REMOVE
         elif action in (self.addAllOfflineAction, self.addVisibleOfflineAction):
@@ -192,8 +198,13 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 layer_source = item.data(Qt.UserRole)
                 old_action = self.get_layer_action(layer_source)
                 available_actions, _ = zip(*self.get_available_actions(layer_source))
-                if sync_action in available_actions:
-                    self.set_layer_action(layer_source, sync_action)
+                layer_sync_action = (
+                    self.get_default_action(layer_source)
+                    if sync_action is None
+                    else sync_action
+                )
+                if layer_sync_action in available_actions:
+                    self.set_layer_action(layer_source, layer_sync_action)
                     if self.get_layer_action(layer_source) != old_action:
                         self.project.setDirty(True)
                     layer_source.apply()
@@ -214,8 +225,13 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                     available_actions, _ = zip(
                         *self.get_available_actions(layer_source)
                     )
-                    if sync_action in available_actions:
-                        self.set_layer_action(layer_source, sync_action)
+                    layer_sync_action = (
+                        self.get_default_action(layer_source)
+                        if sync_action is None
+                        else sync_action
+                    )
+                    if layer_sync_action in available_actions:
+                        self.set_layer_action(layer_source, layer_sync_action)
                         if self.get_layer_action(layer_source) != old_action:
                             self.project.setDirty(True)
                         layer_source.apply()
