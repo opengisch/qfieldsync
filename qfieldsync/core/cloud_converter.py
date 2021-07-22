@@ -32,7 +32,6 @@ from qfieldsync.libqfieldsync.utils.file_utils import copy_images
 class CloudConverter(QObject):
     progressStopped = pyqtSignal()
     warning = pyqtSignal(str, str)
-    task_progress_updated = pyqtSignal(int, int)
     total_progress_updated = pyqtSignal(int, int, str)
 
     def __init__(
@@ -59,7 +58,7 @@ class CloudConverter(QObject):
         project = QgsProject.instance()
         original_project_path = project.fileName()
         project_filename = project.baseName()
-
+        converted = False
         try:
             if not os.path.exists(self.export_folder):
                 os.makedirs(self.export_folder)
@@ -111,7 +110,7 @@ class CloudConverter(QObject):
                 self.export_folder, project_filename + "_cloud.qgs"
             )
 
-            # save the cloud project twice to properly handle relative paths
+            # save the offline project twice so that the offline plugin can "know" that it's a relative path
             QgsProject.instance().write(project_path)
 
             # export the DCIM folder
@@ -122,12 +121,14 @@ class CloudConverter(QObject):
 
             # Now we have a project state which can be saved as cloud project
             QgsProject.instance().write(project_path)
+            converted = True
         finally:
             # We need to let the app handle events before loading the next project or QGIS will crash with rasters
             QCoreApplication.processEvents()
-            QgsProject.instance().clear()
-            QCoreApplication.processEvents()
-            QgsProject.instance().read(original_project_path)
-            QgsProject.instance().setFileName(original_project_path)
+            if not converted:
+                QgsProject.instance().clear()
+                QCoreApplication.processEvents()
+                QgsProject.instance().read(original_project_path)
+                QgsProject.instance().setFileName(original_project_path)
 
         self.total_progress_updated.emit(100, 100, self.tr("Finished"))
