@@ -109,7 +109,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
                 cfg.config("username"), cfg.config("password")
             )
             reply.finished.connect(lambda: self.on_login_reply_finished(reply))
-        else:
+
+        if not cfg.config("token") or not self.parent():
             self.show()
 
     def on_login_button_clicked(self) -> None:

@@ -33,7 +33,9 @@ from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.gui.cloud_browser_tree import DataItemProvider
 from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
+from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
+from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 from qfieldsync.gui.package_dialog import PackageDialog
 from qfieldsync.gui.preferences_widget import PreferencesWidget
@@ -241,7 +243,18 @@ class QFieldSync(object):
                 )
             ),
             text=self.tr("Convert Current Project to Cloud Project"),
-            callback=self.show_cloud_convert_dialog,
+            callback=self.open_cloud_convert_dialog,
+            parent=self.iface.mainWindow(),
+        )
+
+        self.cloud_synchronize_action = self.add_action(
+            QIcon(
+                os.path.join(
+                    os.path.dirname(__file__), "resources/cloud_synchronize.svg"
+                )
+            ),
+            text=self.tr("Synchronize Current Cloud Project"),
+            callback=self.open_cloud_synchronize_dialog,
             parent=self.iface.mainWindow(),
         )
 
@@ -331,6 +344,14 @@ class QFieldSync(object):
         )
         dlg.show()
 
+    def open_cloud_convert_dialog(self):
+        if not self.network_manager.has_token():
+            self.login_dlg = CloudLoginDialog(self.network_manager, None)
+            self.login_dlg.authenticate()
+            self.login_dlg.accepted.connect(lambda: self.show_cloud_convert_dialog())
+        else:
+            self.show_cloud_convert_dialog()
+
     def show_cloud_convert_dialog(self):
         """
         Convert to cloud project.
@@ -354,6 +375,33 @@ class QFieldSync(object):
                 Qgis.Warning,
                 5,
             )
+
+    def open_cloud_synchronize_dialog(self):
+        if not self.network_manager.has_token():
+            self.login_dlg = CloudLoginDialog(self.network_manager, None)
+            self.login_dlg.authenticate()
+            self.login_dlg.accepted.connect(
+                lambda: self.show_cloud_synchronize_dialog()
+            )
+        else:
+            self.show_cloud_synchronize_dialog()
+
+    def show_cloud_synchronize_dialog(self, firstTry=True):
+        """
+        Synchornize cloud project.
+        """
+        if self.network_manager.projects_cache.currently_open_project:
+            self.transfer_dialog = CloudTransferDialog(
+                self.network_manager,
+                self.network_manager.projects_cache.currently_open_project,
+                self.iface.mainWindow(),
+            )
+            self.transfer_dialog.accepted.connect(
+                lambda: QgsProject.instance().read(
+                    QgsProject.instance().absoluteFilePath()
+                )
+            )
+            self.transfer_dialog.show()
 
     def show_package_dialog(self):
         """
@@ -441,8 +489,10 @@ class QFieldSync(object):
         """
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.cloud_convert_action.setEnabled(False)
+            self.cloud_synchronize_action.setEnabled(True)
         else:
             self.cloud_convert_action.setEnabled(True)
+            self.cloud_synchronize_action.setEnabled(False)
 
         try:
             dialog_is_enabled = self.push_dlg and self.push_dlg.isEnabled()

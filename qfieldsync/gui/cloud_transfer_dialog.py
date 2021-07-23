@@ -38,7 +38,8 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_project import ProjectFile, ProjectFileCheckout
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 
 from ..utils.qt_utils import make_icon, make_pixmap
@@ -60,19 +61,18 @@ class ProjectFileAction(Enum):
 
 class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def __init__(
-        self, project_transfer: CloudTransferrer, parent: QObject = None
+        self,
+        network_manager: CloudNetworkAccessManager,
+        cloud_project: CloudProject = None,
+        parent: QObject = None,
     ) -> None:
         """Constructor."""
         super(CloudTransferDialog, self).__init__(parent=parent)
         self.setupUi(self)
-        self.project_transfer = project_transfer
 
-        self.project_transfer.error.connect(self.on_error)
-        self.project_transfer.upload_progress.connect(self.on_upload_transfer_progress)
-        self.project_transfer.download_progress.connect(
-            self.on_download_transfer_progress
-        )
-        self.project_transfer.finished.connect(self.on_transfer_finished)
+        self.network_manager = network_manager
+        self.cloud_project = cloud_project
+        self.project_transfer = None
 
         self.filesTree.header().setSectionResizeMode(0, QHeaderView.Interactive)
         self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -95,9 +95,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # self.filesTree.model().setHeaderData(3, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
 
         self.setWindowTitle(
-            self.tr('Synchronizing project "{}"').format(
-                self.project_transfer.cloud_project.name
-            )
+            self.tr('Synchronizing project "{}"').format(self.cloud_project.name)
         )
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Abort).setVisible(False)
@@ -116,6 +114,26 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
 
         super().showEvent(event)
+
+        reply = self.network_manager.projects_cache.get_project_files(
+            self.cloud_project.id
+        )
+        reply.finished.connect(lambda: self.prepare_project_transfer())
+
+    def prepare_project_transfer(self):
+        if len(list(self.cloud_project.files_to_sync)) == 0:
+            return
+
+        self.project_transfer = CloudTransferrer(
+            self.network_manager,
+            self.cloud_project,
+        )
+        self.project_transfer.error.connect(self.on_error)
+        self.project_transfer.upload_progress.connect(self.on_upload_transfer_progress)
+        self.project_transfer.download_progress.connect(
+            self.on_download_transfer_progress
+        )
+        self.project_transfer.finished.connect(self.on_transfer_finished)
 
         self.build_files_tree()
         self.stackedWidget.setCurrentWidget(self.filesPage)

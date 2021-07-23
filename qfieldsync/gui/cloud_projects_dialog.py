@@ -65,7 +65,6 @@ from qgis.utils import iface
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
@@ -736,32 +735,15 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def sync(self) -> None:
         assert self.current_cloud_project is not None
 
-        # keep this to make it work, explain it later…
-        self.current_cloud_project.name
+        if not self.current_cloud_project.local_dir:
+            self.current_cloud_project.update_data(
+                {"local_dir": self.select_local_dir()}
+            )
 
-        if self.current_cloud_project.cloud_files is not None:
-            if not self.current_cloud_project.local_dir:
-                self.current_cloud_project.update_data(
-                    {"local_dir": self.select_local_dir()}
-                )
-
-            if not self.current_cloud_project.local_dir:
-                return
-
-            if len(list(self.current_cloud_project.files_to_sync)) == 0:
-                iface.messageBar().pushInfo(
-                    f'QFieldSync "{self.current_cloud_project.name}":',
-                    self.tr("Everything is already in sync!"),
-                )
-                return
-
-            self.show_sync_popup()
+        if not self.current_cloud_project.local_dir:
             return
 
-        reply = self.network_manager.projects_cache.get_project_files(
-            self.current_cloud_project.id
-        )
-        reply.finished.connect(lambda: self.sync())
+        self.show_sync_popup()
 
     def launch(self) -> None:
         assert self.current_cloud_project is not None
@@ -864,7 +846,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         # cloud project exists and has files in it, so checkout in an empty dir
         else:
             assert self.current_cloud_project
-            assert self.current_cloud_project.cloud_files is not None
 
             while local_dir is None:
                 local_dir = QFileDialog.getExistingDirectory(
@@ -1172,10 +1153,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.current_cloud_project.local_dir
         ), "Cannot download a project without `local_dir` properly set"
 
-        self.project_transfer = CloudTransferrer(
-            self.network_manager, self.current_cloud_project
+        self.transfer_dialog = CloudTransferDialog(
+            self.network_manager, self.current_cloud_project, self
         )
-        self.transfer_dialog = CloudTransferDialog(self.project_transfer, self)
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
         self.transfer_dialog.show()
