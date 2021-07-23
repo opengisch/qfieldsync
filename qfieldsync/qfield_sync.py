@@ -124,6 +124,7 @@ class QFieldSync(object):
         self.preferences = Preferences()
 
         QgsProject.instance().readProject.connect(self.update_button_enabled_status)
+        QgsProject.instance().cleared.connect(self.update_button_enabled_status)
 
         # store warnings from last run
         self.last_action_warnings = []

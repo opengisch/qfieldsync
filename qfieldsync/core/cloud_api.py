@@ -618,9 +618,7 @@ class CloudProjectsCache(QObject):
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
         ).items():
-            print(local_dir)
             if local_dir == project_dir:
-                print("found")
                 found = True
                 break
 
