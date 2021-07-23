@@ -611,6 +611,22 @@ class CloudProjectsCache(QObject):
         return self._error_reason
 
     @property
+    def is_currently_open_project_cloud_local(self) -> bool:
+        project_dir = QgsProject.instance().homePath()
+
+        found = False
+        for project_id, local_dir in self.preferences.value(
+            "qfieldCloudProjectLocalDirs"
+        ).items():
+            print(local_dir)
+            if local_dir == project_dir:
+                print("found")
+                found = True
+                break
+
+        return found
+
+    @property
     def currently_open_project(self) -> Optional[CloudProject]:
         project_dir = QgsProject.instance().homePath()
 

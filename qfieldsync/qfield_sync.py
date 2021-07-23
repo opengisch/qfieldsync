@@ -234,7 +234,7 @@ class QFieldSync(object):
 
         qfield_action = self.get_qfield_action()
 
-        self.push_action = self.add_action(
+        self.cloud_convert_action = self.add_action(
             QIcon(
                 os.path.join(
                     os.path.dirname(__file__), "resources/cloud_convert_project.svg"
@@ -347,7 +347,7 @@ class QFieldSync(object):
                 self.cloud_convert_dlg.windowFlags() | Qt.Tool
             )
             self.cloud_convert_dlg.show()
-
+            self.cloud_convert_dlg.finished.connect(self.update_button_enabled_status)
         else:
             self.iface.messageBar().pushMessage(
                 self.tr("At least one layer is required to convert a project."),
@@ -439,6 +439,11 @@ class QFieldSync(object):
         """
         Will update the plugin buttons according to open dialog and project properties.
         """
+        if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
+            self.cloud_convert_action.setEnabled(False)
+        else:
+            self.cloud_convert_action.setEnabled(True)
+
         try:
             dialog_is_enabled = self.push_dlg and self.push_dlg.isEnabled()
         except RuntimeError:
