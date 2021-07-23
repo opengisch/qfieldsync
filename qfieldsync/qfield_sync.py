@@ -236,7 +236,9 @@ class QFieldSync(object):
 
         self.push_action = self.add_action(
             QIcon(
-                os.path.join(os.path.dirname(__file__), "resources/cloud_convert.svg")
+                os.path.join(
+                    os.path.dirname(__file__), "resources/cloud_convert_project.svg"
+                )
             ),
             text=self.tr("Convert Current Project to Cloud Project"),
             callback=self.show_cloud_convert_dialog,

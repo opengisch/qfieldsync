@@ -88,11 +88,11 @@ class CloudConverter(QObject):
                     continue
 
                 if layer.dataProvider() is not None:
-                    md = QgsProviderRegistry.instance().providerMetadata(
+                    provider_metadata = QgsProviderRegistry.instance().providerMetadata(
                         layer.dataProvider().name()
                     )
-                    if md is not None:
-                        decoded = md.decodeUri(layer.source())
+                    if provider_metadata is not None:
+                        decoded = provider_metadata.decodeUri(layer.source())
                         if "path" in decoded:
                             path = pathResolver.writePath(decoded["path"])
                             if path.startswith("localized:"):
@@ -101,8 +101,14 @@ class CloudConverter(QObject):
 
                 if layer.type() == QgsMapLayer.VectorLayer:
                     if not layer_source.convert_to_gpkg(self.export_folder):
-                        # something went wrong, remove layer
+                        # something went wrong, remove layer and inform the user that layer will be missing
                         project.removeMapLayer(layer)
+                        self.warning.emit(
+                            self.tr("Cloud Converter"),
+                            self.tr(
+                                "The layer '{}' could not be converted and was therefore removed from the cloud project."
+                            ).format(layer.name()),
+                        )
                 else:
                     layer_source.copy(self.export_folder, list())
 
@@ -125,9 +131,12 @@ class CloudConverter(QObject):
         finally:
             # We need to let the app handle events before loading the next project or QGIS will crash with rasters
             QCoreApplication.processEvents()
-            if not converted:
-                QgsProject.instance().clear()
-                QCoreApplication.processEvents()
+            QgsProject.instance().clear()
+            QCoreApplication.processEvents()
+            if converted:
+                QgsProject.instance().read(project_path)
+                QgsProject.instance().setFileName(project_path)
+            else:
                 QgsProject.instance().read(original_project_path)
                 QgsProject.instance().setFileName(original_project_path)
 

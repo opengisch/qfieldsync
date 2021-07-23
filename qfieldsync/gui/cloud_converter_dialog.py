@@ -68,7 +68,7 @@ class CloudConverterDialog(QDialog, DialogUi):
 
         project_name = self.project.baseName()
         if project_name:
-            pattern = re.compile("[\W_]+")  # noqa
+            pattern = re.compile("[\W_]+")  # NOQA
             project_name = pattern.sub("", project_name)
         else:
             project_name = "CloudProject"
@@ -136,7 +136,9 @@ class CloudConverterDialog(QDialog, DialogUi):
             self.project, self.get_export_folder_from_dialog()
         )
 
+        cloud_convertor.warning.connect(self.show_warning)
         cloud_convertor.total_progress_updated.connect(self.update_total)
+
         try:
             cloud_convertor.convert()
         except Exception:
@@ -151,7 +153,7 @@ class CloudConverterDialog(QDialog, DialogUi):
         self.create_cloud_project()
 
     def create_cloud_project(self):
-        pattern = re.compile("[\W_]+")  # noqa
+        pattern = re.compile("[\W_]+")  # NOQA
         project_name = pattern.sub("", self.mProjectName.text())
 
         reply = self.network_manager.create_project(
@@ -240,3 +242,6 @@ class CloudConverterDialog(QDialog, DialogUi):
     def update_upload(self, fraction):
         self.uploadProgressBar.setMaximum(100)
         self.uploadProgressBar.setValue(fraction * 100)
+
+    def show_warning(self, _, message):
+        self.iface.messageBar().pushMessage(message, Qgis.Warning, 0)
