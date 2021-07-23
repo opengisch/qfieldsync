@@ -48,6 +48,9 @@ class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
         self.setting_widget("exportDirectory").widget.setStorageMode(
             QgsFileWidget.GetDirectory
         )
+        self.setting_widget("cloudDirectory").widget.setStorageMode(
+            QgsFileWidget.GetDirectory
+        )
 
     def apply(self):
         self.set_values_from_widgets()

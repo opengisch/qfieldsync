@@ -89,9 +89,9 @@ class CloudConverterDialog(QDialog, DialogUi):
         if project_file_name:
             export_folder_name = fileparts(project_file_name)[1]
         else:
-            export_folder_name = "new_project"
+            export_folder_name = "new_cloud_project"
         export_folder_path = os.path.join(
-            self.qfield_preferences.value("exportDirectory"), export_folder_name
+            self.qfield_preferences.value("cloudDirectory"), export_folder_name
         )
 
         self.mExportDir.setText(export_folder_path)
