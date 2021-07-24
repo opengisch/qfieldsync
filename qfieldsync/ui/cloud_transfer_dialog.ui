@@ -19,6 +19,65 @@
      <property name="currentIndex">
       <number>1</number>
      </property>
+     <widget class="QWidget" name="getProjectFilesPage">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="projectFilesLabel">
+         <property name="text">
+          <string>Please wait while project files details are fetched from QFieldCloud…</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="projectFilesProgressBar">
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="projectFilesSynchronizedLabel">
+         <property name="text">
+          <string>The locally stored cloud project is already synchronized with QFieldCloud, no action is required.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="progressPage">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="leftMargin">
@@ -36,64 +95,57 @@
        <item>
         <widget class="QLabel" name="messageLabel">
          <property name="text">
-          <string>Please wait while project is being transferred…</string>
+          <string>Please wait while project is being synchornized…</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
          </property>
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-         </property>
         </widget>
        </item>
        <item>
-        <layout class="QFormLayout" name="progressBarFormLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="downloadLabel">
+        <layout class="QVBoxLayout" name="verticalLayout_1">
+         <item>
+          <widget class="QLabel" name="uploadLabel">
            <property name="text">
             <string>Uploading</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item>
           <widget class="QProgressBar" name="uploadProgressBar">
            <property name="value">
             <number>0</number>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="uploadLabel">
-           <property name="text">
-            <string>Downloading</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QProgressBar" name="downloadProgressBar">
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
+         <item>
           <widget class="QLabel" name="uploadProgressFeedbackLabel">
-           <property name="font">
-            <font>
-             <italic>true</italic>
-            </font>
+           <property name="enabled">
+            <bool>false</bool>
            </property>
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
-         <item row="3" column="0" colspan="2">
+         <item>
+          <widget class="QLabel" name="downloadLabel">
+           <property name="text">
+            <string>Downloading</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QProgressBar" name="downloadProgressBar">
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="downloadProgressFeedbackLabel">
-           <property name="font">
-            <font>
-             <italic>true</italic>
-            </font>
+           <property name="enabled">
+            <bool>false</bool>
            </property>
            <property name="text">
             <string/>

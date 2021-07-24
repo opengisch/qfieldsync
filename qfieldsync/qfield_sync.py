@@ -391,13 +391,13 @@ class QFieldSync(object):
         """
         Synchornize cloud project.
         """
-        if self.network_manager.projects_cache.currently_open_project:
+        if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.transfer_dialog = CloudTransferDialog(
                 self.network_manager,
-                self.network_manager.projects_cache.currently_open_project,
+                None,
                 self.iface.mainWindow(),
             )
-            self.transfer_dialog.accepted.connect(
+            self.transfer_dialog.project_synchronized.connect(
                 lambda: QgsProject.instance().read(
                     QgsProject.instance().absoluteFilePath()
                 )
