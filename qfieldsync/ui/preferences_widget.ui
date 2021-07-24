@@ -23,7 +23,7 @@
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="cloudIntroLabel">
         <property name="text">
-         <string>&lt;span style=&quot; font-style:italic;&quot;&gt;&lt;a href=&quot;https://qfield.cloud/&quot;&gt;QFieldCloud&lt;/a&gt; allows your team to focus on what's important, making sure you efficiently get quality field data. Thanks to its integration with QField, you and your team will be able to start surveying and digitising data in no time.&lt;/span&gt;</string>
+         <string>&lt;span style=&quot; font-style:italic;&quot;&gt;&lt;a href=&quot;https://qfield.cloud/&quot;&gt;QFieldCloud&lt;/a&gt; allows your team to focus on what's important, making sure you efficiently get quality field data. Thanks to its integration with QField, you and your team will be able to start surveying and digitising data collaboratively in no time.&lt;/span&gt;</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>

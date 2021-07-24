@@ -36,7 +36,7 @@
        <item>
         <widget class="QLabel" name="projectFilesLabel">
          <property name="text">
-          <string>Please wait while project files details are fetched from QFieldCloud…</string>
+          <string>Please wait while project file details are fetched from QFieldCloud…</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
