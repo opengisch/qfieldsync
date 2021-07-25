@@ -24,14 +24,17 @@
 import os.path
 
 from qgis.core import Qgis, QgsApplication, QgsOfflineEditing, QgsProject
-from qgis.gui import QgsOptionsWidgetFactory
+from qgis.gui import QgsGui, QgsOptionsWidgetFactory
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QSettings, Qt, QTranslator
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
-from qfieldsync.gui.cloud_browser_tree import DataItemProvider
+from qfieldsync.gui.cloud_browser_tree import (
+    QFieldCloudItemGuiProvider,
+    QFieldCloudItemProvider,
+)
 from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
@@ -133,9 +136,13 @@ class QFieldSync(object):
         # TODO enable this and watch the world collapse
         # QgsProject().homePathChanged.connect(self.update_qfield_sync_toolbar_icon)
 
-        self.data_item_provider = DataItemProvider(self.network_manager)
+        self.cloud_item_provider = QFieldCloudItemProvider(self.network_manager)
         QgsApplication.instance().dataItemProviderRegistry().addProvider(
-            self.data_item_provider
+            self.cloud_item_provider
+        )
+        self.cloud_item_gui_provider = QFieldCloudItemGuiProvider(self.network_manager)
+        QgsGui.instance().dataItemGuiProviderRegistry().addProvider(
+            self.cloud_item_gui_provider
         )
 
     # noinspection PyMethodMayBeStatic
@@ -317,9 +324,12 @@ class QFieldSync(object):
         # remove the toolbar
         del self.toolbar
         QgsApplication.instance().dataItemProviderRegistry().removeProvider(
-            self.data_item_provider
+            self.cloud_item_provider
         )
-        self.data_item_provider = None
+        QgsGui.instance().dataItemGuiProviderRegistry().removeProvider(
+            self.cloud_item_gui_provider
+        )
+        self.cloud_item_gui_provider = None
 
         self.iface.unregisterMapLayerConfigWidgetFactory(
             self.mapLayerConfigWidgetFactory
