@@ -96,6 +96,7 @@ def select_table_row(func):
 
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
+    _current_cloud_project = None
 
     def __init__(
         self,
@@ -109,7 +110,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.setWindowModality(Qt.WindowModal)
         self.preferences = Preferences()
         self.network_manager = network_manager
-        self.current_cloud_project = project
+        self._current_cloud_project = project
         self.transfer_dialog = None
         self.project_transfer = None
         self.default_local_dir = "~/qfieldsync/cloudprojects/"
