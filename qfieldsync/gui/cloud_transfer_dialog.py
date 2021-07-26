@@ -24,7 +24,7 @@ import os
 from enum import Enum
 from typing import Dict, List
 
-from qgis.PyQt.QtCore import QObject, Qt
+from qgis.PyQt.QtCore import QObject, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QShowEvent
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
@@ -38,7 +38,8 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_project import ProjectFile, ProjectFileCheckout
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 
 from ..utils.qt_utils import make_icon, make_pixmap
@@ -59,20 +60,21 @@ class ProjectFileAction(Enum):
 
 
 class CloudTransferDialog(QDialog, CloudTransferDialogUi):
+    project_synchronized = pyqtSignal()
+
     def __init__(
-        self, project_transfer: CloudTransferrer, parent: QObject = None
+        self,
+        network_manager: CloudNetworkAccessManager,
+        cloud_project: CloudProject = None,
+        parent: QObject = None,
     ) -> None:
         """Constructor."""
         super(CloudTransferDialog, self).__init__(parent=parent)
         self.setupUi(self)
-        self.project_transfer = project_transfer
 
-        self.project_transfer.error.connect(self.on_error)
-        self.project_transfer.upload_progress.connect(self.on_upload_transfer_progress)
-        self.project_transfer.download_progress.connect(
-            self.on_download_transfer_progress
-        )
-        self.project_transfer.finished.connect(self.on_transfer_finished)
+        self.network_manager = network_manager
+        self.cloud_project = cloud_project
+        self.project_transfer = None
 
         self.filesTree.header().setSectionResizeMode(0, QHeaderView.Interactive)
         self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -94,11 +96,13 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # self.filesTree.model().setHeaderData(1, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
         # self.filesTree.model().setHeaderData(3, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
 
-        self.setWindowTitle(
-            self.tr('Synchronizing project "{}"').format(
-                self.project_transfer.cloud_project.name
+        if self.cloud_project:
+            self.setWindowTitle(
+                self.tr('Synchronizing project "{}"').format(self.cloud_project.name)
             )
-        )
+        else:
+            self.setWindowTitle(self.tr("Synchronizing current project"))
+
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Abort).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
@@ -112,10 +116,67 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.preferLocalButton.clicked.connect(self._on_prefer_local_button_clicked)
         self.preferCloudButton.clicked.connect(self._on_prefer_cloud_button_clicked)
 
+        self.stackedWidget.setCurrentWidget(self.getProjectFilesPage)
+        self.projectFilesLabel.setVisible(True)
+        self.projectFilesProgressBar.setVisible(True)
+        self.projectFilesSynchronizedLabel.setVisible(False)
+
     def showEvent(self, event: QShowEvent) -> None:
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
 
         super().showEvent(event)
+
+        if (
+            not self.cloud_project
+            and self.network_manager.projects_cache.currently_open_project
+        ):
+            self.cloud_project = (
+                self.network_manager.projects_cache.currently_open_project
+            )
+
+        if self.cloud_project:
+            self.get_project_files()
+        else:
+            if (
+                self.network_manager.projects_cache.is_currently_open_project_cloud_local
+            ):
+                reply = self.network_manager.projects_cache.refresh()
+                reply.finished.connect(lambda: self.get_project_files())
+
+    def get_project_files(self):
+        if (
+            not self.cloud_project
+            and self.network_manager.projects_cache.currently_open_project
+        ):
+            self.cloud_project = (
+                self.network_manager.projects_cache.currently_open_project
+            )
+
+        if self.cloud_project:
+            reply = self.network_manager.projects_cache.get_project_files(
+                self.cloud_project.id
+            )
+            reply.finished.connect(lambda: self.prepare_project_transfer())
+
+    def prepare_project_transfer(self):
+        if len(list(self.cloud_project.files_to_sync)) == 0:
+            self.projectFilesLabel.setVisible(False)
+            self.projectFilesProgressBar.setVisible(False)
+            self.projectFilesSynchronizedLabel.setVisible(True)
+            self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
+            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+            return
+
+        self.project_transfer = CloudTransferrer(
+            self.network_manager,
+            self.cloud_project,
+        )
+        self.project_transfer.error.connect(self.on_error)
+        self.project_transfer.upload_progress.connect(self.on_upload_transfer_progress)
+        self.project_transfer.download_progress.connect(
+            self.on_download_transfer_progress
+        )
+        self.project_transfer.finished.connect(self.on_transfer_finished)
 
         self.build_files_tree()
         self.stackedWidget.setCurrentWidget(self.filesPage)
@@ -177,6 +238,16 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             item = self.filesTree.topLevelItem(item_idx)
 
             self.traverse_tree_item(item, files)
+
+        hasUploads = len(files["to_upload"]) > 0
+        self.uploadLabel.setVisible(hasUploads)
+        self.uploadProgressBar.setVisible(hasUploads)
+        self.uploadProgressFeedbackLabel.setVisible(hasUploads)
+
+        hasDownloads = len(files["to_download"]) > 0
+        self.downloadLabel.setVisible(hasDownloads)
+        self.downloadProgressBar.setVisible(hasDownloads)
+        self.downloadProgressFeedbackLabel.setVisible(hasDownloads)
 
         self.show_progress_page(files)
 
@@ -279,6 +350,18 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.downloadProgressBar.setValue(int(fraction * 100))
 
     def on_transfer_finished(self) -> None:
+        self.uploadLabel.setVisible(False)
+        self.uploadProgressBar.setVisible(False)
+        self.uploadProgressFeedbackLabel.setVisible(False)
+        self.downloadLabel.setVisible(False)
+        self.downloadProgressBar.setVisible(False)
+        self.downloadProgressFeedbackLabel.setVisible(False)
+        self.messageLabel.setText(
+            self.tr("Your cloud project has successfully been synchronized.")
+        )
+
+        self.project_synchronized.emit()
+
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         self.buttonBox.button(QDialogButtonBox.Abort).setEnabled(False)
 
@@ -468,33 +551,41 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         upload_message = ""
         if upload_count or cloud_delete_count:
-            if upload_count:
+            if upload_count > 1:
                 upload_message += self.tr(
-                    "{} file(s) to overwrite on the cloud.".format(upload_count)
+                    "{} files to copy to QFieldCloud.".format(upload_count)
                 )
-            if cloud_delete_count:
+            elif upload_count == 1:
+                upload_message += self.tr("1 file to copy to QFieldCloud.")
+            if cloud_delete_count > 1:
                 upload_message += self.tr(
-                    "{} file(s) to delete on QFieldCloud.".format(cloud_delete_count)
+                    "{} files to delete on QFieldCloud.".format(cloud_delete_count)
                 )
+            elif cloud_delete_count == 1:
+                upload_message += self.tr("1 file to delete on QFieldCloud.")
 
             self.uploadProgressBar.setValue(0)
             self.uploadProgressBar.setEnabled(True)
         else:
             self.uploadProgressBar.setValue(100)
             self.uploadProgressBar.setEnabled(False)
-            upload_message = self.tr("Nothing to do on the cloud.")
+            upload_message = self.tr("Nothing to do on QFieldCloud.")
         self.uploadProgressFeedbackLabel.setText(upload_message)
 
         download_message = ""
         if download_count or local_delete_count:
-            if download_count:
+            if download_count > 1:
                 download_message += self.tr(
-                    "{} file(s) to overwrite locally.".format(download_count)
+                    "{} files to copy locally from QFieldCloud.".format(download_count)
                 )
-            if local_delete_count:
+            elif download_count == 1:
+                download_message += self.tr("1 file to copy locally from QFieldCloud.")
+            if local_delete_count > 1:
                 download_message += self.tr(
-                    "{} file(s) to delete locally.".format(local_delete_count)
+                    "{} files to delete locally.".format(local_delete_count)
                 )
+            elif local_delete_count == 1:
+                download_message += self.tr("1 file to delete locally.")
 
             self.downloadProgressBar.setValue(0)
             self.downloadProgressBar.setEnabled(True)

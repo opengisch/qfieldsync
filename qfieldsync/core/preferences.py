@@ -25,3 +25,6 @@ class Preferences(SettingManager):
         self.add_setting(String("qfieldCloudServerUrl", Scope.Global, ""))
         self.add_setting(String("qfieldCloudAuthcfg", Scope.Global, ""))
         self.add_setting(Bool("qfieldCloudRememberMe", Scope.Global, True))
+        self.add_setting(
+            String("cloudDirectory", Scope.Global, os.path.expanduser("~/QField/cloud"))
+        )
