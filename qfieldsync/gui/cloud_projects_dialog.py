@@ -174,6 +174,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.localDirLineEdit.textChanged.connect(
             lambda: self.on_local_dir_line_edit_text_changed()
         )
+        self.localDirLineEdit.editingFinished.connect(
+            lambda: self.on_local_dir_line_edit_editing_finished()
+        )
         self.projectOwnerRefreshButton.clicked.connect(
             lambda: self.on_project_owner_refresh_button_clicked()
         )
@@ -492,6 +495,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.localDirFeedbackLabel.setStyleSheet("color: green;")
 
         self.submitButton.setEnabled(True)
+
+    def on_local_dir_line_edit_editing_finished(self) -> None:
+        local_dir = self.localDirLineEdit.text()
 
         if self.current_cloud_project:
             self.current_cloud_project.update_data({"local_dir": local_dir})
