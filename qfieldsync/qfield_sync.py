@@ -407,11 +407,6 @@ class QFieldSync(object):
                 None,
                 self.iface.mainWindow(),
             )
-            self.transfer_dialog.project_synchronized.connect(
-                lambda: QgsProject.instance().read(
-                    QgsProject.instance().absoluteFilePath()
-                )
-            )
             self.transfer_dialog.show()
 
     def show_package_dialog(self):

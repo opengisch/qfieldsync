@@ -264,7 +264,6 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             project_file_name = glob.glob(
                 os.path.join(project.local_dir, "*.qgs")
             ) + glob.glob(os.path.join(project.local_dir, "*.qgz"))
-            print(project_file_name)
             if project_file_name:
                 iface.addProject(os.path.join(project.local_dir, project_file_name[0]))
                 return True
