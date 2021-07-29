@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List
 
-from qgis.PyQt.QtCore import QObject, Qt, pyqtSignal
+from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QShowEvent
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
@@ -143,7 +143,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             if self.cloud_project.local_dir:
                 self.get_project_files()
             else:
-                self.set_project_local_dir()
+                self.show_project_local_dir_selection()
         else:
             if (
                 self.network_manager.projects_cache.is_currently_open_project_cloud_local
@@ -151,8 +151,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 reply = self.network_manager.projects_cache.refresh()
                 reply.finished.connect(lambda: self.get_project_files())
 
-    def set_project_local_dir(self):
-        self.stackedWidget.setCurrentWidget(self.setProjectLocalDirPage)
+    def show_project_local_dir_selection(self):
+        assert self.cloud_project
+
+        self.is_project_download = True
+
+        self.stackedWidget.setCurrentWidget(self.projectLocalDirPage)
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
         self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Next"))
 
@@ -160,8 +164,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.qfield_preferences.value("cloudDirectory"), self.cloud_project.name
         )
 
-        self.mLocalDir.setText(export_folder_path)
-        self.mLocalDirBtn.clicked.connect(make_folder_selector(self.mLocalDir))
+        self.localDirectoryLineEdit.setText(export_folder_path)
+        self.localDirectoryButton.clicked.connect(
+            make_folder_selector(self.localDirectoryLineEdit)
+        )
 
     def get_project_files(self):
         self.stackedWidget.setCurrentWidget(self.getProjectFilesPage)
@@ -300,15 +306,16 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         assert self.cloud_project
 
         if self.stackedWidget.currentWidget() is self.projectLocalDirPage:
+            if self.localDirectoryLineEdit.text() == "":
                 QMessageBox.warning(
                     None,
                     self.tr("Warning"),
                     self.tr("Please provide a local directory."),
                 )
                 return
-            elif sorted(Path(self.mLocalDir.text()).rglob("*.qgs")) or sorted(
-                Path(self.mLocalDir.text()).rglob("*.qgz")
-            ):
+            elif sorted(
+                Path(self.localDirectoryLineEdit.text()).rglob("*.qgs")
+            ) or sorted(Path(self.localDirectoryLineEdit.text()).rglob("*.qgz")):
                 QMessageBox.warning(
                     None,
                     self.tr("Warning"),
@@ -317,7 +324,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     ),
                 )
                 return
-            elif os.makedirs(self.mLocalDir.text(), exist_ok=True) is False:
+            elif (
+                os.makedirs(self.localDirectoryLineEdit.text(), exist_ok=True) is False
+            ):
                 QMessageBox.warning(
                     None,
                     self.tr("Error"),
@@ -327,8 +336,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
                 return
 
-            self.cloud_project.update_data({"local_dir": self.mLocalDir.text()})
-            self.is_project_download = True
+            self.cloud_project.update_data(
+                {"local_dir": self.localDirectoryLineEdit.text()}
+            )
             self.get_project_files()
         else:
             self.buttonBox.button(QDialogButtonBox.Ok).setVisible(True)
