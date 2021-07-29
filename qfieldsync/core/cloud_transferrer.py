@@ -22,7 +22,7 @@
 
 import shutil
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, Dict, List, Optional
 
 from PyQt5.QtCore import QUrl
 from qgis.PyQt.QtCore import QObject, pyqtSignal
@@ -538,3 +538,197 @@ class CloudTransferrer(QObject):
 
     def _on_logout_success(self) -> None:
         self.abort_requests()
+
+
+class FileTransfer:
+    def __init__(self, filename: str, destination: Path) -> None:
+        self.replies: List[QNetworkReply] = []
+        self.redirects: List[QUrl] = []
+        self.filename = filename
+        self.dest_filename = destination.joinpath(filename)
+        self.dest_filename.parent.mkdir(parents=True, exist_ok=True)
+        self.error: Optional[Exception] = None
+        self.bytes_transferred = 0
+        self.bytes_total = 0
+        self.is_aborted = False
+
+    @property
+    def last_reply(self) -> QNetworkReply:
+        if not self.replies:
+            raise ValueError("There are no replies yet!")
+
+        return self.replies[-1]
+
+    @property
+    def last_redirect_url(self) -> QUrl:
+        if not self.replies:
+            raise ValueError("There are no redirects!")
+
+        return self.redirects[-1]
+
+    @property
+    def is_started(self) -> bool:
+        return len(self.replies) > 0
+
+    @property
+    def is_finished(self) -> bool:
+        if self.is_aborted:
+            return True
+
+        if not self.replies:
+            return False
+
+        if self.is_redirect:
+            return False
+
+        return self.replies[-1].isFinished()
+
+    @property
+    def is_redirect(self) -> bool:
+        if not self.replies:
+            return False
+
+        return len(self.replies) == len(self.redirects)
+
+    @property
+    def is_failed(self) -> bool:
+        if not self.replies:
+            return False
+
+        return self.last_reply.isFinished() and (
+            self.error is not None or self.last_reply.error() != QNetworkReply.NoError
+        )
+
+
+class ThrottledFileTransferrer(QObject):
+    error = pyqtSignal(str, str)
+    finished = pyqtSignal()
+    aborted = pyqtSignal()
+    file_finished = pyqtSignal(str)
+    progress = pyqtSignal(str, int, int)
+
+    def __init__(
+        self,
+        network_manager,
+        cloud_project,
+        files: List[str],
+        max_parallel_requests: int = 8,
+    ) -> None:
+        super(QObject, self).__init__()
+
+        self.transfers: Dict[str, FileTransfer] = {}
+        self.network_manager = network_manager
+        self.cloud_project = cloud_project
+        self.filenames = files
+        self.max_parallel_requests = max_parallel_requests
+        self.finished_count = 0
+        self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
+
+    def download(self) -> None:
+        for filename in self.filenames:
+            self.transfers[filename] = FileTransfer(
+                filename, self.temp_dir.joinpath("download")
+            )
+
+        self._download()
+
+    def _download(self) -> None:
+        transfers = []
+
+        for transfer in self.transfers.values():
+            if transfer.is_finished:
+                continue
+
+            transfers.append(transfer)
+
+            if len(transfers) == self.max_parallel_requests:
+                break
+
+        for transfer in transfers:
+            reply = None
+
+            if transfer.is_redirect:
+                reply = self.network_manager.get(
+                    transfer.last_redirect_url, transfer.dest_filename
+                )
+            elif transfer.is_started:
+                # started a request but still waiting for a response
+                continue
+            else:
+                reply = self.network_manager.get_file_request(
+                    self.cloud_project.id + "/" + transfer.filename + "/"
+                )
+
+            transfer.replies.append(reply)
+
+            reply.redirected.connect(self._on_redirect_wrapper(transfer))
+            reply.downloadProgress.connect(self._on_progress_wrapper(transfer))
+            reply.finished.connect(self._on_finished_wrapper(transfer))
+
+    def abort(self) -> None:
+        for transfer in self.transfers.values():
+            if not transfer.is_started:
+                continue
+
+            transfer.is_aborted = True
+            transfer.last_reply.abort()
+
+        self.aborted.emit()
+
+    def _on_redirect_wrapper(self, transfer: FileTransfer) -> Callable:
+        def on_redirected(url: QUrl) -> None:
+            transfer.redirects.append(url)
+            transfer.last_reply.abort()
+
+            self._download()
+
+        return on_redirected
+
+    def _on_finished_wrapper(self, transfer: FileTransfer) -> Callable:
+        def on_finished() -> None:
+            # note if the redirect request failed, it will continue
+            if transfer.is_redirect:
+                return
+
+            self._download()
+
+            try:
+                self.network_manager.handle_response(transfer.last_reply, False)
+            except Exception as err:
+                self.error.emit(
+                    transfer.filename,
+                    self.tr(
+                        f'Downloaded file "{transfer.dest_filename}" had an HTTP error!'
+                    ),
+                )
+                transfer.error = err
+                return
+
+            self.finished_count += 1
+
+            if not Path(transfer.dest_filename).exists():
+                self.error.emit(
+                    transfer.filename,
+                    self.tr(f'Downloaded file "{transfer.dest_filename}" not found!'),
+                )
+                return
+
+            self.file_finished.emit(transfer.filename)
+
+            if self.finished_count == len(self.transfers):
+                self.finished.emit()
+                return
+
+        return on_finished
+
+    def _on_progress_wrapper(self, transfer: FileTransfer) -> Callable:
+        def on_progress(bytes_received: int, bytes_total: int):
+            transfer.bytes_transferred = bytes_received
+            transfer.bytes_total = bytes_total
+            bytes_received_sum = sum(
+                [t.bytes_transferred for t in self.transfers.values()]
+            )
+            bytes_total_sum = sum([t.bytes_total for t in self.transfers.values()])
+            self.progress.emit(transfer.filename, bytes_received_sum, bytes_total_sum)
+
+        return on_progress
