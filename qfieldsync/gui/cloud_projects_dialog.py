@@ -734,15 +734,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def sync(self) -> None:
         assert self.current_cloud_project is not None
-
-        if not self.current_cloud_project.local_dir:
-            self.current_cloud_project.update_data(
-                {"local_dir": self.select_local_dir()}
-            )
-
-        if not self.current_cloud_project.local_dir:
-            return
-
         self.show_sync_popup()
 
     def launch(self) -> None:
@@ -1149,9 +1140,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def show_sync_popup(self) -> None:
         assert self.current_cloud_project is not None, "No project to download selected"
-        assert (
-            self.current_cloud_project.local_dir
-        ), "Cannot download a project without `local_dir` properly set"
 
         self.transfer_dialog = CloudTransferDialog(
             self.network_manager, self.current_cloud_project, self
