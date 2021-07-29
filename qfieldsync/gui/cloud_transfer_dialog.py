@@ -71,7 +71,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self,
         network_manager: CloudNetworkAccessManager,
         cloud_project: CloudProject = None,
-        parent: QObject = None,
+        parent: QWidget = None,
     ) -> None:
         """Constructor."""
         super(CloudTransferDialog, self).__init__(parent=parent)
@@ -203,6 +203,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
     def prepare_project_transfer(self):
+        assert self.cloud_project
+
         if len(list(self.cloud_project.files_to_sync)) == 0:
             self.show_end_page(
                 self.tr(
@@ -236,6 +238,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
 
     def build_files_tree(self):
+        assert self.project_transfer
+
         # NOTE algorithmic part
         # ##########
         # The "cloud_files" objects are assumed to be sorted alphabetically by name.
@@ -390,7 +394,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self, item: QTreeWidgetItem, project_file: ProjectFile
     ) -> None:
         is_local_enabled = project_file.local_path_exists
-        is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
+        is_cloud_enabled = bool(project_file.checkout & ProjectFileCheckout.Cloud)
         is_local_checked = is_local_enabled
 
         local_checkbox = QCheckBox()
