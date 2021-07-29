@@ -81,8 +81,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.network_manager = network_manager
         self.cloud_project = cloud_project
         self.project_transfer = None
-
-        self.download_project = False
+        self.is_project_download = False
 
         self.filesTree.header().setSectionResizeMode(0, QHeaderView.Interactive)
         self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -225,7 +224,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.build_files_tree()
 
-        if self.download_project:
+        if self.is_project_download:
             self._on_prefer_cloud_button_clicked()
             self.on_project_apply_clicked()
         else:
@@ -316,7 +315,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 return
 
             self.cloud_project.update_data({"local_dir": self.mLocalDir.text()})
-            self.download_project = True
+            self.is_project_download = True
             self.get_project_files()
         else:
             self.buttonBox.button(QDialogButtonBox.Ok).setVisible(True)
@@ -449,7 +448,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def on_transfer_finished(self) -> None:
         self.show_end_page(
             self.tr("Your cloud project has successfully been download.")
-            if self.download_project
+            if self.is_project_download
             else self.tr("Your cloud project has successfully been synchronized.")
         )
 
