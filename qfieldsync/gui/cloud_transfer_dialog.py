@@ -224,17 +224,18 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         )
         self.project_transfer.finished.connect(self.on_transfer_finished)
 
-        self.build_files_tree()
-
         if self.is_project_download:
-            self._on_prefer_cloud_button_clicked()
-            self.on_project_apply_clicked()
+            self._file_tree_set_checkboxes(ProjectFileCheckout.Cloud)
+            self._start_synchronization()
         else:
             self.build_files_tree()
+
             self.stackedWidget.setCurrentWidget(self.filesPage)
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
             self.buttonBox.button(QDialogButtonBox.Apply).setText(
-                self.tr("Download project")
+                self.tr("Synchronize project")
+                if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
+                else self.tr("Upload project")
             )
 
     def build_files_tree(self):
@@ -293,8 +294,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
 
     def on_project_apply_clicked(self):
-        if self.stackedWidget.currentWidget() is self.setProjectLocalDirPage:
-            if self.mLocalDir.text() == "":
+        self._start_synchronization()
+
+    def _start_synchronization(self):
+        assert self.cloud_project
+
+        if self.stackedWidget.currentWidget() is self.projectLocalDirPage:
                 QMessageBox.warning(
                     None,
                     self.tr("Warning"),
