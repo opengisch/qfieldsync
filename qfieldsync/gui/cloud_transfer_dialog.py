@@ -279,14 +279,18 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # NOTE END algorithmic part
 
     def on_project_ok_clicked(self):
-        if self.openProjectCheck.isChecked() and self.cloud_project.local_dir:
-            project_file_name = glob.glob(
-                os.path.join(self.cloud_project.local_dir, "*.qgs")
-            ) + glob.glob(os.path.join(self.cloud_project.local_dir, "*.qgz"))
-            if project_file_name:
-                iface.addProject(
-                    os.path.join(self.cloud_project.local_dir, project_file_name[0])
-                )
+        assert self.cloud_project
+
+        if not self.openProjectCheck.isChecked() or not self.cloud_project.local_dir:
+            return
+
+        project_file_name = glob.glob(
+            os.path.join(self.cloud_project.local_dir, "*.qgs")
+        ) + glob.glob(os.path.join(self.cloud_project.local_dir, "*.qgz"))
+        if project_file_name:
+            iface.addProject(
+                os.path.join(self.cloud_project.local_dir, project_file_name[0])
+            )
 
     def on_project_apply_clicked(self):
         if self.stackedWidget.currentWidget() is self.setProjectLocalDirPage:
