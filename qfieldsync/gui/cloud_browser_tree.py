@@ -242,7 +242,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def handleDoubleClick(self, item, context):
         if type(item) is QFieldCloudProjectItem:
             if not self.open_project(item):
-                self._create_projects_dialog(item).show_project_form()
+                self.show_cloud_synchronize_dialog(item)
             return True
         return False
 
