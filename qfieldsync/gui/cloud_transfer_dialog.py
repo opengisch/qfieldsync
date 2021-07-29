@@ -230,11 +230,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         )
         self.project_transfer.finished.connect(self.on_transfer_finished)
 
+        self.build_files_tree()
         if self.is_project_download:
             self._file_tree_set_checkboxes(ProjectFileCheckout.Cloud)
             self._start_synchronization()
         else:
-            self.build_files_tree()
 
             self.stackedWidget.setCurrentWidget(self.filesPage)
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
