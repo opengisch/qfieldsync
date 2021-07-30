@@ -54,12 +54,11 @@ class CloudTransferrer(QObject):
         self.network_manager = network_manager
         self.cloud_project = cloud_project
         self._files_to_upload = {}
-        self._files_to_download = {}
+        self._files_to_download: Dict[str, ProjectFile] = {}
         self._files_to_delete = {}
         self.upload_files_finished = 0
         self.upload_bytes_total_files_only = 0
-        self.download_files_finished = 0
-        self.download_bytes_total_files_only = 0
+        self.total_download_bytes = 0
         self.delete_files_finished = 0
         self.is_aborted = False
         self.is_started = False
@@ -69,8 +68,6 @@ class CloudTransferrer(QObject):
         self.is_delete_active = False
         self.is_project_list_update_active = False
         self.replies = []
-        self.redirects_data = {}
-        self.redirects = []
         self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
 
         if self.temp_dir.exists():
@@ -131,13 +128,8 @@ class CloudTransferrer(QObject):
             temp_filename = self.temp_dir.joinpath("download", filename)
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
 
-            self.download_bytes_total_files_only += project_file.size or 0
-            self._files_to_download[filename] = {
-                "project_file": project_file,
-                "bytes_total": project_file.size,
-                "bytes_transferred": 0,
-                "temp_filename": temp_filename,
-            }
+            self.total_download_bytes += project_file.size or 0
+            self._files_to_download[filename] = project_file
 
         self._make_backup()
         self._upload()
@@ -216,62 +208,30 @@ class CloudTransferrer(QObject):
             self.download_finished.emit()
             return
 
-        def on_redirected_wrapper(
-            reply: QNetworkReply, filename: str, temp_filename: str
-        ) -> Callable:
-            def on_redirected(url: QUrl) -> None:
-                self.redirects_data[reply] = [url, filename, temp_filename]
+        self.throttled_downloader = ThrottledFileTransferrer(
+            self.network_manager,
+            self.cloud_project,
+            list(self._files_to_download.keys()),
+        )
+        self.throttled_downloader.download()
+        self.throttled_downloader.error.connect(self._on_throttled_download_error)
+        self.throttled_downloader.progress.connect(self._on_throttled_download_progress)
+        self.throttled_downloader.finished.connect(self._on_throttled_download_finished)
 
-                reply.abort()
+    def _on_throttled_download_progress(
+        self, filename: str, bytes_transferred: int, _bytes_total: int
+    ) -> None:
+        fraction = min(bytes_transferred / max(self.total_download_bytes, 1), 1)
+        self.download_progress.emit(fraction)
 
-                if len(self.redirects_data) != len(self._files_to_download):
-                    return
+    def _on_throttled_download_error(self, filename: str, error: str) -> None:
+        self.throttled_downloader.abort()
 
-                self._request_redirects()
-
-            return on_redirected
-
-        def on_finished_wrapper(reply: QNetworkReply, filename: str) -> Callable:
-            def on_finished() -> None:
-                # it has been redirected
-                if self.redirects_data.get(reply):
-                    return
-
-                try:
-                    self.network_manager.handle_response(reply, False)
-                except Exception as err:
-                    self.error.emit(
-                        self.tr(f'Downloading file "{filename}" failed. Aborting...'),
-                        err,
-                    )
-                    self.abort_requests()
-
-            return on_finished
-
-        for filename in self._files_to_download:
-            temp_filename = self._files_to_download[filename]["temp_filename"]
-
-            reply = self.network_manager.get_file_request(
-                self.cloud_project.id + "/" + str(filename) + "/"
-            )
-            self.replies.append(reply)
-
-            reply.redirected.connect(
-                on_redirected_wrapper(reply, filename, temp_filename)
-            )
-            reply.finished.connect(on_finished_wrapper(reply, filename))
-
-    def _request_redirects(self):
-        for url, filename, temp_filename in self.redirects_data.values():
-            reply = self.network_manager.get(url, str(temp_filename))
-            reply.downloadProgress.connect(
-                self._on_download_file_progress_wrapper(reply, filename)
-            )
-            reply.finished.connect(
-                self._on_download_file_finished_wrapper(reply, filename, temp_filename)
-            )
-
-            self.redirects.append(reply)
+    def _on_throttled_download_finished(self) -> None:
+        self._temp_dir2main_dir("download")
+        self.download_progress.emit(1)
+        self.download_finished.emit()
+        return
 
     def _on_upload_file_progress_wrapper(
         self, reply: QNetworkReply, filename: str
@@ -339,46 +299,6 @@ class CloudTransferrer(QObject):
             # NOTE check _on_upload_finished
             return
 
-    def _on_download_file_progress_wrapper(
-        self, reply: QNetworkReply, filename: str
-    ) -> Callable:
-        def cb(bytes_received: int, bytes_total: int) -> None:
-            self._on_download_file_progress(
-                reply, bytes_received, bytes_total, filename
-            )
-
-        return cb
-
-    def _on_download_file_progress(
-        self, reply: QNetworkReply, bytes_received: int, bytes_total: int, filename: str
-    ) -> None:
-        self._files_to_download[filename]["bytes_transferred"] = bytes_received
-        self._files_to_download[filename]["bytes_total"] = bytes_total
-
-        bytes_received_sum = sum(
-            [
-                self._files_to_download[filename]["bytes_transferred"]
-                for filename in self._files_to_download
-            ]
-        )
-        bytes_total_sum = max(
-            sum(
-                [
-                    self._files_to_download[filename]["bytes_total"]
-                    for filename in self._files_to_download
-                ]
-            ),
-            self.download_bytes_total_files_only,
-        )
-
-        fraction = (
-            min(bytes_received_sum / bytes_total_sum, 1)
-            if self.download_bytes_total_files_only > 0
-            else 1
-        )
-
-        self.download_progress.emit(fraction)
-
     def _on_delete_file_finished_wrapper(
         self, reply: QNetworkReply, filename: str
     ) -> Callable:
@@ -397,39 +317,6 @@ class CloudTransferrer(QObject):
 
         if self.delete_files_finished == len(self._files_to_delete):
             self.delete_finished.emit()
-
-    def _on_download_file_finished_wrapper(
-        self, reply: QNetworkReply, filename: str, temp_filename: str
-    ) -> Callable:
-        def cb() -> None:
-            self._on_download_file_finished(reply, filename, temp_filename)
-
-        return cb
-
-    def _on_download_file_finished(
-        self, reply: QNetworkReply, filename: str, temp_filename: str
-    ) -> None:
-        try:
-            self.network_manager.handle_response(reply, False)
-        except Exception as err:
-            self.error.emit(
-                self.tr(f'Downloading file "{filename}" failed. Aborting...'), err
-            )
-            self.abort_requests()
-            return
-
-        self.download_files_finished += 1
-
-        if not Path(temp_filename).exists():
-            self.error.emit(self.tr(f'Downloaded file "{temp_filename}" not found!'))
-            self.abort_requests()
-            return
-
-        if self.download_files_finished == len(self._files_to_download):
-            self._temp_dir2main_dir("download")
-            self.download_progress.emit(1)
-            self.download_finished.emit()
-            return
 
     def _on_upload_finished(self) -> None:
         self.is_upload_active = False
@@ -472,16 +359,15 @@ class CloudTransferrer(QObject):
             if not reply.isFinished():
                 reply.abort()
 
-        for reply in self.redirects:
-            if not reply.isFinished():
-                reply.abort()
+        if self.throttled_downloader:
+            self.throttled_downloader.abort()
 
         self.abort.emit()
 
     def _make_backup(self) -> None:
         for project_file in [
             *list(map(lambda f: f["project_file"], self._files_to_upload.values())),
-            *list(map(lambda f: f["project_file"], self._files_to_download.values())),
+            *list(map(lambda f: f, self._files_to_download.values())),
         ]:
             if project_file.local_path and project_file.local_path.exists():
                 dest = self.temp_dir.joinpath("backup", project_file.path)
@@ -500,9 +386,7 @@ class CloudTransferrer(QObject):
                 continue
 
             source_filename = str(Path(filename).relative_to(subdir_path))
-            dest_filename = str(
-                self._files_to_download[source_filename]["project_file"].local_path
-            )
+            dest_filename = str(self._files_to_download[source_filename].local_path)
 
             dest_path = Path(dest_filename)
             if not dest_path.parent.exists():
