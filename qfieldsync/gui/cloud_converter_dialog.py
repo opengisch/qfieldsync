@@ -57,9 +57,9 @@ class CloudConverterDialog(QDialog, DialogUi):
         self.network_manager = network_manager
 
         if not self.network_manager.has_token():
-            login_dlg = CloudLoginDialog(self.network_manager, self)
-            login_dlg.authenticate()
-            login_dlg.rejected.connect(lambda: self.close())
+            CloudLoginDialog.show_auth_dialog(
+                self.network_manager, lambda: self.close()
+            )
         else:
             self.network_manager.projects_cache.refresh()
 

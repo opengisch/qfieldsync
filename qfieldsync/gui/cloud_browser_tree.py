@@ -87,8 +87,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         items = []
 
         if not self.network_manager.has_token():
-            dlg = CloudLoginDialog(self.network_manager)
-            dlg.authenticate()
+            CloudLoginDialog.show_auth_dialog(self.network_manager)
             self.setState(QgsDataItem.Populating)
             return []
 
@@ -272,9 +271,9 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
 
     def refresh_cloud_projects(self):
         if not self.network_manager.has_token():
-            dlg = CloudLoginDialog(self.network_manager)
-            dlg.authenticate()
-            dlg.accepted.connect(lambda: self.refresh_cloud_projects())
+            CloudLoginDialog.show_auth_dialog(
+                self.network_manager, lambda: self.refresh_cloud_projects()
+            )
             return
 
         if self.network_manager.is_login_active:
