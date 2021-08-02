@@ -20,8 +20,9 @@
 """
 
 from pathlib import Path
+from typing import List
 
-from qgis.core import QgsProject
+from qgis.core import QgsMapLayer, QgsProject
 
 from qfieldsync.libqfieldsync import ProjectConfiguration
 from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder
@@ -49,3 +50,11 @@ def import_checksums_of_project(folder):
     original_project_path = ProjectConfiguration(project).original_project_path
     open_project(original_project_path)
     return ProjectConfiguration(project).imported_files_checksums
+
+
+def get_memory_layers(project: QgsProject) -> List[QgsMapLayer]:
+    return [
+        layer
+        for layer in project.mapLayers().values()
+        if layer.isValid() and layer.dataProvider().name() == "memory"
+    ]
