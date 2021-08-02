@@ -44,7 +44,7 @@ from qgis.utils import iface
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.core.cloud_transferrer import CloudTransferrer
+from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
 from qfieldsync.core.preferences import Preferences
 
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
@@ -189,7 +189,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
             reply.finished.connect(lambda: self.prepare_project_transfer())
 
-    def show_end_page(self, feedback=""):
+    def show_end_page(
+        self, feedback: str = "", logs_model: TransferFileLogsModel = None
+    ) -> None:
         self.stackedWidget.setCurrentWidget(self.endPage)
 
         self.feedbackLabel.setText(feedback)
@@ -207,6 +209,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Cancel).setEnabled(True)
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(True)
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+
+        self.detailedLogEndPageGroupBox.setVisible(False)
+        if logs_model:
+            self.detailedLogEndPageGroupBox.setVisible(True)
+            self.detailedLogEndPageListView.setModel(logs_model)
+            self.detailedLogEndPageListView.setModelColumn(0)
 
     def prepare_project_transfer(self):
         assert self.cloud_project
@@ -373,6 +381,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.project_transfer.sync(
                 files["to_upload"], files["to_download"], files["to_delete"]
             )
+            self.detailedLogListView.setModel(self.project_transfer.transfers_model)
+            self.detailedLogListView.setModelColumn(0)
 
     def traverse_tree_item(
         self, item: QTreeWidgetItem, files: Dict[str, List[ProjectFile]]
@@ -472,7 +482,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.show_end_page(
             self.tr("Your cloud project has successfully been download.")
             if self.is_project_download
-            else self.tr("Your cloud project has successfully been synchronized.")
+            else self.tr("Your cloud project has successfully been synchronized."),
+            self.project_transfer.transfers_model,
         )
 
         self.project_synchronized.emit()

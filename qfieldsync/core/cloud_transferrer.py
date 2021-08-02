@@ -23,10 +23,10 @@
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from PyQt5.QtCore import QUrl
-from qgis.PyQt.QtCore import QObject, pyqtSignal
+from qgis.PyQt.QtCore import QAbstractListModel, QModelIndex, QObject, Qt, pyqtSignal
 from qgis.PyQt.QtNetwork import QNetworkReply
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
@@ -150,6 +150,13 @@ class CloudTransferrer(QObject):
             self.cloud_project,
             list(self._files_to_download.keys()),
             FileTransfer.Type.DOWNLOAD,
+        )
+        self.transfers_model = TransferFileLogsModel(
+            [
+                self.throttled_uploader,
+                self.throttled_deleter,
+                self.throttled_downloader,
+            ]
         )
 
         self._make_backup()
@@ -716,3 +723,105 @@ class ThrottledFileTransferrer(QObject):
                 return
 
         return on_delete_finished
+
+
+class TransferFileLogsModel(QAbstractListModel):
+    def __init__(
+        self, transferrers: List[ThrottledFileTransferrer], parent: QObject = None
+    ):
+        super(TransferFileLogsModel, self).__init__()
+        self.transfers: List[FileTransfer] = []
+        self.filename_to_index: Dict[str, int] = {}
+
+        for transferrer in transferrers:
+            for filename, transfer in transferrer.transfers.items():
+                self.filename_to_index[filename] = len(self.transfers)
+                self.transfers.append(transfer)
+
+            transferrer.file_finished.connect(self._on_updated_transfer)
+            transferrer.error.connect(self._on_updated_transfer)
+            transferrer.progress.connect(self._on_updated_transfer)
+
+    def rowCount(self, parent: QModelIndex) -> int:
+        return len(self.transfers)
+
+    def data(self, index: QModelIndex, role: int) -> Any:
+        if index.row() < 0 or index.row() >= self.rowCount(QModelIndex()):
+            return None
+
+        if role == Qt.DisplayRole:
+            return self._data_string(self.transfers[index.row()])
+
+        return None
+
+    def index(self, row: int, col: int, _index: QModelIndex) -> QModelIndex:
+        return self.createIndex(row, col)
+
+    def _data_string(self, transfer: FileTransfer) -> str:
+        error_msg = ""
+        if transfer.is_failed:
+            error_msg = (
+                str(transfer.error)
+                if transfer.error
+                else "[{}] {}".format(
+                    transfer.last_reply.error(), transfer.last_reply.errorString()
+                )
+            )
+
+        if transfer.type == FileTransfer.Type.DOWNLOAD:
+            if transfer.is_aborted:
+                return self.tr('Aborted "{}" download'.format(transfer.filename))
+            elif transfer.is_failed:
+                return self.tr(
+                    'Failed to download "{}": {}'.format(transfer.filename, error_msg)
+                )
+            elif transfer.is_finished:
+                return self.tr('Downloaded "{}"'.format(transfer.filename))
+            elif transfer.is_started:
+                percentage = (
+                    transfer.bytes_transferred / transfer.bytes_total
+                    if transfer.bytes_total > 0
+                    else 0
+                )
+                return self.tr(
+                    'Downloading "{}" {}%'.format(
+                        transfer.filename, round(percentage * 100)
+                    )
+                )
+            else:
+                return self.tr('File to download "{}"'.format(transfer.filename))
+        elif transfer.type == FileTransfer.Type.UPLOAD:
+            if transfer.is_aborted:
+                return self.tr('Aborted "{}" upload'.format(transfer.filename))
+            elif transfer.is_failed:
+                return self.tr(
+                    'Failed to upload "{}": {}'.format(transfer.filename, error_msg)
+                )
+            elif transfer.is_finished:
+                return self.tr('Uploaded "{}"'.format(transfer.filename))
+            elif transfer.is_started:
+                percentage = (
+                    transfer.bytes_transferred / transfer.bytes_total
+                    if transfer.bytes_total > 0
+                    else 0
+                )
+                return self.tr(
+                    'Uploading "{}" {}%'.format(
+                        transfer.filename, round(percentage * 100)
+                    )
+                )
+            else:
+                return self.tr('File to upload "{}"'.format(transfer.filename))
+        elif transfer.type == FileTransfer.Type.DELETE:
+            if transfer.is_finished:
+                return self.tr('File to delete "{}"'.format(transfer.filename))
+            else:
+                return self.tr('File deleted "{}"'.format(transfer.filename))
+        else:
+            raise NotImplementedError("Unknown transfer type")
+
+    def _on_updated_transfer(self, filename, *args) -> None:
+        row = self.filename_to_index[filename]
+        index = self.createIndex(row, 0)
+
+        self.dataChanged.emit(index, index, [Qt.DisplayRole])
