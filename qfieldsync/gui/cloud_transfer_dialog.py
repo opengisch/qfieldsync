@@ -174,14 +174,16 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
         self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Next"))
 
-        export_dirname = get_unique_empty_dirname(
-            Path(self.preferences.value("cloudDirectory")).joinpath(
-                self.cloud_project.name
-            )
+        export_dirname = Path(self.preferences.value("cloudDirectory"))
+        export_dirname = export_dirname.joinpath(
+            self.cloud_project.name
+            if self.cloud_project.owner
+            == self.network_manager.auth().config("username")
+            else f"{self.cloud_project.owner}__{self.cloud_project.name}"
         )
 
         self.localDirectoryLineEdit.setText(
-            QDir.toNativeSeparators(str(export_dirname))
+            QDir.toNativeSeparators(str(get_unique_empty_dirname(export_dirname)))
         )
         self.localDirectoryButton.clicked.connect(
             make_folder_selector(self.localDirectoryLineEdit)
