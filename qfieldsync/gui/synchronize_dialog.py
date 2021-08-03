@@ -35,7 +35,11 @@ from qfieldsync.libqfieldsync.utils.file_utils import (
     get_project_in_folder,
     import_file_checksum,
 )
-from qfieldsync.utils.qgis_utils import import_checksums_of_project, open_project
+from qfieldsync.utils.qgis_utils import (
+    import_checksums_of_project,
+    make_temp_qgis_file,
+    open_project,
+)
 from qfieldsync.utils.qt_utils import make_folder_selector
 
 DialogUi, _ = loadUiType(
@@ -55,19 +59,22 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
             lambda: self.start_synchronization()
         )
-        self.qfieldDir.setText(
-            self.preferences.value("importDirectoryProject")
-            or self.preferences.value("importDirectory")
-        )
+        import_dir = self.preferences.value("importDirectoryProject")
+        if not import_dir:
+            import_dir = self.preferences.value("importDirectory")
+
+        self.qfieldDir.setText(import_dir)
         self.qfieldDir_button.clicked.connect(make_folder_selector(self.qfieldDir))
 
         self.offline_editing_done = False
 
     def start_synchronization(self):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
-        current_path = Path(QgsProject.instance().fileName())
+        project = QgsProject.instance()
+        current_path = Path(project.fileName())
         qfield_path = Path(self.qfieldDir.text())
-        self.preferences.set_value("importDirectoryProject", qfield_path)
+        self.preferences.set_value("importDirectoryProject", str(qfield_path))
+        backup_project_path = make_temp_qgis_file(project)
 
         try:
             current_import_file_checksum = import_file_checksum(str(qfield_path))
@@ -125,7 +132,9 @@ class SynchronizeDialog(QDialog, DialogUi):
                     )
                 )
 
-            if original_path.exists() and open_project(str(original_path)):
+            if original_path.exists() and open_project(
+                str(original_path), backup_project_path
+            ):
                 copy_images(
                     os.path.join(qfield_path, "DCIM"),
                     os.path.join(original_path.parent, "DCIM"),

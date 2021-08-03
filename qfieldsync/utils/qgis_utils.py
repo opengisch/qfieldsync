@@ -19,6 +19,8 @@
  ***************************************************************************/
 """
 
+import os
+import tempfile
 from pathlib import Path
 from typing import List
 
@@ -36,11 +38,26 @@ def get_project_title(project: QgsProject) -> str:
         return Path(project.fileName()).stem
 
 
-def open_project(filename: str) -> bool:
+def open_project(filename: str, filename_to_read: str = None) -> bool:
     project = QgsProject.instance()
     project.clear()
+
+    is_success = project.read(filename_to_read or filename)
     project.setFileName(filename)
-    return project.read()
+
+    return is_success
+
+
+def make_temp_qgis_file(project: QgsProject) -> str:
+    project_backup_folder = tempfile.mkdtemp()
+    original_filename = project.fileName()
+    backup_project_path = os.path.join(
+        project_backup_folder, project.baseName() + ".qgs"
+    )
+    project.write(backup_project_path)
+    project.setFileName(original_filename)
+
+    return backup_project_path
 
 
 def import_checksums_of_project(folder):
