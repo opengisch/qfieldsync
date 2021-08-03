@@ -116,17 +116,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.default_local_dir = "~/qfieldsync/cloudprojects/"
 
         if not self.network_manager.has_token():
-            login_dlg = CloudLoginDialog(self.network_manager, self)
-            login_dlg.authenticate()
-            login_dlg.accepted.connect(
-                lambda: self.welcomeLabelValue.setText(
-                    self.network_manager.auth().config("username")
-                )
+            CloudLoginDialog.show_auth_dialog(
+                self.network_manager,
+                lambda: self.on_auth_accepted(),
+                lambda: self.close(),
             )
-            login_dlg.accepted.connect(
-                lambda: self.network_manager.projects_cache.refresh()
-            )
-            login_dlg.rejected.connect(lambda: self.close())
         else:
             self.welcomeLabelValue.setText(
                 self.network_manager.auth().config("username")
@@ -229,6 +223,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def current_cloud_project(self, value: CloudProject):
         self._current_cloud_project = value
         self.update_project_table_selection()
+
+    def on_auth_accepted(self):
+        self.welcomeLabelValue.setText(self.network_manager.auth().config("username"))
+        self.network_manager.projects_cache.refresh()
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)

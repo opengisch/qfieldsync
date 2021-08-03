@@ -357,9 +357,9 @@ class QFieldSync(object):
 
     def open_cloud_convert_dialog(self):
         if not self.network_manager.has_token():
-            self.login_dlg = CloudLoginDialog(self.network_manager, None)
-            self.login_dlg.authenticate()
-            self.login_dlg.accepted.connect(lambda: self.show_cloud_convert_dialog())
+            CloudLoginDialog.show_auth_dialog(
+                self.network_manager, lambda: self.show_cloud_convert_dialog()
+            )
         else:
             self.show_cloud_convert_dialog()
 
@@ -389,10 +389,8 @@ class QFieldSync(object):
 
     def open_cloud_synchronize_dialog(self):
         if not self.network_manager.has_token():
-            self.login_dlg = CloudLoginDialog(self.network_manager, None)
-            self.login_dlg.authenticate()
-            self.login_dlg.accepted.connect(
-                lambda: self.show_cloud_synchronize_dialog()
+            CloudLoginDialog.show_auth_dialog(
+                self.network_manager, lambda: self.show_cloud_synchronize_dialog()
             )
         else:
             self.show_cloud_synchronize_dialog()

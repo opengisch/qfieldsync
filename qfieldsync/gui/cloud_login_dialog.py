@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 import os
+from typing import Callable
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
@@ -37,6 +38,33 @@ CloudLoginDialogUi, _ = loadUiType(
 
 
 class CloudLoginDialog(QDialog, CloudLoginDialogUi):
+    instance = None
+
+    @staticmethod
+    def show_auth_dialog(
+        network_manager: CloudNetworkAccessManager,
+        accepted_cb: Callable = None,
+        rejected_cb: Callable = None,
+    ):
+        if CloudLoginDialog.instance:
+            CloudLoginDialog.instance.show()
+            return
+
+        CloudLoginDialog.instance = CloudLoginDialog(network_manager)
+        CloudLoginDialog.instance.authenticate()
+
+        if accepted_cb:
+            CloudLoginDialog.instance.accepted.connect(accepted_cb)
+        if rejected_cb:
+            CloudLoginDialog.instance.rejected.connect(rejected_cb)
+
+        def on_finished(result):
+            CloudLoginDialog.instance = None
+
+        CloudLoginDialog.instance.finished.connect(on_finished)
+
+        return CloudLoginDialog.instance
+
     def __init__(
         self, network_manager: CloudNetworkAccessManager, parent: QWidget = None
     ) -> None:
