@@ -47,6 +47,7 @@ from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.libqfieldsync.utils.file_utils import get_unique_empty_dirname
 
 from ..utils.qgis_utils import get_memory_layers
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
@@ -79,7 +80,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         super(CloudTransferDialog, self).__init__(parent=parent)
         self.setupUi(self)
 
-        self.qfield_preferences = Preferences()
+        self.preferences = Preferences()
         self.network_manager = network_manager
         self.cloud_project = cloud_project
         self.project_transfer = None
@@ -173,11 +174,15 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
         self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Next"))
 
-        export_folder_path = os.path.join(
-            self.qfield_preferences.value("cloudDirectory"), self.cloud_project.name
+        export_dirname = get_unique_empty_dirname(
+            Path(self.preferences.value("cloudDirectory")).joinpath(
+                self.cloud_project.name
+            )
         )
 
-        self.localDirectoryLineEdit.setText(QDir.toNativeSeparators(export_folder_path))
+        self.localDirectoryLineEdit.setText(
+            QDir.toNativeSeparators(str(export_dirname))
+        )
         self.localDirectoryButton.clicked.connect(
             make_folder_selector(self.localDirectoryLineEdit)
         )
