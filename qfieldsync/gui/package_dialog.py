@@ -23,7 +23,7 @@
 import os
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import QDir, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
@@ -91,7 +91,7 @@ class PackageDialog(QDialog, DialogUi):
                 self.qfield_preferences.value("exportDirectory"), export_folder_name
             )
 
-        self.manualDir.setText(export_folder_path)
+        self.manualDir.setText(QDir.toNativeSeparators(export_folder_path))
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
 

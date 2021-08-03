@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.PyQt.QtCore import QDir, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QShowEvent
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
@@ -177,7 +177,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.qfield_preferences.value("cloudDirectory"), self.cloud_project.name
         )
 
-        self.localDirectoryLineEdit.setText(export_folder_path)
+        self.localDirectoryLineEdit.setText(QDir.toNativeSeparators(export_folder_path))
         self.localDirectoryButton.clicked.connect(
             make_folder_selector(self.localDirectoryLineEdit)
         )
