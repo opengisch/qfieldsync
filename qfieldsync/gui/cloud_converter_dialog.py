@@ -236,7 +236,7 @@ class CloudConverterDialog(QDialog, DialogUi):
 
     def update_upload(self, fraction):
         self.uploadProgressBar.setMaximum(100)
-        self.uploadProgressBar.setValue(fraction * 100)
+        self.uploadProgressBar.setValue(int(fraction * 100))
 
     def show_warning(self, _, message):
         self.iface.messageBar().pushMessage(message, Qgis.Warning, 0)
