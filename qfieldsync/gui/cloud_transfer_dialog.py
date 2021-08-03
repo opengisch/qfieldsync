@@ -26,6 +26,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List
 
+from qgis.core import QgsProject
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QShowEvent
 from qgis.PyQt.QtWidgets import (
@@ -47,6 +48,7 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 
+from ..utils.qgis_utils import get_memory_layers
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
 CloudTransferDialogUi, _ = loadUiType(
@@ -109,6 +111,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
         else:
             self.setWindowTitle(self.tr("Synchronizing current project"))
+
+        memory_layers = get_memory_layers(QgsProject.instance())
+
+        if memory_layers:
+            self.memoryLayersLabel.setText(
+                self.tr(
+                    "QFieldSync has detected temporary scratch layers in you project which are stored in your current QGIS memory and cannot be available on other devices. The following layers will be ignored: {}"
+                ).format(
+                    ", ".join([f"<b>{layer.name()}</b>" for layer in memory_layers])
+                )
+            )
 
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(
