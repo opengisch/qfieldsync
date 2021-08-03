@@ -24,6 +24,7 @@ import os
 from pathlib import Path
 
 from qgis.core import QgsProject
+from qgis.PyQt.QtCore import QDir
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
 
@@ -63,7 +64,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         if not import_dir:
             import_dir = self.preferences.value("importDirectory")
 
-        self.qfieldDir.setText(import_dir)
+        self.qfieldDir.setText(QDir.toNativeSeparators(import_dir))
         self.qfieldDir_button.clicked.connect(make_folder_selector(self.qfieldDir))
 
         self.offline_editing_done = False

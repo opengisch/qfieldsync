@@ -155,10 +155,8 @@ class CloudProject:
         self._data = {**self._data, **new_data}
         # make sure empty string is converted to None
 
-        if "local_dir" in new_data and self._local_dir != (
-            new_data.get("local_dir") or None
-        ):
-            self._local_dir = self._data.get("local_dir") or None
+        if "local_dir" in new_data and self._local_dir != new_data.get("local_dir"):
+            self._local_dir = (self._data.get("local_dir") or "").strip() or None
 
             del self._data["local_dir"]
 

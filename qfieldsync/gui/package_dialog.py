@@ -23,7 +23,7 @@
 import os
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import QDir, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
@@ -31,7 +31,10 @@ from qgis.PyQt.uic import loadUiType
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
-from qfieldsync.libqfieldsync.utils.file_utils import fileparts
+from qfieldsync.libqfieldsync.utils.file_utils import (
+    fileparts,
+    get_unique_empty_dirname,
+)
 
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import make_folder_selector
@@ -83,15 +86,16 @@ class PackageDialog(QDialog, DialogUi):
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
-        export_folder_path = self.qfield_preferences.value("exportDirectoryProject")
-        if not export_folder_path:
-            project_fn = QgsProject.instance().fileName()
-            export_folder_name = fileparts(project_fn)[1]
-            export_folder_path = os.path.join(
-                self.qfield_preferences.value("exportDirectory"), export_folder_name
+        export_dirname = self.qfield_preferences.value("exportDirectoryProject")
+        if not export_dirname:
+            export_dirname = os.path.join(
+                self.qfield_preferences.value("exportDirectory"),
+                fileparts(QgsProject.instance().fileName())[1],
             )
 
-        self.manualDir.setText(export_folder_path)
+        export_dirname = get_unique_empty_dirname(export_dirname)
+
+        self.manualDir.setText(QDir.toNativeSeparators(str(export_dirname)))
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
 

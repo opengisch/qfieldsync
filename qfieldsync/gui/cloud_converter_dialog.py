@@ -26,7 +26,7 @@ import re
 from pathlib import Path
 
 from qgis.core import Qgis, QgsProject, QgsProviderRegistry
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import QDir, Qt
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
 
@@ -82,22 +82,20 @@ class CloudConverterDialog(QDialog, DialogUi):
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
-        project_file_name = QgsProject.instance().fileName()
-        if project_file_name:
-            export_folder_name = fileparts(project_file_name)[1]
-        else:
-            export_folder_name = "new_cloud_project"
-        export_folder_path = os.path.join(
-            self.qfield_preferences.value("cloudDirectory"), export_folder_name
+        project_filename = QgsProject.instance().fileName()
+        export_dirname = Path(self.qfield_preferences.value("cloudDirectory")).joinpath(
+            fileparts(project_filename)[1] if project_filename else "new_cloud_project"
         )
 
-        self.mExportDir.setText(export_folder_path)
-        self.mExportDirBtn.clicked.connect(make_folder_selector(self.mExportDir))
+        self.exportDirLineEdit.setText(QDir.toNativeSeparators(str(export_dirname)))
+        self.exportDirButton.clicked.connect(
+            make_folder_selector(self.exportDirLineEdit)
+        )
         self.update_info_visibility()
 
     def get_export_folder_from_dialog(self):
         """Get the export folder according to the inputs in the selected"""
-        return self.mExportDir.text()
+        return self.exportDirLineEdit.text()
 
     def convert_project(self):
         for cloud_project in self.network_manager.projects_cache.projects:
@@ -111,8 +109,8 @@ class CloudConverterDialog(QDialog, DialogUi):
                 )
                 return
 
-        if sorted(Path(self.mExportDir.text()).rglob("*.qgs")) or sorted(
-            Path(self.mExportDir.text()).rglob("*.qgz")
+        if sorted(Path(self.exportDirLineEdit.text()).rglob("*.qgs")) or sorted(
+            Path(self.exportDirLineEdit.text()).rglob("*.qgz")
         ):
             QMessageBox.warning(
                 None,
@@ -238,7 +236,7 @@ class CloudConverterDialog(QDialog, DialogUi):
 
     def update_upload(self, fraction):
         self.uploadProgressBar.setMaximum(100)
-        self.uploadProgressBar.setValue(fraction * 100)
+        self.uploadProgressBar.setValue(int(fraction * 100))
 
     def show_warning(self, _, message):
         self.iface.messageBar().pushMessage(message, Qgis.Warning, 0)
