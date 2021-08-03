@@ -178,7 +178,7 @@ class CloudConverterDialog(QDialog, DialogUi):
 
         cloud_transferrer = CloudTransferrer(self.network_manager, cloud_project)
         cloud_transferrer.upload_progress.connect(self.update_upload)
-        cloud_transferrer.sync(cloud_project.files_to_sync, [], [])
+        cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [])
         cloud_transferrer.finished.connect(self.do_post_cloud_convert_action)
 
     def do_post_cloud_convert_action(self):
