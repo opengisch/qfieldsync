@@ -628,6 +628,9 @@ class CloudProjectsCache(QObject):
     def currently_open_project(self) -> Optional[CloudProject]:
         project_dir = QgsProject.instance().homePath()
 
+        if not self.projects:
+            return
+
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
         ).items():
