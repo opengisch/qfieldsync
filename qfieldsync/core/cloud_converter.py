@@ -42,8 +42,6 @@ class CloudConverter(QObject):
 
         super(CloudConverter, self).__init__(parent=None)
         self.project = project
-        self.__max_task_progress = 0
-        self.__convertor_progress = None  # for processing feedback
         self.__layers = list()
 
         # elipsis workaround
