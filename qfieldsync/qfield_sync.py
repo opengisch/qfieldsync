@@ -133,8 +133,9 @@ class QFieldSync(object):
         self.last_action_warnings = []
 
         self.network_manager = CloudNetworkAccessManager(self.iface.mainWindow())
-        # TODO enable this and watch the world collapse
-        # QgsProject().homePathChanged.connect(self.update_qfield_sync_toolbar_icon)
+        self.network_manager.projects_cache.projects_updated.connect(
+            self.update_button_enabled_status
+        )
 
         self.cloud_item_provider = QFieldCloudItemProvider(self.network_manager)
         QgsApplication.instance().dataItemProviderRegistry().addProvider(
