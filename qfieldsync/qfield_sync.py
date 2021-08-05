@@ -171,6 +171,7 @@ class QFieldSync(object):
         status_tip=None,
         whats_this=None,
         parent=None,
+        separator_before: bool = False,
     ):
         """Add a toolbar icon to the toolbar.
 
@@ -206,6 +207,8 @@ class QFieldSync(object):
         :param whats_this: Optional text to show in the status bar when the
             mouse pointer hovers over the action.
 
+        :param separator_before: Optionally adds a separator before the action.
+
         :returns: The action that was created. Note that the action is also
             added to self.actions list.
         :rtype: QAction
@@ -223,9 +226,13 @@ class QFieldSync(object):
             action.setWhatsThis(whats_this)
 
         if add_to_toolbar:
+            if separator_before:
+                self.toolbar.addSeparator()
             self.toolbar.addAction(action)
 
         if add_to_menu:
+            if separator_before:
+                self.get_qfield_action().menu().addSeparator()
             self.iface.addPluginToMenu(self.menu, action)
 
         self.actions.append(action)
@@ -241,8 +248,6 @@ class QFieldSync(object):
             callback=self.show_cloud_overview_dialog,
             parent=self.iface.mainWindow(),
         )
-
-        qfield_action = self.get_qfield_action()
 
         self.cloud_convert_action = self.add_action(
             QIcon(
@@ -266,13 +271,12 @@ class QFieldSync(object):
             parent=self.iface.mainWindow(),
         )
 
-        qfield_action.menu().addSeparator()
-
         self.push_action = self.add_action(
             QIcon(os.path.join(os.path.dirname(__file__), "resources/package.svg")),
             text=self.tr("Package for QField"),
             callback=self.show_package_dialog,
             parent=self.iface.mainWindow(),
+            separator_before=True,
         )
 
         self.sync_action = self.add_action(
@@ -281,7 +285,6 @@ class QFieldSync(object):
             callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow(),
         )
-        qfield_action.menu().addSeparator()
 
         self.add_action(
             QIcon(
@@ -292,6 +295,7 @@ class QFieldSync(object):
             text=self.tr("Configure Current Project"),
             callback=self.show_project_configuration_dialog,
             parent=self.iface.mainWindow(),
+            separator_before=True,
         )
 
         self.add_action(
@@ -300,6 +304,7 @@ class QFieldSync(object):
             callback=self.show_preferences_dialog,
             parent=self.iface.mainWindow(),
             add_to_toolbar=False,
+            separator_before=True,
         )
 
         self.iface.registerMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
