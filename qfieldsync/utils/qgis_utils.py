@@ -22,7 +22,7 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from qgis.core import QgsMapLayer, QgsProject
 
@@ -73,3 +73,8 @@ def get_memory_layers(project: QgsProject) -> List[QgsMapLayer]:
         for layer in project.mapLayers().values()
         if layer.isValid() and layer.dataProvider().name() == "memory"
     ]
+
+
+def get_qgis_files_within_dir(dirname: Union[str, Path]) -> List[Path]:
+    dirname = Path(dirname)
+    return list(dirname.glob("*.qgs")) + list(dirname.glob("*.qgz"))

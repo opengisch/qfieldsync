@@ -20,7 +20,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-import glob
 import os
 from enum import Enum
 from pathlib import Path
@@ -48,6 +47,7 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.libqfieldsync.utils.file_utils import get_unique_empty_dirname
+from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 
 from ..utils.qgis_utils import get_memory_layers
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
@@ -319,9 +319,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         if not self.openProjectCheck.isChecked() or not self.cloud_project.local_dir:
             return
 
-        project_file_name = glob.glob(
-            os.path.join(self.cloud_project.local_dir, "*.qgs")
-        ) + glob.glob(os.path.join(self.cloud_project.local_dir, "*.qgz"))
+        project_file_name = get_qgis_files_within_dir(self.cloud_project.local_dir)
         if project_file_name:
             iface.addProject(
                 os.path.join(self.cloud_project.local_dir, project_file_name[0])
@@ -341,9 +339,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     self.tr("Please provide a local directory."),
                 )
                 return
-            elif sorted(
-                Path(self.localDirectoryLineEdit.text()).rglob("*.qgs")
-            ) or sorted(Path(self.localDirectoryLineEdit.text()).rglob("*.qgz")):
+            elif get_qgis_files_within_dir(self.localDirectoryLineEdit.text()):
                 QMessageBox.warning(
                     None,
                     self.tr("Warning"),

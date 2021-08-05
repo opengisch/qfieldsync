@@ -38,6 +38,7 @@ from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.libqfieldsync.utils.file_utils import fileparts
+from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 
 from ..utils.qt_utils import make_folder_selector
 
@@ -111,9 +112,7 @@ class CloudConverterDialog(QDialog, DialogUi):
                 )
                 return
 
-        if sorted(Path(self.exportDirLineEdit.text()).rglob("*.qgs")) or sorted(
-            Path(self.exportDirLineEdit.text()).rglob("*.qgz")
-        ):
+        if get_qgis_files_within_dir(self.exportDirLineEdit.text()):
             QMessageBox.warning(
                 None,
                 self.tr("Warning"),

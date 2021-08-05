@@ -19,8 +19,8 @@
  ***************************************************************************/
 """
 
-import glob
 import os
+from pathlib import Path
 from typing import List
 
 from qgis.core import (
@@ -40,6 +40,7 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
+from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 
 
 class QFieldCloudItemProvider(QgsDataItemProvider):
@@ -260,9 +261,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def open_project(self, item) -> bool:
         project = self.network_manager.projects_cache.find_project(item.project_id)
         if project and project.local_dir:
-            project_file_name = glob.glob(
-                os.path.join(project.local_dir, "*.qgs")
-            ) + glob.glob(os.path.join(project.local_dir, "*.qgz"))
+            project_file_name = get_qgis_files_within_dir(Path(project.local_dir))
             if project_file_name:
                 iface.addProject(os.path.join(project.local_dir, project_file_name[0]))
                 return True

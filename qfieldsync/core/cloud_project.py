@@ -29,6 +29,7 @@ from typing import Any, Dict, Iterator, List, Optional
 from qgis.core import QgsProject
 
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 
 
 class ProjectFileCheckout(IntFlag):
@@ -197,14 +198,6 @@ class CloudProject:
             self.refresh_files()
 
     @staticmethod
-    def project_files(path: str) -> List[str]:
-        project_filenames = []
-        project_filenames += list(Path(path).glob("*.qgs"))
-        project_filenames += list(Path(path).glob("*.qgz"))
-
-        return project_filenames
-
-    @staticmethod
     def get_cloud_project_id(path: str) -> Optional[str]:
         project_local_dirs: Dict[str, str] = Preferences().value(
             "qfieldCloudProjectLocalDirs"
@@ -295,9 +288,9 @@ class CloudProject:
         return f"a/{self.owner}/{self.name}"
 
     @property
-    def root_project_files(self) -> List[str]:
+    def root_project_files(self) -> List[Path]:
         if self.local_dir:
-            return CloudProject.project_files(self.local_dir)
+            return get_qgis_files_within_dir(Path(self.local_dir))
         else:
             return []
 
