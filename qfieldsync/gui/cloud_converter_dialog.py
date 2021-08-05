@@ -105,6 +105,8 @@ class CloudConverterDialog(QDialog, DialogUi):
         return self.exportDirLineEdit.text()
 
     def convert_project(self):
+        assert self.network_manager.projects_cache.projects
+
         for cloud_project in self.network_manager.projects_cache.projects:
             if cloud_project.name == self.mProjectName.text():
                 QMessageBox.warning(
