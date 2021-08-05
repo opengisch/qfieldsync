@@ -27,7 +27,11 @@ from qgis.utils import iface
 
 from qfieldsync.libqfieldsync.layer import LayerSource
 from qfieldsync.libqfieldsync.utils.file_utils import copy_images
-from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
+from qfieldsync.utils.qgis_utils import (
+    get_qgis_files_within_dir,
+    make_temp_qgis_file,
+    open_project,
+)
 
 
 class CloudConverter(QObject):
@@ -59,8 +63,9 @@ class CloudConverter(QObject):
         project_path = self.export_dirname.joinpath(
             f"{self.project.baseName()}_cloud.qgs"
         )
-
+        backup_project_path = make_temp_qgis_file(self.project)
         is_converted = False
+
         try:
             if not self.export_dirname.exists():
                 self.export_dirname.mkdir(parents=True, exist_ok=True)
@@ -138,10 +143,8 @@ class CloudConverter(QObject):
 
             # TODO whatcha gonna do if QgsProject::read()/write() fails
             if is_converted:
-                iface.addProject(project_path)
-                self.project.setFileName(project_path)
+                iface.addProject(str(project_path))
             else:
-                iface.addProject(original_project_path)
-                self.project.setFileName(original_project_path)
+                open_project(original_project_path, backup_project_path)
 
         self.total_progress_updated.emit(100, 100, self.tr("Finished"))
