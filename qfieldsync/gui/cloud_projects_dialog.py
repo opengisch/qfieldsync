@@ -113,7 +113,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self._current_cloud_project = project
         self.transfer_dialog = None
         self.project_transfer = None
-        self.default_local_dir = "~/qfieldsync/cloudprojects/"
 
         if not self.network_manager.has_token():
             CloudLoginDialog.show_auth_dialog(
@@ -804,7 +803,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         initial_path = (
             self.localDirLineEdit.text()
             or str(Path(QgsProject.instance().homePath()).parent)
-            or self.default_local_dir
+            or self.preferences.value("cloudDirectory")
         )
 
         # cloud project is empty, you can upload a local project into it
