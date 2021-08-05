@@ -191,7 +191,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def populateContextMenu(self, item, menu, selectedItems, context):
         if type(item) is QFieldCloudProjectItem:
             project = self.network_manager.projects_cache.find_project(item.project_id)
-            if project.local_dir:
+            if project and project.local_dir:
                 open_action = menu.addAction(QObject().tr("Open Project"))
                 open_action.triggered.connect(lambda: self.open_project(item))
 
@@ -259,7 +259,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
 
     def open_project(self, item) -> bool:
         project = self.network_manager.projects_cache.find_project(item.project_id)
-        if project.local_dir:
+        if project and project.local_dir:
             project_file_name = glob.glob(
                 os.path.join(project.local_dir, "*.qgs")
             ) + glob.glob(os.path.join(project.local_dir, "*.qgz"))
