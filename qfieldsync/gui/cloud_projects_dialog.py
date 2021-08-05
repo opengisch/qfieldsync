@@ -204,7 +204,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             lambda project_id: self.on_projects_cached_project_files_updated(project_id)
         )
 
-        self.projectFilesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.projectFilesTree.header().setSectionResizeMode(
+            0, QHeaderView.ResizeToContents
+        )
         self.projectFilesTree.header().setSectionResizeMode(
             1, QHeaderView.ResizeToContents
         )
