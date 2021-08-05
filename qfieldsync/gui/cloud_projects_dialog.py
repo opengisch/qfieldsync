@@ -1084,21 +1084,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
     def update_project_table_selection(self) -> None:
-        project_filename = None
         font = QFont()
 
         for row_idx in range(self.projectsTable.rowCount()):
             cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
-            project_filename = cloud_project.local_project_file
+            is_currently_open_project = (
+                cloud_project
+                == self.network_manager.projects_cache.currently_open_project
+            )
 
-            if (
-                project_filename
-                and str(project_filename.local_path.as_posix())
-                == QgsProject().instance().fileName()
-            ):
-                font.setBold(True)
-            else:
-                font.setBold(False)
+            font.setBold(is_currently_open_project)
 
             self.projectsTable.item(row_idx, 0).setFont(font)
             self.projectsTable.item(row_idx, 1).setFont(font)
