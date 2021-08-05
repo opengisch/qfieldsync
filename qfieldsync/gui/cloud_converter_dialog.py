@@ -37,7 +37,10 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
-from qfieldsync.libqfieldsync.utils.file_utils import fileparts
+from qfieldsync.libqfieldsync.utils.file_utils import (
+    fileparts,
+    get_unique_empty_dirname,
+)
 from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 
 from ..utils.qt_utils import make_folder_selector
@@ -89,6 +92,7 @@ class CloudConverterDialog(QDialog, DialogUi):
         export_dirname = Path(self.qfield_preferences.value("cloudDirectory")).joinpath(
             fileparts(project_filename)[1] if project_filename else "new_cloud_project"
         )
+        export_dirname = get_unique_empty_dirname(export_dirname)
 
         self.exportDirLineEdit.setText(QDir.toNativeSeparators(str(export_dirname)))
         self.exportDirButton.clicked.connect(
