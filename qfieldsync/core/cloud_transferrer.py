@@ -22,7 +22,7 @@
 
 import shutil
 from enum import Enum
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Callable, Dict, List, Optional
 
 from PyQt5.QtCore import QUrl
@@ -54,6 +54,7 @@ class CloudTransferrer(QObject):
 
         self.network_manager = network_manager
         self.cloud_project = cloud_project
+        # note these `_files_to_(upload|download|delete)` uses POSIX path as keys, so beware on M$
         self._files_to_upload = {}
         self._files_to_download: Dict[str, ProjectFile] = {}
         self._files_to_delete = {}
@@ -341,7 +342,7 @@ class CloudTransferrer(QObject):
                 filename.mkdir(parents=True, exist_ok=True)
                 continue
 
-            source_filename = str(Path(filename).relative_to(subdir_path))
+            source_filename = str(PurePosixPath(filename.relative_to(subdir_path)))
             dest_filename = str(self._files_to_download[source_filename].local_path)
 
             dest_path = Path(dest_filename)
