@@ -216,11 +216,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
     @property
-    def current_cloud_project(self) -> CloudProject:
+    def current_cloud_project(self) -> Optional[CloudProject]:
         return self._current_cloud_project
 
     @current_cloud_project.setter
-    def current_cloud_project(self, value: CloudProject):
+    def current_cloud_project(self, value: Optional[CloudProject]):
         self._current_cloud_project = value
         self.update_project_table_selection()
 
