@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QFieldPreferencesBase</class>
+ <class>QFieldPreferences</class>
  <widget class="QWidget" name="QFieldPreferences">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>285</width>
-    <height>190</height>
+    <width>378</width>
+    <height>342</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,6 +20,13 @@
       <string>QFieldCloud Settings</string>
      </property>
      <layout class="QGridLayout" name="cloudGridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="cloudDirectoryLabel">
+        <property name="text">
+         <string>Default cloud directory</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="cloudIntroLabel">
         <property name="text">
@@ -33,15 +40,18 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="cloudDirectoryLabel">
-        <property name="text">
-         <string>Default cloud directory</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
        <widget class="QgsFileWidget" name="cloudDirectory"/>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QCheckBox" name="qfieldCloudRememberMe">
+        <property name="text">
+         <string>Stay logged in</string>
+        </property>
+        <property name="toolTip">
+         <string>Store QFieldCloud credentials and automatically login on QGIS startup</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -111,4 +121,5 @@
   </customwidget>
  </customwidgets>
  <resources/>
+ <connections/>
 </ui>
