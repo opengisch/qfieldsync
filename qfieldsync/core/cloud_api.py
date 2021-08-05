@@ -618,7 +618,7 @@ class CloudProjectsCache(QObject):
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
         ).items():
-            if local_dir == project_dir:
+            if local_dir and Path(local_dir) == Path(project_dir):
                 found = True
                 break
 
@@ -631,7 +631,7 @@ class CloudProjectsCache(QObject):
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
         ).items():
-            if local_dir != project_dir:
+            if not local_dir or Path(local_dir) != Path(project_dir):
                 continue
 
             cloud_project = self.find_project(project_id)
