@@ -174,10 +174,12 @@ class CloudConverterDialog(QDialog, DialogUi):
             {**payload, "local_dir": self.get_export_folder_from_dialog()}
         )
 
-        cloud_transferrer = CloudTransferrer(self.network_manager, cloud_project)
-        cloud_transferrer.upload_progress.connect(self.update_upload)
-        cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [])
-        cloud_transferrer.finished.connect(self.do_post_cloud_convert_action)
+        self.cloud_transferrer = CloudTransferrer(self.network_manager, cloud_project)
+        self.cloud_transferrer.upload_progress.connect(
+            self.on_transferrer_update_progress
+        )
+        self.cloud_transferrer.finished.connect(self.on_transferrer_finished)
+        self.cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [])
 
     def do_post_cloud_convert_action(self):
         QApplication.restoreOverrideCursor()
@@ -234,9 +236,12 @@ class CloudConverterDialog(QDialog, DialogUi):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
 
-    def update_upload(self, fraction):
+    def on_transferrer_update_progress(self, fraction):
         self.uploadProgressBar.setMaximum(100)
         self.uploadProgressBar.setValue(int(fraction * 100))
+
+    def on_transferrer_finished(self):
+        self.do_post_cloud_convert_action()
 
     def show_warning(self, _, message):
         self.iface.messageBar().pushMessage(message, Qgis.Warning, 0)
