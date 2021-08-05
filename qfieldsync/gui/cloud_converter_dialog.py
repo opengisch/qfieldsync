@@ -27,11 +27,22 @@ from pathlib import Path
 from typing import Optional
 
 from qgis.core import Qgis, QgsProject, QgsProviderRegistry
+from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QDir, Qt
-from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
+from qgis.PyQt.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QMessageBox,
+    QWidget,
+)
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_api import CloudException, from_reply
+from qfieldsync.core.cloud_api import (
+    CloudException,
+    CloudNetworkAccessManager,
+    from_reply,
+)
 from qfieldsync.core.cloud_converter import CloudConverter
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
@@ -51,7 +62,13 @@ DialogUi, _ = loadUiType(
 
 
 class CloudConverterDialog(QDialog, DialogUi):
-    def __init__(self, iface, network_manager, project, parent=None):
+    def __init__(
+        self,
+        iface: QgisInterface,
+        network_manager: CloudNetworkAccessManager,
+        project: QgsProject,
+        parent: QWidget = None,
+    ) -> None:
         """Constructor."""
         super(CloudConverterDialog, self).__init__(parent=parent)
         self.setupUi(self)
@@ -75,6 +92,9 @@ class CloudConverterDialog(QDialog, DialogUi):
             project_name = pattern.sub("", project_name)
         else:
             project_name = "CloudProject"
+
+        project_name = self.network_manager.projects_cache.get_unique_name(project_name)
+
         self.mProjectName.setText(project_name)
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
