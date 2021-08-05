@@ -656,7 +656,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             btn_sync = QToolButton()
             btn_sync.setIcon(
-                QIcon(str(Path(__file__).parent.joinpath("../resources/sync.svg")))
+                QIcon(
+                    str(
+                        Path(__file__).parent.joinpath(
+                            "../resources/cloud_synchronize.svg"
+                        )
+                    )
+                )
             )
             btn_sync.setToolTip(self.tr("Synchronize with QFieldCloud"))
             btn_sync.setMinimumSize(24, 24)
