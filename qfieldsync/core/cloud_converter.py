@@ -24,6 +24,7 @@ import os
 
 from qgis.core import QgsMapLayer, QgsProject, QgsProviderRegistry
 from qgis.PyQt.QtCore import QCoreApplication, QObject, pyqtSignal
+from qgis.utils import iface
 
 from qfieldsync.libqfieldsync.layer import LayerSource
 from qfieldsync.libqfieldsync.utils.file_utils import copy_images
@@ -135,10 +136,10 @@ class CloudConverter(QObject):
 
             # TODO whatcha gonna do if QgsProject::read()/write() fails
             if is_converted:
-                self.project.read(project_path)
+                iface.addProject(project_path)
                 self.project.setFileName(project_path)
             else:
-                self.project.read(original_project_path)
+                iface.addProject(original_project_path)
                 self.project.setFileName(original_project_path)
 
         self.total_progress_updated.emit(100, 100, self.tr("Finished"))
