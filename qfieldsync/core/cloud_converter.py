@@ -38,7 +38,7 @@ class CloudConverter(QObject):
     def __init__(
         self,
         project: QgsProject,
-        export_folder: str,
+        export_dirname: str,
     ):
 
         super(CloudConverter, self).__init__(parent=None)
@@ -48,7 +48,7 @@ class CloudConverter(QObject):
         # elipsis workaround
         self.trUtf8 = self.tr
 
-        self.export_folder = export_folder
+        self.export_dirname = export_dirname
 
     def convert(self) -> None:  # noqa: C901
         """
@@ -57,15 +57,16 @@ class CloudConverter(QObject):
 
         original_project_path = self.project.fileName()
         project_path = os.path.join(
-            self.export_folder, f"{self.project.baseName()}_cloud.qgs"
+            self.export_dirname, f"{self.project.baseName()}_cloud.qgs"
         )
+
         is_converted = False
         try:
-            if not os.path.exists(self.export_folder):
-                os.makedirs(self.export_folder)
+            if not os.path.exists(self.export_dirname):
+                os.makedirs(self.export_dirname)
 
-            if glob.glob(os.path.join(self.export_folder, "*.qgs")) or glob.glob(
-                os.path.join(self.export_folder, "*.qgz")
+            if glob.glob(os.path.join(self.export_dirname, "*.qgs")) or glob.glob(
+                os.path.join(self.export_dirname, "*.qgz")
             ):
                 raise Exception(
                     self.tr("The destination folder already contains a project file")
@@ -101,7 +102,7 @@ class CloudConverter(QObject):
                                 continue
 
                 if layer.type() == QgsMapLayer.VectorLayer:
-                    if not layer_source.convert_to_gpkg(self.export_folder):
+                    if not layer_source.convert_to_gpkg(self.export_dirname):
                         # something went wrong, remove layer and inform the user that layer will be missing
                         self.project.removeMapLayer(layer)
                         self.warning.emit(
@@ -111,7 +112,7 @@ class CloudConverter(QObject):
                             ).format(layer.name()),
                         )
                 else:
-                    layer_source.copy(self.export_folder, list())
+                    layer_source.copy(self.export_dirname, list())
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             if not self.project.write(project_path):
@@ -125,6 +126,9 @@ class CloudConverter(QObject):
                 os.path.join(os.path.dirname(project_path), "DCIM"),
             )
 
+            self.project.setTitle(
+                self.tr("{} (QFieldCloud)").format(self.project.title())
+            )
             # Now we have a project state which can be saved as cloud project
             self.project.write(project_path)
             is_converted = True
