@@ -132,6 +132,10 @@ class CloudConverterDialog(QDialog, DialogUi):
         self.projectGroupBox.setVisible(False)
         self.progressGroupBox.setVisible(True)
 
+        if not self.project.title():
+            self.project.setTitle(self.get_cloud_project_name())
+            self.project.setDirty()
+
         cloud_convertor = CloudConverter(
             self.project, self.get_export_folder_from_dialog()
         )
@@ -152,12 +156,13 @@ class CloudConverterDialog(QDialog, DialogUi):
 
         self.create_cloud_project()
 
-    def create_cloud_project(self):
+    def get_cloud_project_name(self) -> str:
         pattern = re.compile(r"[\W_]+")
-        project_name = pattern.sub("", self.mProjectName.text())
+        return pattern.sub("", self.mProjectName.text())
 
+    def create_cloud_project(self):
         reply = self.network_manager.create_project(
-            project_name,
+            self.get_cloud_project_name(),
             self.network_manager.auth().config("username"),
             self.project.metadata().abstract(),
             True,
