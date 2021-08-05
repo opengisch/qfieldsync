@@ -41,6 +41,7 @@ class CloudConverter(QObject):
     ):
 
         super(CloudConverter, self).__init__(parent=None)
+        self.project = project
         self.__max_task_progress = 0
         self.__convertor_progress = None  # for processing feedback
         self.__layers = list()
@@ -55,10 +56,11 @@ class CloudConverter(QObject):
         Convert the project to a cloud project.
         """
 
-        project = QgsProject.instance()
-        original_project_path = project.fileName()
-        project_filename = project.baseName()
-        converted = False
+        original_project_path = self.project.fileName()
+        project_path = os.path.join(
+            self.export_folder, f"{self.project.baseName()}_cloud.qgs"
+        )
+        is_converted = False
         try:
             if not os.path.exists(self.export_folder):
                 os.makedirs(self.export_folder)
@@ -71,10 +73,10 @@ class CloudConverter(QObject):
                 )
 
             self.total_progress_updated.emit(0, 100, self.trUtf8("Converting project…"))
-            self.__layers = list(project.mapLayers().values())
+            self.__layers = list(self.project.mapLayers().values())
 
             # Loop through all layers and copy them to the destination folder
-            pathResolver = QgsProject.instance().pathResolver()
+            pathResolver = self.project.pathResolver()
             for current_layer_index, layer in enumerate(self.__layers):
                 self.total_progress_updated.emit(
                     current_layer_index,
@@ -84,7 +86,7 @@ class CloudConverter(QObject):
 
                 layer_source = LayerSource(layer)
                 if not layer_source.is_supported:
-                    project.removeMapLayer(layer)
+                    self.project.removeMapLayer(layer)
                     continue
 
                 if layer.dataProvider() is not None:
@@ -102,7 +104,7 @@ class CloudConverter(QObject):
                 if layer.type() == QgsMapLayer.VectorLayer:
                     if not layer_source.convert_to_gpkg(self.export_folder):
                         # something went wrong, remove layer and inform the user that layer will be missing
-                        project.removeMapLayer(layer)
+                        self.project.removeMapLayer(layer)
                         self.warning.emit(
                             self.tr("Cloud Converter"),
                             self.tr(
@@ -112,12 +114,11 @@ class CloudConverter(QObject):
                 else:
                     layer_source.copy(self.export_folder, list())
 
-            project_path = os.path.join(
-                self.export_folder, project_filename + "_cloud.qgs"
-            )
-
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
-            QgsProject.instance().write(project_path)
+            if not self.project.write(project_path):
+                raise Exception(
+                    self.tr('Failed to save project to "{}".').format(project_path)
+                )
 
             # export the DCIM folder
             copy_images(
@@ -126,18 +127,18 @@ class CloudConverter(QObject):
             )
 
             # Now we have a project state which can be saved as cloud project
-            QgsProject.instance().write(project_path)
-            converted = True
+            self.project.write(project_path)
+            is_converted = True
         finally:
             # We need to let the app handle events before loading the next project or QGIS will crash with rasters
             QCoreApplication.processEvents()
-            QgsProject.instance().clear()
+            self.project.clear()
             QCoreApplication.processEvents()
-            if converted:
-                QgsProject.instance().read(project_path)
-                QgsProject.instance().setFileName(project_path)
+            if is_converted:
+                self.project.read(project_path)
+                self.project.setFileName(project_path)
             else:
-                QgsProject.instance().read(original_project_path)
-                QgsProject.instance().setFileName(original_project_path)
+                self.project.read(original_project_path)
+                self.project.setFileName(original_project_path)
 
         self.total_progress_updated.emit(100, 100, self.tr("Finished"))
