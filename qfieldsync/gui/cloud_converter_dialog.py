@@ -24,13 +24,14 @@
 import os
 import re
 from pathlib import Path
+from typing import Optional
 
 from qgis.core import Qgis, QgsProject, QgsProviderRegistry
 from qgis.PyQt.QtCore import QDir, Qt
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_api import CloudException
+from qfieldsync.core.cloud_api import CloudException, from_reply
 from qfieldsync.core.cloud_converter import CloudConverter
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
@@ -55,6 +56,7 @@ class CloudConverterDialog(QDialog, DialogUi):
         self.project = project
         self.qfield_preferences = Preferences()
         self.network_manager = network_manager
+        self.cloud_transferrer: Optional[CloudTransferrer] = None
 
         if not self.network_manager.has_token():
             CloudLoginDialog.show_auth_dialog(
@@ -131,8 +133,8 @@ class CloudConverterDialog(QDialog, DialogUi):
             self.project, self.get_export_folder_from_dialog()
         )
 
-        cloud_convertor.warning.connect(self.show_warning)
-        cloud_convertor.total_progress_updated.connect(self.update_total)
+        cloud_convertor.warning.connect(self.on_show_warning)
+        cloud_convertor.total_progress_updated.connect(self.on_update_total_progressbar)
 
         try:
             cloud_convertor.convert()
@@ -162,9 +164,11 @@ class CloudConverterDialog(QDialog, DialogUi):
     def on_create_project_finished(self, reply):
         try:
             payload = self.network_manager.json_object(reply)
-        except CloudException:
+        except CloudException as err:
             QApplication.restoreOverrideCursor()
-            critical_message = self.tr("QFieldCloud rejected projection creation.")
+            critical_message = self.tr(
+                "QFieldCloud rejected projection creation: {}"
+            ).format(from_reply(err.reply))
             self.iface.messageBar().pushMessage(critical_message, Qgis.Critical, 0)
             self.close()
             return
@@ -174,10 +178,12 @@ class CloudConverterDialog(QDialog, DialogUi):
             {**payload, "local_dir": self.get_export_folder_from_dialog()}
         )
 
-        cloud_transferrer = CloudTransferrer(self.network_manager, cloud_project)
-        cloud_transferrer.upload_progress.connect(self.update_upload)
-        cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [])
-        cloud_transferrer.finished.connect(self.do_post_cloud_convert_action)
+        self.cloud_transferrer = CloudTransferrer(self.network_manager, cloud_project)
+        self.cloud_transferrer.upload_progress.connect(
+            self.on_transferrer_update_progress
+        )
+        self.cloud_transferrer.finished.connect(self.on_transferrer_finished)
+        self.cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [])
 
     def do_post_cloud_convert_action(self):
         QApplication.restoreOverrideCursor()
@@ -230,13 +236,16 @@ class CloudConverterDialog(QDialog, DialogUi):
             self.infoLocalizedPresentLabel.setVisible(False)
         self.infoGroupBox.setVisible(len(localizedDataPathLayers) > 0)
 
-    def update_total(self, current, layer_count, message):
+    def on_update_total_progressbar(self, current, layer_count, message):
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
 
-    def update_upload(self, fraction):
+    def on_transferrer_update_progress(self, fraction):
         self.uploadProgressBar.setMaximum(100)
         self.uploadProgressBar.setValue(int(fraction * 100))
 
-    def show_warning(self, _, message):
+    def on_transferrer_finished(self):
+        self.do_post_cloud_convert_action()
+
+    def on_show_warning(self, _, message):
         self.iface.messageBar().pushMessage(message, Qgis.Warning, 0)

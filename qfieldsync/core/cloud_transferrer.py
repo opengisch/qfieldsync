@@ -663,6 +663,12 @@ class ThrottledFileTransferrer(QObject):
     def _on_upload_progress_wrapper(self, transfer: FileTransfer) -> Callable:
         def on_upload_progress(bytes_sent: int, bytes_total: int) -> None:
             # there are always at least a few bytes to send, so ignore this situation
+            if (
+                bytes_sent < transfer.bytes_transferred
+                or bytes_total < transfer.bytes_total
+            ):
+                return
+
             transfer.bytes_transferred = bytes_sent
             transfer.bytes_total = bytes_total
             bytes_received_sum = sum(
