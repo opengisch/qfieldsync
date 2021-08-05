@@ -1094,7 +1094,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             if (
                 project_filename
-                and str(project_filename.local_path)
+                and str(project_filename.local_path.as_posix())
                 == QgsProject().instance().fileName()
             ):
                 font.setBold(True)
