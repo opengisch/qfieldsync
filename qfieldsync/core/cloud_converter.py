@@ -132,6 +132,8 @@ class CloudConverter(QObject):
             QCoreApplication.processEvents()
             self.project.clear()
             QCoreApplication.processEvents()
+
+            # TODO whatcha gonna do if QgsProject::read()/write() fails
             if is_converted:
                 self.project.read(project_path)
                 self.project.setFileName(project_path)
