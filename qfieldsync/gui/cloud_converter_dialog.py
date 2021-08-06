@@ -27,17 +27,32 @@ from pathlib import Path
 from typing import Optional
 
 from qgis.core import Qgis, QgsProject, QgsProviderRegistry
+from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QDir, Qt
-from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
+from qgis.PyQt.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QMessageBox,
+    QWidget,
+)
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_api import CloudException, from_reply
+from qfieldsync.core.cloud_api import (
+    CloudException,
+    CloudNetworkAccessManager,
+    from_reply,
+)
 from qfieldsync.core.cloud_converter import CloudConverter
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
-from qfieldsync.libqfieldsync.utils.file_utils import fileparts
+from qfieldsync.libqfieldsync.utils.file_utils import (
+    fileparts,
+    get_unique_empty_dirname,
+)
+from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 
 from ..utils.qt_utils import make_folder_selector
 
@@ -47,7 +62,13 @@ DialogUi, _ = loadUiType(
 
 
 class CloudConverterDialog(QDialog, DialogUi):
-    def __init__(self, iface, network_manager, project, parent=None):
+    def __init__(
+        self,
+        iface: QgisInterface,
+        network_manager: CloudNetworkAccessManager,
+        project: QgsProject,
+        parent: QWidget = None,
+    ) -> None:
         """Constructor."""
         super(CloudConverterDialog, self).__init__(parent=parent)
         self.setupUi(self)
@@ -71,6 +92,9 @@ class CloudConverterDialog(QDialog, DialogUi):
             project_name = pattern.sub("", project_name)
         else:
             project_name = "CloudProject"
+
+        project_name = self.network_manager.projects_cache.get_unique_name(project_name)
+
         self.mProjectName.setText(project_name)
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
@@ -88,6 +112,7 @@ class CloudConverterDialog(QDialog, DialogUi):
         export_dirname = Path(self.qfield_preferences.value("cloudDirectory")).joinpath(
             fileparts(project_filename)[1] if project_filename else "new_cloud_project"
         )
+        export_dirname = get_unique_empty_dirname(export_dirname)
 
         self.exportDirLineEdit.setText(QDir.toNativeSeparators(str(export_dirname)))
         self.exportDirButton.clicked.connect(
@@ -100,6 +125,8 @@ class CloudConverterDialog(QDialog, DialogUi):
         return self.exportDirLineEdit.text()
 
     def convert_project(self):
+        assert self.network_manager.projects_cache.projects
+
         for cloud_project in self.network_manager.projects_cache.projects:
             if cloud_project.name == self.mProjectName.text():
                 QMessageBox.warning(
@@ -111,9 +138,7 @@ class CloudConverterDialog(QDialog, DialogUi):
                 )
                 return
 
-        if sorted(Path(self.exportDirLineEdit.text()).rglob("*.qgs")) or sorted(
-            Path(self.exportDirLineEdit.text()).rglob("*.qgz")
-        ):
+        if get_qgis_files_within_dir(self.exportDirLineEdit.text()):
             QMessageBox.warning(
                 None,
                 self.tr("Warning"),
@@ -128,6 +153,10 @@ class CloudConverterDialog(QDialog, DialogUi):
         self.button_box.setEnabled(False)
         self.projectGroupBox.setVisible(False)
         self.progressGroupBox.setVisible(True)
+
+        if not self.project.title():
+            self.project.setTitle(self.get_cloud_project_name())
+            self.project.setDirty()
 
         cloud_convertor = CloudConverter(
             self.project, self.get_export_folder_from_dialog()
@@ -149,12 +178,13 @@ class CloudConverterDialog(QDialog, DialogUi):
 
         self.create_cloud_project()
 
-    def create_cloud_project(self):
+    def get_cloud_project_name(self) -> str:
         pattern = re.compile(r"[\W_]+")
-        project_name = pattern.sub("", self.mProjectName.text())
+        return pattern.sub("", self.mProjectName.text())
 
+    def create_cloud_project(self):
         reply = self.network_manager.create_project(
-            project_name,
+            self.get_cloud_project_name(),
             self.network_manager.auth().config("username"),
             self.project.metadata().abstract(),
             True,

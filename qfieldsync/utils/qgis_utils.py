@@ -22,7 +22,7 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from qgis.core import QgsMapLayer, QgsProject
 
@@ -49,20 +49,18 @@ def open_project(filename: str, filename_to_read: str = None) -> bool:
 
 
 def make_temp_qgis_file(project: QgsProject) -> str:
-    project_backup_folder = tempfile.mkdtemp()
+    project_backup_dir = tempfile.mkdtemp()
     original_filename = project.fileName()
-    backup_project_path = os.path.join(
-        project_backup_folder, project.baseName() + ".qgs"
-    )
-    project.write(backup_project_path)
+    backup_filename = os.path.join(project_backup_dir, f"{project.baseName()}.qgs")
+    project.write(backup_filename)
     project.setFileName(original_filename)
 
-    return backup_project_path
+    return backup_filename
 
 
-def import_checksums_of_project(folder):
+def import_checksums_of_project(dirname: str) -> List[str]:
     project = QgsProject.instance()
-    qgs_file = get_project_in_folder(folder)
+    qgs_file = get_project_in_folder(dirname)
     open_project(qgs_file)
     original_project_path = ProjectConfiguration(project).original_project_path
     open_project(original_project_path)
@@ -75,3 +73,8 @@ def get_memory_layers(project: QgsProject) -> List[QgsMapLayer]:
         for layer in project.mapLayers().values()
         if layer.isValid() and layer.dataProvider().name() == "memory"
     ]
+
+
+def get_qgis_files_within_dir(dirname: Union[str, Path]) -> List[Path]:
+    dirname = Path(dirname)
+    return list(dirname.glob("*.qgs")) + list(dirname.glob("*.qgz"))

@@ -639,6 +639,23 @@ class CloudProjectsCache(QObject):
             if cloud_project is not None:
                 return cloud_project
 
+    def get_unique_name(self, name: str) -> Optional[str]:
+        if not self.projects:
+            return None
+
+        names = [p.name for p in self.projects]
+        if name not in names:
+            return name
+
+        i = 1
+        while True:
+            new_name = f"{name}_{i}"
+
+            if new_name not in names:
+                return new_name
+
+            i += 1
+
     def refresh(self) -> QNetworkReply:
         # TODO this abort appears sometimes in the UI, think how to hide it?
         if self._projects_reply:

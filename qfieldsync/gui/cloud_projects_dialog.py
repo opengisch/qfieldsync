@@ -69,6 +69,7 @@ from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 from qfieldsync.utils.permissions import can_change_project_owner
+from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 
 CloudProjectsDialogUi, _ = loadUiType(
     str(Path(__file__).parent.joinpath("../ui/cloud_projects_dialog.ui"))
@@ -576,7 +577,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             return LocalDirFeedback.Warning, self.tr(
                 "The entered path is not an existing directory. It will be created after you submit this form."
             )
-        elif len(CloudProject.project_files(local_dir)) == 0:
+        elif len(get_qgis_files_within_dir(Path(local_dir))) == 0:
             message = self.tr(
                 "The entered path does not contain a QGIS project file yet."
             )
@@ -588,7 +589,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 message += self.tr("You can always add one later.")
 
             return status, message
-        elif len(CloudProject.project_files(local_dir)) == 1:
+        elif len(get_qgis_files_within_dir(Path(local_dir))) == 1:
             message = self.tr("The entered path contains one QGIS project file.")
             status = LocalDirFeedback.Warning
 
