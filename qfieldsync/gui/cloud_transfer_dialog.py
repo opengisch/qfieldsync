@@ -86,7 +86,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.project_transfer = None
         self.is_project_download = False
 
-        self.filesTree.header().setSectionResizeMode(0, QHeaderView.Interactive)
+        self.filesTree.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.filesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.filesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)

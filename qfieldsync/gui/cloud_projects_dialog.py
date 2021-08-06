@@ -204,7 +204,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             lambda project_id: self.on_projects_cached_project_files_updated(project_id)
         )
 
-        self.projectFilesTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.projectFilesTree.header().setSectionResizeMode(
+            0, QHeaderView.ResizeToContents
+        )
         self.projectFilesTree.header().setSectionResizeMode(
             1, QHeaderView.ResizeToContents
         )
@@ -654,7 +656,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             btn_sync = QToolButton()
             btn_sync.setIcon(
-                QIcon(str(Path(__file__).parent.joinpath("../resources/sync.svg")))
+                QIcon(
+                    str(
+                        Path(__file__).parent.joinpath(
+                            "../resources/cloud_synchronize.svg"
+                        )
+                    )
+                )
             )
             btn_sync.setToolTip(self.tr("Synchronize with QFieldCloud"))
             btn_sync.setMinimumSize(24, 24)
