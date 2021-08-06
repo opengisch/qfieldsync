@@ -612,20 +612,37 @@ class CloudProjectsCache(QObject):
 
     @property
     def is_currently_open_project_cloud_local(self) -> bool:
-        project_dir = QgsProject.instance().homePath()
+        """Checks whether the currently opened QGIS project is a configured cloud project.
 
-        found = False
+        NOTE there is a difference with `currently_opened_project()`, as this method does not
+        depend on downloaded project list.
+
+        Returns:
+            bool: opened QGIS project is configured cloud project
+        """
+        project_dir = QgsProject.instance().homePath()
+        project_ids = [p.id for p in self.projects] if self.projects else []
+
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
         ).items():
-            if local_dir and Path(local_dir) == Path(project_dir):
-                found = True
-                break
+            if project_ids and project_id not in project_ids:
+                continue
 
-        return found
+            if local_dir and Path(local_dir) == Path(project_dir):
+                return True
+
+        return False
 
     @property
     def currently_open_project(self) -> Optional[CloudProject]:
+        """Returns the associated `CloudProject` instance of the currently opened QGIS project.
+        If the cloud project list is not present, or the current project has no
+        associated cloud project, return `None`.
+
+        Returns:
+            Optional[CloudProject]: associated cloud project
+        """
         project_dir = QgsProject.instance().homePath()
 
         if not self.projects:
