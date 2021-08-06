@@ -114,7 +114,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self._current_cloud_project = project
         self.transfer_dialog = None
         self.project_transfer = None
-        self.default_local_dir = "~/qfieldsync/cloudprojects/"
 
         if not self.network_manager.has_token():
             CloudLoginDialog.show_auth_dialog(
@@ -220,11 +219,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
     @property
-    def current_cloud_project(self) -> CloudProject:
+    def current_cloud_project(self) -> Optional[CloudProject]:
         return self._current_cloud_project
 
     @current_cloud_project.setter
-    def current_cloud_project(self, value: CloudProject):
+    def current_cloud_project(self, value: Optional[CloudProject]):
         self._current_cloud_project = value
         self.update_project_table_selection()
 
@@ -814,7 +813,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         initial_path = (
             self.localDirLineEdit.text()
             or str(Path(QgsProject.instance().homePath()).parent)
-            or self.default_local_dir
+            or self.preferences.value("cloudDirectory")
         )
 
         # cloud project is empty, you can upload a local project into it
@@ -1095,24 +1094,22 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
     def update_project_table_selection(self) -> None:
-        project_filename = None
         font = QFont()
 
         for row_idx in range(self.projectsTable.rowCount()):
             cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
-            project_filename = cloud_project.local_project_file
+            is_currently_open_project = (
+                cloud_project
+                == self.network_manager.projects_cache.currently_open_project
+            )
 
-            if (
-                project_filename
-                and str(project_filename.local_path)
-                == QgsProject().instance().fileName()
-            ):
-                font.setBold(True)
-            else:
-                font.setBold(False)
+            font.setBold(is_currently_open_project)
 
             self.projectsTable.item(row_idx, 0).setFont(font)
             self.projectsTable.item(row_idx, 1).setFont(font)
+            self.projectsTable.cellWidget(row_idx, 4).children()[3].setEnabled(
+                not is_currently_open_project
+            )
 
             if cloud_project == self.current_cloud_project:
                 index = self.projectsTable.model().index(row_idx, 0)

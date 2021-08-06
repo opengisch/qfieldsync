@@ -55,7 +55,7 @@
        <item>
         <widget class="QLabel" name="projectFilesLabel">
          <property name="text">
-          <string>Please provider a folder within which a local copy of the QFieldCloud project will be stored.</string>
+          <string>Please provide a directory within which a local copy of the QFieldCloud project will be stored.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
