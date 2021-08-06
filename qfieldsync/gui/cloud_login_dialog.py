@@ -45,12 +45,15 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         network_manager: CloudNetworkAccessManager,
         accepted_cb: Callable = None,
         rejected_cb: Callable = None,
+        parent: QWidget = None,
     ):
         if CloudLoginDialog.instance:
+            if parent:
+                CloudLoginDialog.instance.setParent(parent)
             CloudLoginDialog.instance.show()
             return
 
-        CloudLoginDialog.instance = CloudLoginDialog(network_manager)
+        CloudLoginDialog.instance = CloudLoginDialog(network_manager, parent)
         CloudLoginDialog.instance.authenticate()
 
         if accepted_cb:
