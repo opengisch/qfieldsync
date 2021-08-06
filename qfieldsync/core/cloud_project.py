@@ -53,7 +53,7 @@ class ProjectFile:
         return Path(self.name)
 
     @property
-    def dir_name(self) -> str:
+    def dirname(self) -> str:
         return str(self.path.parent)
 
     @property

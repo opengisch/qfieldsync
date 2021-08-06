@@ -22,7 +22,7 @@
 
 import shutil
 from enum import Enum
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from PyQt5.QtCore import QUrl
@@ -54,7 +54,7 @@ class CloudTransferrer(QObject):
 
         self.network_manager = network_manager
         self.cloud_project = cloud_project
-        # note these `_files_to_(upload|download|delete)` uses POSIX path as keys, so beware on M$
+        # NOTE these `_files_to_(upload|download|delete)` uses POSIX path as keys, so beware on M$
         self._files_to_upload = {}
         self._files_to_download: Dict[str, ProjectFile] = {}
         self._files_to_delete = {}
@@ -102,38 +102,33 @@ class CloudTransferrer(QObject):
 
             project_file.flush()
 
-            filename = project_file.name
             temp_filename = self.temp_dir.joinpath(
-                FileTransfer.Type.UPLOAD.value, filename
+                FileTransfer.Type.UPLOAD.value, project_file.name
             )
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
             copy_multifile(project_file.local_path, temp_filename)
 
             self.total_upload_bytes += project_file.local_size or 0
-            self._files_to_upload[filename] = project_file
+            self._files_to_upload[str(project_file.path.as_posix())] = project_file
 
         # prepare the files to be delete, both locally and remotely
         for project_file in files_to_delete:
-            filename = project_file.name
-
-            self._files_to_delete[filename] = project_file
+            self._files_to_delete[str(project_file.path.as_posix())] = project_file
 
         # prepare the files to be downloaded, download them in a temporary destination
         for project_file in files_to_download:
-            filename = project_file.name
-
             temp_filename = self.temp_dir.joinpath(
-                FileTransfer.Type.DOWNLOAD.value, filename
+                FileTransfer.Type.DOWNLOAD.value, project_file.name
             )
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
 
             self.total_download_bytes += project_file.size or 0
-            self._files_to_download[filename] = project_file
+            self._files_to_download[str(project_file.path.as_posix())] = project_file
 
         self.throttled_uploader = ThrottledFileTransferrer(
             self.network_manager,
             self.cloud_project,
-            list(self._files_to_upload.keys()),
+            [t.name for t in self._files_to_upload.values()],
             FileTransfer.Type.UPLOAD,
         )
         self.throttled_deleter = ThrottledFileTransferrer(
@@ -149,7 +144,7 @@ class CloudTransferrer(QObject):
         self.throttled_downloader = ThrottledFileTransferrer(
             self.network_manager,
             self.cloud_project,
-            list(self._files_to_download.keys()),
+            [t.name for t in self._files_to_download.values()],
             FileTransfer.Type.DOWNLOAD,
         )
         self.transfers_model = TransferFileLogsModel(
@@ -342,7 +337,7 @@ class CloudTransferrer(QObject):
                 filename.mkdir(parents=True, exist_ok=True)
                 continue
 
-            source_filename = str(PurePosixPath(filename.relative_to(subdir_path)))
+            source_filename = str(filename.relative_to(subdir_path).as_posix())
             dest_filename = str(self._files_to_download[source_filename].local_path)
 
             dest_path = Path(dest_filename)
