@@ -120,6 +120,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.network_manager,
                 lambda: self.on_auth_accepted(),
                 lambda: self.close(),
+                parent=self,
             )
         else:
             self.welcomeLabelValue.setText(

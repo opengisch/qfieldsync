@@ -145,6 +145,12 @@ class QFieldSync(object):
             self.cloud_item_gui_provider
         )
 
+        # autologin
+        if self.preferences.value("qfieldCloudRememberMe"):
+            dialog = CloudLoginDialog(self.network_manager)
+            dialog.authenticate()
+            dialog.hide()
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.

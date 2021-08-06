@@ -89,7 +89,10 @@
       <item row="4" column="1">
 	   <widget class="QCheckBox" name="rememberMeCheckBox">
         <property name="text">
-         <string>Remember Me</string>
+         <string>Stay logged in</string>
+        </property>
+        <property name="toolTip">
+         <string>Store QFieldCloud credentials and automatically login on QGIS startup</string>
         </property>
        </widget>
       </item>
