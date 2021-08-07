@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from PyQt5.QtCore import QUrl
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import (
     QDateTime,
     QItemSelectionModel,
@@ -34,14 +34,7 @@ from qgis.PyQt.QtCore import (
     Qt,
     pyqtSignal,
 )
-from qgis.PyQt.QtGui import (
-    QColor,
-    QFont,
-    QIcon,
-    QPalette,
-    QRegularExpressionValidator,
-    QValidator,
-)
+from qgis.PyQt.QtGui import QFont, QIcon, QRegularExpressionValidator, QValidator
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -54,7 +47,6 @@ from qgis.PyQt.QtWidgets import (
     QMenu,
     QMessageBox,
     QPushButton,
-    QSizePolicy,
     QTableWidgetItem,
     QToolButton,
     QTreeWidgetItem,
@@ -157,6 +149,27 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 QRegularExpression("^[a-zA-Z][-a-zA-Z0-9_]{2,}$")
             )
         )
+
+        self.projectsTable.setColumnWidth(0, self.projectsTable.width() / 2)
+        self.projectsTable.setColumnWidth(1, self.projectsTable.width() / 3.25)
+        self.projectsTable.setColumnWidth(2, self.projectsTable.width() / 10)
+
+        self.synchronizeButton.clicked.connect(
+            lambda: self.on_project_sync_button_clicked()
+        )
+        self.synchronizeButton.setEnabled(False)
+        self.editButton.setIcon(
+            QgsApplication.getThemeIcon("/mActionProjectProperties.svg")
+        )
+        self.editButton.clicked.connect(lambda: self.on_project_edit_button_clicked())
+        self.editButton.setEnabled(False)
+        self.openButton.setIcon(QgsApplication.getThemeIcon("/mActionFileOpen.svg"))
+        self.openButton.clicked.connect(lambda: self.on_project_launch_button_clicked())
+        self.openButton.setEnabled(False)
+        self.deleteButton.clicked.connect(
+            lambda: self.on_project_delete_button_clicked()
+        )
+        self.deleteButton.setEnabled(False)
 
         self.createButton.clicked.connect(lambda: self.on_create_button_clicked())
         self.convertButton.clicked.connect(lambda: self.on_convert_button_clicked())
@@ -645,19 +658,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             item.setData(Qt.UserRole, cloud_project)
             item.setData(Qt.EditRole, cloud_project.name)
 
-            cbx_private = QCheckBox()
-            cbx_private.setEnabled(False)
-            cbx_private.setChecked(cloud_project.is_private)
-            # # it's more UI friendly when the checkbox is centered, an ugly workaround to achieve it
-            cbx_private_widget = QWidget()
-            cbx_private_layout = QHBoxLayout()
-            cbx_private_layout.setAlignment(Qt.AlignCenter)
-            cbx_private_layout.setContentsMargins(0, 0, 0, 0)
-            cbx_private_layout.addWidget(cbx_private)
-            cbx_private_widget.setLayout(cbx_private_layout)
-            # NOTE the margin is not updated when the table column is resized, so better rely on the code above
-            # cbx_private.setStyleSheet("margin-left:50%; margin-right:50%;")
-
             cbx_local = QCheckBox()
             cbx_local.setEnabled(False)
             cbx_local.setChecked(bool(cloud_project.local_dir))
@@ -672,97 +672,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 cbx_local_widget.setToolTip(str(cloud_project.local_dir))
             else:
                 cbx_local_widget.setToolTip(self.tr("No local dir configured"))
-            # NOTE the margin is not updated when the table column is resized, so better rely on the code above
-            # cbx_local.setStyleSheet("margin-left:50%; margin-right:50%;")
-
-            btn_sync = QToolButton()
-            btn_sync.setIcon(
-                QIcon(
-                    str(
-                        Path(__file__).parent.joinpath(
-                            "../resources/cloud_synchronize.svg"
-                        )
-                    )
-                )
-            )
-            btn_sync.setToolTip(self.tr("Synchronize with QFieldCloud"))
-            btn_sync.setMinimumSize(24, 24)
-            btn_sync.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            btn_edit = QToolButton()
-            btn_edit.setIcon(
-                QIcon(str(Path(__file__).parent.joinpath("../resources/edit.svg")))
-            )
-            btn_edit.setToolTip(self.tr("Edit project details"))
-            btn_edit.setMinimumSize(24, 24)
-            btn_edit.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            btn_launch = QToolButton()
-            btn_launch.setIcon(
-                QIcon(str(Path(__file__).parent.joinpath("../resources/launch.svg")))
-            )
-            btn_launch.setToolTip(self.tr("Open project"))
-            btn_launch.setMinimumSize(24, 24)
-            btn_launch.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            btn_delete = QToolButton()
-            btn_delete.setPalette(QPalette(QColor("red")))
-            btn_delete.setIcon(
-                QIcon(str(Path(__file__).parent.joinpath("../resources/delete.svg")))
-            )
-            btn_delete.setToolTip(
-                self.tr("Delete QFieldCloud project (files are kept locally)")
-            )
-            btn_delete.setMinimumSize(24, 24)
-            btn_delete.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            btn_widget = QWidget()
-            btn_layout = QHBoxLayout()
-            btn_layout.setAlignment(Qt.AlignCenter)
-            btn_layout.setContentsMargins(0, 0, 0, 0)
-            btn_layout.addWidget(btn_sync)
-            btn_layout.addWidget(btn_edit)
-            btn_layout.addWidget(btn_launch)
-            btn_layout.addWidget(btn_delete)
-            btn_widget.setLayout(btn_layout)
-
-            root_project_files = cloud_project.root_project_files
-            if len(root_project_files) == 1:
-                btn_launch.setToolTip(
-                    self.tr('Open project "{}"').format(root_project_files[0])
-                )
-            elif len(root_project_files) == 0:
-                btn_launch.setToolTip(
-                    self.tr(
-                        "Cannot open project since no local .qgs or .qgz project file found"
-                    )
-                )
-                btn_launch.setEnabled(False)
-            else:
-                btn_launch.setToolTip(
-                    self.tr(
-                        "Multiple .qgs or .qgz project files found in the project directory"
-                    )
-                )
-                btn_launch.setEnabled(False)
-
-            btn_sync.clicked.connect(
-                self.on_project_sync_button_clicked(cloud_project)
-            )  # pylint: disable=too-many-function-args
-            btn_edit.clicked.connect(
-                self.on_project_edit_button_clicked(cloud_project)
-            )  # pylint: disable=too-many-function-args
-            btn_launch.clicked.connect(
-                self.on_project_launch_button_clicked(cloud_project)
-            )  # pylint: disable=too-many-function-args
-            btn_delete.clicked.connect(
-                self.on_project_delete_button_clicked(cloud_project)
-            )  # pylint: disable=too-many-function-args
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
-            self.projectsTable.setCellWidget(count, 2, cbx_private_widget)
-            self.projectsTable.setCellWidget(count, 3, cbx_local_widget)
-            self.projectsTable.setCellWidget(count, 4, btn_widget)
+            self.projectsTable.setCellWidget(count, 2, cbx_local_widget)
 
-        self.projectsTable.resizeColumnsToContents()
-        self.projectsTable.sortByColumn(2, Qt.AscendingOrder)
+        self.projectsTable.sortByColumn(1, Qt.AscendingOrder)
+        self.projectsTable.sortByColumn(0, Qt.AscendingOrder)
         self.projectsTable.setSortingEnabled(True)
         self.update_project_table_selection()
 
@@ -905,12 +821,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         return local_dir
 
-    @select_table_row
-    def on_project_sync_button_clicked(self, is_toggled: bool) -> None:
+    def on_project_sync_button_clicked(self) -> None:
         self.sync()
 
-    @select_table_row
-    def on_project_delete_button_clicked(self, is_toggled: bool) -> None:
+    def on_project_edit_button_clicked(self) -> None:
+        self.show_project_form()
+
+    def on_project_launch_button_clicked(self) -> None:
+        self.launch()
+
+    def on_project_delete_button_clicked(self) -> None:
         button_pressed = QMessageBox.question(
             self,
             self.tr("Delete QFieldCloud project"),
@@ -926,14 +846,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         reply = self.network_manager.delete_project(self.current_cloud_project.id)
         reply.finished.connect(lambda: self.on_delete_project_reply_finished(reply))
-
-    @select_table_row
-    def on_project_launch_button_clicked(self, is_toggled: bool) -> None:
-        self.launch()
-
-    @select_table_row
-    def on_project_edit_button_clicked(self, is_toggled: bool) -> None:
-        self.show_project_form()
 
     def on_delete_project_reply_finished(self, reply: QNetworkReply) -> None:
         self.projectsStack.setEnabled(True)
@@ -1194,13 +1106,40 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
     def on_projects_table_selection_changed(self) -> None:
+        hasSelection = False
+        hasProjectFile = False
         if self.projectsTable.selectionModel().hasSelection():
+            hasSelection = True
             row_idx = self.projectsTable.currentRow()
             self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(
                 Qt.UserRole
             )
+
+            root_project_files = self.current_cloud_project.root_project_files
+            if len(root_project_files) == 1:
+                self.openButton.setToolTip(
+                    self.tr('Open project "{}"').format(root_project_files[0])
+                )
+                hasProjectFile = True
+            elif len(root_project_files) == 0:
+                self.openButton.setToolTip(
+                    self.tr(
+                        "Cannot open project since no local .qgs or .qgz project file found"
+                    )
+                )
+            else:
+                self.openButton.setToolTip(
+                    self.tr(
+                        "Multiple .qgs or .qgz project files found in the project directory"
+                    )
+                )
         else:
             self.current_cloud_project = None
+
+        self.synchronizeButton.setEnabled(hasSelection)
+        self.editButton.setEnabled(hasSelection)
+        self.openButton.setEnabled(hasSelection and hasProjectFile)
+        self.deleteButton.setEnabled(hasSelection)
 
     def show_sync_popup(self) -> None:
         assert self.current_cloud_project is not None, "No project to download selected"

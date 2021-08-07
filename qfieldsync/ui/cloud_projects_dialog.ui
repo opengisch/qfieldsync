@@ -155,9 +155,6 @@
          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
           <bool>true</bool>
          </attribute>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>true</bool>
-         </attribute>
          <column>
           <property name="text">
            <string>Name</string>
@@ -170,26 +167,86 @@
          </column>
          <column>
           <property name="text">
-           <string>Private</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
            <string>Local</string>
           </property>
           <property name="toolTip">
            <string>Whether the file has a configured local directory</string>
           </property>
          </column>
-         <column>
-          <property name="text">
-           <string>Actions</string>
-          </property>
-          <property name="toolTip">
-           <string>Synchronize| Edit | Delete | Open</string>
-          </property>
-         </column>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="projectsActionsHLayout">
+         <item>
+          <widget class="QPushButton" name="synchronizeButton">
+           <property name="toolTip">
+            <string>Synchronize Selected Cloud Project</string>
+           </property>
+           <property name="text">
+            <string></string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../resources/cloud_synchronize.svg</normaloff>../resources/cloud_synchronize.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="editButton">
+           <property name="toolTip">
+            <string>Edit Selected Cloud Project</string>
+           </property>
+           <property name="text">
+            <string></string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../resources/edit.svg</normaloff>../resources/edit.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="openButton">
+           <property name="toolTip">
+            <string>Open Selected Cloud Project</string>
+           </property>
+           <property name="text">
+            <string></string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../resources/launch.svg</normaloff>../resources/launch.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="deleteButton">
+           <property name="toolTip">
+            <string>Delete Selected Cloud Project</string>
+           </property>
+           <property name="text">
+            <string></string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../resources/delete.svg</normaloff>../resources/delete.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+           <spacer name="headerHSpacer">
+           <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+             <size>
+             <width>40</width>
+             <height>20</height>
+             </size>
+           </property>
+           </spacer>
+         </item>
+        </layout>
        </item>
        <item>
        <widget class="QLabel" name="projectsActionLabel">
