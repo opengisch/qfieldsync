@@ -204,8 +204,12 @@ class CloudNetworkAccessManager(QObject):
         url = self.url + "/api/v1/"
         return re.sub(r"([^:]/)(/)+", r"\1", url)
 
-    def login(self, username: str, password: str) -> QNetworkReply:
+    def login(self, username: str, password: str) -> Optional[QNetworkReply]:
         """Login to QFieldCloud"""
+        # don't login multiple times
+        if self.is_login_active:
+            return
+
         self.is_login_active = True
 
         reply = self.cloud_post(
