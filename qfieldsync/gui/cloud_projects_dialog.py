@@ -231,6 +231,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     @current_cloud_project.setter
     def current_cloud_project(self, value: Optional[CloudProject]):
+        if self._current_cloud_project == value:
+            return
+
         self._current_cloud_project = value
         self.update_project_table_selection()
         self.update_ui_state()
@@ -1077,10 +1080,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.projectsTable.item(row_idx, 0).setFont(font)
             self.projectsTable.item(row_idx, 1).setFont(font)
-            if self.projectsTable.cellWidget(row_idx, 4):
-                self.projectsTable.cellWidget(row_idx, 4).children()[3].setEnabled(
-                    not is_currently_open_project
-                )
+
+            self.update_project_buttons()
 
             if cloud_project == self.current_cloud_project:
                 index = self.projectsTable.model().index(row_idx, 0)
@@ -1113,21 +1114,30 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
     def on_projects_table_selection_changed(self) -> None:
-        hasSelection = False
-        hasProjectFile = False
+        self.update_project_buttons()
+
+    def update_project_buttons(self) -> None:
+        has_selection = False
+        has_local_project_file = False
+        is_currently_open_project = False
         if self.projectsTable.selectionModel().hasSelection():
-            hasSelection = True
+            has_selection = True
             row_idx = self.projectsTable.currentRow()
             self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(
                 Qt.UserRole
             )
+            is_currently_open_project = (
+                self.current_cloud_project
+                == self.network_manager.projects_cache.currently_open_project
+            )
+            assert self.current_cloud_project
 
             root_project_files = self.current_cloud_project.root_project_files
             if len(root_project_files) == 1:
                 self.openButton.setToolTip(
                     self.tr('Open project "{}"').format(root_project_files[0])
                 )
-                hasProjectFile = True
+                has_local_project_file = True
             elif len(root_project_files) == 0:
                 self.openButton.setToolTip(
                     self.tr(
@@ -1143,10 +1153,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         else:
             self.current_cloud_project = None
 
-        self.synchronizeButton.setEnabled(hasSelection)
-        self.editButton.setEnabled(hasSelection)
-        self.openButton.setEnabled(hasSelection and hasProjectFile)
-        self.deleteButton.setEnabled(hasSelection)
+        self.synchronizeButton.setEnabled(has_selection)
+        self.editButton.setEnabled(has_selection)
+        self.openButton.setEnabled(
+            has_selection and has_local_project_file and not is_currently_open_project
+        )
+        self.deleteButton.setEnabled(has_selection)
 
     def show_sync_popup(self) -> None:
         assert self.current_cloud_project is not None, "No project to download selected"
