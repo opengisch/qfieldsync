@@ -231,10 +231,11 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def get_projects(self, should_include_public: bool = False) -> QNetworkReply:
+    def get_projects(self, should_include_public: bool = True) -> QNetworkReply:
         """Get QFieldCloud projects"""
-
-        return self.cloud_get("projects/")
+        return self.cloud_get(
+            "projects", {"include-public": "true" if should_include_public else "false"}
+        )
 
     def get_projects_not_async(self, should_include_public: bool = False) -> List[Dict]:
         """Get QFieldCloud projects synchronously"""
