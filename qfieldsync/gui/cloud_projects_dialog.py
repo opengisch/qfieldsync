@@ -61,7 +61,11 @@ from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
 from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
+from qfieldsync.core.cloud_api import (
+    CloudException,
+    CloudNetworkAccessManager,
+    from_reply,
+)
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
@@ -1022,7 +1026,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         reply = self.network_manager.projects_cache.refresh()
         reply.finished.connect(
-            lambda: self.on_create_project_finished_projects_refreshed(project.id)
+            lambda: self.on_create_project_finished_projects_refreshed(
+                reply, project.id
+            )
         )
 
     def update_welcome_label(self) -> None:
@@ -1081,8 +1087,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectsTable.item(row_idx, 0).setFont(font)
             self.projectsTable.item(row_idx, 1).setFont(font)
 
-            self.update_project_buttons()
-
             if cloud_project == self.current_cloud_project:
                 index = self.projectsTable.model().index(row_idx, 0)
                 self.projectsTable.setCurrentIndex(index)
@@ -1090,10 +1094,22 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     index, QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows
                 )
 
-    def on_create_project_finished_projects_refreshed(self, project_id: str) -> None:
-        self.current_cloud_project = self.network_manager.projects_cache.find_project(
-            project_id
-        )
+            self.update_project_buttons()
+
+    def on_create_project_finished_projects_refreshed(
+        self, reply: QNetworkReply, project_id: str
+    ) -> None:
+        error = from_reply(reply)
+
+        if error:
+            iface.messageBar().pushWarning(
+                "QFieldSync",
+                self.tr("Failed to refresh the project list, please do it manually."),
+            )
+            return
+
+        cloud_project = self.network_manager.projects_cache.find_project(project_id)
+        self.current_cloud_project = cloud_project
 
         self.launch()
         self.sync()
