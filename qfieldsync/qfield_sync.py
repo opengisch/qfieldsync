@@ -265,6 +265,7 @@ class QFieldSync(object):
             text=self.tr("Convert Current Project to Cloud Project"),
             callback=self.open_cloud_convert_dialog,
             parent=self.iface.mainWindow(),
+            add_to_toolbar=False,
         )
 
         self.cloud_synchronize_action = self.add_action(
