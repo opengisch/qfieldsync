@@ -90,7 +90,7 @@
          <item>
           <widget class="QLabel" name="projectsListLabel">
            <property name="text">
-            <string>Projects List</string>
+            <string>Cloud Projects List</string>
            </property>
            <property name="font">
             <font>
@@ -194,7 +194,7 @@
        <item>
        <widget class="QLabel" name="projectsActionLabel">
          <property name="text">
-         <string>Projects Actions</string>
+         <string>New Cloud Project</string>
          </property>
          <property name="font">
          <font>
