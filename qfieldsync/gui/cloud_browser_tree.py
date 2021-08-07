@@ -75,7 +75,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         self.network_manager = network_manager
         self.error = None
 
-        self.network_manager.login_success.connect(lambda: self.update_icon())
+        self.network_manager.login_finished.connect(lambda: self.update_icon())
         self.network_manager.token_changed.connect(lambda: self.update_icon())
         self.network_manager.projects_cache.projects_updated.connect(
             lambda: self.refreshing_cloud_projects()

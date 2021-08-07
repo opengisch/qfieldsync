@@ -25,12 +25,11 @@ from typing import Callable
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
-from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QWidget
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 
 CloudLoginDialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_login_dialog.ui")
@@ -98,6 +97,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.passwordLineEdit.setText(cfg.config("password"))
         self.rememberMeCheckBox.setChecked(remember_me)
 
+        self.network_manager.login_finished.connect(self.on_login_finished)
+
         self.qfieldCloudIcon.setAlignment(Qt.AlignHCenter)
         self.qfieldCloudIcon.setPixmap(
             QPixmap(
@@ -136,10 +137,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.network_manager.set_url(cfg.uri())
             self.network_manager.set_auth(self.network_manager.url, token="")
             # don't trust the password, just login once again
-            reply = self.network_manager.login(
-                cfg.config("username"), cfg.config("password")
-            )
-            reply.finished.connect(lambda: self.on_login_reply_finished(reply))
+            self.network_manager.login(cfg.config("username"), cfg.config("password"))
 
         if not cfg.config("token") or not self.parent():
             self.show()
@@ -155,22 +153,17 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.network_manager.set_auth(server_url, username=username, password=password)
         self.network_manager.set_url(server_url)
+        self.network_manager.login(username, password)
+
         self.preferences.set_value("qfieldCloudRememberMe", remember_me)
 
-        reply = self.network_manager.login(username, password)
-        reply.finished.connect(lambda: self.on_login_reply_finished(reply))
-
-    def on_login_reply_finished(self, reply: QNetworkReply) -> None:
+    def on_login_finished(self) -> None:
         if self.parent():
             self.parent().setEnabled(True)
             self.setEnabled(True)
 
-        try:
-            payload = self.network_manager.json_object(reply)
-        except CloudException as err:
-            self.loginFeedbackLabel.setText(
-                self.tr("Login failed: {}").format(str(err))
-            )
+        if not self.network_manager.has_token():
+            self.loginFeedbackLabel.setText(self.network_manager.get_last_login_error())
             self.loginFeedbackLabel.setVisible(True)
             self.usernameLineEdit.setEnabled(True)
             self.passwordLineEdit.setEnabled(True)
@@ -178,17 +171,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
             return
 
-        server_url = self.serverUrlCmb.currentText()
-
-        self.network_manager.set_auth(server_url, username=payload["username"])
-        self.network_manager.set_token(
-            payload["token"], self.rememberMeCheckBox.isChecked()
-        )
-
         self.usernameLineEdit.setEnabled(False)
         self.passwordLineEdit.setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
-
-        self.network_manager.login_success.emit()
-
         self.done(QDialog.Accepted)

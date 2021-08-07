@@ -21,6 +21,7 @@
 
 import json
 import re
+import tempfile
 import urllib.parse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -59,7 +60,7 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 
     message = ""
     try:
-        payload = str(reply.readAll())
+        payload = reply.readAll().data().decode()
 
         try:
             resp = json.loads(payload)
@@ -89,9 +90,10 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 class CloudNetworkAccessManager(QObject):
 
     token_changed = pyqtSignal()
-    login_success = pyqtSignal()
+    login_finished = pyqtSignal()
     logout_success = pyqtSignal()
     logout_failed = pyqtSignal(str)
+    avatar_success = pyqtSignal()
 
     def __init__(self, parent=None) -> None:
         """Constructor."""
@@ -100,7 +102,7 @@ class CloudNetworkAccessManager(QObject):
         self.preferences = Preferences()
         self.url = ""
         self._token = ""
-        self._username = ""
+        self.user_details: Dict[str, str] = {}
         self.projects_cache = CloudProjectsCache(self, self)
         self._nam = QgsNetworkAccessManager.instance()
         self.is_login_active = False
@@ -204,8 +206,12 @@ class CloudNetworkAccessManager(QObject):
         url = self.url + "/api/v1/"
         return re.sub(r"([^:]/)(/)+", r"\1", url)
 
-    def login(self, username: str, password: str) -> QNetworkReply:
+    def login(self, username: str, password: str) -> Optional[QNetworkReply]:
         """Login to QFieldCloud"""
+        # don't login multiple times
+        if self.is_login_active:
+            return
+
         self.is_login_active = True
 
         reply = self.cloud_post(
@@ -550,6 +556,50 @@ class CloudNetworkAccessManager(QObject):
 
     def _on_login_finished(self, reply: QNetworkReply) -> None:
         self.is_login_active = False
+
+        try:
+            payload = self.json_object(reply)
+        except CloudException as err:
+            self._login_error = err
+            self.login_finished.emit()
+            return
+
+        self.user_details = {
+            "username": payload["username"],
+            "avatar_url": payload["avatar_url"],
+        }
+        if payload["avatar_url"]:
+            suffix = payload["avatar_url"].rsplit(".")[-1]
+            avatar_filename = tempfile.mktemp(suffix=f".{suffix}")
+            reply = self.get_file(
+                QUrl(payload["avatar_url"]),
+                avatar_filename,
+            )
+            reply.finished.connect(
+                lambda: self._on_avatar_download_finished(reply, avatar_filename)
+            )
+        self.set_auth(self.url, username=payload["username"])
+        self.set_token(
+            payload["token"], self.preferences.value("qfieldCloudRememberMe")
+        )
+        self.login_finished.emit()
+
+    def _on_avatar_download_finished(self, reply: QNetworkReply, filename: str) -> None:
+        error = from_reply(reply)
+
+        if not error:
+            self.user_details["avatar_filename"] = filename
+            self.avatar_success.emit()
+
+    def get_last_login_error(self) -> str:
+        if self.has_token():
+            return ""
+
+        error = self.user_details.get("error")
+        if error:
+            return self.tr("Login failed: {}").format(str(error))
+        else:
+            return self.tr("Login failed.")
 
     def _clear_cloud_cookies(self, url: QUrl) -> None:
         """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
