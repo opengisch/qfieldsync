@@ -59,7 +59,7 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 
     message = ""
     try:
-        payload = str(reply.readAll())
+        payload = reply.readAll().data().decode()
 
         try:
             resp = json.loads(payload)
