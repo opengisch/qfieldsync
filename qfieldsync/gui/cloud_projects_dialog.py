@@ -20,7 +20,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-import functools
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -81,19 +80,6 @@ class LocalDirFeedback(Enum):
     Error = "error"
     Warning = "warning"
     Success = "success"
-
-
-def select_table_row(func):
-    @functools.wraps(func)
-    def closure(self, cloud_project):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            self.current_cloud_project = cloud_project
-            return func(self, *args, **kwargs)
-
-        return wrapper
-
-    return closure
 
 
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
