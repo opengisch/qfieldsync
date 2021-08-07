@@ -530,7 +530,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.feedbackLabel.setText(self.tr("Failed to refresh project owners."))
 
     def on_logout_button_clicked(self) -> None:
-        self.logoutButton.setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.Reset).setEnabled(False)
         self.feedbackLabel.setVisible(False)
         self.network_manager.logout()
 
@@ -1180,4 +1180,4 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def _on_logout_failed(self, err: str) -> None:
         self.feedbackLabel.setText("Logout failed: {}".format(str(err)))
         self.feedbackLabel.setVisible(True)
-        self.logoutButton.setEnabled(True)
+        self.buttonBox.button(QDialogButtonBox.Reset).setEnabled(True)
