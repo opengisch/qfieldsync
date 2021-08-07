@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from PyQt5.QtCore import QUrl
-from qgis.core import QgsProject
+from qgis.core import Qgis, QgsProject
 from qgis.PyQt.QtCore import (
     QDateTime,
     QItemSelectionModel,
@@ -47,6 +47,7 @@ from qgis.PyQt.QtWidgets import (
     QAction,
     QCheckBox,
     QDialog,
+    QDialogButtonBox,
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
@@ -65,6 +66,7 @@ from qgis.utils import iface
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
+from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
@@ -123,18 +125,20 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 parent=self,
             )
         else:
-            self.welcomeLabelValue.setText(
-                self.network_manager.auth().config("username")
+            self.welcomeLabel.setText(
+                self.tr("Greetings {}.").format(
+                    self.network_manager.auth().config("username")
+                )
             )
 
         if self.network_manager.url == self.network_manager.server_urls()[0]:
-            self.welcomeLabelValue.setToolTip(
+            self.welcomeLabel.setToolTip(
                 self.tr("You are logged in with the following username")
             )
         else:
-            self.welcomeLabelValue.setToolTip(
-                self.tr(
-                    f"You are logged in with the following username at {self.network_manager.url}"
+            self.welcomeLabel.setToolTip(
+                self.tr("You are logged in with the following username at {}").format(
+                    self.network_manager.url
                 )
             )
 
@@ -155,14 +159,23 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
         self.createButton.clicked.connect(lambda: self.on_create_button_clicked())
+        self.convertButton.clicked.connect(lambda: self.on_convert_button_clicked())
         self.refreshButton.clicked.connect(lambda: self.on_refresh_button_clicked())
         self.backButton.clicked.connect(lambda: self.on_back_button_clicked())
         self.submitButton.clicked.connect(lambda: self.on_submit_button_clicked())
-        self.logoutButton.clicked.connect(lambda: self.on_logout_button_clicked())
         self.projectsTable.cellDoubleClicked.connect(
             lambda: self.on_projects_table_cell_double_clicked()
         )
-        self.buttonBox.clicked.connect(lambda: self.on_button_box_clicked())
+
+        self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(
+            lambda: self.on_button_box_clicked()
+        )
+        self.buttonBox.button(QDialogButtonBox.Reset).setText(self.tr("Logout"))
+        self.buttonBox.button(QDialogButtonBox.Reset).setIcon(QIcon())
+        self.buttonBox.button(QDialogButtonBox.Reset).clicked.connect(
+            lambda: self.on_logout_button_clicked()
+        )
+
         self.projectsTable.selectionModel().selectionChanged.connect(
             lambda: self.on_projects_table_selection_changed()
         )
@@ -218,6 +231,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             3, QHeaderView.ResizeToContents
         )
 
+        self.update_ui_state()
+
     @property
     def current_cloud_project(self) -> Optional[CloudProject]:
         return self._current_cloud_project
@@ -226,9 +241,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def current_cloud_project(self, value: Optional[CloudProject]):
         self._current_cloud_project = value
         self.update_project_table_selection()
+        self.update_ui_state()
 
     def on_auth_accepted(self):
-        self.welcomeLabelValue.setText(self.network_manager.auth().config("username"))
+        self.welcomeLabel.setText(
+            self.tr("Greetings {}.").format(
+                self.network_manager.auth().config("username")
+            )
+        )
         self.network_manager.projects_cache.refresh()
 
     def on_projects_cached_projects_started(self) -> None:
@@ -776,6 +796,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             if QgsProject.instance().read(str(project_filename.local_path)):
                 self.update_project_table_selection()
+                self.update_ui_state()
 
             return
 
@@ -936,6 +957,27 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.current_cloud_project = None
         self.show_project_form()
 
+    def on_convert_button_clicked(self) -> None:
+        if QgsProject.instance().mapLayers():
+            self.cloud_convert_dlg = CloudConverterDialog(
+                iface,
+                self.network_manager,
+                QgsProject.instance(),
+                self,
+            )
+            self.cloud_convert_dlg.setAttribute(Qt.WA_DeleteOnClose)
+            self.cloud_convert_dlg.setWindowFlags(
+                self.cloud_convert_dlg.windowFlags() | Qt.Tool
+            )
+            self.cloud_convert_dlg.exec()
+            self.update_ui_state()
+        else:
+            iface.messageBar().pushMessage(
+                self.tr("At least one layer is required to convert a project."),
+                Qgis.Warning,
+                5,
+            )
+
     def show_project_form(self) -> None:
         self.show()
 
@@ -1092,6 +1134,15 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         reply.finished.connect(
             lambda: self.on_create_project_finished_projects_refreshed(project.id)
         )
+
+    def update_ui_state(self) -> None:
+        if (
+            self.network_manager.projects_cache.currently_open_project
+            or self.network_manager.projects_cache.is_currently_open_project_cloud_local
+        ):
+            self.convertButton.setEnabled(False)
+        else:
+            self.convertButton.setEnabled(True)
 
     def update_project_table_selection(self) -> None:
         font = QFont()
