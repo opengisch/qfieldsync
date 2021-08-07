@@ -1107,9 +1107,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.projectsTable.item(row_idx, 0).setFont(font)
             self.projectsTable.item(row_idx, 1).setFont(font)
-            self.projectsTable.cellWidget(row_idx, 4).children()[3].setEnabled(
-                not is_currently_open_project
-            )
+            if self.projectsTable.cellWidget(row_idx, 4):
+                self.projectsTable.cellWidget(row_idx, 4).children()[3].setEnabled(
+                    not is_currently_open_project
+                )
 
             if cloud_project == self.current_cloud_project:
                 index = self.projectsTable.model().index(row_idx, 0)
