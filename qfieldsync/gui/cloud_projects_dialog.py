@@ -109,6 +109,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog = None
         self.project_transfer = None
 
+        self.update_welcome_label()
+
         if not self.network_manager.has_token():
             CloudLoginDialog.show_auth_dialog(
                 self.network_manager,
@@ -117,24 +119,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 parent=self,
             )
         else:
-            self.welcomeLabel.setText(
-                self.tr("Greetings {}.").format(
-                    self.network_manager.auth().config("username")
-                )
-            )
-
-        if self.network_manager.url == self.network_manager.server_urls()[0]:
-            self.welcomeLabel.setToolTip(
-                self.tr("You are logged in with the following username")
-            )
-        else:
-            self.welcomeLabel.setToolTip(
-                self.tr("You are logged in with the following username at {}").format(
-                    self.network_manager.url
-                )
-            )
-
-        if self.network_manager.has_token():
             self.show_projects()
 
         self.use_current_project_directory_action = QAction(
@@ -257,11 +241,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.update_ui_state()
 
     def on_auth_accepted(self):
-        self.welcomeLabel.setText(
-            self.tr("Greetings {}.").format(
-                self.network_manager.auth().config("username")
-            )
-        )
+        self.update_welcome_label()
         self.network_manager.projects_cache.refresh()
 
     def on_projects_cached_projects_started(self) -> None:
@@ -1046,6 +1026,27 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         reply.finished.connect(
             lambda: self.on_create_project_finished_projects_refreshed(project.id)
         )
+
+    def update_welcome_label(self) -> None:
+        if self.network_manager.has_token():
+            self.welcomeLabel.setText(
+                self.tr("Greetings {}.").format(
+                    self.network_manager.auth().config("username")
+                )
+            )
+            if self.network_manager.url == self.network_manager.server_urls()[0]:
+                self.welcomeLabel.setToolTip(
+                    self.tr("You are logged in with the following username")
+                )
+            else:
+                self.welcomeLabel.setToolTip(
+                    self.tr(
+                        "You are logged in with the following username at {}"
+                    ).format(self.network_manager.url)
+                )
+        else:
+            self.welcomeLabel.setText(self.tr("Logged out"))
+            self.welcomeLabel.setToolTip("")
 
     def update_ui_state(self) -> None:
         if (
