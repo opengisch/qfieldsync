@@ -25,16 +25,22 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from PyQt5.QtCore import QUrl
 from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import (
     QDateTime,
     QItemSelectionModel,
     QRegularExpression,
     Qt,
+    QUrl,
     pyqtSignal,
 )
-from qgis.PyQt.QtGui import QFont, QIcon, QRegularExpressionValidator, QValidator
+from qgis.PyQt.QtGui import (
+    QFont,
+    QIcon,
+    QPixmap,
+    QRegularExpressionValidator,
+    QValidator,
+)
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -64,6 +70,7 @@ from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 from qfieldsync.utils.permissions import can_change_project_owner
 from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
+from qfieldsync.utils.qt_utils import rounded_pixmap
 
 CloudProjectsDialogUi, _ = loadUiType(
     str(Path(__file__).parent.joinpath("../ui/cloud_projects_dialog.ui"))
@@ -190,6 +197,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
         self.localDirButton.menu().addAction(self.use_current_project_directory_action)
 
+        self.network_manager.avatar_success.connect(lambda: self.update_welcome_label())
+        self.network_manager.login_finished.connect(lambda: self.update_welcome_label())
         self.network_manager.logout_success.connect(lambda: self._on_logout_success())
         self.network_manager.logout_failed.connect(
             lambda err: self._on_logout_failed(err)
@@ -241,8 +250,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.update_ui_state()
 
     def on_auth_accepted(self):
-        self.update_welcome_label()
         self.network_manager.projects_cache.refresh()
+        self.update_welcome_label()
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
@@ -1029,11 +1038,21 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def update_welcome_label(self) -> None:
         if self.network_manager.has_token():
+            avatar_filename = self.network_manager.user_details.get("avatar_filename")
+            if avatar_filename:
+                self.avatarLabel.setVisible(True)
+                pixmap = rounded_pixmap(avatar_filename, self.avatarLabel.height())
+                self.avatarLabel.setPixmap(pixmap)
+            else:
+                self.avatarLabel.setVisible(False)
+                self.avatarLabel.setPixmap(QPixmap())
+
             self.welcomeLabel.setText(
                 self.tr("Greetings {}.").format(
                     self.network_manager.auth().config("username")
                 )
             )
+
             if self.network_manager.url == self.network_manager.server_urls()[0]:
                 self.welcomeLabel.setToolTip(
                     self.tr("You are logged in with the following username")
@@ -1045,7 +1064,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     ).format(self.network_manager.url)
                 )
         else:
-            self.welcomeLabel.setText(self.tr("Logged out"))
+            self.avatarLabel.setVisible(False)
+            self.welcomeLabel.setText("Logged out in.")
             self.welcomeLabel.setToolTip("")
 
     def update_ui_state(self) -> None:
