@@ -31,10 +31,7 @@ from qgis.PyQt.uic import loadUiType
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
-from qfieldsync.libqfieldsync.utils.file_utils import (
-    fileparts,
-    get_unique_empty_dirname,
-)
+from qfieldsync.libqfieldsync.utils.file_utils import fileparts
 
 from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import make_folder_selector
@@ -92,8 +89,6 @@ class PackageDialog(QDialog, DialogUi):
                 self.qfield_preferences.value("exportDirectory"),
                 fileparts(QgsProject.instance().fileName())[1],
             )
-
-        export_dirname = get_unique_empty_dirname(export_dirname)
 
         self.manualDir.setText(QDir.toNativeSeparators(str(export_dirname)))
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
