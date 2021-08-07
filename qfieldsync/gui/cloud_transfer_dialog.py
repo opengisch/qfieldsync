@@ -124,6 +124,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
             )
 
+        self.errorLabel.setVisible(False)
+
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(
             lambda: self.on_project_ok_clicked()
@@ -486,6 +488,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.update_detail(item)
 
     def on_error(self, descr: str, error: Exception = None) -> None:
+        self.errorLabel.setVisible(True)
         self.errorLabel.setText(self.errorLabel.text() + "\n" + descr)
 
     def on_upload_transfer_progress(self, fraction: float) -> None:
