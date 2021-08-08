@@ -131,6 +131,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             )
         )
 
+        self.projectsType.addItem(self.tr("My projects"))
+        self.projectsType.addItem(self.tr("Community"))
+        self.projectsType.currentIndexChanged.connect(lambda: self.show_projects())
+
         self.projectsTable.setColumnWidth(0, self.projectsTable.width() / 2)
         self.projectsTable.setColumnWidth(1, self.projectsTable.width() / 3.25)
         self.projectsTable.setColumnWidth(2, self.projectsTable.width() / 10)
@@ -152,9 +156,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.deleteButton.setEnabled(False)
 
+        self.refreshButton.setIcon(QgsApplication.getThemeIcon("/mActionRefresh.svg"))
+        self.refreshButton.clicked.connect(lambda: self.on_refresh_button_clicked())
+
         self.createButton.clicked.connect(lambda: self.on_create_button_clicked())
         self.convertButton.clicked.connect(lambda: self.on_convert_button_clicked())
-        self.refreshButton.clicked.connect(lambda: self.on_refresh_button_clicked())
         self.backButton.clicked.connect(lambda: self.on_back_button_clicked())
         self.submitButton.clicked.connect(lambda: self.on_submit_button_clicked())
         self.projectsTable.cellDoubleClicked.connect(
@@ -630,7 +636,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             return
 
         for cloud_project in self.network_manager.projects_cache.projects:
-            if cloud_project.user_role_origin == "public":
+            if (
+                self.projectsType.currentIndex() == 0
+                and cloud_project.user_role_origin == "public"
+            ) or (
+                self.projectsType.currentIndex() == 1
+                and cloud_project.user_role_origin != "public"
+            ):
                 continue
 
             count = self.projectsTable.rowCount()
@@ -1060,7 +1072,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 )
         else:
             self.avatarLabel.setVisible(False)
-            self.welcomeLabel.setText("Logged out in.")
+            self.welcomeLabel.setText("Logged out.")
             self.welcomeLabel.setToolTip("")
 
     def update_ui_state(self) -> None:
@@ -1135,6 +1147,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def update_project_buttons(self) -> None:
         has_selection = False
         has_local_project_file = False
+        is_public = False
         is_currently_open_project = False
         if self.projectsTable.selectionModel().hasSelection():
             has_selection = True
@@ -1142,6 +1155,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(
                 Qt.UserRole
             )
+            is_public = self.current_cloud_project.user_role_origin == "public"
             is_currently_open_project = (
                 self.current_cloud_project
                 == self.network_manager.projects_cache.currently_open_project
@@ -1174,7 +1188,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.openButton.setEnabled(
             has_selection and has_local_project_file and not is_currently_open_project
         )
-        self.deleteButton.setEnabled(has_selection)
+        self.deleteButton.setEnabled(has_selection and not is_public)
 
     def show_sync_popup(self) -> None:
         assert self.current_cloud_project is not None, "No project to download selected"

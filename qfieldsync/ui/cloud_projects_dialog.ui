@@ -114,48 +114,7 @@
         <number>0</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="projectsSelectButtonLayout" stretch="0,0,0">
-         <item>
-          <widget class="QLabel" name="projectsListLabel">
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Cloud Projects List</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="projectsSelectButtonSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QToolButton" name="refreshButton">
-           <property name="toolTip">
-            <string>Refresh Projects List</string>
-           </property>
-           <property name="text">
-            <string>Refresh</string>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../resources/refresh.svg</normaloff>../resources/refresh.svg</iconset>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QComboBox" name="projectsType"/>
        </item>
        <item>
         <widget class="QTableWidget" name="projectsTable">
@@ -274,6 +233,20 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="refreshButton">
+           <property name="toolTip">
+            <string>Refresh Cloud Projects List</string>
+           </property>
+           <property name="text">
+            <string></string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../resources/refresh.svg</normaloff>../resources/refresh.svg</iconset>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -335,6 +308,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QLabel" name="projectPropertiesLabel">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
            <property name="text">
             <string>Project Properties</string>
            </property>
