@@ -107,7 +107,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         items.append(my_projects)
 
         public_projects = QFieldCloudGroupItem(
-            self, "Public projects", "public", "../resources/cloud.svg", 2
+            self, "Community", "public", "../resources/cloud.svg", 2
         )
         items.append(public_projects)
 
