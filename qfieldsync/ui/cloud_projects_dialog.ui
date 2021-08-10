@@ -239,7 +239,7 @@
             <string>Refresh Cloud Projects List</string>
            </property>
            <property name="text">
-            <string></string>
+            <string/>
            </property>
            <property name="icon">
             <iconset>
@@ -307,6 +307,17 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
+          <widget class="QToolButton" name="backButton">
+           <property name="text">
+            <string>Back</string>
+           </property>
+           <property name="icon">
+             <iconset>
+             <normaloff>:/images/themes/default/mActionArrowLeft.svg</normaloff>:/images/themes/default/mActionArrowLeft.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="projectPropertiesLabel">
            <property name="font">
             <font>
@@ -331,17 +342,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="QToolButton" name="backButton">
-           <property name="text">
-            <string>Back</string>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../resources/arrow_back.svg</normaloff>../resources/arrow_back.svg</iconset>
-           </property>
-          </widget>
          </item>
         </layout>
        </item>
