@@ -497,7 +497,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.feedbackLabel.setText("")
 
     def on_use_current_project_directory_action_triggered(self, _toggled: bool) -> None:
-        self.localDirLineEdit.setText(QgsProject.instance().homePath())
+        self.localDirLineEdit.setText(str(Path(QgsProject.instance().homePath())))
 
     def on_button_box_clicked(self) -> None:
         self.close()
@@ -525,7 +525,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.current_cloud_project.update_data({"local_dir": local_dir})
 
     def on_local_dir_button_clicked(self) -> None:
-        self.localDirLineEdit.setText(self.select_local_dir())
+        dirname = self.select_local_dir()
+        if dirname:
+            self.localDirLineEdit.setText(str(Path(self.select_local_dir())))
 
     def on_project_owner_refresh_button_clicked(self) -> None:
         self.request_refresh_project_owners_combobox()
@@ -913,10 +915,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectDescriptionTextEdit.setPlainText("")
             self.projectIsPrivateCheckBox.setChecked(True)
 
+            # check if there is already another cloud project using the currently open filename
             if CloudProject.get_cloud_project_id(QgsProject.instance().homePath()):
                 self.localDirLineEdit.setText("")
             else:
-                self.localDirLineEdit.setText(QgsProject().instance().homePath())
+                self.localDirLineEdit.setText(
+                    str(Path(QgsProject().instance().homePath()))
+                )
 
         else:
             self.submitButton.setText(self.tr("Update project details"))
