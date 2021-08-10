@@ -131,6 +131,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             )
         )
 
+        # TODO show when public projects are ready
         self.projectsType.hide()
         self.projectsType.addItem(self.tr("My projects"))
         self.projectsType.addItem(self.tr("Community"))
