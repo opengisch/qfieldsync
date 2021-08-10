@@ -132,6 +132,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
         self.projectsType.addItem(self.tr("My projects"))
+        self.projectsType.addItem(self.tr("Community"))
         self.projectsType.setCurrentIndex(0)
         self.projectsType.currentIndexChanged.connect(lambda: self.show_projects())
 
