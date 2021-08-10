@@ -71,7 +71,7 @@ from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
-from qfieldsync.utils.permissions import can_change_project_owner
+from qfieldsync.utils.permissions import can_change_project_owner, can_delete_project
 from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
@@ -695,7 +695,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 iface.messageBar().pushInfo(
                     f'QFieldSync "{self.current_cloud_project.name}":',
                     self.tr(
-                        "Cannot find local project file. Please first synchronize."
+                        "Cannot find local project file. QFieldSync will first download the project."
                     ),
                 )
                 return
@@ -1151,21 +1151,21 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def update_project_buttons(self) -> None:
         has_selection = False
-        is_public = False
         is_currently_open_project = False
+        can_delete_selected_project = False
         if self.projectsTable.selectionModel().hasSelection():
             has_selection = True
             row_idx = self.projectsTable.currentRow()
             self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(
                 Qt.UserRole
             )
-            is_public = self.current_cloud_project.user_role_origin == "public"
+            assert self.current_cloud_project
+
             is_currently_open_project = (
                 self.current_cloud_project
                 == self.network_manager.projects_cache.currently_open_project
             )
-            assert self.current_cloud_project
-
+            can_delete_selected_project = can_delete_project(self.current_cloud_project)
             root_project_files = self.current_cloud_project.root_project_files
             if len(root_project_files) == 1:
                 self.openButton.setToolTip(
@@ -1189,7 +1189,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.synchronizeButton.setEnabled(has_selection)
         self.editButton.setEnabled(has_selection)
         self.openButton.setEnabled(has_selection and not is_currently_open_project)
-        self.deleteButton.setEnabled(has_selection and not is_public)
+        self.deleteButton.setEnabled(has_selection and can_delete_selected_project)
 
     def show_sync_popup(self) -> None:
         assert self.current_cloud_project is not None, "No project to download selected"
