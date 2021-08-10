@@ -275,10 +275,10 @@
        <item>
         <widget class="QPushButton" name="convertButton">
          <property name="toolTip">
-          <string>Convert Current Project to Cloud Project</string>
+          <string>Convert Currently Open Project to Cloud Project</string>
          </property>
          <property name="text">
-          <string>Convert current project to cloud project</string>
+          <string>Convert currently open project to cloud project</string>
          </property>
         </widget>
        </item>
