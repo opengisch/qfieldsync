@@ -309,7 +309,9 @@ class CloudTransferrer(QObject):
             self.throttled_downloader,
             self.throttled_deleter,
         ]:
-            transferrer.abort()
+            # it might be deleted
+            if transferrer:
+                transferrer.abort()
 
         self.abort.emit()
 
