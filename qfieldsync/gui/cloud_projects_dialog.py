@@ -1191,8 +1191,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         "Multiple .qgs or .qgz project files found in the project directory"
                     )
                 )
-        else:
-            self.current_cloud_project = None
 
         self.synchronizeButton.setEnabled(has_selection)
         self.editButton.setEnabled(has_selection)
