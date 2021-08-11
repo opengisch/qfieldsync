@@ -885,7 +885,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.cloud_convert_dlg.setWindowFlags(
                 self.cloud_convert_dlg.windowFlags() | Qt.Tool
             )
-            self.cloud_convert_dlg.exec()
+            self.cloud_convert_dlg.open()
             self.update_ui_state()
         else:
             iface.messageBar().pushMessage(
@@ -1207,7 +1207,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
-        self.transfer_dialog.exec()
+        self.transfer_dialog.open()
 
     def on_transfer_dialog_rejected(self) -> None:
         if self.project_transfer:
