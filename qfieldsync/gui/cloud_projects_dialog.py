@@ -530,7 +530,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_local_dir_button_clicked(self) -> None:
         dirname = self.select_local_dir()
         if dirname:
-            self.localDirLineEdit.setText(str(Path(self.select_local_dir())))
+            self.localDirLineEdit.setText(str(Path(dirname)))
 
     def on_project_owner_refresh_button_clicked(self) -> None:
         self.request_refresh_project_owners_combobox()
