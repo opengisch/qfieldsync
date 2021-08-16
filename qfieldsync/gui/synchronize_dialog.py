@@ -97,7 +97,11 @@ class SynchronizeDialog(QDialog, DialogUi):
             self.offline_editing.layerProgressUpdated.connect(self.update_total)
             self.offline_editing.progressModeSet.connect(self.update_mode)
             self.offline_editing.progressUpdated.connect(self.update_value)
-            self.offline_editing.synchronize()
+
+            try:
+                self.offline_editing.synchronize(True)
+            except Exception:
+                self.offline_editing.synchronize()
 
             project_config = ProjectConfiguration(QgsProject.instance())
             original_path = Path(project_config.original_project_path or "")
