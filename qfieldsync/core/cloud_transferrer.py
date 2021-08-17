@@ -467,7 +467,7 @@ class ThrottledFileTransferrer(QObject):
         self,
         network_manager,
         cloud_project,
-        files: List[str],
+        filenames: List[str],
         transfer_type: FileTransfer.Type,
         max_parallel_requests: int = 8,
     ) -> None:
@@ -477,7 +477,7 @@ class ThrottledFileTransferrer(QObject):
         self.transfers: Dict[str, FileTransfer] = {}
         self.network_manager = network_manager
         self.cloud_project = cloud_project
-        self.filenames = files
+        self.filenames = filenames
         self.max_parallel_requests = max_parallel_requests
         self.finished_count = 0
         self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
