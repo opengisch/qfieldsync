@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import List, Union
 
 from qgis.core import QgsMapLayer, QgsProject
+from qgis.PyQt.QtCore import QCoreApplication
 
 from qfieldsync.libqfieldsync import ProjectConfiguration
 from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder
@@ -40,7 +41,9 @@ def get_project_title(project: QgsProject) -> str:
 
 def open_project(filename: str, filename_to_read: str = None) -> bool:
     project = QgsProject.instance()
+    QCoreApplication.processEvents()
     project.clear()
+    QCoreApplication.processEvents()
 
     is_success = project.read(filename_to_read or filename)
     project.setFileName(filename)
