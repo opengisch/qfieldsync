@@ -227,8 +227,9 @@ class CloudTransferrer(QObject):
     def _on_throttled_delete_error(self, filename: str, error: str) -> None:
         self.throttled_deleter.abort()
 
-    def _on_throttled_delete_finished(self, filename: str, error: str) -> None:
-        self.delete_finished.emit()
+    def _on_throttled_delete_finished(self) -> None:
+        if self.delete_files_finished == len(self._files_to_delete):
+            self.delete_finished.emit()
 
     def _download(self) -> None:
         assert not self.is_upload_active, "Upload in progress"
