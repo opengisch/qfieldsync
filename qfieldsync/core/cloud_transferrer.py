@@ -513,7 +513,7 @@ class ThrottledFileTransferrer(QObject):
         self.aborted.emit()
 
     def _download(self) -> None:
-        transfers = []
+        transfers: List[FileTransfer] = []
 
         for transfer in self.transfers.values():
             if transfer.is_finished:
@@ -604,7 +604,7 @@ class ThrottledFileTransferrer(QObject):
         return on_download_progress
 
     def _upload(self) -> None:
-        transfers = []
+        transfers: List[FileTransfer] = []
 
         for transfer in self.transfers.values():
             if transfer.is_finished:
