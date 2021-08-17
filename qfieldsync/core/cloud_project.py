@@ -328,7 +328,7 @@ class CloudProject:
             local_filenames = [
                 f
                 for f in [
-                    str(f.relative_to(self.local_dir))
+                    str(f.relative_to(self.local_dir).as_posix())
                     for f in Path(self.local_dir).glob("**/*")
                     if f.is_file()
                 ]
