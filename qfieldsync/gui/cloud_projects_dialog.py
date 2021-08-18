@@ -1069,7 +1069,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.welcomeLabel.setText(
                 self.tr("Greetings {}.").format(
-                    self.network_manager.auth().config("username")
+                    f'<a href="{self.network_manager.url}">{self.network_manager.auth().config("username")}</a>'
                 )
             )
 
