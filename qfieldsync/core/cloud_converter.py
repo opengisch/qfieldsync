@@ -121,9 +121,10 @@ class CloudConverter(QObject):
                 str(project_path.parent.joinpath("DCIM")),
             )
 
-            self.project.setTitle(
-                self.tr("{} (QFieldCloud)").format(self.project.title())
-            )
+            title = self.project.title()
+            title_suffix = self.tr("(QFieldCloud)")
+            if not title.endswith(title_suffix):
+                self.project.setTitle("{} {}".format(title, title_suffix))
             # Now we have a project state which can be saved as cloud project
             self.project.write(str(project_path))
             is_converted = True

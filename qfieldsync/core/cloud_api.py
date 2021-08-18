@@ -154,7 +154,6 @@ class CloudNetworkAccessManager(QObject):
         ]
 
     def auth(self) -> QgsAuthMethodConfig:
-        self.url
         auth_manager = QgsApplication.authManager()
 
         if not auth_manager.masterPasswordHashInDatabase():
@@ -273,7 +272,7 @@ class CloudNetworkAccessManager(QObject):
         )
 
     def update_project(
-        self, project_id: str, name: str, owner: str, description: str, private: bool
+        self, project_id: str, name: str, description: str
     ) -> QNetworkReply:
         """Update an existing QFieldCloud project"""
 
@@ -281,9 +280,7 @@ class CloudNetworkAccessManager(QObject):
             ["projects", project_id],
             {
                 "name": name,
-                "owner": owner,
                 "description": description,
-                "private": private,
             },
         )
 

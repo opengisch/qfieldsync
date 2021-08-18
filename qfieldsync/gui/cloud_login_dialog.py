@@ -47,8 +47,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         parent: QWidget = None,
     ):
         if CloudLoginDialog.instance:
-            if parent:
-                CloudLoginDialog.instance.setParent(parent)
             CloudLoginDialog.instance.show()
             return
 
@@ -111,6 +109,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.qfieldCloudIcon.mouseDoubleClickEvent = (
             lambda event: self.toggleServerUrlVisibility()
         )
+        self.hide()
 
     def toggleServerUrlVisibility(self):
         self.serverUrlLabel.setVisible(not self.serverUrlLabel.isVisible())

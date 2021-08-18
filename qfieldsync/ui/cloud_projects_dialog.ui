@@ -168,6 +168,27 @@
        <item>
         <layout class="QHBoxLayout" name="projectsActionsHLayout">
          <item>
+          <widget class="QPushButton" name="createButton">
+           <property name="toolTip">
+            <string>Create New Project</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../resources/cloud_create.svg</normaloff>../resources/cloud_create.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="synchronizeButton">
            <property name="toolTip">
             <string>Synchronize Selected Cloud Project</string>
@@ -252,39 +273,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <widget class="QLabel" name="projectsActionLabel">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>New Cloud Project</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="createButton">
-         <property name="toolTip">
-          <string>Create Blank QFieldCloud Project</string>
-         </property>
-         <property name="text">
-          <string>Create blank cloud project</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="convertButton">
-         <property name="toolTip">
-          <string>Convert Currently Open Project to Cloud Project</string>
-         </property>
-         <property name="text">
-          <string>Convert currently open project to cloud project</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="projectsFormPage">
@@ -315,7 +303,7 @@
             <string>Back</string>
            </property>
            <property name="icon">
-             <iconset>
+            <iconset>
              <normaloff>:/images/themes/default/mActionArrowLeft.svg</normaloff>:/images/themes/default/mActionArrowLeft.svg</iconset>
            </property>
           </widget>
@@ -698,6 +686,25 @@
          </widget>
         </widget>
        </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="projectCreatePage">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
       </layout>
      </widget>
     </widget>
