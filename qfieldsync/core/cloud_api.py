@@ -778,7 +778,8 @@ class CloudProjectsCache(QObject):
 
     def refresh_filesystem_watchers(self, _dirpath: str = "") -> None:
         # TODO in theory we can update only the _dirpath. There are gothas with links etc, better keep it KISS for now
-        self._fs_watcher.removePaths(self._fs_watcher.directories())
+        if self._fs_watcher.directories():
+            self._fs_watcher.removePaths(self._fs_watcher.directories())
 
         if self._projects:
             for project in self._projects:
