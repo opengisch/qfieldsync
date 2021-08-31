@@ -29,7 +29,7 @@ from typing import Any, Dict, Iterator, List, Optional
 from qgis.core import QgsProject
 
 from qfieldsync.core.preferences import Preferences
-from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
+from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 
 
 class ProjectFileCheckout(IntFlag):

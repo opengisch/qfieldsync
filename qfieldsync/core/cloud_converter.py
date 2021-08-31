@@ -27,11 +27,11 @@ from qgis.utils import iface
 
 from qfieldsync.libqfieldsync.layer import LayerSource
 from qfieldsync.libqfieldsync.utils.file_utils import copy_images
-from qfieldsync.utils.qgis_utils import (
+from qfieldsync.libqfieldsync.utils.qgis import (
     get_qgis_files_within_dir,
     make_temp_qgis_file,
-    open_project,
 )
+from qfieldsync.utils.qgis_utils import open_project
 
 
 class CloudConverter(QObject):

@@ -40,7 +40,7 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
-from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
+from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 
 
 class QFieldCloudItemProvider(QgsDataItemProvider):

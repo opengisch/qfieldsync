@@ -19,46 +19,13 @@
  ***************************************************************************/
 """
 
-import os
-import tempfile
-from pathlib import Path
-from typing import List, Union
+from typing import List
 
-from qgis.core import QgsMapLayer, QgsProject
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.core import QgsProject
 
 from qfieldsync.libqfieldsync import ProjectConfiguration
 from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder
-
-
-def get_project_title(project: QgsProject) -> str:
-    """ Gets project title, or if non available, the basename of the filename"""
-    if project.title():
-        return project.title()
-    else:
-        return Path(project.fileName()).stem
-
-
-def open_project(filename: str, filename_to_read: str = None) -> bool:
-    project = QgsProject.instance()
-    QCoreApplication.processEvents()
-    project.clear()
-    QCoreApplication.processEvents()
-
-    is_success = project.read(filename_to_read or filename)
-    project.setFileName(filename)
-
-    return is_success
-
-
-def make_temp_qgis_file(project: QgsProject) -> str:
-    project_backup_dir = tempfile.mkdtemp()
-    original_filename = project.fileName()
-    backup_filename = os.path.join(project_backup_dir, f"{project.baseName()}.qgs")
-    project.write(backup_filename)
-    project.setFileName(original_filename)
-
-    return backup_filename
+from qfieldsync.libqfieldsync.utils.qgis import open_project
 
 
 def import_checksums_of_project(dirname: str) -> List[str]:
@@ -68,16 +35,3 @@ def import_checksums_of_project(dirname: str) -> List[str]:
     original_project_path = ProjectConfiguration(project).original_project_path
     open_project(original_project_path)
     return ProjectConfiguration(project).imported_files_checksums
-
-
-def get_memory_layers(project: QgsProject) -> List[QgsMapLayer]:
-    return [
-        layer
-        for layer in project.mapLayers().values()
-        if layer.isValid() and layer.dataProvider().name() == "memory"
-    ]
-
-
-def get_qgis_files_within_dir(dirname: Union[str, Path]) -> List[Path]:
-    dirname = Path(dirname)
-    return list(dirname.glob("*.qgs")) + list(dirname.glob("*.qgz"))

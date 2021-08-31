@@ -32,8 +32,8 @@ from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
 from qfieldsync.libqfieldsync.utils.file_utils import fileparts
+from qfieldsync.libqfieldsync.utils.qgis import get_project_title
 
-from ..utils.qgis_utils import get_project_title
 from ..utils.qt_utils import make_folder_selector
 
 DialogUi, _ = loadUiType(
