@@ -26,7 +26,7 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from qgis.core import Qgis, QgsProject, QgsProviderRegistry
+from qgis.core import Qgis, QgsProject
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QDir, Qt
 from qgis.PyQt.QtWidgets import (
@@ -48,6 +48,7 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
+from qfieldsync.libqfieldsync.layer import LayerSource
 from qfieldsync.libqfieldsync.utils.file_utils import (
     fileparts,
     get_unique_empty_dirname,
@@ -230,21 +231,14 @@ class CloudConverterDialog(QDialog, DialogUi):
         """
         Show the info label if there are unconfigured layers
         """
-        pathResolver = QgsProject.instance().pathResolver()
         localizedDataPathLayers = []
         for layer in list(self.project.mapLayers().values()):
+            layer_source = LayerSource(layer)
             if layer.dataProvider() is not None:
-                metadata = QgsProviderRegistry.instance().providerMetadata(
-                    layer.dataProvider().name()
-                )
-                if metadata is not None:
-                    decoded = metadata.decodeUri(layer.source())
-                    if "path" in decoded:
-                        path = pathResolver.writePath(decoded["path"])
-                        if path.startswith("localized:"):
-                            localizedDataPathLayers.append(
-                                "- {} ({})".format(layer.name(), path[10:])
-                            )
+                if layer_source.is_localized_path:
+                    localizedDataPathLayers.append(
+                        "- {} ({})".format(layer.name(), layer_source.filename)
+                    )
 
         if localizedDataPathLayers:
             if len(localizedDataPathLayers) == 1:

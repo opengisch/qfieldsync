@@ -21,7 +21,7 @@
 
 from pathlib import Path
 
-from qgis.core import QgsMapLayer, QgsProject, QgsProviderRegistry
+from qgis.core import QgsMapLayer, QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QObject, pyqtSignal
 from qgis.utils import iface
 
@@ -79,7 +79,6 @@ class CloudConverter(QObject):
             self.__layers = list(self.project.mapLayers().values())
 
             # Loop through all layers and copy them to the destination folder
-            path_resolver = self.project.pathResolver()
             for current_layer_index, layer in enumerate(self.__layers):
                 self.total_progress_updated.emit(
                     current_layer_index,
@@ -93,16 +92,9 @@ class CloudConverter(QObject):
                     continue
 
                 if layer.dataProvider() is not None:
-                    provider_metadata = QgsProviderRegistry.instance().providerMetadata(
-                        layer.dataProvider().name()
-                    )
-                    if provider_metadata is not None:
-                        decoded = provider_metadata.decodeUri(layer.source())
-                        if "path" in decoded:
-                            path = path_resolver.writePath(decoded["path"])
-                            if path.startswith("localized:"):
-                                # layer stored in localized data path, skip
-                                continue
+                    # layer stored in localized data path, skip
+                    if layer_source.is_localized_path:
+                        continue
 
                 if layer.type() == QgsMapLayer.VectorLayer:
                     if not layer_source.convert_to_gpkg(self.export_dirname):
