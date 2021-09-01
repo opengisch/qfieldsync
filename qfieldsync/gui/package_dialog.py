@@ -22,7 +22,7 @@
 """
 import os
 
-from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
+from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import QDir, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
@@ -156,24 +156,17 @@ class PackageDialog(QDialog, DialogUi):
         """
         Show the info label if there are unconfigured layers
         """
-        pathResolver = QgsProject.instance().pathResolver()
         showInfoConfiguration = False
         localizedDataPathLayers = []
         for layer in list(self.project.mapLayers().values()):
-            if not LayerSource(layer).is_configured:
+            layer_source = LayerSource(layer)
+            if not layer_source.is_configured:
                 showInfoConfiguration = True
-            if layer.dataProvider() is not None:
-                metadata = QgsProviderRegistry.instance().providerMetadata(
-                    layer.dataProvider().name()
+
+            if layer_source.is_localized_path:
+                localizedDataPathLayers.append(
+                    "- {} ({})".format(layer.name(), layer_source.filename)
                 )
-                if metadata is not None:
-                    decoded = metadata.decodeUri(layer.source())
-                    if "path" in decoded:
-                        path = pathResolver.writePath(decoded["path"])
-                        if path.startswith("localized:"):
-                            localizedDataPathLayers.append(
-                                "- {} ({})".format(layer.name(), path[10:])
-                            )
 
         self.infoConfigurationLabel.setVisible(showInfoConfiguration)
         if localizedDataPathLayers:
