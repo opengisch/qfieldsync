@@ -118,9 +118,11 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.stackedWidget.setCurrentWidget(self.selectTypePage)
 
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
+            self.createCloudRadioButton.setChecked(True)
             self.cloudifyRadioButton.setEnabled(False)
             self.cloudifyInfoLabel.setEnabled(False)
         else:
+            self.cloudifyRadioButton.setChecked(True)
             self.cloudifyRadioButton.setEnabled(True)
             self.cloudifyInfoLabel.setEnabled(True)
 
