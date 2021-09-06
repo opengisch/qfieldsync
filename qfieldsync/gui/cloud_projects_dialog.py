@@ -70,9 +70,9 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
+from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qfieldsync.utils.cloud_utils import closure, to_cloud_title
 from qfieldsync.utils.permissions import can_change_project_owner, can_delete_project
-from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
 CloudProjectsDialogUi, _ = loadUiType(

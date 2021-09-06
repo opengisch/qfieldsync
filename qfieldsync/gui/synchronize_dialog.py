@@ -36,11 +36,8 @@ from qfieldsync.libqfieldsync.utils.file_utils import (
     get_project_in_folder,
     import_file_checksum,
 )
-from qfieldsync.utils.qgis_utils import (
-    import_checksums_of_project,
-    make_temp_qgis_file,
-    open_project,
-)
+from qfieldsync.libqfieldsync.utils.qgis import make_temp_qgis_file, open_project
+from qfieldsync.utils.qgis_utils import import_checksums_of_project
 from qfieldsync.utils.qt_utils import make_folder_selector
 
 DialogUi, _ = loadUiType(

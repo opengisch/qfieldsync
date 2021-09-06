@@ -47,9 +47,11 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.libqfieldsync.utils.file_utils import get_unique_empty_dirname
-from qfieldsync.utils.qgis_utils import get_qgis_files_within_dir
+from qfieldsync.libqfieldsync.utils.qgis import (
+    get_memory_layers,
+    get_qgis_files_within_dir,
+)
 
-from ..utils.qgis_utils import get_memory_layers
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
 CloudTransferDialogUi, _ = loadUiType(
