@@ -20,9 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 """
-from enum import Enum
 from pathlib import Path
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional
 
 from qgis.core import QgsApplication, QgsProject
 from qgis.PyQt.QtCore import (
@@ -68,20 +67,13 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
-from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qfieldsync.utils.cloud_utils import closure
+from qfieldsync.utils.cloud_utils import LocalDirFeedback, closure, local_dir_feedback
 from qfieldsync.utils.permissions import can_delete_project
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
 CloudProjectsDialogUi, _ = loadUiType(
     str(Path(__file__).parent.joinpath("../ui/cloud_projects_dialog.ui"))
 )
-
-
-class LocalDirFeedback(Enum):
-    Error = "error"
-    Warning = "warning"
-    Success = "success"
 
 
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
@@ -517,19 +509,18 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_local_dir_line_edit_text_changed(self) -> None:
         local_dir = self.localDirLineEdit.text()
-        self.submitButton.setEnabled(False)
-
-        feedback, feedback_msg = self.local_dir_feedback(local_dir)
+        feedback, feedback_msg = local_dir_feedback(local_dir)
         self.localDirFeedbackLabel.setText(feedback_msg)
 
         if feedback == LocalDirFeedback.Error:
             self.localDirFeedbackLabel.setStyleSheet("color: red;")
+            self.submitButton.setEnabled(False)
         elif feedback == LocalDirFeedback.Warning:
             self.localDirFeedbackLabel.setStyleSheet("color: orange;")
+            self.submitButton.setEnabled(True)
         else:
             self.localDirFeedbackLabel.setStyleSheet("color: green;")
-
-        self.submitButton.setEnabled(True)
+            self.submitButton.setEnabled(True)
 
     def on_local_dir_line_edit_editing_finished(self) -> None:
         local_dir = self.localDirLineEdit.text()
@@ -549,44 +540,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_refresh_button_clicked(self) -> None:
         self.network_manager.projects_cache.refresh()
-
-    def local_dir_feedback(
-        self, local_dir, empty_ok=True, exiting_ok=True
-    ) -> Tuple[LocalDirFeedback, str]:
-        if not local_dir:
-            return LocalDirFeedback.Error, self.tr(
-                "Please select local directory where the project to be stored."
-            )
-        elif not Path(local_dir).is_dir():
-            return LocalDirFeedback.Warning, self.tr(
-                "The entered path is not an existing directory. It will be created after you submit this form."
-            )
-        elif len(get_qgis_files_within_dir(Path(local_dir))) == 0:
-            message = self.tr(
-                "The entered path does not contain a QGIS project file yet."
-            )
-            status = LocalDirFeedback.Warning
-
-            if empty_ok:
-                status = LocalDirFeedback.Success
-                message += " "
-                message += self.tr("You can always add one later.")
-
-            return status, message
-        elif len(get_qgis_files_within_dir(Path(local_dir))) == 1:
-            message = self.tr("The entered path contains one QGIS project file.")
-            status = LocalDirFeedback.Warning
-
-            if exiting_ok:
-                status = LocalDirFeedback.Success
-                message += " "
-                message += self.tr("Exactly as it should be.")
-
-            return status, message
-        else:
-            return LocalDirFeedback.Error, self.tr(
-                "Multiple project files have been found in the directory. Please leave exactly one QGIS project in the root directory."
-            )
 
     def show_projects(self) -> None:
         self.feedbackLabel.setText("")
@@ -729,8 +682,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 if local_dir == "":
                     return
 
-                feedback, feedback_msg = self.local_dir_feedback(
-                    local_dir, empty_ok=False
+                feedback, feedback_msg = local_dir_feedback(
+                    local_dir, no_project_status=LocalDirFeedback.Warning
                 )
                 title = self.tr("Cannot upload local QFieldSync directory")
 
@@ -763,8 +716,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 # when the dir is empty, all is good. But if not there are some file, we need to ask the user to confirm what to do
                 if list(Path(local_dir).iterdir()):
                     buttons = QMessageBox.Ok | QMessageBox.Abort
-                    feedback, feedback_msg = self.local_dir_feedback(
-                        local_dir, exiting_ok=False
+                    feedback, feedback_msg = local_dir_feedback(
+                        local_dir, single_project_status=LocalDirFeedback.Warning
                     )
                     title = self.tr("QFieldSync checkout prefers an empty directory")
                     answer = None

@@ -56,7 +56,11 @@ from qfieldsync.libqfieldsync.utils.file_utils import (
     get_unique_empty_dirname,
 )
 from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qfieldsync.utils.cloud_utils import to_cloud_title
+from qfieldsync.utils.cloud_utils import (
+    LocalDirFeedback,
+    local_dir_feedback,
+    to_cloud_title,
+)
 
 WidgetUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_create_project_widget.ui")
@@ -72,12 +76,13 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         iface: QgisInterface,
         network_manager: CloudNetworkAccessManager,
         project: QgsProject,
-        parent: QWidget = None,
+        parent: QWidget,
     ) -> None:
         """Constructor."""
         super(CloudCreateProjectWidget, self).__init__(parent=parent)
         self.setupUi(self)
 
+        self.cloud_projects_dialog = parent
         self.iface = iface
         self.project = project
         self.qfield_preferences = Preferences()
@@ -95,6 +100,8 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.nextButton.clicked.connect(self.on_next_button_clicked)
         self.backButton.clicked.connect(self.on_back_button_clicked)
         self.createButton.clicked.connect(self.on_create_button_clicked)
+        self.dirnameButton.clicked.connect(self.on_dirname_button_clicked)
+        self.dirnameLineEdit.textChanged.connect(self.on_dirname_line_edit_text_changed)
 
         self.use_current_project_directory_action = QAction(
             QIcon(), self.tr("Use Current Project Directory")
@@ -102,11 +109,9 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.use_current_project_directory_action.triggered.connect(
             self.on_use_current_project_directory_action_triggered
         )
-        self.dirnameToolButton.setMenu(QMenu())
-        self.dirnameToolButton.setPopupMode(QToolButton.MenuButtonPopup)
-        self.dirnameToolButton.menu().addAction(
-            self.use_current_project_directory_action
-        )
+        self.dirnameButton.setMenu(QMenu())
+        self.dirnameButton.setPopupMode(QToolButton.MenuButtonPopup)
+        self.dirnameButton.menu().addAction(self.use_current_project_directory_action)
 
         self.projectNameLineEdit.setValidator(
             QRegularExpressionValidator(
@@ -295,6 +300,30 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         return project_name
 
+    def set_dirname(self, dirname: str):
+        if self.cloudifyRadioButton.isChecked():
+            feedback, feedback_msg = local_dir_feedback(
+                dirname,
+                single_project_status=LocalDirFeedback.Error,
+                not_existing_status=LocalDirFeedback.Success,
+            )
+        elif self.createCloudRadioButton.isChecked():
+            feedback, feedback_msg = local_dir_feedback(dirname)
+        else:
+            raise NotImplementedError("Unknown create new button radio.")
+
+        self.dirnameFeedbackLabel.setText(feedback_msg)
+
+        if feedback == LocalDirFeedback.Error:
+            self.dirnameFeedbackLabel.setStyleSheet("color: red;")
+            self.createButton.setEnabled(False)
+        elif feedback == LocalDirFeedback.Warning:
+            self.dirnameFeedbackLabel.setStyleSheet("color: orange;")
+            self.createButton.setEnabled(True)
+        else:
+            self.dirnameFeedbackLabel.setStyleSheet("color: green;")
+            self.createButton.setEnabled(True)
+
     def on_update_total_progressbar(self, current, layer_count, message):
         self.convertProgressBar.setMaximum(layer_count)
         self.convertProgressBar.setValue(current)
@@ -330,6 +359,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             )
         )
         if self.cloudifyRadioButton.isChecked():
+            self.createButton.setEnabled(True)
             self.dirnameLineEdit.setText(str(export_dirname))
         elif self.createCloudRadioButton.isChecked():
             self.dirnameLineEdit.setText(str(Path(self.project.fileName()).parent))
@@ -346,6 +376,16 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         elif self.createCloudRadioButton.isChecked():
             self.infoLabel.setText(self.createCloudInfoLabel.text())
             self.create_empty_cloud_project()
+
+    def on_dirname_button_clicked(self):
+        dirname = self.cloud_projects_dialog.select_local_dir()
+
+        if dirname:
+            self.set_dirname(dirname)
+            self.dirnameLineEdit.setText(str(Path(dirname)))
+
+    def on_dirname_line_edit_text_changed(self, text: str):
+        self.set_dirname(self.dirnameLineEdit.text())
 
     def on_use_current_project_directory_action_triggered(self):
         self.dirnameLineEdit.setText(str(Path(self.project.fileName()).parent))
