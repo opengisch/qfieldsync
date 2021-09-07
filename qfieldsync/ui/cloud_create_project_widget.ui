@@ -63,13 +63,10 @@
              </font>
             </property>
             <property name="text">
-             <string>A new QFieldCloud-compatible project is created from the currently opened QGIS project. In order to do so, datasets will be copied into an export directory that will act as your local mirror. Vector datasets will be converted to geopackage format to facilitate data synchronization from multiple devices. Other files used by the project will be copied in the new project location. You will automatically be switched to the newly created cloud project.</string>
+             <string>A new QFieldCloud-compatible project is created from the currently opened QGIS project. In order to do so, datasets will be copied into an export directory that will act as your local mirror. Vector datasets will be converted to geopackage format to facilitate data synchronization from multiple devices while other dataset types will be copied to the new project location.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
             </property>
            </widget>
           </item>
@@ -94,13 +91,10 @@
              </font>
             </property>
             <property name="text">
-             <string>A new QFieldCloud project will be created, similarly to the web interface. You will be responsible to move all the project-related files in the project root directory, in order to make the files available on QFieldCloud. No project files will be uploaded until you click the sync button. Make sure the selected directory is empty or contains no more than one QGIS project file.</string>
+             <string>A new blank QFieldCloud project will be created. You will be responsible to move all the project-related files within the selected local directory, with the project file at its root. Project files will only be uploaded when you click the synchronize button. Make sure the selected directory contains no more than one QGIS project file.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
             </property>
            </widget>
           </item>
