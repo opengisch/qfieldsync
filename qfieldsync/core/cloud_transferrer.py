@@ -71,6 +71,9 @@ class CloudTransferrer(QObject):
         self.replies = []
         self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
         self.error_message = None
+        self.throttled_uploader = None
+        self.throttled_downloader = None
+        self.throttled_deleter = None
 
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
