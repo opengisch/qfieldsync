@@ -21,6 +21,9 @@
        <property name="text">
         <string/>
        </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -91,7 +94,7 @@
       <set>Qt::ImhDialableCharactersOnly</set>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="projectsListPage">
       <property name="sizePolicy">
@@ -164,6 +167,27 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="projectsActionsHLayout">
+         <item>
+          <widget class="QPushButton" name="createButton">
+           <property name="toolTip">
+            <string>Create New Project</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../resources/cloud_create.svg</normaloff>../resources/cloud_create.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="synchronizeButton">
            <property name="toolTip">
@@ -249,39 +273,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <widget class="QLabel" name="projectsActionLabel">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>New Cloud Project</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="createButton">
-         <property name="toolTip">
-          <string>Create Blank QFieldCloud Project</string>
-         </property>
-         <property name="text">
-          <string>Create blank cloud project</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="convertButton">
-         <property name="toolTip">
-          <string>Convert Currently Open Project to Cloud Project</string>
-         </property>
-         <property name="text">
-          <string>Convert currently open project to cloud project</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="projectsFormPage">
@@ -312,7 +303,7 @@
             <string>Back</string>
            </property>
            <property name="icon">
-             <iconset>
+            <iconset>
              <normaloff>:/images/themes/default/mActionArrowLeft.svg</normaloff>:/images/themes/default/mActionArrowLeft.svg</iconset>
            </property>
           </widget>
@@ -361,24 +352,28 @@
               <string>Online Project Settings</string>
              </property>
              <layout class="QGridLayout" name="gridLayout" columnstretch="1,4">
-              <item row="1" column="1">
-               <widget class="QPlainTextEdit" name="projectDescriptionTextEdit"/>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="projectNameLineEdit">
-                <property name="toolTip">
-                 <string>A valid project name consists of at least 3 characters, starting with a letter and containing nothing other than letters, digits, dashes and underscores</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="projectDescriptionLabel">
                 <property name="text">
                  <string>Description</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="1" column="0">
+               <widget class="QLabel" name="projectNameLabel">
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="projectOwnerLabel">
+                <property name="text">
+                 <string>Owner</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
                <layout class="QHBoxLayout" name="projectFormButtonLayout">
                 <property name="leftMargin">
                  <number>0</number>
@@ -387,66 +382,34 @@
                  <number>0</number>
                 </property>
                 <item>
+                 <widget class="QLineEdit" name="projectNameLineEdit">
+                  <property name="toolTip">
+                   <string>A valid project name consists of at least 3 characters, starting with a letter and containing nothing other than letters, digits, dashes and underscores</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QCheckBox" name="projectIsPrivateCheckBox">
                   <property name="text">
                    <string>Private</string>
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <spacer name="projectFormButtonSpacer">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
                </layout>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="projectOwnerLabel">
-                <property name="text">
-                 <string>Owner</string>
-                </property>
-               </widget>
               </item>
               <item row="2" column="1">
-               <layout class="QHBoxLayout" name="projectOwner">
-                <item>
-                 <widget class="QComboBox" name="projectOwnerComboBox">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="projectOwnerRefreshButton">
-                  <property name="toolTip">
-                   <string>Refresh the list of available project owners</string>
-                  </property>
-                  <property name="text">
-                   <string>Back</string>
-                  </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>../resources/refresh.svg</normaloff>../resources/refresh.svg</iconset>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QPlainTextEdit" name="projectDescriptionTextEdit"/>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="projectNameLabel">
-                <property name="text">
-                 <string>Name</string>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="projectOwnerLineEdit">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>A valid project name consists of at least 3 characters, starting with a letter and containing nothing other than letters, digits, dashes and underscores</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -505,9 +468,16 @@
               </spacer>
              </item>
              <item>
+              <widget class="QPushButton" name="editOnlineButton">
+               <property name="text">
+                <string>Edit on QFieldCloud</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="submitButton">
                <property name="text">
-                <string>Submit</string>
+                <string>Update Project Details</string>
                </property>
               </widget>
              </item>
@@ -695,6 +665,25 @@
          </widget>
         </widget>
        </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="projectCreatePage">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
       </layout>
      </widget>
     </widget>

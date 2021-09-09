@@ -20,11 +20,10 @@
  *                                                                         *
  ***************************************************************************/
 """
-from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Callable, Optional
 
-from qgis.core import Qgis, QgsApplication, QgsProject
+from qgis.core import QgsApplication, QgsProject
 from qgis.PyQt.QtCore import (
     QDateTime,
     QItemSelectionModel,
@@ -34,6 +33,7 @@ from qgis.PyQt.QtCore import (
     pyqtSignal,
 )
 from qgis.PyQt.QtGui import (
+    QDesktopServices,
     QFont,
     QIcon,
     QPixmap,
@@ -42,6 +42,7 @@ from qgis.PyQt.QtGui import (
 )
 from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.QtWidgets import (
+    QAbstractItemView,
     QAction,
     QCheckBox,
     QDialog,
@@ -61,29 +62,18 @@ from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
 from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_api import (
-    CloudException,
-    CloudNetworkAccessManager,
-    from_reply,
-)
+from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
+from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
-from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qfieldsync.utils.cloud_utils import closure, to_cloud_title
-from qfieldsync.utils.permissions import can_change_project_owner, can_delete_project
+from qfieldsync.utils.cloud_utils import LocalDirFeedback, closure, local_dir_feedback
+from qfieldsync.utils.permissions import can_delete_project
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
 CloudProjectsDialogUi, _ = loadUiType(
     str(Path(__file__).parent.joinpath("../ui/cloud_projects_dialog.ui"))
 )
-
-
-class LocalDirFeedback(Enum):
-    Error = "error"
-    Warning = "warning"
-    Success = "success"
 
 
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
@@ -138,9 +128,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsType.setCurrentIndex(0)
         self.projectsType.currentIndexChanged.connect(lambda: self.show_projects())
 
-        self.projectsTable.setColumnWidth(0, self.projectsTable.width() / 2)
-        self.projectsTable.setColumnWidth(1, self.projectsTable.width() / 3.25)
-        self.projectsTable.setColumnWidth(2, self.projectsTable.width() / 10)
+        self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() / 2))
+        self.projectsTable.setColumnWidth(1, int(self.projectsTable.width() / 3.25))
+        self.projectsTable.setColumnWidth(2, int(self.projectsTable.width() / 10))
 
         self.synchronizeButton.clicked.connect(
             lambda: self.on_project_sync_button_clicked()
@@ -159,13 +149,28 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.deleteButton.setEnabled(False)
 
+        self.projectsStack.setCurrentWidget(self.projectsListPage)
+        self.createProjectWidget = CloudCreateProjectWidget(
+            iface,
+            self.network_manager,
+            QgsProject.instance(),
+            self,
+        )
+        self.projectCreatePage.layout().addWidget(self.createProjectWidget)
+        self.createProjectWidget.finished.connect(
+            lambda: self.on_create_project_finished()
+        )
+        self.createProjectWidget.canceled.connect(
+            lambda: self.on_create_project_canceled()
+        )
+
         self.refreshButton.setIcon(QgsApplication.getThemeIcon("/mActionRefresh.svg"))
         self.refreshButton.clicked.connect(lambda: self.on_refresh_button_clicked())
 
         self.createButton.clicked.connect(lambda: self.on_create_button_clicked())
-        self.convertButton.clicked.connect(lambda: self.on_convert_button_clicked())
         self.backButton.clicked.connect(lambda: self.on_back_button_clicked())
         self.submitButton.clicked.connect(lambda: self.on_submit_button_clicked())
+        self.editOnlineButton.clicked.connect(self.on_edit_online_button_clicked)
         self.projectsTable.cellDoubleClicked.connect(
             lambda: self.on_projects_table_cell_double_clicked()
         )
@@ -187,9 +192,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.localDirLineEdit.editingFinished.connect(
             lambda: self.on_local_dir_line_edit_editing_finished()
-        )
-        self.projectOwnerRefreshButton.clicked.connect(
-            lambda: self.on_project_owner_refresh_button_clicked()
         )
         self.localDirButton.clicked.connect(lambda: self.on_local_dir_button_clicked())
         self.localDirButton.setMenu(QMenu())
@@ -507,19 +509,18 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_local_dir_line_edit_text_changed(self) -> None:
         local_dir = self.localDirLineEdit.text()
-        self.submitButton.setEnabled(False)
-
-        feedback, feedback_msg = self.local_dir_feedback(local_dir)
+        feedback, feedback_msg = local_dir_feedback(local_dir)
         self.localDirFeedbackLabel.setText(feedback_msg)
 
         if feedback == LocalDirFeedback.Error:
             self.localDirFeedbackLabel.setStyleSheet("color: red;")
+            self.submitButton.setEnabled(False)
         elif feedback == LocalDirFeedback.Warning:
             self.localDirFeedbackLabel.setStyleSheet("color: orange;")
+            self.submitButton.setEnabled(True)
         else:
             self.localDirFeedbackLabel.setStyleSheet("color: green;")
-
-        self.submitButton.setEnabled(True)
+            self.submitButton.setEnabled(True)
 
     def on_local_dir_line_edit_editing_finished(self) -> None:
         local_dir = self.localDirLineEdit.text()
@@ -532,16 +533,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if dirname:
             self.localDirLineEdit.setText(str(Path(dirname)))
 
-    def on_project_owner_refresh_button_clicked(self) -> None:
-        self.request_refresh_project_owners_combobox()
-
-    def on_get_user_organizations_finished(self, reply: QNetworkReply) -> None:
-        try:
-            payload = self.network_manager.json_array(reply)
-            self.refresh_project_owners_combobox(payload)
-        except Exception:
-            self.feedbackLabel.setText(self.tr("Failed to refresh project owners."))
-
     def on_logout_button_clicked(self) -> None:
         self.buttonBox.button(QDialogButtonBox.Reset).setEnabled(False)
         self.feedbackLabel.setVisible(False)
@@ -549,85 +540,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_refresh_button_clicked(self) -> None:
         self.network_manager.projects_cache.refresh()
-
-    def refresh_project_owners_combobox(
-        self, organizations: List[Dict[str, Any]] = []
-    ) -> None:
-        username = self.network_manager.auth().config("username")
-        selected_value = username
-        is_project_owner_select_enabled = True
-
-        if self.current_cloud_project:
-            selected_value = self.current_cloud_project.owner
-            is_project_owner_select_enabled = can_change_project_owner(
-                self.current_cloud_project
-            )
-
-        self.projectOwnerComboBox.clear()
-        self.projectOwnerComboBox.setEnabled(is_project_owner_select_enabled)
-        self.projectOwnerRefreshButton.setEnabled(is_project_owner_select_enabled)
-        self.projectOwnerComboBox.addItem(username, username)
-
-        if organizations:
-            for org in organizations:
-                self.projectOwnerComboBox.addItem(org["username"], org["username"])
-
-        selected_value_idx = self.projectOwnerComboBox.findData(selected_value)
-        if selected_value_idx == -1:
-            selected_value_idx = 0
-            self.projectOwnerComboBox.insertItem(
-                selected_value_idx,
-                selected_value,
-                selected_value,
-            )
-
-        self.projectOwnerComboBox.setCurrentIndex(selected_value_idx)
-
-    def request_refresh_project_owners_combobox(self) -> None:
-        self.projectOwnerRefreshButton.setEnabled(False)
-
-        reply = self.network_manager.get_user_organizations(
-            self.network_manager.auth().config("username")
-        )
-        reply.finished.connect(lambda: self.on_get_user_organizations_finished(reply))
-
-    def local_dir_feedback(
-        self, local_dir, empty_ok=True, exiting_ok=True
-    ) -> Tuple[LocalDirFeedback, str]:
-        if not local_dir:
-            return LocalDirFeedback.Error, self.tr(
-                "Please select local directory where the project to be stored."
-            )
-        elif not Path(local_dir).is_dir():
-            return LocalDirFeedback.Warning, self.tr(
-                "The entered path is not an existing directory. It will be created after you submit this form."
-            )
-        elif len(get_qgis_files_within_dir(Path(local_dir))) == 0:
-            message = self.tr(
-                "The entered path does not contain a QGIS project file yet."
-            )
-            status = LocalDirFeedback.Warning
-
-            if empty_ok:
-                status = LocalDirFeedback.Success
-                message += " "
-                message += self.tr("You can always add one later.")
-
-            return status, message
-        elif len(get_qgis_files_within_dir(Path(local_dir))) == 1:
-            message = self.tr("The entered path contains one QGIS project file.")
-            status = LocalDirFeedback.Warning
-
-            if exiting_ok:
-                status = LocalDirFeedback.Success
-                message += " "
-                message += self.tr("Exactly as it should be.")
-
-            return status, message
-        else:
-            return LocalDirFeedback.Error, self.tr(
-                "Multiple project files have been found in the directory. Please leave exactly one QGIS project in the root directory."
-            )
 
     def show_projects(self) -> None:
         self.feedbackLabel.setText("")
@@ -770,8 +682,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 if local_dir == "":
                     return
 
-                feedback, feedback_msg = self.local_dir_feedback(
-                    local_dir, empty_ok=False
+                feedback, feedback_msg = local_dir_feedback(
+                    local_dir, no_project_status=LocalDirFeedback.Warning
                 )
                 title = self.tr("Cannot upload local QFieldSync directory")
 
@@ -804,8 +716,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 # when the dir is empty, all is good. But if not there are some file, we need to ask the user to confirm what to do
                 if list(Path(local_dir).iterdir()):
                     buttons = QMessageBox.Ok | QMessageBox.Abort
-                    feedback, feedback_msg = self.local_dir_feedback(
-                        local_dir, exiting_ok=False
+                    feedback, feedback_msg = local_dir_feedback(
+                        local_dir, single_project_status=LocalDirFeedback.Warning
                     )
                     title = self.tr("QFieldSync checkout prefers an empty directory")
                     answer = None
@@ -869,32 +781,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.show_project_form()
 
     def on_create_button_clicked(self) -> None:
-        self.projectsTable.clearSelection()
-        self.current_cloud_project = None
-        self.show_project_form()
-
-    def on_convert_button_clicked(self) -> None:
-        if QgsProject.instance().mapLayers():
-            self.cloud_convert_dlg = CloudConverterDialog(
-                iface,
-                self.network_manager,
-                QgsProject.instance(),
-                self,
-            )
-            self.cloud_convert_dlg.setAttribute(Qt.WA_DeleteOnClose)
-            self.cloud_convert_dlg.setWindowFlags(
-                self.cloud_convert_dlg.windowFlags() | Qt.Tool
-            )
-            self.cloud_convert_dlg.open()
-            self.update_ui_state()
-        else:
-            iface.messageBar().pushMessage(
-                self.tr("At least one layer is required to convert a project."),
-                Qgis.Warning,
-                5,
-            )
+        self.show_create_project()
 
     def show_project_form(self) -> None:
+        assert self.current_cloud_project
+
         self.show()
 
         self.projectsStack.setCurrentWidget(self.projectsFormPage)
@@ -902,83 +793,59 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectFilesTree.clear()
         self.projectNameLineEdit.setEnabled(True)
         self.projectDescriptionTextEdit.setEnabled(True)
-        self.projectIsPrivateCheckBox.setEnabled(True)
-        self.projectOwnerComboBox.setEnabled(True)
 
-        self.refresh_project_owners_combobox()
-        self.request_refresh_project_owners_combobox()
+        self.projectTabs.setTabEnabled(1, True)
+        self.projectTabs.setTabEnabled(2, True)
+        self.projectNameLineEdit.setText(self.current_cloud_project.name)
+        self.projectDescriptionTextEdit.setPlainText(
+            self.current_cloud_project.description
+        )
+        self.projectIsPrivateCheckBox.setChecked(self.current_cloud_project.is_private)
+        self.projectOwnerLineEdit.setText(self.current_cloud_project.owner)
+        self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
+        self.projectUrlLabelValue.setText(
+            '<a href="{url}">{url}</a>'.format(
+                url=(self.network_manager.url + self.current_cloud_project.url)
+            )
+        )
+        self.createdAtLabelValue.setText(
+            QDateTime.fromString(
+                self.current_cloud_project.created_at, Qt.ISODateWithMs
+            ).toString()
+        )
+        self.updatedAtLabelValue.setText(
+            QDateTime.fromString(
+                self.current_cloud_project.updated_at, Qt.ISODateWithMs
+            ).toString()
+        )
+        self.lastSyncedAtLabelValue.setText(
+            QDateTime.fromString(
+                self.current_cloud_project.updated_at, Qt.ISODateWithMs
+            ).toString()
+        )
 
-        if self.current_cloud_project is None:
-            self.submitButton.setText(self.tr("Create new project"))
-            self.projectTabs.setTabEnabled(1, False)
-            self.projectTabs.setTabEnabled(2, False)
-            self.projectNameLineEdit.setText(
-                to_cloud_title(QgsProject.instance().title())
-            )
-            self.projectDescriptionTextEdit.setPlainText("")
-            self.projectIsPrivateCheckBox.setChecked(True)
+        if self.current_cloud_project.user_role not in ("admin", "manager"):
+            self.projectNameLineEdit.setEnabled(False)
+            self.projectDescriptionTextEdit.setEnabled(False)
 
-            # check if there is already another cloud project using the currently open filename
-            if CloudProject.get_cloud_project_id(QgsProject.instance().homePath()):
-                self.localDirLineEdit.setText("")
-            else:
-                self.localDirLineEdit.setText(
-                    str(Path(QgsProject().instance().homePath()))
-                )
+        self.network_manager.projects_cache.get_project_files(
+            self.current_cloud_project.id
+        )
 
-        else:
-            self.submitButton.setText(self.tr("Update project details"))
-            self.projectTabs.setTabEnabled(1, True)
-            self.projectTabs.setTabEnabled(2, True)
-            # TODO validate project name to match QFieldCloudRequirements
-            self.projectNameLineEdit.setText(self.current_cloud_project.name)
-            self.projectDescriptionTextEdit.setPlainText(
-                self.current_cloud_project.description
-            )
-            self.projectIsPrivateCheckBox.setChecked(
-                self.current_cloud_project.is_private
-            )
-            self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
-            self.projectUrlLabelValue.setText(
-                '<a href="{url}">{url}</a>'.format(
-                    url=(self.network_manager.url + self.current_cloud_project.url)
-                )
-            )
-            self.createdAtLabelValue.setText(
-                QDateTime.fromString(
-                    self.current_cloud_project.created_at, Qt.ISODateWithMs
-                ).toString()
-            )
-            self.updatedAtLabelValue.setText(
-                QDateTime.fromString(
-                    self.current_cloud_project.updated_at, Qt.ISODateWithMs
-                ).toString()
-            )
-            self.lastSyncedAtLabelValue.setText(
-                QDateTime.fromString(
-                    self.current_cloud_project.updated_at, Qt.ISODateWithMs
-                ).toString()
-            )
-
-            if self.current_cloud_project.user_role not in ("admin", "manager"):
-                self.projectNameLineEdit.setEnabled(False)
-                self.projectDescriptionTextEdit.setEnabled(False)
-                self.projectIsPrivateCheckBox.setEnabled(False)
-                self.projectOwnerComboBox.setEnabled(False)
-
-            self.network_manager.projects_cache.get_project_files(
-                self.current_cloud_project.id
-            )
+    def show_create_project(self):
+        self.projectsTable.clearSelection()
+        self.projectsStack.setCurrentWidget(self.projectCreatePage)
+        self.createProjectWidget.restart()
 
     def on_back_button_clicked(self) -> None:
         self.projectsStack.setCurrentWidget(self.projectsListPage)
 
     def on_submit_button_clicked(self) -> None:
+        assert self.current_cloud_project
+
         cloud_project_data = {
             "name": self.projectNameLineEdit.text(),
             "description": self.projectDescriptionTextEdit.toPlainText(),
-            "owner": self.projectOwnerComboBox.currentData(),
-            "private": self.projectIsPrivateCheckBox.isChecked(),
             "local_dir": self.localDirLineEdit.text(),
         }
 
@@ -1000,61 +867,28 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsFormPage.setEnabled(False)
         self.feedbackLabel.setVisible(True)
 
-        if self.current_cloud_project is None:
-            self.feedbackLabel.setText(self.tr("Creating project…"))
-            reply = self.network_manager.create_project(
-                cloud_project_data["name"],
-                cloud_project_data["owner"],
-                cloud_project_data["description"],
-                cloud_project_data["private"],
-            )
-            reply.finished.connect(
-                lambda: self.on_create_project_finished(
-                    reply, local_dir=cloud_project_data["local_dir"]
-                )
-            )
-        else:
-            self.current_cloud_project.update_data(cloud_project_data)
-            self.feedbackLabel.setText(self.tr("Updating project…"))
+        self.current_cloud_project.update_data(cloud_project_data)
+        self.feedbackLabel.setText(self.tr("Updating project…"))
 
-            reply = self.network_manager.update_project(
-                self.current_cloud_project.id,
-                self.current_cloud_project.name,
-                self.current_cloud_project.owner,
-                self.current_cloud_project.description,
-                self.current_cloud_project.is_private,
-            )
-            reply.finished.connect(lambda: self.on_update_project_finished(reply))
+        reply = self.network_manager.update_project(
+            self.current_cloud_project.id,
+            self.current_cloud_project.name,
+            self.current_cloud_project.description,
+        )
+        reply.finished.connect(lambda: self.on_update_project_finished(reply))
 
-    def on_create_project_finished(
-        self, reply: QNetworkReply, local_dir: str = None
-    ) -> None:
-        self.projectsFormPage.setEnabled(True)
+    def on_edit_online_button_clicked(self) -> None:
+        assert self.current_cloud_project
 
-        try:
-            payload = self.network_manager.json_object(reply)
-        except CloudException as err:
-            self.feedbackLabel.setText("Project create failed: {}".format(str(err)))
-            self.feedbackLabel.setVisible(True)
-            return
-
-        # save `local_dir` configuration permanently, `CloudProject` constructor does this for free
-        project = CloudProject(
-            {
-                **payload,
-                "local_dir": local_dir,
-            }
+        QDesktopServices.openUrl(
+            QUrl(self.network_manager.url + self.current_cloud_project.url)
         )
 
+    def on_create_project_finished(self) -> None:
         self.projectsStack.setCurrentWidget(self.projectsListPage)
-        self.feedbackLabel.setVisible(False)
 
-        reply = self.network_manager.projects_cache.refresh()
-        reply.finished.connect(
-            lambda: self.on_create_project_finished_projects_refreshed(
-                reply, project.id
-            )
-        )
+    def on_create_project_canceled(self) -> None:
+        self.projectsStack.setCurrentWidget(self.projectsListPage)
 
     def update_welcome_label(self) -> None:
         if self.network_manager.has_token():
@@ -1069,7 +903,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.welcomeLabel.setText(
                 self.tr("Greetings {}.").format(
-                    self.network_manager.auth().config("username")
+                    f'<a href="{self.network_manager.url}">{self.network_manager.auth().config("username")}</a>'
                 )
             )
 
@@ -1093,9 +927,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.network_manager.projects_cache.currently_open_project
             or self.network_manager.projects_cache.is_currently_open_project_cloud_local
         ):
-            self.convertButton.setEnabled(False)
+            pass
+            # self.convertButton.setEnabled(False)
         else:
-            self.convertButton.setEnabled(True)
+            pass
+            # self.convertButton.setEnabled(True)
 
     def update_project_table_selection(self) -> None:
         font = QFont()
@@ -1118,26 +954,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.projectsTable.selectionModel().select(
                     index, QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows
                 )
+                self.projectsTable.scrollToItem(
+                    self.projectsTable.item(row_idx, 0),
+                    QAbstractItemView.EnsureVisible,
+                )
 
             self.update_project_buttons()
-
-    def on_create_project_finished_projects_refreshed(
-        self, reply: QNetworkReply, project_id: str
-    ) -> None:
-        error = from_reply(reply)
-
-        if error:
-            iface.messageBar().pushWarning(
-                "QFieldSync",
-                self.tr("Failed to refresh the project list, please do it manually."),
-            )
-            return
-
-        cloud_project = self.network_manager.projects_cache.find_project(project_id)
-        self.current_cloud_project = cloud_project
-
-        self.launch()
-        self.sync()
 
     def on_update_project_finished(self, reply: QNetworkReply) -> None:
         self.projectsFormPage.setEnabled(True)

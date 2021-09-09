@@ -35,7 +35,6 @@ from qfieldsync.gui.cloud_browser_tree import (
     QFieldCloudItemGuiProvider,
     QFieldCloudItemProvider,
 )
-from qfieldsync.gui.cloud_converter_dialog import CloudConverterDialog
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
@@ -148,9 +147,9 @@ class QFieldSync(object):
 
         # autologin
         if self.preferences.value("qfieldCloudRememberMe"):
-            dialog = CloudLoginDialog(self.network_manager)
-            dialog.authenticate()
-            dialog.hide()
+            CloudLoginDialog.show_auth_dialog(
+                self.network_manager, parent=self.iface.mainWindow()
+            )
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -256,18 +255,6 @@ class QFieldSync(object):
             parent=self.iface.mainWindow(),
         )
 
-        self.cloud_convert_action = self.add_action(
-            QIcon(
-                os.path.join(
-                    os.path.dirname(__file__), "resources/cloud_convert_project.svg"
-                )
-            ),
-            text=self.tr("Convert Current Project to Cloud Project"),
-            callback=self.open_cloud_convert_dialog,
-            parent=self.iface.mainWindow(),
-            add_to_toolbar=False,
-        )
-
         self.cloud_synchronize_action = self.add_action(
             QIcon(
                 os.path.join(
@@ -367,38 +354,6 @@ class QFieldSync(object):
             self.iface, self.offline_editing, self.iface.mainWindow()
         )
         dlg.show()
-
-    def open_cloud_convert_dialog(self):
-        if not self.network_manager.has_token():
-            CloudLoginDialog.show_auth_dialog(
-                self.network_manager, lambda: self.show_cloud_convert_dialog()
-            )
-        else:
-            self.show_cloud_convert_dialog()
-
-    def show_cloud_convert_dialog(self):
-        """
-        Convert to cloud project.
-        """
-        if QgsProject.instance().mapLayers():
-            self.cloud_convert_dlg = CloudConverterDialog(
-                self.iface,
-                self.network_manager,
-                QgsProject.instance(),
-                self.iface.mainWindow(),
-            )
-            self.cloud_convert_dlg.setAttribute(Qt.WA_DeleteOnClose)
-            self.cloud_convert_dlg.setWindowFlags(
-                self.cloud_convert_dlg.windowFlags() | Qt.Tool
-            )
-            self.cloud_convert_dlg.show()
-            self.cloud_convert_dlg.finished.connect(self.update_button_enabled_status)
-        else:
-            self.iface.messageBar().pushMessage(
-                self.tr("At least one layer is required to convert a project."),
-                Qgis.Warning,
-                5,
-            )
 
     def open_cloud_synchronize_dialog(self):
         if not self.network_manager.has_token():
@@ -505,10 +460,8 @@ class QFieldSync(object):
         Will update the plugin buttons according to open dialog and project properties.
         """
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
-            self.cloud_convert_action.setEnabled(False)
             self.cloud_synchronize_action.setEnabled(True)
         else:
-            self.cloud_convert_action.setEnabled(True)
             self.cloud_synchronize_action.setEnabled(False)
 
         try:
