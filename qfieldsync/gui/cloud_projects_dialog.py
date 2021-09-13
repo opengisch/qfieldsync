@@ -99,17 +99,17 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.update_welcome_label()
 
         if self.network_manager.has_token():
-            self.show()
             self.show_projects()
+            self.show()
             self.createButton.setEnabled(True)
         else:
-            self.hide()
             CloudLoginDialog.show_auth_dialog(
                 self.network_manager,
                 lambda: self.on_auth_accepted(),
                 lambda: self.close(),
                 parent=self,
             )
+            self.hide()
             self.createButton.setEnabled(False)
 
         self.use_current_project_directory_action = QAction(

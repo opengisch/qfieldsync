@@ -79,7 +79,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.on_login_button_clicked
         )
         self.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(
-            lambda: self.close()
+            self.on_cancel_button_clicked
         )
 
         self.serverUrlLabel.setVisible(False)
@@ -107,11 +107,17 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         )
         self.qfieldCloudIcon.setMinimumSize(175, 180)
         self.qfieldCloudIcon.mouseDoubleClickEvent = (
-            lambda event: self.toggleServerUrlVisibility()
+            lambda event: self.toggle_server_url_visibility()
         )
+        self.rejected.connect(self.on_rejected)
         self.hide()
 
-    def toggleServerUrlVisibility(self):
+    def on_rejected(self) -> None:
+        if self.parent():
+            self.parent().setEnabled(True)
+            self.setEnabled(True)
+
+    def toggle_server_url_visibility(self) -> None:
         self.serverUrlLabel.setVisible(not self.serverUrlLabel.isVisible())
         self.serverUrlCmb.setVisible(not self.serverUrlCmb.isVisible())
 
@@ -174,3 +180,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.passwordLineEdit.setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
         self.done(QDialog.Accepted)
+
+    def on_cancel_button_clicked(self):
+        self.reject()
