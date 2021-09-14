@@ -276,7 +276,7 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         """Update an existing QFieldCloud project"""
 
-        return self.cloud_put(
+        return self.cloud_patch(
             ["projects", project_id],
             {
                 "name": name,
@@ -448,6 +448,30 @@ class CloudNetworkAccessManager(QObject):
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
         reply = self._nam.put(request, payload_bytes)
+        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.setParent(self)
+
+        return reply
+
+    def cloud_patch(
+        self, uri: Union[str, List[str]], payload: Dict = None
+    ) -> QNetworkReply:
+        url = self._prepare_uri(uri)
+
+        self._clear_cloud_cookies(url)
+
+        request = QNetworkRequest(url)
+        request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
+        request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
+
+        if self._token:
+            request.setRawHeader(
+                b"Authorization", "Token {}".format(self._token).encode("utf-8")
+            )
+
+        payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
+
+        reply = self._nam.sendCustomRequest(request, b"PATCH", payload_bytes)
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 

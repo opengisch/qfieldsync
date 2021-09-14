@@ -98,15 +98,19 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.update_welcome_label()
 
-        if not self.network_manager.has_token():
+        if self.network_manager.has_token():
+            self.show_projects()
+            self.show()
+            self.createButton.setEnabled(True)
+        else:
             CloudLoginDialog.show_auth_dialog(
                 self.network_manager,
                 lambda: self.on_auth_accepted(),
                 lambda: self.close(),
                 parent=self,
             )
-        else:
-            self.show_projects()
+            self.hide()
+            self.createButton.setEnabled(False)
 
         self.use_current_project_directory_action = QAction(
             QIcon(), self.tr("Use Current Project Directory")
@@ -509,18 +513,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_local_dir_line_edit_text_changed(self) -> None:
         local_dir = self.localDirLineEdit.text()
-        feedback, feedback_msg = local_dir_feedback(local_dir)
-        self.localDirFeedbackLabel.setText(feedback_msg)
-
-        if feedback == LocalDirFeedback.Error:
-            self.localDirFeedbackLabel.setStyleSheet("color: red;")
-            self.submitButton.setEnabled(False)
-        elif feedback == LocalDirFeedback.Warning:
-            self.localDirFeedbackLabel.setStyleSheet("color: orange;")
-            self.submitButton.setEnabled(True)
-        else:
-            self.localDirFeedbackLabel.setStyleSheet("color: green;")
-            self.submitButton.setEnabled(True)
+        self.update_local_dir_feedback(local_dir)
 
     def on_local_dir_line_edit_editing_finished(self) -> None:
         local_dir = self.localDirLineEdit.text()
@@ -802,7 +795,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.projectIsPrivateCheckBox.setChecked(self.current_cloud_project.is_private)
         self.projectOwnerLineEdit.setText(self.current_cloud_project.owner)
-        self.localDirLineEdit.setText(self.current_cloud_project.local_dir)
+        self.localDirLineEdit.setText(self.current_cloud_project.local_dir or "")
         self.projectUrlLabelValue.setText(
             '<a href="{url}">{url}</a>'.format(
                 url=(self.network_manager.url + self.current_cloud_project.url)
@@ -823,6 +816,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.current_cloud_project.updated_at, Qt.ISODateWithMs
             ).toString()
         )
+
+        self.update_local_dir_feedback(self.localDirLineEdit.text())
 
         if self.current_cloud_project.user_role not in ("admin", "manager"):
             self.projectNameLineEdit.setEnabled(False)
@@ -1028,6 +1023,20 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)
         self.transfer_dialog.open()
+
+    def update_local_dir_feedback(self, local_dir: str) -> None:
+        feedback, feedback_msg = local_dir_feedback(local_dir)
+        self.localDirFeedbackLabel.setText(feedback_msg)
+
+        if feedback == LocalDirFeedback.Error:
+            self.localDirFeedbackLabel.setStyleSheet("color: red;")
+            self.submitButton.setEnabled(False)
+        elif feedback == LocalDirFeedback.Warning:
+            self.localDirFeedbackLabel.setStyleSheet("color: orange;")
+            self.submitButton.setEnabled(True)
+        else:
+            self.localDirFeedbackLabel.setStyleSheet("color: green;")
+            self.submitButton.setEnabled(True)
 
     def on_transfer_dialog_rejected(self) -> None:
         if self.project_transfer:

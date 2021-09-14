@@ -22,7 +22,6 @@
 """
 
 import os
-import re
 from pathlib import Path
 from typing import Optional
 
@@ -185,8 +184,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.create_cloud_project()
 
     def get_cloud_project_name(self) -> str:
-        pattern = re.compile(r"[\W_]+")
-        return pattern.sub("", self.projectNameLineEdit.text())
+        return self.projectNameLineEdit.text()
 
     def create_empty_cloud_project(self):
         self.convertProgressBar.setVisible(False)
