@@ -99,13 +99,13 @@ class CloudConverter(QObject):
                 if layer.type() == QgsMapLayer.VectorLayer:
                     if not layer_source.convert_to_gpkg(self.export_dirname):
                         # something went wrong, remove layer and inform the user that layer will be missing
-                        self.project.removeMapLayer(layer)
                         self.warning.emit(
                             self.tr("Cloud Converter"),
                             self.tr(
                                 "The layer '{}' could not be converted and was therefore removed from the cloud project."
                             ).format(layer.name()),
                         )
+                        self.project.removeMapLayer(layer)
                 else:
                     layer_source.copy(self.export_dirname, list())
 
