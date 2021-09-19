@@ -260,6 +260,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_auth_accepted(self):
         self.network_manager.projects_cache.refresh()
         self.update_welcome_label()
+        self.createButton.setEnabled(True)
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
