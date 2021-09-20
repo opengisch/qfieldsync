@@ -168,3 +168,4 @@ qfield-sync.*.zip
 qfieldsync/resources_rc.py
 
 .vscode/**
+.qt_for_python/**
