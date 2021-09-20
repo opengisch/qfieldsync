@@ -390,6 +390,9 @@
                 </item>
                 <item>
                  <widget class="QCheckBox" name="projectIsPrivateCheckBox">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="text">
                    <string>Private</string>
                   </property>
