@@ -1026,7 +1026,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog.open()
 
     def update_local_dir_feedback(self, local_dir: str) -> None:
-        feedback, feedback_msg = local_dir_feedback(local_dir)
+        feedback, feedback_msg = local_dir_feedback(
+            local_dir, no_path_status=LocalDirFeedback.Warning
+        )
         self.localDirFeedbackLabel.setText(feedback_msg)
 
         if feedback == LocalDirFeedback.Error:
