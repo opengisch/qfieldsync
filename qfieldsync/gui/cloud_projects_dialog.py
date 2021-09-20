@@ -830,39 +830,54 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_submit_button_clicked(self) -> None:
         assert self.current_cloud_project
 
-        cloud_project_data = {
-            "name": self.projectNameLineEdit.text(),
-            "description": self.projectDescriptionTextEdit.toPlainText(),
-            "local_dir": self.localDirLineEdit.text(),
-        }
-
+        should_update_online = False
         if (
-            self.projectNameLineEdit.validator().validate(
-                cloud_project_data["name"], 0
-            )[0]
-            != QValidator.Acceptable
+            self.current_cloud_project.name != self.projectNameLineEdit.text()
+            or self.current_cloud_project.description
+            != self.projectDescriptionTextEdit.toPlainText()
         ):
-            QMessageBox.warning(
-                None,
-                self.tr("Invalid project name"),
-                self.tr(
-                    "You cannot create a new project without setting a valid name first."
-                ),
+            cloud_project_data = {
+                "name": self.projectNameLineEdit.text(),
+                "description": self.projectDescriptionTextEdit.toPlainText(),
+            }
+
+            if (
+                self.projectNameLineEdit.validator().validate(
+                    cloud_project_data["name"], 0
+                )[0]
+                != QValidator.Acceptable
+            ):
+                QMessageBox.warning(
+                    None,
+                    self.tr("Invalid project name"),
+                    self.tr(
+                        "You cannot create a new project without setting a valid name first."
+                    ),
+                )
+                return
+
+            self.projectsFormPage.setEnabled(False)
+            self.feedbackLabel.setVisible(True)
+
+            self.current_cloud_project.update_data(cloud_project_data)
+            self.feedbackLabel.setText(self.tr("Updating project…"))
+
+            reply = self.network_manager.update_project(
+                self.current_cloud_project.id,
+                self.current_cloud_project.name,
+                self.current_cloud_project.description,
             )
-            return
+            reply.finished.connect(lambda: self.on_update_project_finished(reply))
 
-        self.projectsFormPage.setEnabled(False)
-        self.feedbackLabel.setVisible(True)
+            should_update_online = True
 
-        self.current_cloud_project.update_data(cloud_project_data)
-        self.feedbackLabel.setText(self.tr("Updating project…"))
+        if self.current_cloud_project.local_dir != self.localDirLineEdit.text():
+            self.current_cloud_project.update_data(
+                {"local_dir": self.localDirLineEdit.text()}
+            )
 
-        reply = self.network_manager.update_project(
-            self.current_cloud_project.id,
-            self.current_cloud_project.name,
-            self.current_cloud_project.description,
-        )
-        reply.finished.connect(lambda: self.on_update_project_finished(reply))
+        if not should_update_online:
+            self.projectsStack.setCurrentWidget(self.projectsListPage)
 
     def on_edit_online_button_clicked(self) -> None:
         assert self.current_cloud_project
