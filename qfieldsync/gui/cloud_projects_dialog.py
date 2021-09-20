@@ -194,9 +194,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.localDirLineEdit.textChanged.connect(
             lambda: self.on_local_dir_line_edit_text_changed()
         )
-        self.localDirLineEdit.editingFinished.connect(
-            lambda: self.on_local_dir_line_edit_editing_finished()
-        )
         self.localDirButton.clicked.connect(lambda: self.on_local_dir_button_clicked())
         self.localDirButton.setMenu(QMenu())
         self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
@@ -515,12 +512,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_local_dir_line_edit_text_changed(self) -> None:
         local_dir = self.localDirLineEdit.text()
         self.update_local_dir_feedback(local_dir)
-
-    def on_local_dir_line_edit_editing_finished(self) -> None:
-        local_dir = self.localDirLineEdit.text()
-
-        if self.current_cloud_project:
-            self.current_cloud_project.update_data({"local_dir": local_dir})
 
     def on_local_dir_button_clicked(self) -> None:
         dirname = self.select_local_dir()
