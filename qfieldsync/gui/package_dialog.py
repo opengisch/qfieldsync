@@ -131,26 +131,40 @@ class PackageDialog(QDialog, DialogUi):
             lambda title, body: QMessageBox.warning(None, title, body)
         )
 
-        offline_convertor.convert()
-        self.do_post_offline_convert_action()
+        try:
+            offline_convertor.convert()
+            self.do_post_offline_convert_action(True)
+        except Exception as err:
+            self.do_post_offline_convert_action(False)
+            raise err
+
         self.close()
 
         self.progress_group.setEnabled(False)
 
-    def do_post_offline_convert_action(self):
+    def do_post_offline_convert_action(self, is_success):
         """
         Show an information label that the project has been copied
         with a nice link to open the result folder.
         """
-        export_folder = self.get_export_folder_from_dialog()
+        if is_success:
+            export_folder = self.get_export_folder_from_dialog()
+            result_message = self.tr(
+                "Finished creating the project at {result_folder}. Please copy this folder to "
+                "your QField device."
+            ).format(
+                result_folder='<a href="{folder}">{folder}</a>'.format(
+                    folder=export_folder
+                )
+            )
+            status = Qgis.Success
+        else:
+            result_message = self.tr(
+                "Failed to package project. See message log (Python Error) for more details."
+            )
+            status = Qgis.Warning
 
-        result_message = self.tr(
-            "Finished creating the project at {result_folder}. Please copy this folder to "
-            "your QField device."
-        ).format(
-            result_folder='<a href="{folder}">{folder}</a>'.format(folder=export_folder)
-        )
-        self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
+        self.iface.messageBar().pushMessage(result_message, status, 0)
 
     def update_info_visibility(self):
         """
