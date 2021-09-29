@@ -25,7 +25,7 @@ from typing import Callable
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QWidget
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QWidget
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core import Preferences
@@ -127,7 +127,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.rememberMeCheckBox.setEnabled(True)
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
-        if self.parent():
+        if self.parent() and not isinstance(self.parent(), QMainWindow):
             self.parent().setEnabled(False)
             self.setEnabled(True)
 
