@@ -22,7 +22,6 @@
 """
 
 import os
-from pathlib import Path
 
 from qgis.core import Qgis, QgsApplication, QgsOfflineEditing, QgsProject
 from qgis.gui import QgsGui, QgsOptionsWidgetFactory
@@ -45,9 +44,6 @@ from qfieldsync.gui.preferences_widget import PreferencesWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.gui.project_configuration_widget import ProjectConfigurationWidget
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
-
-old_cwd = os.getcwd()
-os.chdir(str(Path(__file__).parent.joinpath("ui")))
 
 
 class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):

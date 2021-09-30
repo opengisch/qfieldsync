@@ -20,6 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -88,7 +89,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     ) -> None:
         """Constructor."""
         super(CloudProjectsDialog, self).__init__(parent=parent)
+        # workaround for older QT (M$ QGIS <3.16.5) to make the custom icons load with relative path
+        old_cwd = os.getcwd()
+        os.chdir(str(Path(__file__).parent.parent.joinpath("ui")))
+        # we need to call setupUi with or without the workaround, so keep it
         self.setupUi(self)
+        os.chdir(old_cwd)
+        # / workaround
         self.setWindowModality(Qt.WindowModal)
         self.preferences = Preferences()
         self.network_manager = network_manager
