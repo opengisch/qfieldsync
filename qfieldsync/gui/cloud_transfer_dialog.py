@@ -456,9 +456,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             local_updated_at = os.path.getmtime(
                 os.path.join(self.cloud_project.local_dir, project_file.path)
             )
-            cloud_updated_at = datetime.strptime(
-                project_file.updated_at, "%d.%m.%Y %H:%M:%S %Z"
-            ).timestamp()
+            cloud_updated_at = 0.0
+            if project_file.updated_at:
+                cloud_updated_at = datetime.strptime(
+                    project_file.updated_at, "%d.%m.%Y %H:%M:%S %Z"
+                ).timestamp()
             is_local_checked = local_updated_at > cloud_updated_at
 
         local_checkbox = QCheckBox()
