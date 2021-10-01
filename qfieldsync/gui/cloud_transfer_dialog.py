@@ -267,6 +267,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self._file_tree_set_checkboxes(ProjectFileCheckout.Cloud)
             self._start_synchronization()
         else:
+            if self.cloud_project.user_role == "reader":
+                self.preferNoneButton.setVisible(False)
+                self.preferLocalButton.setVisible(False)
+                self.preferCloudButton.setVisible(False)
 
             self.stackedWidget.setCurrentWidget(self.filesPage)
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
@@ -442,11 +446,14 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def add_file_checkbox_buttons(
         self, item: QTreeWidgetItem, project_file: ProjectFile
     ) -> None:
-        is_local_enabled = project_file.local_path_exists
+        is_local_enabled = (
+            project_file.local_path_exists and self.cloud_project.user_role != "reader"
+        )
         is_cloud_enabled = bool(project_file.checkout & ProjectFileCheckout.Cloud)
-        is_local_checked = is_local_enabled
+        is_local_checked = is_local_enabled  # TODO: don't assume users always want to upload what's local, check latest modified time
 
         local_checkbox = QCheckBox()
+        local_checkbox.setEnabled(is_local_enabled)
         local_checkbox.setChecked(is_local_checked)
         local_checkbox.toggled.connect(
             lambda _is_checked: self.on_local_checkbox_toggled(item)
