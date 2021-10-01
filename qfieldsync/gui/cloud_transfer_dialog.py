@@ -250,6 +250,14 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     "The locally stored cloud project is already synchronized with QFieldCloud, no action is required."
                 )
             )
+            # if the cloud project being synchronize matches the currently open project, don't offer to open
+            if (
+                self.network_manager.projects_cache.currently_open_project
+                and self.cloud_project.id
+                == self.network_manager.projects_cache.currently_open_project.id
+            ):
+                self.openProjectCheck.setChecked(False)
+                self.openProjectCheck.setVisible(False)
             return
 
         self.project_transfer = CloudTransferrer(
@@ -400,6 +408,16 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.downloadLabel.setVisible(hasDownloads)
             self.downloadProgressBar.setVisible(hasDownloads)
             self.downloadProgressFeedbackLabel.setVisible(hasDownloads)
+
+            # if the cloud project being synchronize matches the currently open project, don't offer to open if nothing is being downloaded
+            if (
+                not hasDownloads
+                and self.network_manager.projects_cache.currently_open_project
+                and self.cloud_project.id
+                == self.network_manager.projects_cache.currently_open_project.id
+            ):
+                self.openProjectCheck.setChecked(False)
+                self.openProjectCheck.setVisible(False)
 
             self.show_progress_page(files)
 
