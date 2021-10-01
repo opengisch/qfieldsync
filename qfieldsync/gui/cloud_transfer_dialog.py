@@ -114,7 +114,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.tr('Synchronizing project "{}"').format(self.cloud_project.name)
             )
         else:
-            self.setWindowTitle(self.tr("Synchronizing current project"))
+            self.setWindowTitle(self.tr("Synchronizing Current Project"))
 
         memory_layers = get_memory_layers(QgsProject.instance())
 
@@ -284,9 +284,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.stackedWidget.setCurrentWidget(self.filesPage)
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
             self.buttonBox.button(QDialogButtonBox.Apply).setText(
-                self.tr("Synchronize project")
+                self.tr("Synchronize Project")
                 if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
-                else self.tr("Upload project")
+                else self.tr("Upload Project")
             )
 
     def build_files_tree(self):

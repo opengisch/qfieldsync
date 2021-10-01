@@ -397,7 +397,7 @@
          <item>
           <widget class="QPushButton" name="preferNoneButton">
            <property name="text">
-            <string>Prefer None</string>
+            <string>Prefer No Action</string>
            </property>
           </widget>
          </item>
