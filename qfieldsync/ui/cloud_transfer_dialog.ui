@@ -387,7 +387,7 @@
          </column>
          <column>
           <property name="text">
-           <string>Detail</string>
+           <string>Action</string>
           </property>
          </column>
         </widget>
