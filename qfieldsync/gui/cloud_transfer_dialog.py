@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 import os
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List
@@ -450,7 +451,15 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             project_file.local_path_exists and self.cloud_project.user_role != "reader"
         )
         is_cloud_enabled = bool(project_file.checkout & ProjectFileCheckout.Cloud)
-        is_local_checked = is_local_enabled  # TODO: don't assume users always want to upload what's local, check latest modified time
+        is_local_checked = False
+        if is_local_enabled:
+            local_updated_at = os.path.getmtime(
+                os.path.join(self.cloud_project.local_dir, project_file.path)
+            )
+            cloud_updated_at = datetime.strptime(
+                project_file.updated_at, "%d.%m.%Y %H:%M:%S %Z"
+            ).timestamp()
+            is_local_checked = local_updated_at > cloud_updated_at
 
         local_checkbox = QCheckBox()
         local_checkbox.setEnabled(is_local_enabled)
