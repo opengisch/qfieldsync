@@ -62,14 +62,14 @@ class ProjectFile:
         if not self.versions:
             return
 
-        return self.versions[-1].get("created_at")
+        return self.versions[-1].get("last_modified")
 
     @property
     def updated_at(self) -> Optional[str]:
         if not self.versions:
             return
 
-        return self.versions[-1].get("updated_at")
+        return self.versions[0].get("last_modified")
 
     @property
     def versions(self) -> Optional[List[Dict[str, str]]]:
