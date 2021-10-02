@@ -245,13 +245,21 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         assert self.cloud_project
 
         if len(list(self.cloud_project.files_to_sync)) == 0:
-            self.show_end_page(
-                self.tr(
-                    "The locally stored cloud project is already synchronized with QFieldCloud, no action is required."
+            files_total = len(self.cloud_project.get_files())
+            if files_total > 0:
+                self.show_end_page(
+                    self.tr(
+                        "The locally stored cloud project is already synchronized with QFieldCloud, no action is required."
+                    )
                 )
-            )
+            else:
+                self.show_end_page(
+                    self.tr(
+                        "This cloud project currently has no file stored either locally on on the server."
+                    )
+                )
             # if the cloud project being synchronize matches the currently open project, don't offer to open
-            if (
+            if files_total == 0 or (
                 self.network_manager.projects_cache.currently_open_project
                 and self.cloud_project.id
                 == self.network_manager.projects_cache.currently_open_project.id
