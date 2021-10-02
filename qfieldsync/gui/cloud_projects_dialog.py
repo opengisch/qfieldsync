@@ -20,6 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -76,6 +77,20 @@ CloudProjectsDialogUi, _ = loadUiType(
 )
 
 
+class WindowsIconFixWorkDir(object):
+    """Workaround for older QT (M$ QGIS <3.16.5) to make the custom icons load with relative path."""
+
+    def __init__(self, path):
+        self.path = path
+        self.old_cwd = os.getcwd()
+
+    def __enter__(self):
+        os.chdir(self.path)
+
+    def __exit__(self, *_args):
+        os.chdir(self.old_cwd)
+
+
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
     _current_cloud_project = None
@@ -88,7 +103,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     ) -> None:
         """Constructor."""
         super(CloudProjectsDialog, self).__init__(parent=parent)
-        self.setupUi(self)
+
+        with WindowsIconFixWorkDir(Path(__file__).parent.parent.joinpath("ui")):
+            self.setupUi(self)
+
         self.setWindowModality(Qt.WindowModal)
         self.preferences = Preferences()
         self.network_manager = network_manager
