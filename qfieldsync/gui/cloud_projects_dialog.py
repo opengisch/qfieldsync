@@ -571,6 +571,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             item = QTableWidgetItem(cloud_project.name)
             item.setData(Qt.UserRole, cloud_project)
             item.setData(Qt.EditRole, cloud_project.name)
+            item.setData(
+                Qt.DecorationRole,
+                QIcon(
+                    str(
+                        Path(__file__).parent.joinpath("../resources/cloud_project.svg")
+                    )
+                ),
+            )
 
             cbx_local = QCheckBox()
             cbx_local.setEnabled(False)
