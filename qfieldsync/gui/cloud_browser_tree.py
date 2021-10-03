@@ -179,14 +179,19 @@ class QFieldCloudProjectItem(QgsDataItem):
             project.name,
             "/QFieldCloud/project/" + project.id,
         )
+        self.project_id = project.id
+        project = parent.network_manager.projects_cache.find_project(self.project_id)
         self.setIcon(
             QIcon(
-                os.path.join(
-                    os.path.dirname(__file__), "../resources/cloud_project.svg"
+                str(
+                    Path(__file__).parent.joinpath(
+                        "../resources/cloud_project.svg"
+                        if project.local_dir
+                        else "../resources/cloud_project_remote.svg"
+                    )
                 )
             )
         )
-        self.project_id = project.id
 
 
 class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):

@@ -45,7 +45,6 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.QtWidgets import (
     QAbstractItemView,
     QAction,
-    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
@@ -150,9 +149,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsType.setCurrentIndex(0)
         self.projectsType.currentIndexChanged.connect(lambda: self.show_projects())
 
-        self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() / 2))
-        self.projectsTable.setColumnWidth(1, int(self.projectsTable.width() / 3.25))
-        self.projectsTable.setColumnWidth(2, int(self.projectsTable.width() / 10))
+        self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() * 0.75))
+        self.projectsTable.setColumnWidth(1, int(self.projectsTable.width() * 0.2))
 
         self.synchronizeButton.clicked.connect(
             lambda: self.on_project_sync_button_clicked()
@@ -575,29 +573,21 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 Qt.DecorationRole,
                 QIcon(
                     str(
-                        Path(__file__).parent.joinpath("../resources/cloud_project.svg")
+                        Path(__file__).parent.joinpath(
+                            "../resources/cloud_project.svg"
+                            if cloud_project.local_dir
+                            else "../resources/cloud_project_remote.svg"
+                        )
                     )
                 ),
             )
-
-            cbx_local = QCheckBox()
-            cbx_local.setEnabled(False)
-            cbx_local.setChecked(bool(cloud_project.local_dir))
-            # # it's more UI friendly when the checkbox is centered, an ugly workaround to achieve it
-            cbx_local_widget = QWidget()
-            cbx_local_layout = QHBoxLayout()
-            cbx_local_layout.setAlignment(Qt.AlignCenter)
-            cbx_local_layout.setContentsMargins(0, 0, 0, 0)
-            cbx_local_layout.addWidget(cbx_local)
-            cbx_local_widget.setLayout(cbx_local_layout)
             if bool(cloud_project.local_dir):
-                cbx_local_widget.setToolTip(str(cloud_project.local_dir))
+                item.setToolTip(str(cloud_project.local_dir))
             else:
-                cbx_local_widget.setToolTip(self.tr("No local dir configured"))
+                item.setToolTip(self.tr("No local dir configured"))
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
-            self.projectsTable.setCellWidget(count, 2, cbx_local_widget)
 
         self.projectsTable.sortByColumn(1, Qt.AscendingOrder)
         self.projectsTable.sortByColumn(0, Qt.AscendingOrder)
