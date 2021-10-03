@@ -179,6 +179,13 @@ class QFieldCloudProjectItem(QgsDataItem):
             project.name,
             "/QFieldCloud/project/" + project.id,
         )
+        self.setIcon(
+            QIcon(
+                os.path.join(
+                    os.path.dirname(__file__), "../resources/cloud_project.svg"
+                )
+            )
+        )
         self.project_id = project.id
 
 
