@@ -58,11 +58,16 @@ def local_dir_feedback(
     no_project_status: LocalDirFeedback = LocalDirFeedback.Success,
     single_project_status: LocalDirFeedback = LocalDirFeedback.Success,
     multiple_projects_status: LocalDirFeedback = LocalDirFeedback.Error,
+    relative_status: LocalDirFeedback = LocalDirFeedback.Error,
 ) -> Tuple[LocalDirFeedback, str]:
     dummy = QObject()
     if not local_dir:
         return no_path_status, dummy.tr(
             "Please select local directory where the project to be stored."
+        )
+    elif not Path(local_dir).is_absolute():
+        return relative_status, dummy.tr(
+            "The entered path is a relative path. Please enter an absolute directory path."
         )
     elif Path(local_dir).exists() and not Path(local_dir).is_dir():
         return not_dir_status, dummy.tr(
