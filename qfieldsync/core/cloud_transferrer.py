@@ -74,6 +74,7 @@ class CloudTransferrer(QObject):
         self.throttled_uploader = None
         self.throttled_downloader = None
         self.throttled_deleter = None
+        self.transfers_model = None
 
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
