@@ -161,6 +161,9 @@ class CloudProject:
 
             del self._data["local_dir"]
 
+            if self._local_dir and not Path(self._local_dir).is_absolute():
+                self._local_dir = None
+
             old_project_local_dirs = self._preferences.value(
                 "qfieldCloudProjectLocalDirs"
             )
@@ -249,7 +252,7 @@ class CloudProject:
     def local_dir(self) -> Optional[str]:
         dirname = self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
 
-        if not dirname or not Path(dirname).exists():
+        if not dirname or not Path(dirname).exists() or not Path(dirname).is_absolute():
             return None
 
         return dirname
