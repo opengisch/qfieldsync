@@ -306,7 +306,10 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
                 not_existing_status=LocalDirFeedback.Success,
             )
         elif self.createCloudRadioButton.isChecked():
-            feedback, feedback_msg = local_dir_feedback(dirname)
+            feedback, feedback_msg = local_dir_feedback(
+                dirname,
+                no_path_status=LocalDirFeedback.Warning,
+            )
         else:
             raise NotImplementedError("Unknown create new button radio.")
 
