@@ -349,21 +349,23 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.projectNameLineEdit.setText(project_name)
         self.projectDescriptionTextEdit.setText(self.project.metadata().abstract())
 
-        project_filename = (
-            project_name.lower()
-            if project_name
-            else fileparts(QgsProject.instance().fileName())[1]
-        )
-        export_dirname = get_unique_empty_dirname(
-            Path(self.qfield_preferences.value("cloudDirectory")).joinpath(
-                project_filename
-            )
-        )
         if self.cloudifyRadioButton.isChecked():
+            project_filename = (
+                project_name.lower()
+                if project_name
+                else fileparts(QgsProject.instance().fileName())[1]
+            )
+            export_dirname = get_unique_empty_dirname(
+                Path(self.qfield_preferences.value("cloudDirectory")).joinpath(
+                    project_filename
+                )
+            )
+
             self.createButton.setEnabled(True)
-            self.dirnameLineEdit.setText(str(export_dirname))
+            self.set_dirname(str(export_dirname))
         elif self.createCloudRadioButton.isChecked():
-            self.dirnameLineEdit.setText(str(Path(self.project.fileName()).parent))
+            if self.project.fileName():
+                self.set_dirname(str(Path(self.project.fileName()).parent))
 
         self.update_info_visibility()
 
