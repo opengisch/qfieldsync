@@ -416,7 +416,7 @@
              <property name="title">
               <string>Local Project Settings</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,4,0">
+             <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,4">
               <item row="0" column="1">
                <layout class="QHBoxLayout" name="localDirHBoxLayout">
                 <item>
@@ -449,6 +449,19 @@
                <widget class="QLabel" name="localDirLabel">
                 <property name="text">
                  <string>Local Directory</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLabel" name="localDirFeedbackLabel">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+                <property name="textInteractionFlags">
+                 <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
                 </property>
                </widget>
               </item>
@@ -491,19 +504,6 @@
               </widget>
              </item>
             </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="localDirFeedbackLabel">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="wordWrap">
-              <bool>true</bool>
-             </property>
-             <property name="textInteractionFlags">
-              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-             </property>
-            </widget>
            </item>
           </layout>
          </widget>
