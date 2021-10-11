@@ -214,6 +214,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.localDirButton.setMenu(QMenu())
         self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
         self.localDirButton.menu().addAction(self.use_current_project_directory_action)
+        self.localDirOpenButton.clicked.connect(
+            lambda: self.on_local_dir_open_button_clicked()
+        )
+        self.localDirOpenButton.setIcon(
+            QgsApplication.getThemeIcon("/mActionFileOpen.svg")
+        )
 
         self.network_manager.avatar_success.connect(lambda: self.update_welcome_label())
         self.network_manager.login_finished.connect(lambda: self.update_welcome_label())
@@ -533,6 +539,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         dirname = self.select_local_dir()
         if dirname:
             self.localDirLineEdit.setText(str(Path(dirname)))
+
+    def on_local_dir_open_button_clicked(self) -> None:
+        dirname = self.localDirLineEdit.text()
+        if dirname and Path(dirname).exists():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(dirname))
 
     def on_logout_button_clicked(self) -> None:
         self.buttonBox.button(QDialogButtonBox.Reset).setEnabled(False)
@@ -1052,6 +1063,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             local_dir, no_path_status=LocalDirFeedback.Warning
         )
         self.localDirFeedbackLabel.setText(feedback_msg)
+        self.localDirOpenButton.setEnabled(bool(local_dir) and Path(local_dir).exists())
 
         if feedback == LocalDirFeedback.Error:
             self.localDirFeedbackLabel.setStyleSheet("color: red;")
