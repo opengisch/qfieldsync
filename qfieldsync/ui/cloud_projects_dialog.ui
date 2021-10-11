@@ -94,7 +94,7 @@
       <set>Qt::ImhDialableCharactersOnly</set>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="projectsListPage">
       <property name="sizePolicy">
@@ -416,14 +416,7 @@
              <property name="title">
               <string>Local Project Settings</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,4">
-              <item row="0" column="0">
-               <widget class="QLabel" name="localDirLabel">
-                <property name="text">
-                 <string>Local Directory</string>
-                </property>
-               </widget>
-              </item>
+             <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,4,0">
               <item row="0" column="1">
                <layout class="QHBoxLayout" name="localDirHBoxLayout">
                 <item>
@@ -436,7 +429,28 @@
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QPushButton" name="localDirOpenButton">
+                  <property name="toolTip">
+                   <string>Open in external file browser</string>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset>
+                    <normaloff>../resources/launch.svg</normaloff>../resources/launch.svg</iconset>
+                  </property>
+                 </widget>
+                </item>
                </layout>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="localDirLabel">
+                <property name="text">
+                 <string>Local Directory</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
