@@ -355,7 +355,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
     def _start_synchronization(self):
         assert self.cloud_project
-        assert self.project_transfer
 
         if self.stackedWidget.currentWidget() is self.projectLocalDirPage:
             if self.localDirectoryLineEdit.text() == "":
@@ -429,6 +428,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.openProjectCheck.setVisible(False)
 
             self.show_progress_page(files)
+
+            assert self.project_transfer
 
             self.project_transfer.sync(
                 files["to_upload"], files["to_download"], files["to_delete"]
