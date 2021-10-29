@@ -292,7 +292,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.stackedWidget.setCurrentWidget(self.filesPage)
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
             self.buttonBox.button(QDialogButtonBox.Apply).setText(
-                self.tr("Synchronize Project")
+                self.tr("Perform Actions")
                 if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
                 else self.tr("Upload Project")
             )
