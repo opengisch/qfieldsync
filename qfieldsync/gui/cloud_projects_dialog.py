@@ -1051,8 +1051,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def show_sync_popup(self) -> None:
         assert self.current_cloud_project is not None, "No project to download selected"
 
-        self.transfer_dialog = CloudTransferDialog(
-            self.network_manager, self.current_cloud_project, self
+        self.transfer_dialog = CloudTransferDialog.show_transfer_dialog(
+            self.network_manager, self.current_cloud_project, None, None, self
         )
         self.transfer_dialog.rejected.connect(self.on_transfer_dialog_rejected)
         self.transfer_dialog.accepted.connect(self.on_transfer_dialog_accepted)

@@ -24,7 +24,7 @@ import os
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, pyqtSignal
@@ -72,6 +72,37 @@ class ProjectFileAction(Enum):
 
 class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     project_synchronized = pyqtSignal()
+
+    instance = None
+
+    @staticmethod
+    def show_transfer_dialog(
+        network_manager: CloudNetworkAccessManager,
+        cloud_project: CloudProject = None,
+        accepted_cb: Callable = None,
+        rejected_cb: Callable = None,
+        parent: QWidget = None,
+    ):
+        if CloudTransferDialog.instance:
+            CloudTransferDialog.instance.show()
+            return
+
+        CloudTransferDialog.instance = CloudTransferDialog(
+            network_manager, cloud_project, parent
+        )
+        CloudTransferDialog.instance.show()
+
+        if accepted_cb:
+            CloudTransferDialog.instance.accepted.connect(accepted_cb)
+        if rejected_cb:
+            CloudTransferDialog.instance.rejected.connect(rejected_cb)
+
+        def on_finished(result):
+            CloudTransferDialog.instance = None
+
+        CloudTransferDialog.instance.finished.connect(on_finished)
+
+        return CloudTransferDialog.instance
 
     def __init__(
         self,

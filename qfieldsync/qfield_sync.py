@@ -368,12 +368,13 @@ class QFieldSync(object):
         Synchornize cloud project.
         """
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
-            self.transfer_dialog = CloudTransferDialog(
+            self.transfer_dialog = CloudTransferDialog.show_transfer_dialog(
                 self.network_manager,
+                None,
+                None,
                 None,
                 self.iface.mainWindow(),
             )
-            self.transfer_dialog.show()
 
     def show_package_dialog(self):
         """
