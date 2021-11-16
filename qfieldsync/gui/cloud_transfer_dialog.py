@@ -275,6 +275,15 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def prepare_project_transfer(self):
         assert self.cloud_project
 
+        # Failed to update project files
+        if self.cloud_project.cloud_files is None:
+            self.show_end_page(
+                self.tr("Failed to update the project files status from the server.")
+            )
+            self.openProjectCheck.setChecked(False)
+            self.openProjectCheck.setVisible(False)
+            return
+
         if len(list(self.cloud_project.files_to_sync)) == 0:
             files_total = len(self.cloud_project.get_files())
             if files_total > 0:
