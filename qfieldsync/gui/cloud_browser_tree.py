@@ -268,8 +268,9 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
 
     def show_cloud_synchronize_dialog(self, item):
         project = self.network_manager.projects_cache.find_project(item.project_id)
-        dlg = CloudTransferDialog(self.network_manager, project, iface.mainWindow())
-        dlg.show()
+        CloudTransferDialog.show_transfer_dialog(
+            self.network_manager, project, None, None, iface.mainWindow()
+        )
 
     def open_project(self, item) -> bool:
         project = self.network_manager.projects_cache.find_project(item.project_id)
