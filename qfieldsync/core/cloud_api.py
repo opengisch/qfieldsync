@@ -205,6 +205,15 @@ class CloudNetworkAccessManager(QObject):
         url = self.url + "/api/v1/"
         return re.sub(r"([^:]/)(/)+", r"\1", url)
 
+    def auto_login_attempt(self):
+        cfg = self.auth()
+
+        server_url = cfg.uri() or self.server_url
+        username = cfg.config("username")
+        password = cfg.config("password")
+        self.set_url(server_url)
+        self.login(username, password)
+
     def login(self, username: str, password: str) -> Optional[QNetworkReply]:
         """Login to QFieldCloud"""
         # don't login multiple times

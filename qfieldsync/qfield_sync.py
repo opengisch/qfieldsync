@@ -147,9 +147,7 @@ class QFieldSync(object):
 
         # autologin
         if self.preferences.value("qfieldCloudRememberMe"):
-            CloudLoginDialog.show_auth_dialog(
-                self.network_manager, parent=self.iface.mainWindow()
-            )
+            self.network_manager.auto_login_attempt()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
