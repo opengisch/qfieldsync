@@ -48,7 +48,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     ):
         if CloudLoginDialog.instance:
             CloudLoginDialog.instance.show()
-            return
+            return CloudLoginDialog.instance
 
         CloudLoginDialog.instance = CloudLoginDialog(network_manager, parent)
         CloudLoginDialog.instance.authenticate()
