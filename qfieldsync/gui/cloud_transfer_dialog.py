@@ -85,7 +85,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     ):
         if CloudTransferDialog.instance:
             CloudTransferDialog.instance.show()
-            return
+            return CloudTransferDialog.instance
 
         CloudTransferDialog.instance = CloudTransferDialog(
             network_manager, cloud_project, parent
