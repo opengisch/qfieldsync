@@ -248,9 +248,33 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def show_end_page(
         self, feedback: str = "", logs_model: TransferFileLogsModel = None
     ) -> None:
+        summary = ""
+
+        if logs_model:
+            failed_count = 0
+            success_count = 0
+            aborted_count = 0
+
+            for transfer in logs_model.transfers:
+                if transfer.is_aborted:
+                    aborted_count += 1
+                elif transfer.is_failed:
+                    failed_count += 1
+                elif transfer.is_finished:
+                    success_count += 1
+
+            if success_count:
+                summary += self.tr("{} file(s) succeeded. ").format(success_count)
+            if failed_count:
+                summary += self.tr("{} file(s) failed. ").format(failed_count)
+            if aborted_count:
+                summary += self.tr("{} file(s) aborted. ").format(aborted_count)
+
+        summary = f"{summary}{feedback}"
+
         self.stackedWidget.setCurrentWidget(self.endPage)
 
-        self.feedbackLabel.setText(feedback)
+        self.feedbackLabel.setText(summary)
 
         self.openProjectCheck.setText(
             self.tr("Open project after closing this dialog")
@@ -592,9 +616,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         assert self.project_transfer
 
         self.show_end_page(
-            self.tr("Your cloud project has successfully been download.")
-            if self.is_project_download
-            else self.tr("Your cloud project has successfully been synchronized."),
+            self.tr("Transfer finished."),
             self.project_transfer.transfers_model,
         )
 
