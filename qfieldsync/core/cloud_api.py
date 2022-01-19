@@ -308,19 +308,10 @@ class CloudNetworkAccessManager(QObject):
 
         return self.cloud_get(["files", project_id], {"client": client})
 
-    def get_file(
-        self, url: QUrl, local_filename: str, version: str = None
-    ) -> QNetworkReply:
-        """"Download file"""
+    def get_file(self, url: QUrl, local_filename: str) -> QNetworkReply:
+        """"Download file from external URL"""
 
-        return self.cloud_get(
-            url, local_filename=local_filename, params={"version": version}
-        )
-
-    def get_file_request(self, filename: str, version: str = None) -> QNetworkReply:
-        """"Download file"""
-
-        return self.cloud_get("files/" + filename, params={"version": version})
+        return self.cloud_get(url, local_filename=local_filename)
 
     def delete_file(self, filename: str) -> QNetworkReply:
         return self.cloud_delete("files/" + filename)
@@ -411,6 +402,11 @@ class CloudNetworkAccessManager(QObject):
     def _on_cloud_get_download_finished(
         self, reply: QNetworkReply, local_filename: str
     ) -> None:
+        http_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        if http_code >= 301 and http_code <= 308:
+            # redirects should not be saved as files, just ignore them
+            return
+
         with open(local_filename, "wb") as file:
             assert (
                 file.write(reply.readAll()) != -1
