@@ -436,7 +436,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         assert version_idx < len(project_file.versions)
 
         basename = "{}_{}{}".format(
-            project_file.path.stem, str(version_idx + 1), project_file.path.suffix
+            project_file.path.stem,
+            str(len(project_file.versions) - version_idx),
+            project_file.path.suffix,
         )
 
         if project_file.local_path:
