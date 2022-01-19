@@ -542,6 +542,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def add_file_checkbox_buttons(
         self, item: QTreeWidgetItem, project_file: ProjectFile
     ) -> None:
+        assert self.cloud_project
+
         is_local_enabled = (
             project_file.local_path_exists and self.cloud_project.user_role != "reader"
         )
