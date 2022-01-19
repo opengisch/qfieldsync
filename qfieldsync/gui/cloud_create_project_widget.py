@@ -244,10 +244,6 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         self.network_manager.projects_cache.refresh()
 
-        result_message = self.tr(
-            "Finished uploading the project to QFieldCloud, you are now viewing the locally stored copy."
-        )
-        self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
         self.finished.emit()
 
     def update_info_visibility(self):
@@ -334,6 +330,11 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.uploadProgressBar.setValue(int(fraction * 100))
 
     def on_transferrer_finished(self):
+        result_message = self.tr(
+            "Finished uploading the project to QFieldCloud, you are now viewing the locally stored copy."
+        )
+        self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
+
         self.after_project_creation_action()
 
     def on_show_warning(self, _, message):
