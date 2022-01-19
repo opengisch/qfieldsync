@@ -581,11 +581,9 @@ class ThrottledFileTransferrer(QObject):
             self.finished_count += 1
 
             if not Path(transfer.fs_filename).exists():
-                self.error.emit(
-                    transfer.filename,
-                    self.tr(f'Downloaded file "{transfer.fs_filename}" not found!'),
+                transfer.error = Exception(
+                    f'Downloaded file "{transfer.fs_filename}" not found!'
                 )
-                return
 
             self.file_finished.emit(transfer.filename)
 
