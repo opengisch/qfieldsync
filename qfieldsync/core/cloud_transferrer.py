@@ -23,7 +23,7 @@
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from PyQt5.QtCore import QUrl
 from qgis.PyQt.QtCore import QAbstractListModel, QModelIndex, QObject, Qt, pyqtSignal
@@ -394,24 +394,120 @@ class CloudTransferrer(QObject):
         self.abort_requests()
 
 
-class FileTransfer:
+class FileTransfer(QObject):
+
+    progress = pyqtSignal(int, int)
+    finished = pyqtSignal()
+
     class Type(Enum):
         DOWNLOAD = "download"
         UPLOAD = "upload"
         DELETE = "delete"
 
-    def __init__(self, filename: str, destination: Path, type: Type) -> None:
+    def __init__(
+        self,
+        network_manager: CloudNetworkAccessManager,
+        cloud_project: CloudProject,
+        type: Type,
+        filename: str,
+        destination: Path,
+        version: str = None,
+    ) -> None:
+        super(QObject, self).__init__()
+
+        self.network_manager = network_manager
+        self.cloud_project = cloud_project
         self.replies: List[QNetworkReply] = []
         self.redirects: List[QUrl] = []
         self.filename = filename
         # filesystem filename
-        self.fs_filename = destination.joinpath(filename)
+        self.fs_filename = destination
         self.fs_filename.parent.mkdir(parents=True, exist_ok=True)
         self.error: Optional[Exception] = None
         self.bytes_transferred = 0
         self.bytes_total = 0
         self.is_aborted = False
         self.type = type
+        self.version = version
+
+    def abort(self):
+        if not self.is_started:
+            return
+
+        if self.is_finished:
+            return
+
+        self.is_aborted = True
+        self.last_reply.abort()
+
+    def transfer(self) -> None:
+        if self.type == FileTransfer.Type.DOWNLOAD:
+            if self.is_redirect:
+                reply = self.network_manager.get(
+                    self.last_redirect_url, str(self.fs_filename)
+                )
+            else:
+                params = {"version": self.version} if self.version else {}
+                reply = self.network_manager.cloud_get(
+                    f"files/{self.cloud_project.id}/{self.filename}/",
+                    local_filename=str(self.fs_filename),
+                    params=params,
+                )
+        elif self.type == FileTransfer.Type.UPLOAD:
+            reply = self.network_manager.cloud_upload_files(
+                "files/" + self.cloud_project.id + "/" + self.filename,
+                filenames=[str(self.fs_filename)],
+            )
+        elif self.type == FileTransfer.Type.DELETE:
+            reply = self.network_manager.delete_file(
+                self.cloud_project.id + "/" + self.filename + "/"
+            )
+        else:
+            raise NotImplementedError()
+
+        self.replies.append(reply)
+
+        reply.redirected.connect(lambda *args: self._on_redirected(*args))
+        reply.downloadProgress.connect(lambda *args: self._on_progress(*args))
+        reply.uploadProgress.connect(lambda *args: self._on_progress(*args))
+        reply.finished.connect(lambda *args: self._on_finished(*args))
+
+    def _on_progress(self, bytes_transferred: int, bytes_total: int) -> None:
+        # there are always at least a few bytes to send, so ignore this situation
+        if bytes_transferred < self.bytes_transferred or bytes_total < self.bytes_total:
+            return
+
+        self.bytes_transferred = bytes_transferred
+        self.bytes_total = bytes_total
+
+        self.progress.emit(bytes_transferred, bytes_total)
+
+    def _on_redirected(self, url: QUrl) -> None:
+        self.redirects.append(url)
+        self.last_reply.abort()
+
+    def _on_finished(self) -> None:
+        if self.is_redirect:
+            if self.type == FileTransfer.Type.DOWNLOAD:
+                self.transfer()
+                return
+            else:
+                raise NotImplementedError("Redirects on upload are not supported")
+
+        try:
+            self.network_manager.handle_response(self.last_reply, False)
+
+            if (
+                self.type == FileTransfer.Type.DOWNLOAD
+                and not Path(self.fs_filename).is_file()
+            ):
+                self.error = Exception(
+                    f'Downloaded file "{self.fs_filename}" not found!'
+                )
+        except Exception as err:
+            self.error = err
+
+        self.finished.emit()
 
     @property
     def last_reply(self) -> QNetworkReply:
@@ -488,247 +584,79 @@ class ThrottledFileTransferrer(QObject):
         self.transfer_type = transfer_type
 
         for filename in self.filenames:
-            self.transfers[filename] = FileTransfer(
-                filename,
-                self.temp_dir.joinpath(str(self.transfer_type.value)),
+            transfer = FileTransfer(
+                self.network_manager,
+                self.cloud_project,
                 self.transfer_type,
+                filename,
+                self.temp_dir.joinpath(str(self.transfer_type.value), filename),
+            )
+            transfer.progress.connect(
+                lambda *args: self._on_transfer_progress(transfer, *args)
+            )
+            transfer.finished.connect(
+                lambda *args: self._on_transfer_finished(transfer, *args)
             )
 
+            assert filename not in self.transfers
+
+            self.transfers[filename] = transfer
+
     def transfer(self):
-        if self.transfer_type == FileTransfer.Type.DOWNLOAD:
-            self._download()
-        elif self.transfer_type == FileTransfer.Type.UPLOAD:
-            self._upload()
-        elif self.transfer_type == FileTransfer.Type.DELETE:
-            self._delete()
-        else:
-            raise NotImplementedError(
-                f'Unknown file transfer type "{self.transfer_type}"'
-            )
+        transfers_count = 0
+
+        for transfer in self.transfers.values():
+            if transfer.is_finished:
+                continue
+
+            transfers_count += 1
+
+            # skip a started request but still waiting for a response
+            if not transfer.is_started:
+                transfer.transfer()
+
+            if transfers_count == self.max_parallel_requests:
+                break
 
     def abort(self) -> None:
         for transfer in self.transfers.values():
-            if not transfer.is_started:
-                continue
-
-            transfer.is_aborted = True
-            transfer.last_reply.abort()
+            transfer.abort()
 
         self.aborted.emit()
 
-    def _download(self) -> None:
-        transfers: List[FileTransfer] = []
+    def _on_transfer_progress(self, transfer, bytes_received: int, bytes_total: int):
+        bytes_received_sum = sum([t.bytes_transferred for t in self.transfers.values()])
+        bytes_total_sum = sum([t.bytes_total for t in self.transfers.values()])
+        self.progress.emit(transfer.filename, bytes_received_sum, bytes_total_sum)
 
-        for transfer in self.transfers.values():
-            if transfer.is_finished:
-                continue
+    def _on_transfer_finished(self, transfer: FileTransfer) -> None:
+        self.transfer()
 
-            transfers.append(transfer)
-
-            if len(transfers) == self.max_parallel_requests:
-                break
-
-        for transfer in transfers:
-            reply = None
-
-            if transfer.is_redirect:
-                reply = self.network_manager.get(
-                    transfer.last_redirect_url, transfer.fs_filename
+        if transfer.error:
+            if transfer.type == FileTransfer.Type.DOWNLOAD:
+                msg = self.tr('Downloading file "{}" failed!').format(
+                    transfer.fs_filename
                 )
-            elif transfer.is_started:
-                # started a request but still waiting for a response
-                continue
+            elif transfer.type == FileTransfer.Type.UPLOAD:
+                msg = self.tr('Uploading file "{}" failed!').format(
+                    transfer.fs_filename
+                )
+            elif transfer.type == FileTransfer.Type.DELETE:
+                msg = self.tr('Deleting file "{}" failed!').format(transfer.fs_filename)
             else:
-                reply = self.network_manager.get_file_request(
-                    self.cloud_project.id + "/" + transfer.filename + "/"
-                )
+                raise NotImplementedError()
 
-            transfer.replies.append(reply)
-
-            reply.redirected.connect(self._on_redirect_wrapper(transfer))
-            reply.downloadProgress.connect(self._on_download_progress_wrapper(transfer))
-            reply.finished.connect(self._on_download_finished_wrapper(transfer))
-
-    def _on_redirect_wrapper(self, transfer: FileTransfer) -> Callable:
-        def on_redirected(url: QUrl) -> None:
-            transfer.redirects.append(url)
-            transfer.last_reply.abort()
-
-            self._download()
-
-        return on_redirected
-
-    def _on_download_finished_wrapper(self, transfer: FileTransfer) -> Callable:
-        def on_download_finished() -> None:
-            # note if the redirect request failed, it will continue
-            if transfer.is_redirect:
-                return
-
-            self._download()
-
-            try:
-                self.network_manager.handle_response(transfer.last_reply, False)
-            except Exception as err:
-                self.error.emit(
-                    transfer.filename,
-                    self.tr(
-                        f'Downloaded file "{transfer.fs_filename}" had an HTTP error!'
-                    ),
-                )
-                transfer.error = err
-                return
-
-            self.finished_count += 1
-
-            if not Path(transfer.fs_filename).exists():
-                transfer.error = Exception(
-                    f'Downloaded file "{transfer.fs_filename}" not found!'
-                )
-
-            self.file_finished.emit(transfer.filename)
-
-            if self.finished_count == len(self.transfers):
-                self.finished.emit()
-                return
-
-        return on_download_finished
-
-    def _on_download_progress_wrapper(self, transfer: FileTransfer) -> Callable:
-        def on_download_progress(bytes_received: int, bytes_total: int):
-            transfer.bytes_transferred = bytes_received
-            transfer.bytes_total = bytes_total
-            bytes_received_sum = sum(
-                [t.bytes_transferred for t in self.transfers.values()]
+            self.error.emit(
+                transfer.filename,
+                msg,
             )
-            bytes_total_sum = sum([t.bytes_total for t in self.transfers.values()])
-            self.progress.emit(transfer.filename, bytes_received_sum, bytes_total_sum)
 
-        return on_download_progress
+        self.finished_count += 1
+        self.file_finished.emit(transfer.filename)
 
-    def _upload(self) -> None:
-        transfers: List[FileTransfer] = []
-
-        for transfer in self.transfers.values():
-            if transfer.is_finished:
-                continue
-
-            transfers.append(transfer)
-
-            if len(transfers) == self.max_parallel_requests:
-                break
-
-        for transfer in transfers:
-            reply = None
-
-            if transfer.is_redirect:
-                raise NotImplementedError("Redirects on upload are not supported")
-            elif transfer.is_started:
-                # started a request but still waiting for a response
-                continue
-            else:
-                reply = self.network_manager.cloud_upload_files(
-                    "files/" + self.cloud_project.id + "/" + transfer.filename,
-                    filenames=[str(transfer.fs_filename)],
-                )
-
-            transfer.replies.append(reply)
-
-            reply.uploadProgress.connect(self._on_upload_progress_wrapper(transfer))
-            reply.finished.connect(self._on_upload_finished_wrapper(transfer))
-
-    def _on_upload_finished_wrapper(self, transfer: FileTransfer) -> Callable:
-        def on_upload_finished() -> None:
-            self._upload()
-
-            try:
-                self.network_manager.handle_response(transfer.last_reply, False)
-            except Exception as err:
-                self.error.emit(
-                    transfer.filename,
-                    self.tr(f'Uploading file "{transfer.filename}" failed: {err}'),
-                )
-                transfer.error = err
-                return
-
-            self.finished_count += 1
-            self.file_finished.emit(transfer.filename)
-
-            if self.finished_count == len(self.transfers):
-                self.finished.emit()
-                return
-
-        return on_upload_finished
-
-    def _on_upload_progress_wrapper(self, transfer: FileTransfer) -> Callable:
-        def on_upload_progress(bytes_sent: int, bytes_total: int) -> None:
-            # there are always at least a few bytes to send, so ignore this situation
-            if (
-                bytes_sent < transfer.bytes_transferred
-                or bytes_total < transfer.bytes_total
-            ):
-                return
-
-            transfer.bytes_transferred = bytes_sent
-            transfer.bytes_total = bytes_total
-            bytes_received_sum = sum(
-                [t.bytes_transferred for t in self.transfers.values()]
-            )
-            bytes_total_sum = sum([t.bytes_total for t in self.transfers.values()])
-            self.progress.emit(transfer.filename, bytes_received_sum, bytes_total_sum)
-
-        return on_upload_progress
-
-    def _delete(self) -> None:
-        transfers = []
-
-        for transfer in self.transfers.values():
-            if transfer.is_finished:
-                continue
-
-            transfers.append(transfer)
-
-            if len(transfers) == self.max_parallel_requests:
-                break
-
-        for transfer in transfers:
-            reply = None
-
-            if transfer.is_redirect:
-                raise NotImplementedError("Redirects on delete are not supported")
-            elif transfer.is_started:
-                # started a request but still waiting for a response
-                continue
-            else:
-                reply = self.network_manager.delete_file(
-                    self.cloud_project.id + "/" + transfer.filename + "/"
-                )
-
-            transfer.replies.append(reply)
-
-            reply.finished.connect(self._on_delete_finished_wrapper(transfer))
-
-    def _on_delete_finished_wrapper(self, transfer: FileTransfer) -> Callable:
-        def on_delete_finished() -> None:
-            self._delete()
-
-            try:
-                self.network_manager.handle_response(transfer.last_reply, False)
-            except Exception as err:
-                self.error.emit(
-                    transfer.filename,
-                    self.tr(f'Deleting file "{transfer.filename}" failed: {err}'),
-                )
-                transfer.error = err
-                return
-
-            self.finished_count += 1
-            self.file_finished.emit(transfer.filename)
-
-            if self.finished_count == len(self.transfers):
-                self.finished.emit()
-                return
-
-        return on_delete_finished
+        if self.finished_count == len(self.transfers):
+            self.finished.emit()
+            return
 
 
 class TransferFileLogsModel(QAbstractListModel):
