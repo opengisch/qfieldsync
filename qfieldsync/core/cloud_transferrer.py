@@ -478,7 +478,6 @@ class ThrottledFileTransferrer(QObject):
     ) -> None:
         super(QObject, self).__init__()
 
-        self.type = FileTransfer.Type
         self.transfers: Dict[str, FileTransfer] = {}
         self.network_manager = network_manager
         self.cloud_project = cloud_project
