@@ -22,7 +22,7 @@
 """
 import os
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 from qgis.core import QgsApplication, QgsProject
 from qgis.PyQt.QtCore import (
@@ -64,6 +64,7 @@ from qgis.utils import iface
 from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
+from qfieldsync.core.cloud_transferrer import FileTransfer
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
@@ -430,6 +431,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_save_as_btn_version_clicked(
         self, project_file: ProjectFile, version_idx: int, _is_checked: bool
     ):
+        assert self.current_cloud_project
         assert project_file.versions
         assert version_idx < len(project_file.versions)
 
@@ -451,71 +453,39 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if not version_dest_filename:
             return
 
-        def on_redirected_wrapper() -> Callable:
-            def on_redirected(url: QUrl) -> None:
-                reply = self.network_manager.get(url, version_dest_filename)
-                reply.downloadProgress.connect(
-                    lambda r, t: self.on_download_file_progress(
-                        reply, r, t, project_file=project_file
-                    )
-                )
-                reply.finished.connect(
-                    lambda: self.on_download_file_finished(
-                        reply, project_file=project_file
-                    )
-                )
-
-            return on_redirected
-
-        def on_finished_wrapper(reply: QNetworkReply) -> Callable:
-            def on_finished():
-                try:
-                    self.network_manager.handle_response(reply, False)
-                except CloudException as err:
-                    self.feedbackLabel.setText(
-                        self.tr(
-                            'Downloading file "{}" failed: {}'.format(
-                                project_file.name, str(err)
-                            )
-                        )
-                    )
-                    self.feedbackLabel.setVisible(True)
-                    return
-
-            return on_finished
-
-        reply = self.network_manager.get_file_request(
-            self.current_cloud_project.id + "/" + str(project_file.name) + "/",
+        transfer = FileTransfer(
+            self.network_manager,
+            self.current_cloud_project,
+            FileTransfer.Type.DOWNLOAD,
+            project_file.name,
+            Path(version_dest_filename),
             project_file.versions[version_idx]["version_id"],
         )
-
-        reply.redirected.connect(on_redirected_wrapper())
-        reply.finished.connect(on_finished_wrapper(reply))
+        transfer.progress.connect(
+            lambda r, t: self.on_download_file_progress(transfer, r, t)
+        )
+        transfer.finished.connect(lambda: self.on_download_file_finished(transfer))
+        transfer.transfer()
 
     def on_download_file_progress(
         self,
-        _reply: QNetworkReply,
+        transfer: FileTransfer,
         bytes_received: int,
         bytes_total: int,
-        project_file: ProjectFile,
     ) -> None:
+        progress = int((bytes_received / bytes_total) * 100) if bytes_total > 0 else 100
+
         self.feedbackLabel.setVisible(True)
         self.feedbackLabel.setText(
-            self.tr('Downloading file "{}" at {}%…').format(
-                project_file.name, int((bytes_received / bytes_total) * 100)
-            )
+            self.tr('Downloading file "{}" at {}%…').format(transfer.filename, progress)
         )
 
-    def on_download_file_finished(
-        self, reply: QNetworkReply, project_file: ProjectFile
-    ) -> None:
-        try:
-            self.network_manager.handle_response(reply, False)
-        except CloudException as err:
+    def on_download_file_finished(self, transfer: FileTransfer) -> None:
+        if transfer.is_failed:
             self.feedbackLabel.setText(
                 self.tr(
                     'Downloading file "{}" failed: {}'.format(
-                        project_file.name, str(err)
+                        transfer.name, str(transfer.error)
                     )
                 )
             )
