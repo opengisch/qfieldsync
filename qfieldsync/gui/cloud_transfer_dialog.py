@@ -27,8 +27,8 @@ from pathlib import Path
 from typing import Callable, Dict, List
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QDir, Qt, pyqtSignal
-from qgis.PyQt.QtGui import QShowEvent
+from qgis.PyQt.QtCore import QDir, Qt, QUrl, pyqtSignal
+from qgis.PyQt.QtGui import QDesktopServices, QShowEvent
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -170,6 +170,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Synchronize"))
         self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(
             lambda: self.on_project_apply_clicked()
+        )
+        self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://qfield.org/docs/"))
         )
 
         self.preferNoneButton.clicked.connect(self._on_prefer_none_button_clicked)
