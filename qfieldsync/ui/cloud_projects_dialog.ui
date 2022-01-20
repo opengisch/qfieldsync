@@ -40,9 +40,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="avatarLabel">
+      <widget class="QPushButton" name="avatarButton">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Maximum" vsizetype="MinimumExpanding">
          <horstretch>50</horstretch>
          <verstretch>50</verstretch>
         </sizepolicy>
@@ -59,11 +59,17 @@
          <height>50</height>
         </size>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
+       <property name="toolTip">
+        <string>Click to logout</string>
        </property>
-       <property name="text">
-        <string/>
+       <property name="iconSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -94,7 +100,7 @@
       <set>Qt::ImhDialableCharactersOnly</set>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="projectsListPage">
       <property name="sizePolicy">
@@ -700,7 +706,7 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Reset</set>
+      <set>QDialogButtonBox::Close</set>
      </property>
     </widget>
    </item>
