@@ -19,30 +19,19 @@
  ***************************************************************************/
 """
 
+from typing import List
+
 from qgis.core import QgsProject
 
-from qfieldsync.utils.file_utils import fileparts, get_project_in_folder
-from qfieldsync.core.project import ProjectConfiguration
+from qfieldsync.libqfieldsync import ProjectConfiguration
+from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder
+from qfieldsync.libqfieldsync.utils.qgis import open_project
 
 
-def get_project_title(proj):
-    """ Gets project title, or if non available, the basename of the filename"""
-    title = proj.title()
-    if not title:  # if title is empty, get basename
-        fn = proj.fileName()
-        _, title, _ = fileparts(fn)
-    return title
-
-
-def open_project(fn):
-    QgsProject.instance().clear()
-    QgsProject.instance().setFileName(fn)
-    return QgsProject.instance().read()
-
-
-def import_checksums_of_project(folder):
-    qgs_file = get_project_in_folder(folder)
+def import_checksums_of_project(dirname: str) -> List[str]:
+    project = QgsProject.instance()
+    qgs_file = get_project_in_folder(dirname)
     open_project(qgs_file)
-    original_project_path = ProjectConfiguration(QgsProject.instance()).original_project_path
+    original_project_path = ProjectConfiguration(project).original_project_path
     open_project(original_project_path)
-    return ProjectConfiguration(QgsProject.instance()).imported_files_checksums
+    return ProjectConfiguration(project).imported_files_checksums

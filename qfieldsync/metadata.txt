@@ -1,6 +1,6 @@
-# This file contains metadata for your plugin. Since 
-# version 2.0 of QGIS this is the proper way to supply 
-# information about a plugin. The old method of 
+# This file contains metadata for your plugin. Since
+# version 2.0 of QGIS this is the proper way to supply
+# information about a plugin. The old method of
 # embedding metadata in __init__.py
 # is no longer supported since version 2.0.
 
@@ -8,7 +8,7 @@
 
 [general]
 name=QField Sync
-qgisMinimumVersion=3.10
+qgisMinimumVersion=3.16
 description=Sync your projects to QField
 version=dev
 author=OPENGIS.ch
@@ -20,7 +20,7 @@ email=info@opengis.ch
 
 changelog=
     We've been busy improving QFieldSync, enjoy this new release.
-    
+
     Check out the complete changelog on: https://github.com/opengisch/qfieldsync/releases
 
 # Tags are comma separated with spaces allowed
@@ -40,4 +40,3 @@ deprecated=False
 about=
     This plugin facilitates packaging QGIS projects for QField.<br>
     It analyses the current project and suggests (and performs) actions needed to make the project working on QField.
-    

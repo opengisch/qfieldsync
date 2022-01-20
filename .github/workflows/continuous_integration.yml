@@ -18,12 +18,29 @@ on:
         default: 'master'
 
 jobs:
+  code_check:
+    name: Code check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Check code formatting
+        run: |
+          pipenv install pre_commit
+          pipenv run python -m pre_commit run --all-files
+
   # Run unit tests
   test:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        qgis_version: [release-3_10, release-3_16, latest]
+        qgis_version: [release-3_16, latest]
     env:
       QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
     steps:
@@ -31,9 +48,28 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Test on QGIS LTR 3.
+      - name: Test
         run: |
           docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
+
+  test-18-04:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Test
+        run: |
+          wget -qO - https://qgis.org/downloads/qgis-2021.gpg.key | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/qgis-archive.gpg --import
+          sudo chmod a+r /etc/apt/trusted.gpg.d/qgis-archive.gpg
+          sudo add-apt-repository "deb https://qgis.org/ubuntu $(lsb_release -c -s) main"
+
+          sudo apt update
+          sudo apt install qgis
+          sudo pip3 install pytest nose2 mock
+
+          xvfb-run pytest
 
   release:
     runs-on: ubuntu-20.04

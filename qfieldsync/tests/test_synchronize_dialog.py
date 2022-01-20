@@ -18,17 +18,16 @@
  *                                                                         *
  ***************************************************************************/
 """
+from qgis.core import QgsOfflineEditing
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
-from qgis.core import QgsOfflineEditing
-from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 
+from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 
 start_app()
 
 
 class SynchronizeDialogTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.iface = get_iface()

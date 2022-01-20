@@ -23,23 +23,18 @@
 
 import os
 
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.gui import QgsFileWidget, QgsOptionsPageWidget
 from qgis.PyQt.uic import loadUiType
 
-from qgis.gui import (
-    QgsOptionsWidgetFactory,
-    QgsOptionsPageWidget,
-    QgsFileWidget,
-)
-
-from qfieldsync.setting_manager import SettingDialog, UpdateMode
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.setting_manager import SettingDialog
 
-WidgetUi, _ = loadUiType(os.path.join(os.path.dirname(__file__), '../ui/preferences_widget.ui'))
+WidgetUi, _ = loadUiType(
+    os.path.join(os.path.dirname(__file__), "../ui/preferences_widget.ui")
+)
 
 
 class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
-
     def __init__(self, parent=None):
         preferences = Preferences()
         SettingDialog.__init__(self, setting_manager=preferences)
@@ -47,8 +42,15 @@ class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
         self.setupUi(self)
         self.init_widgets()
 
-        self.setting_widget('importDirectory').widget.setStorageMode(QgsFileWidget.GetDirectory)
-        self.setting_widget('exportDirectory').widget.setStorageMode(QgsFileWidget.GetDirectory)
+        self.setting_widget("importDirectory").widget.setStorageMode(
+            QgsFileWidget.GetDirectory
+        )
+        self.setting_widget("exportDirectory").widget.setStorageMode(
+            QgsFileWidget.GetDirectory
+        )
+        self.setting_widget("cloudDirectory").widget.setStorageMode(
+            QgsFileWidget.GetDirectory
+        )
 
     def apply(self):
         self.set_values_from_widgets()
