@@ -37,7 +37,6 @@ from qgis.PyQt.QtGui import (
     QDesktopServices,
     QFont,
     QIcon,
-    QPixmap,
     QRegularExpressionValidator,
     QValidator,
 )
@@ -199,11 +198,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(
             lambda: self.on_button_box_clicked()
         )
-        self.buttonBox.button(QDialogButtonBox.Reset).setText(self.tr("Logout"))
-        self.buttonBox.button(QDialogButtonBox.Reset).setIcon(QIcon())
-        self.buttonBox.button(QDialogButtonBox.Reset).clicked.connect(
-            lambda: self.on_logout_button_clicked()
-        )
+        self.avatarButton.clicked.connect(lambda: self.on_logout_button_clicked())
 
         self.projectsTable.selectionModel().selectionChanged.connect(
             lambda: self.on_projects_table_selection_changed()
@@ -518,7 +513,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             QDesktopServices.openUrl(QUrl.fromLocalFile(dirname))
 
     def on_logout_button_clicked(self) -> None:
-        self.buttonBox.button(QDialogButtonBox.Reset).setEnabled(False)
+        self.avatarButton.setEnabled(False)
         self.feedbackLabel.setVisible(False)
         self.network_manager.logout()
 
@@ -895,12 +890,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.network_manager.has_token():
             avatar_filename = self.network_manager.user_details.get("avatar_filename")
             if avatar_filename:
-                self.avatarLabel.setVisible(True)
-                pixmap = rounded_pixmap(avatar_filename, self.avatarLabel.height())
-                self.avatarLabel.setPixmap(pixmap)
+                self.avatarButton.setVisible(True)
+                pixmap = rounded_pixmap(avatar_filename, self.avatarButton.height())
+                self.avatarButton.setIcon(QIcon(pixmap))
             else:
-                self.avatarLabel.setVisible(False)
-                self.avatarLabel.setPixmap(QPixmap())
+                self.avatarButton.setVisible(False)
+                self.avatarButton.setIcon(QIcon())
 
             self.welcomeLabel.setText(
                 self.tr("Greetings {}.").format(
@@ -919,7 +914,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     ).format(self.network_manager.url)
                 )
         else:
-            self.avatarLabel.setVisible(False)
+            self.avatarButton.setVisible(False)
             self.welcomeLabel.setText("Logged out.")
             self.welcomeLabel.setToolTip("")
 
@@ -1075,4 +1070,4 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def _on_logout_failed(self, err: str) -> None:
         self.feedbackLabel.setText("Logout failed: {}".format(str(err)))
         self.feedbackLabel.setVisible(True)
-        self.buttonBox.button(QDialogButtonBox.Reset).setEnabled(True)
+        self.avatarButton.setEnabled(True)
