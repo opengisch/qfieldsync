@@ -140,12 +140,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # self.filesTree.model().setHeaderData(1, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
         # self.filesTree.model().setHeaderData(3, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
 
-        if self.cloud_project:
-            self.setWindowTitle(
-                self.tr('Synchronizing project "{}"').format(self.cloud_project.name)
-            )
-        else:
-            self.setWindowTitle(self.tr("Synchronizing Current Project"))
+        self._update_window_title()
 
         memory_layers = get_memory_layers(QgsProject.instance())
 
@@ -191,6 +186,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.cloud_project = (
                 self.network_manager.projects_cache.currently_open_project
             )
+
+        self._update_window_title()
 
         if self.cloud_project:
             if self.cloud_project.local_dir:
@@ -241,6 +238,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.cloud_project = (
                 self.network_manager.projects_cache.currently_open_project
             )
+
+        self._update_window_title()
 
         if self.cloud_project:
             reply = self.network_manager.projects_cache.get_project_files(
@@ -367,11 +366,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.cloud_project.local_dir,
                 self.cloud_project.human_local_dir,
             )
-            project_cloud_link = '<a href="{}{}">{}/{}</a>'.format(
+            project_cloud_link = '<a href="{}{}">{}</a>'.format(
                 self.network_manager.url,
                 self.cloud_project.url,
-                self.cloud_project.owner,
-                self.cloud_project.name,
+                self.cloud_project.name_with_owner,
             )
 
             if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0:
@@ -380,7 +378,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
                 self.explanationLabel.setText(
                     self.tr(
-                        'QFieldSync found some of the files stored in QGIS project directory in "{}" and the cloud project "{}" differ. '
+                        'Some of the files stored in the QGIS project directory "{}" and the cloud project "{}" are different. '
                     ).format(
                         project_filesystem_link,
                         project_cloud_link,
@@ -392,7 +390,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
                 self.explanationLabel.setText(
                     self.tr(
-                        'QFieldSync will upload all files in QGIS project directory in "{}" to the cloud project "{}". '
+                        'All files in QGIS project directory "{}" will be uploaded to the cloud project "{}". '
                     ).format(
                         project_filesystem_link,
                         project_cloud_link,
@@ -439,6 +437,16 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     pass
         self.filesTree.expandAll()
         # NOTE END algorithmic part
+
+    def _update_window_title(self):
+        if self.cloud_project:
+            self.setWindowTitle(
+                self.tr('Synchronizing project "{}"').format(
+                    self.cloud_project.name_with_owner
+                )
+            )
+        else:
+            self.setWindowTitle(self.tr("Synchronizing project"))
 
     def on_project_ok_clicked(self):
         assert self.cloud_project

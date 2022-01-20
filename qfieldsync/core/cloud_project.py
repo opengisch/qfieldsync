@@ -304,6 +304,10 @@ class CloudProject:
         return f"a/{self.owner}/{self.name}"
 
     @property
+    def name_with_owner(self) -> str:
+        return f"{self.owner}/{self.name}"
+
+    @property
     def root_project_files(self) -> List[Path]:
         if self.local_dir:
             return get_qgis_files_within_dir(Path(self.local_dir))
