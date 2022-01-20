@@ -298,6 +298,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
     def prepare_project_transfer(self):
         assert self.cloud_project
+        assert self.cloud_project.human_local_dir
 
         # Failed to update project files
         if self.cloud_project.cloud_files is None:
@@ -343,6 +344,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         )
         self.project_transfer.finished.connect(self.on_transfer_finished)
 
+        self.explanationLabel.setVisible(False)
+
         self.build_files_tree()
         if self.is_project_download:
             self._file_tree_set_checkboxes(ProjectFileCheckout.Cloud)
@@ -355,11 +358,43 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
             self.stackedWidget.setCurrentWidget(self.filesPage)
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
-            self.buttonBox.button(QDialogButtonBox.Apply).setText(
-                self.tr("Perform Actions")
-                if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
-                else self.tr("Upload Project")
+            self.explanationLabel.setVisible(True)
+
+            project_filesystem_link = '<a href="{}">{}</a>'.format(
+                self.cloud_project.local_dir,
+                self.cloud_project.human_local_dir,
             )
+            project_cloud_link = '<a href="{}{}">{}/{}</a>'.format(
+                self.network_manager.url,
+                self.cloud_project.url,
+                self.cloud_project.owner,
+                self.cloud_project.name,
+            )
+
+            if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0:
+                self.buttonBox.button(QDialogButtonBox.Apply).setText(
+                    self.tr("Perform Actions")
+                )
+                self.explanationLabel.setText(
+                    self.tr(
+                        'QFieldSync found some of the files stored in QGIS project directory in "{}" and the cloud project "{}" differ. '
+                    ).format(
+                        project_filesystem_link,
+                        project_cloud_link,
+                    )
+                )
+            else:
+                self.buttonBox.button(QDialogButtonBox.Apply).setText(
+                    self.tr("Upload Files")
+                )
+                self.explanationLabel.setText(
+                    self.tr(
+                        'QFieldSync will upload all files in QGIS project directory in "{}" to the cloud project "{}". '
+                    ).format(
+                        project_filesystem_link,
+                        project_cloud_link,
+                    )
+                )
 
     def build_files_tree(self):
         assert self.project_transfer

@@ -334,7 +334,23 @@
        <item>
         <widget class="QLabel" name="explanationLabel">
          <property name="text">
-          <string>Please select action to be applied on the files. Checking &quot;local&quot; or &quot;cloud&quot; will mark it as a single source of truth and will overwrite the file on any other storage.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="openExternalLinks">
+          <bool>true</bool>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="explanationStaticLabel">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Now you should choose what actions to perform on those files by clicking on the checkboxes in the file list below. &lt;/p&gt;&lt;p&gt;Checking the &amp;quot;local&amp;quot; action (under the computer icon) or &amp;quot;cloud&amp;quot; action (under the cloud icon) will mark that file as single source of truth and will cause the file to be overwritten either in the cloud or the local storage. All other files will not be affected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
