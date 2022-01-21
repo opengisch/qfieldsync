@@ -31,6 +31,7 @@ from qgis.PyQt.uic import loadUiType
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
+from qfieldsync.libqfieldsync.project_checker import ProjectChecker
 from qfieldsync.libqfieldsync.utils.file_utils import fileparts
 from qfieldsync.libqfieldsync.utils.qgis import get_project_title
 
@@ -72,6 +73,7 @@ class PackageDialog(QDialog, DialogUi):
         )
 
         self.devices = None
+        self.project_checker = ProjectChecker(QgsProject.instance())
         # self.refresh_devices()
         self.setup_gui()
 
@@ -94,10 +96,30 @@ class PackageDialog(QDialog, DialogUi):
         self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
 
+        self.nextButton.clicked.connect(lambda: self.show_package_page())
+        self.nextButton.setVisible(False)
+        self.button_box.setVisible(False)
+
+        feedback = self.project_checker.check()
+        if feedback.count > 0:
+            has_errors = len(feedback.error_feedbacks) > 0
+
+            self.feedbackText.setText(str(feedback))
+            self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
+            self.nextButton.setVisible(True)
+            self.nextButton.setEnabled(not has_errors)
+        else:
+            self.show_package_page()
+
     def get_export_folder_from_dialog(self):
         """Get the export folder according to the inputs in the selected"""
         # manual
         return self.manualDir.text()
+
+    def show_package_page(self):
+        self.nextButton.setVisible(False)
+        self.button_box.setVisible(True)
+        self.stackedWidget.setCurrentWidget(self.packagePage)
 
     def package_project(self):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
@@ -170,19 +192,15 @@ class PackageDialog(QDialog, DialogUi):
         """
         Show the info label if there are unconfigured layers
         """
-        showInfoConfiguration = False
         localizedDataPathLayers = []
         for layer in list(self.project.mapLayers().values()):
             layer_source = LayerSource(layer)
-            if not layer_source.is_configured:
-                showInfoConfiguration = True
 
             if layer_source.is_localized_path:
                 localizedDataPathLayers.append(
                     "- {} ({})".format(layer.name(), layer_source.filename)
                 )
 
-        self.infoConfigurationLabel.setVisible(showInfoConfiguration)
         if localizedDataPathLayers:
             if len(localizedDataPathLayers) == 1:
                 self.infoLocalizedLayersLabel.setText(
@@ -201,9 +219,7 @@ class PackageDialog(QDialog, DialogUi):
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
             self.infoLocalizedPresentLabel.setVisible(False)
-        self.infoGroupBox.setVisible(
-            showInfoConfiguration or len(localizedDataPathLayers) > 0
-        )
+        self.infoGroupBox.setVisible(len(localizedDataPathLayers) > 0)
 
     def show_settings(self):
         if Qgis.QGIS_VERSION_INT >= 31500:
