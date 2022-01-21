@@ -81,7 +81,7 @@ def local_dir_feedback(
         message = dummy.tr("The entered path does not contain a QGIS project file yet.")
         status = no_project_status
 
-        if single_project_status is not LocalDirFeedback.Success:
+        if single_project_status == LocalDirFeedback.Success:
             message += " "
             message += dummy.tr("You can always add one later.")
 
@@ -90,7 +90,7 @@ def local_dir_feedback(
         message = dummy.tr("The entered path contains one QGIS project file.")
         status = single_project_status
 
-        if single_project_status is not LocalDirFeedback.Success:
+        if single_project_status == LocalDirFeedback.Success:
             message += " "
             message += dummy.tr("Exactly as it should be.")
 
