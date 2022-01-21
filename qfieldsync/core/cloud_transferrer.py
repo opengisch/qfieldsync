@@ -100,8 +100,16 @@ class CloudTransferrer(QObject):
 
         self.is_started = True
 
+        # .qgs/.qgz files should be uploaded the last, since they trigger a new job
+        files_to_upload_sorted = [
+            f
+            for f in sorted(
+                files_to_upload,
+                key=lambda f: f.path.suffix in (".qgs", ".qgz"),
+            )
+        ]
         # prepare the files to be uploaded, copy them in a temporary destination
-        for project_file in files_to_upload:
+        for project_file in files_to_upload_sorted:
             assert project_file.local_path
 
             project_file.flush()
@@ -132,6 +140,7 @@ class CloudTransferrer(QObject):
         self.throttled_uploader = ThrottledFileTransferrer(
             self.network_manager,
             self.cloud_project,
+            # note the .qgs/.qgz files are sorted in the end
             [t.name for t in self._files_to_upload.values()],
             FileTransfer.Type.UPLOAD,
         )
