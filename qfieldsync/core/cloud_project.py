@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
 from qgis.core import QgsProject
+from qgis.PyQt.QtCore import QDir
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
@@ -257,6 +258,18 @@ class CloudProject:
 
         return dirname
 
+    @property
+    def human_local_dir(self) -> Optional[str]:
+        dirname = self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
+
+        if not dirname or not Path(dirname).exists() or not Path(dirname).is_absolute():
+            return None
+
+        if QDir(dirname).absolutePath().startswith(QDir.homePath()):
+            return f"{QDir.toNativeSeparators(QDir.home().relativeFilePath(dirname))}"
+        else:
+            return dirname
+
     # TODO remove this, use `get_files` instead
     @property
     def cloud_files(self) -> Optional[List]:
@@ -289,6 +302,10 @@ class CloudProject:
     @property
     def url(self) -> str:
         return f"a/{self.owner}/{self.name}"
+
+    @property
+    def name_with_owner(self) -> str:
+        return f"{self.owner}/{self.name}"
 
     @property
     def root_project_files(self) -> List[Path]:
