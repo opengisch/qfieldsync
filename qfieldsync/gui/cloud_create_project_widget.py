@@ -27,7 +27,7 @@ from typing import Optional
 
 from qgis.core import Qgis, QgsProject
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import QRegularExpression, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QDir, QRegularExpression, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QIcon, QRegularExpressionValidator
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -320,6 +320,8 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         else:
             self.dirnameFeedbackLabel.setStyleSheet("color: green;")
             self.createButton.setEnabled(True)
+
+        self.dirnameLineEdit.setText(QDir.toNativeSeparators(dirname))
 
     def on_update_total_progressbar(self, current, layer_count, message):
         self.convertProgressBar.setMaximum(layer_count)
