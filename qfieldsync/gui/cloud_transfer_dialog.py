@@ -49,10 +49,7 @@ from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogs
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.libqfieldsync.project_checker import ProjectChecker
 from qfieldsync.libqfieldsync.utils.file_utils import get_unique_empty_dirname
-from qfieldsync.libqfieldsync.utils.qgis import (
-    get_memory_layers,
-    get_qgis_files_within_dir,
-)
+from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
@@ -142,17 +139,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # self.filesTree.model().setHeaderData(3, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
 
         self._update_window_title()
-
-        memory_layers = get_memory_layers(QgsProject.instance())
-
-        if memory_layers:
-            self.memoryLayersLabel.setText(
-                self.tr(
-                    "QFieldSync has detected temporary scratch layers in you project which are stored in your current QGIS memory and cannot be available on other devices. The following layers will be ignored: {}"
-                ).format(
-                    ", ".join([f"<b>{layer.name()}</b>" for layer in memory_layers])
-                )
-            )
 
         self.errorLabel.setVisible(False)
 
