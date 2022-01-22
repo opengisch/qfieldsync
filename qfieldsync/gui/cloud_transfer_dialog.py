@@ -590,12 +590,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     ) -> None:
         assert self.cloud_project
 
-        is_local_enabled = (
-            project_file.local_path_exists and self.cloud_project.user_role != "reader"
-        )
+        is_local_enabled = self.cloud_project.user_role != "reader"
         is_cloud_enabled = bool(project_file.checkout & ProjectFileCheckout.Cloud)
         is_local_checked = False
-        if is_local_enabled:
+        if is_local_enabled and project_file.local_path_exists:
             local_updated_at = os.path.getmtime(
                 os.path.join(self.cloud_project.local_dir, project_file.path)
             )
