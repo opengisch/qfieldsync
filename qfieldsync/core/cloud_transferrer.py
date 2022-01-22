@@ -757,9 +757,9 @@ class TransferFileLogsModel(QAbstractListModel):
                 return self.tr('File to upload "{}"'.format(transfer.filename))
         elif transfer.type == FileTransfer.Type.DELETE:
             if transfer.is_finished:
-                return self.tr('File to delete "{}"'.format(transfer.filename))
-            else:
                 return self.tr('File deleted "{}"'.format(transfer.filename))
+            else:
+                return self.tr('File to delete "{}"'.format(transfer.filename))
         else:
             raise NotImplementedError("Unknown transfer type")
 
