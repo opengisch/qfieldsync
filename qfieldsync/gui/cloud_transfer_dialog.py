@@ -47,11 +47,9 @@ from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.libqfieldsync.project_checker import ProjectChecker
 from qfieldsync.libqfieldsync.utils.file_utils import get_unique_empty_dirname
-from qfieldsync.libqfieldsync.utils.qgis import (
-    get_memory_layers,
-    get_qgis_files_within_dir,
-)
+from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
@@ -142,17 +140,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self._update_window_title()
 
-        memory_layers = get_memory_layers(QgsProject.instance())
-
-        if memory_layers:
-            self.memoryLayersLabel.setText(
-                self.tr(
-                    "QFieldSync has detected temporary scratch layers in you project which are stored in your current QGIS memory and cannot be available on other devices. The following layers will be ignored: {}"
-                ).format(
-                    ", ".join([f"<b>{layer.name()}</b>" for layer in memory_layers])
-                )
-            )
-
         self.errorLabel.setVisible(False)
 
         self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
@@ -162,7 +149,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.buttonBox.button(QDialogButtonBox.Abort).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Synchronize"))
         self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(
             lambda: self.on_project_apply_clicked()
         )
@@ -191,7 +177,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         if self.cloud_project:
             if self.cloud_project.local_dir:
-                self.get_project_files()
+                self.show_project_compatibility_page()
             else:
                 self.show_project_local_dir_selection()
         else:
@@ -199,7 +185,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.network_manager.projects_cache.is_currently_open_project_cloud_local
             ):
                 reply = self.network_manager.projects_cache.refresh()
-                reply.finished.connect(lambda: self.get_project_files())
+                reply.finished.connect(lambda: self.show_project_compatibility_page())
 
     def show_project_local_dir_selection(self):
         assert self.cloud_project
@@ -225,7 +211,26 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             make_folder_selector(self.localDirectoryLineEdit)
         )
 
-    def get_project_files(self):
+    def show_project_compatibility_page(self):
+        self.feedbackText.setText("")
+
+        feedback = None
+        if self.cloud_project and self.cloud_project.is_current_qgis_project:
+            checker = ProjectChecker(QgsProject.instance())
+            feedback = checker.check()
+
+        if feedback and feedback.count > 0:
+            has_errors = len(feedback.error_feedbacks) > 0
+
+            self.feedbackText.setText(str(feedback))
+            self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
+            self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
+            self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(not has_errors)
+            self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Next"))
+        else:
+            self.show_project_files_fetching_page()
+
+    def show_project_files_fetching_page(self):
         self.stackedWidget.setCurrentWidget(self.getProjectFilesPage)
         self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
         self.projectFilesLabel.setVisible(True)
@@ -371,6 +376,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.cloud_project.url,
                 self.cloud_project.name_with_owner,
             )
+            self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(True)
+            self.buttonBox.button(QDialogButtonBox.Apply).setText(
+                self.tr("Perform Actions")
+                if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
+                else self.tr("Upload Project")
+            )
 
             if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0:
                 self.buttonBox.button(QDialogButtonBox.Apply).setText(
@@ -461,7 +472,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
 
     def on_project_apply_clicked(self):
-        self._start_synchronization()
+        if self.stackedWidget.currentWidget() is self.projectCompatibilityPage:
+            self.show_project_files_fetching_page()
+        elif self.stackedWidget.currentWidget() is self.filesPage:
+            self._start_synchronization()
+        else:
+            raise NotImplementedError()
 
     def _start_synchronization(self):
         assert self.cloud_project
@@ -498,7 +514,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.cloud_project.update_data(
                 {"local_dir": self.localDirectoryLineEdit.text()}
             )
-            self.get_project_files()
+            self.show_project_compatibility_page()
         else:
             self.buttonBox.button(QDialogButtonBox.Ok).setVisible(True)
             self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)

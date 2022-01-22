@@ -196,6 +196,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.__project_configuration.base_map_theme = (
             self.mapThemeComboBox.currentText()
         )
+
+        # try/pass these because the save button is global for all
+        # project settings, not only QField
         try:
             self.__project_configuration.base_map_layer = (
                 self.layerComboBox.currentLayer().id()
@@ -210,6 +213,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             )
         except AttributeError:
             pass
+
         if self.singleLayerRadioButton.isChecked():
             self.__project_configuration.base_map_type = (
                 ProjectProperties.BaseMapType.SINGLE_LAYER
