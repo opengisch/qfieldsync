@@ -34,9 +34,14 @@ from qgis.PyQt.QtCore import (
     pyqtSignal,
 )
 from qgis.PyQt.QtGui import (
+    QBrush,
+    QColor,
     QDesktopServices,
     QFont,
     QIcon,
+    QPainter,
+    QPen,
+    QPixmap,
     QRegularExpressionValidator,
     QValidator,
 )
@@ -548,24 +553,53 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectsTable.insertRow(count)
 
             item = QTableWidgetItem(cloud_project.name)
+
+            if cloud_project.status == "ok":
+                color = QColor("#87af87")
+            elif cloud_project.status == "busy":
+                color = QColor("#9e6a03")
+            elif cloud_project.status == "failed":
+                color = QColor("#dc3545")
+            else:
+                raise NotImplementedError()
+
+            pm = QPixmap(40, 20)
+            pm.fill(Qt.transparent)
+            painter = QPainter(pm)
+            painter.setPen(QPen(color, 8, Qt.SolidLine))
+            painter.setBrush(QBrush(color, Qt.SolidPattern))
+            painter.drawEllipse(30, 10, 5, 5)
+            icon = QIcon(
+                str(
+                    Path(__file__).parent.joinpath(
+                        "../resources/cloud_project.svg"
+                        if cloud_project.local_dir
+                        else "../resources/cloud_project_remote.svg"
+                    )
+                )
+            )
+            painter.drawPixmap(0, 0, icon.pixmap(pm.size()))
+            del painter
+
             item.setData(Qt.UserRole, cloud_project)
             item.setData(Qt.EditRole, cloud_project.name)
             item.setData(
                 Qt.DecorationRole,
-                QIcon(
-                    str(
-                        Path(__file__).parent.joinpath(
-                            "../resources/cloud_project.svg"
-                            if cloud_project.local_dir
-                            else "../resources/cloud_project_remote.svg"
-                        )
-                    )
-                ),
+                pm,
             )
+
+            tooltip = self.tr("Cloud status: {}. \nLocal status: ").format(
+                cloud_project.status
+            )
+
             if bool(cloud_project.local_dir):
-                item.setToolTip(str(cloud_project.local_dir))
+                tooltip += self.tr('Project stored at "{}".').format(
+                    str(cloud_project.local_dir)
+                )
             else:
-                item.setToolTip(self.tr("No local dir configured"))
+                tooltip += self.tr("No local dir configured.")
+
+            item.setToolTip(tooltip)
 
             self.projectsTable.setItem(count, 0, item)
             self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))

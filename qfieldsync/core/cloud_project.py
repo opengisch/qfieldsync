@@ -250,6 +250,11 @@ class CloudProject:
         return self._data["user_role_origin"]
 
     @property
+    def status(self) -> bool:
+        # TODO remove as soon as all API servers support `status` key
+        return self._data.get("status", "busy")
+
+    @property
     def local_dir(self) -> Optional[str]:
         dirname = self._preferences.value("qfieldCloudProjectLocalDirs").get(self.id)
 
