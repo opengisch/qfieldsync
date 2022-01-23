@@ -150,7 +150,7 @@ class CloudNetworkAccessManager(QObject):
         return [
             "https://app.qfield.cloud/",
             "https://dev.qfield.cloud/",
-            "http://localhost:8000/",
+            "https://localhost:8002/",
         ]
 
     def auth(self) -> QgsAuthMethodConfig:
