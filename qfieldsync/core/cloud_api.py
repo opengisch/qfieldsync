@@ -150,7 +150,7 @@ class CloudNetworkAccessManager(QObject):
         return [
             "https://app.qfield.cloud/",
             "https://dev.qfield.cloud/",
-            "http://localhost:8000/",
+            "https://localhost:8002/",
         ]
 
     def auth(self) -> QgsAuthMethodConfig:
@@ -840,23 +840,10 @@ class CloudProjectsCache(QObject):
 
         self._projects = []
 
-        old_project_local_dirs = self.preferences.value("qfieldCloudProjectLocalDirs")
-        new_project_local_dirs = {}
         for project_data in payload:
             cloud_project = CloudProject(project_data)
 
             self._projects.append(cloud_project)
-
-            if cloud_project.id in old_project_local_dirs:
-                new_project_local_dirs[cloud_project.id] = old_project_local_dirs[
-                    cloud_project.id
-                ]
-
-        # cleanup old configuration that are no longer relevant
-        if new_project_local_dirs != old_project_local_dirs:
-            old_project_local_dirs = self.preferences.set_value(
-                "qfieldCloudProjectLocalDirs", new_project_local_dirs
-            )
 
         self.projects_updated.emit()
 
