@@ -107,6 +107,8 @@ class CloudNetworkAccessManager(QObject):
         self._nam = QgsNetworkAccessManager.instance()
         self.is_login_active = False
 
+        self._nam.setTimeout(0)
+
         # use the default URL
         self.set_url(self.preferences.value("qfieldCloudServerUrl"))
 
