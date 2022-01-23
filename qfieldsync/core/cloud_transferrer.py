@@ -772,26 +772,34 @@ class TransferFileLogsModel(QAbstractListModel):
             if transfer.file.checkout & ProjectFileCheckout.Cloud:
                 if transfer.is_aborted:
                     return self.tr(
-                        'Aborted "{}" cloud delete'.format(transfer.filename)
+                        'Aborted "{}" deleting one the cloud'.format(transfer.filename)
                     )
                 elif transfer.is_failed:
-                    return self.tr('Failed cloud delete "{}"'.format(transfer.filename))
+                    return self.tr(
+                        'Failed delete "{}" on the cloud'.format(transfer.filename)
+                    )
                 elif transfer.is_finished:
-                    return self.tr('File "{}" cloud deleted'.format(transfer.filename))
+                    return self.tr(
+                        'File "{}" deleted on the cloud'.format(transfer.filename)
+                    )
                 elif transfer.is_started:
-                    return self.tr('Cloud deleting "{}"'.format(transfer.filename))
+                    return self.tr(
+                        'Deleting "{}" on the cloud'.format(transfer.filename)
+                    )
                 else:
                     return self.tr(
-                        'File "{}" to cloud delete'.format(transfer.filename)
+                        'File "{}" will be deleted on the cloud'.format(
+                            transfer.filename
+                        )
                     )
             else:
                 if transfer.is_aborted:
                     return self.tr(
-                        'Aborted "{}" locally delete'.format(transfer.filename)
+                        'Aborted "{}" deleting locally'.format(transfer.filename)
                     )
                 elif transfer.is_failed:
                     return self.tr(
-                        'Failed locally delete "{}"'.format(transfer.filename)
+                        'Failed delete "{}" locally'.format(transfer.filename)
                     )
                 elif transfer.is_finished:
                     return self.tr(
@@ -801,7 +809,7 @@ class TransferFileLogsModel(QAbstractListModel):
                     return self.tr('Locally deleting "{}"'.format(transfer.filename))
                 else:
                     return self.tr(
-                        'File "{}" to delete locally'.format(transfer.filename)
+                        'File "{}" to will be locally deleted'.format(transfer.filename)
                     )
         else:
             raise NotImplementedError("Unknown transfer type")
