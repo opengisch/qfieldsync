@@ -422,7 +422,7 @@ class FileTransfer(QObject):
         self.bytes_transferred = 0
         self.bytes_total = 0
         self.is_aborted = False
-        self.is_local_delete = True
+        self.is_local_delete = False
         self.is_local_delete_finished = False
         self.type = type
         self.version = version
@@ -466,9 +466,10 @@ class FileTransfer(QObject):
                 try:
                     assert self.file.local_path
                     Path(self.file.local_path).unlink()
-                    self.is_local_delete_finished = True
                 except Exception as err:
                     self.error = err
+                finally:
+                    self.is_local_delete_finished = True
 
                 self.finished.emit()
                 return
