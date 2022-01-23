@@ -141,23 +141,19 @@ class CloudTransferrer(QObject):
             self.network_manager,
             self.cloud_project,
             # note the .qgs/.qgz files are sorted in the end
-            [t.name for t in self._files_to_upload.values()],
+            list(self._files_to_upload.values()),
             FileTransfer.Type.UPLOAD,
         )
         self.throttled_deleter = ThrottledFileTransferrer(
             self.network_manager,
             self.cloud_project,
-            [
-                t.name
-                for t in self._files_to_delete.values()
-                if t.checkout & ProjectFileCheckout.Cloud
-            ],
+            list(self._files_to_delete.values()),
             FileTransfer.Type.DELETE,
         )
         self.throttled_downloader = ThrottledFileTransferrer(
             self.network_manager,
             self.cloud_project,
-            [t.name for t in self._files_to_download.values()],
+            list(self._files_to_download.values()),
             FileTransfer.Type.DOWNLOAD,
         )
         self.transfers_model = TransferFileLogsModel(
@@ -217,17 +213,6 @@ class CloudTransferrer(QObject):
             self.delete_finished.emit()
             # NOTE check _on_delete_finished
             return
-
-        for filename in self._files_to_delete:
-            project_file = self._files_to_delete[filename]
-
-            if project_file.checkout == ProjectFileCheckout.Local:
-                self.delete_files_finished += 1
-                Path(project_file.local_path).unlink()
-
-            if project_file.checkout & ProjectFileCheckout.Cloud:
-                if project_file.checkout & ProjectFileCheckout.Local:
-                    Path(project_file.local_path).unlink()
 
         self.throttled_deleter.error.connect(self._on_throttled_delete_error)
         self.throttled_deleter.finished.connect(self._on_throttled_delete_finished)
@@ -418,7 +403,7 @@ class FileTransfer(QObject):
         network_manager: CloudNetworkAccessManager,
         cloud_project: CloudProject,
         type: Type,
-        filename: str,
+        file: ProjectFile,
         destination: Path,
         version: str = None,
     ) -> None:
@@ -428,7 +413,8 @@ class FileTransfer(QObject):
         self.cloud_project = cloud_project
         self.replies: List[QNetworkReply] = []
         self.redirects: List[QUrl] = []
-        self.filename = filename
+        self.file = file
+        self.filename = file.name
         # filesystem filename
         self.fs_filename = destination
         self.fs_filename.parent.mkdir(parents=True, exist_ok=True)
@@ -436,8 +422,16 @@ class FileTransfer(QObject):
         self.bytes_transferred = 0
         self.bytes_total = 0
         self.is_aborted = False
+        self.is_local_delete = True
+        self.is_local_delete_finished = False
         self.type = type
         self.version = version
+
+        if self.file.checkout == ProjectFileCheckout.Local or (
+            self.file.checkout & ProjectFileCheckout.Cloud
+            and self.file.checkout & ProjectFileCheckout.Local
+        ):
+            self.is_local_delete = True
 
     def abort(self):
         if not self.is_started:
@@ -468,6 +462,17 @@ class FileTransfer(QObject):
                 filenames=[str(self.fs_filename)],
             )
         elif self.type == FileTransfer.Type.DELETE:
+            if self.is_local_delete:
+                try:
+                    assert self.file.local_path
+                    Path(self.file.local_path).unlink()
+                    self.is_local_delete_finished = True
+                except Exception as err:
+                    self.error = err
+
+                self.finished.emit()
+                return
+
             reply = self.network_manager.delete_file(
                 self.cloud_project.id + "/" + self.filename + "/"
             )
@@ -534,11 +539,14 @@ class FileTransfer(QObject):
 
     @property
     def is_started(self) -> bool:
-        return len(self.replies) > 0
+        return self.is_local_delete_finished or len(self.replies) > 0
 
     @property
     def is_finished(self) -> bool:
         if self.is_aborted:
+            return True
+
+        if self.is_local_delete_finished:
             return True
 
         if not self.replies:
@@ -558,6 +566,9 @@ class FileTransfer(QObject):
 
     @property
     def is_failed(self) -> bool:
+        if self.is_local_delete and self.error:
+            return True
+
         if not self.replies:
             return False
 
@@ -577,7 +588,7 @@ class ThrottledFileTransferrer(QObject):
         self,
         network_manager,
         cloud_project,
-        filenames: List[str],
+        files: List[ProjectFile],
         transfer_type: FileTransfer.Type,
         max_parallel_requests: int = 8,
     ) -> None:
@@ -586,19 +597,20 @@ class ThrottledFileTransferrer(QObject):
         self.transfers: Dict[str, FileTransfer] = {}
         self.network_manager = network_manager
         self.cloud_project = cloud_project
-        self.filenames = filenames
+        self.files = files
+        self.filenames = [f.name for f in files]
         self.max_parallel_requests = max_parallel_requests
         self.finished_count = 0
         self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
         self.transfer_type = transfer_type
 
-        for filename in self.filenames:
+        for file in self.files:
             transfer = FileTransfer(
                 self.network_manager,
                 self.cloud_project,
                 self.transfer_type,
-                filename,
-                self.temp_dir.joinpath(str(self.transfer_type.value), filename),
+                file,
+                self.temp_dir.joinpath(str(self.transfer_type.value), file.name),
             )
             transfer.progress.connect(
                 lambda *args: self._on_transfer_progress(transfer, *args)
@@ -607,9 +619,9 @@ class ThrottledFileTransferrer(QObject):
                 lambda *args: self._on_transfer_finished(transfer, *args)
             )
 
-            assert filename not in self.transfers
+            assert file.name not in self.transfers
 
-            self.transfers[filename] = transfer
+            self.transfers[file.name] = transfer
 
     def transfer(self):
         transfers_count = 0
@@ -756,10 +768,40 @@ class TransferFileLogsModel(QAbstractListModel):
             else:
                 return self.tr('File to upload "{}"'.format(transfer.filename))
         elif transfer.type == FileTransfer.Type.DELETE:
-            if transfer.is_finished:
-                return self.tr('File deleted "{}"'.format(transfer.filename))
+            if transfer.file.checkout & ProjectFileCheckout.Cloud:
+                if transfer.is_aborted:
+                    return self.tr(
+                        'Aborted "{}" cloud delete'.format(transfer.filename)
+                    )
+                elif transfer.is_failed:
+                    return self.tr('Failed cloud delete "{}"'.format(transfer.filename))
+                elif transfer.is_finished:
+                    return self.tr('File "{}" cloud deleted'.format(transfer.filename))
+                elif transfer.is_started:
+                    return self.tr('Cloud deleting "{}"'.format(transfer.filename))
+                else:
+                    return self.tr(
+                        'File "{}" to cloud delete'.format(transfer.filename)
+                    )
             else:
-                return self.tr('File to delete "{}"'.format(transfer.filename))
+                if transfer.is_aborted:
+                    return self.tr(
+                        'Aborted "{}" locally delete'.format(transfer.filename)
+                    )
+                elif transfer.is_failed:
+                    return self.tr(
+                        'Failed locally delete "{}"'.format(transfer.filename)
+                    )
+                elif transfer.is_finished:
+                    return self.tr(
+                        'File "{}" locally deleted'.format(transfer.filename)
+                    )
+                elif transfer.is_started:
+                    return self.tr('Locally deleting "{}"'.format(transfer.filename))
+                else:
+                    return self.tr(
+                        'File "{}" to delete locally'.format(transfer.filename)
+                    )
         else:
             raise NotImplementedError("Unknown transfer type")
 

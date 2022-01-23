@@ -457,7 +457,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.network_manager,
             self.current_cloud_project,
             FileTransfer.Type.DOWNLOAD,
-            project_file.name,
+            project_file,
             Path(version_dest_filename),
             project_file.versions[version_idx]["version_id"],
         )
