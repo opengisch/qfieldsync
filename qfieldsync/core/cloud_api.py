@@ -104,13 +104,20 @@ class CloudNetworkAccessManager(QObject):
         self._token = ""
         self.user_details: Dict[str, str] = {}
         self.projects_cache = CloudProjectsCache(self, self)
-        self._nam = QgsNetworkAccessManager.instance()
         self.is_login_active = False
 
+        url = self.preferences.value("qfieldCloudServerUrl")
+        # for localhost/dev.qfield.cloud use the singleton QgsNetworkAccessManager,
+        # otherwise create new instance, since we need to remove timeout and don't want to mess up globally
+        self._nam = (
+            QgsNetworkAccessManager.instance()
+            if ("://localhost" in url or "://dev.qfield.cloud" in url)
+            else QgsNetworkAccessManager(self)
+        )
         self._nam.setTimeout(0)
 
         # use the default URL
-        self.set_url(self.preferences.value("qfieldCloudServerUrl"))
+        self.set_url(url)
 
     def handle_response(
         self, reply: QNetworkReply, should_parse_json: bool = True
