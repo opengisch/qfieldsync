@@ -55,12 +55,12 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>16777215</width>
          <height>50</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>Click to logout</string>
+        <string>Click to sign out</string>
        </property>
        <property name="iconSize">
         <size>

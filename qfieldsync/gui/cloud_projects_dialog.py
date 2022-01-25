@@ -926,12 +926,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def update_welcome_label(self) -> None:
         if self.network_manager.has_token():
             avatar_filename = self.network_manager.user_details.get("avatar_filename")
+            self.avatarButton.setVisible(True)
+
             if avatar_filename:
-                self.avatarButton.setVisible(True)
                 pixmap = rounded_pixmap(avatar_filename, self.avatarButton.height())
+                self.avatarButton.setText("")
+                self.avatarButton.setFlat(True)
                 self.avatarButton.setIcon(QIcon(pixmap))
             else:
-                self.avatarButton.setVisible(False)
+                self.avatarButton.setText(self.tr("Sign out"))
+                self.avatarButton.setFlat(False)
                 self.avatarButton.setIcon(QIcon())
 
             self.welcomeLabel.setText(
@@ -1105,6 +1109,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.close()
 
     def _on_logout_failed(self, err: str) -> None:
-        self.feedbackLabel.setText("Logout failed: {}".format(str(err)))
+        self.feedbackLabel.setText("Sign out failed: {}".format(str(err)))
         self.feedbackLabel.setVisible(True)
         self.avatarButton.setEnabled(True)
