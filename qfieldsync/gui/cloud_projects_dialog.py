@@ -1109,6 +1109,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.close()
 
     def _on_logout_failed(self, err: str) -> None:
-        self.feedbackLabel.setText("Logout failed: {}".format(str(err)))
+        self.feedbackLabel.setText("Sign out failed: {}".format(str(err)))
         self.feedbackLabel.setVisible(True)
         self.avatarButton.setEnabled(True)
