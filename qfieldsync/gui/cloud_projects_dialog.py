@@ -927,16 +927,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.network_manager.has_token():
             avatar_filename = self.network_manager.user_details.get("avatar_filename")
             self.avatarButton.setVisible(True)
+            if not avatar_filename:
+                avatar_filename = os.path.join(
+                    os.path.dirname(__file__), "../resources/qfieldcloud_logo.png"
+                )
 
-            if avatar_filename:
-                pixmap = rounded_pixmap(avatar_filename, self.avatarButton.height())
-                self.avatarButton.setText("")
-                self.avatarButton.setFlat(True)
-                self.avatarButton.setIcon(QIcon(pixmap))
-            else:
-                self.avatarButton.setText(self.tr("Sign out"))
-                self.avatarButton.setFlat(False)
-                self.avatarButton.setIcon(QIcon())
+            self.avatarButton.setVisible(True)
+            pixmap = rounded_pixmap(avatar_filename, self.avatarButton.height())
+            self.avatarButton.setIcon(QIcon(pixmap))
 
             self.welcomeLabel.setText(
                 self.tr("Greetings {}.").format(
