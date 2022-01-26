@@ -54,6 +54,20 @@ class CloudException(Exception):
         self.httpCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
 
 
+class disable_nam_timeout:
+    """By default QGIS has 60 seconds timeout, which is too short for uploading huge files"""
+
+    def __init__(self, nam: QgsNetworkAccessManager) -> None:
+        self.nam = nam
+
+    def __enter__(self):
+        self.timeout = self.nam.timeout()
+        self.nam.setTimeout(0)
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.nam.setTimeout(self.timeout)
+
+
 def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
     if reply.error() == QNetworkReply.NoError:
         return None
@@ -107,14 +121,8 @@ class CloudNetworkAccessManager(QObject):
         self.is_login_active = False
 
         url = self.preferences.value("qfieldCloudServerUrl")
-        # for localhost/dev.qfield.cloud use the singleton QgsNetworkAccessManager,
-        # otherwise create new instance, since we need to remove timeout and don't want to mess up globally
-        self._nam = (
-            QgsNetworkAccessManager.instance()
-            if ("://localhost" in url or "://dev.qfield.cloud" in url)
-            else QgsNetworkAccessManager(self)
-        )
-        self._nam.setTimeout(0)
+        # we should always use the QgsNetworkAccessManager instance, otherwise ssl handling is impossible
+        self._nam = QgsNetworkAccessManager.instance()
 
         # use the default URL
         self.set_url(url)
@@ -554,7 +562,9 @@ class CloudNetworkAccessManager(QObject):
 
                 multi_part.append(file_part)
 
-        reply = self._nam.post(request, multi_part)
+        with disable_nam_timeout(self._name):
+            reply = self._nam.post(request, multi_part)
+
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
         multi_part.setParent(reply)
