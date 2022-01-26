@@ -472,9 +472,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
 
     def on_project_apply_clicked(self):
-        if self.stackedWidget.currentWidget() is self.projectCompatibilityPage:
+        current_page = self.stackedWidget.currentWidget()
+
+        if current_page is self.projectCompatibilityPage:
             self.show_project_files_fetching_page()
-        elif self.stackedWidget.currentWidget() is self.filesPage:
+        elif current_page is self.filesPage or current_page is self.projectLocalDirPage:
             self._start_synchronization()
         else:
             raise NotImplementedError()
