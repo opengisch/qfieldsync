@@ -106,8 +106,11 @@ class CloudConverter(QObject):
                             ).format(layer.name()),
                         )
                         self.project.removeMapLayer(layer)
+                    else:
+                        layer.setCustomProperty("QFieldSync/cloud_action", "offline")
                 else:
                     layer_source.copy(self.export_dirname, list())
+                    layer.setCustomProperty("QFieldSync/cloud_action", "no_action")
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             if not self.project.write(str(project_path)):
