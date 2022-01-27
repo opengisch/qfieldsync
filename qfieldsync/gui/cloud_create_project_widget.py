@@ -27,7 +27,7 @@ from typing import Optional
 
 from qgis.core import Qgis, QgsProject
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import QDir, QRegularExpression, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QDir, QRegularExpression, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QIcon, QRegularExpressionValidator
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -87,6 +87,9 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.qfield_preferences = Preferences()
         self.network_manager = network_manager
         self.cloud_transferrer: Optional[CloudTransferrer] = None
+
+        # keep a timer reference
+        self.timer = QTimer(self)
 
         if not self.network_manager.has_token():
             CloudLoginDialog.show_auth_dialog(
@@ -168,18 +171,21 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         cloud_convertor.warning.connect(self.on_show_warning)
         cloud_convertor.total_progress_updated.connect(self.on_update_total_progressbar)
 
-        try:
-            cloud_convertor.convert()
-        except Exception:
-            QApplication.restoreOverrideCursor()
-            critical_message = self.tr(
-                "The project could not be converted into the export directory."
-            )
-            self.iface.messageBar().pushMessage(critical_message, Qgis.Critical, 0)
-            self.close()
-            return
+        def convert():
+            try:
+                cloud_convertor.convert()
+            except Exception:
+                QApplication.restoreOverrideCursor()
+                critical_message = self.tr(
+                    "The project could not be converted into the export directory."
+                )
+                self.iface.messageBar().pushMessage(critical_message, Qgis.Critical, 0)
+                self.close()
+                return
 
-        self.create_cloud_project()
+            self.create_cloud_project()
+
+        self.timer.singleShot(1, convert)
 
     def get_cloud_project_name(self) -> str:
         return self.projectNameLineEdit.text()
