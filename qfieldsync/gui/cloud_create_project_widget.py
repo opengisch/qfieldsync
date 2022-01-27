@@ -131,8 +131,6 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.cloudifyInfoLabel.setEnabled(True)
 
     def cloudify_project(self):
-        assert self.network_manager.projects_cache.projects
-
         for cloud_project in self.network_manager.projects_cache.projects:
             if cloud_project.name == self.get_cloud_project_name():
                 QMessageBox.warning(
