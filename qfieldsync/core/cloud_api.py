@@ -562,7 +562,7 @@ class CloudNetworkAccessManager(QObject):
 
                 multi_part.append(file_part)
 
-        with disable_nam_timeout(self._name):
+        with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, multi_part)
 
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
