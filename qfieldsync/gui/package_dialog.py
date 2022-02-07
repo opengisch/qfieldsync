@@ -100,8 +100,11 @@ class PackageDialog(QDialog, DialogUi):
         self.nextButton.setVisible(False)
         self.button_box.setVisible(False)
 
-        feedback = self.project_checker.check()
-        if feedback.count > 0:
+        feedback = None
+        if os.path.exists(self.project.fileName()):
+            feedback = self.project_checker.check()
+
+        if feedback and feedback.count > 0:
             has_errors = len(feedback.error_feedbacks) > 0
 
             self.feedbackText.setText(str(feedback))
