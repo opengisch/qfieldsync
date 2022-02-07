@@ -367,14 +367,15 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
             self.explanationLabel.setVisible(True)
 
-            project_filesystem_link = '<a href="{}">{}</a>'.format(
-                self.cloud_project.local_dir,
-                self.cloud_project.human_local_dir,
+            self.cloudProjectNameValueLabel.setText(
+                '<a href="{}{}">{}</a>'.format(
+                    self.network_manager.url,
+                    self.cloud_project.url,
+                    self.cloud_project.name_with_owner,
+                )
             )
-            project_cloud_link = '<a href="{}{}">{}</a>'.format(
-                self.network_manager.url,
-                self.cloud_project.url,
-                self.cloud_project.name_with_owner,
+            self.projectLocalDirValueLineEdit.setText(
+                self.cloud_project.local_dir,
             )
             self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(True)
             self.buttonBox.button(QDialogButtonBox.Apply).setText(
@@ -389,10 +390,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
                 self.explanationLabel.setText(
                     self.tr(
-                        'Some of the files stored in the QGIS project directory "{}" and the cloud project "{}" are different. '
-                    ).format(
-                        project_filesystem_link,
-                        project_cloud_link,
+                        "Some of the files on QFieldCloud differ from the files stored in the local project directory. "
                     )
                 )
             else:
@@ -401,10 +399,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
                 self.explanationLabel.setText(
                     self.tr(
-                        'All files in QGIS project directory "{}" will be uploaded to the cloud project "{}". '
-                    ).format(
-                        project_filesystem_link,
-                        project_cloud_link,
+                        "All files in the local project directory will be uploaded to QFieldCloud. "
                     )
                 )
 
