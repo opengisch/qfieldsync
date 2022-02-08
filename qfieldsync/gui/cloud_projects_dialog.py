@@ -390,9 +390,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         version_item = QTreeWidgetItem()
 
                         version_item.setData(0, Qt.UserRole, version_obj)
-                        version_item.setText(
-                            0, "Version {}".format(versions_count - version_idx)
+                        # TODO remove default value `versions_count - version_idx`, the "display" key is standard for newer QFC releases
+                        version_display = version_obj.get(
+                            "display", versions_count - version_idx
                         )
+                        version_item.setText(0, "Version {}".format(version_display))
                         version_item.setText(1, str(version_obj["size"]))
                         version_item.setTextAlignment(1, Qt.AlignRight)
                         version_item.setText(2, version_obj["last_modified"])
