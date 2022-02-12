@@ -420,7 +420,7 @@ class CloudNetworkAccessManager(QObject):
         self, reply: QNetworkReply, local_filename: str
     ) -> None:
         http_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
-        if http_code >= 301 and http_code <= 308:
+        if http_code is not None and http_code >= 301 and http_code <= 308:
             # redirects should not be saved as files, just ignore them
             return
 
