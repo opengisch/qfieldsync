@@ -274,7 +274,7 @@ class CloudNetworkAccessManager(QObject):
         params = {"include-public": should_include_public}
 
         response = requests.get(
-            self.server_url + self._prepare_uri("projects"),
+            self._prepare_uri("projects").toString(),
             headers=headers,
             params=params,
         )
