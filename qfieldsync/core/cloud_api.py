@@ -225,7 +225,7 @@ class CloudNetworkAccessManager(QObject):
     def auto_login_attempt(self):
         cfg = self.auth()
 
-        server_url = cfg.uri() or self.server_url
+        server_url = cfg.uri() or self.url
         username = cfg.config("username")
         password = cfg.config("password")
         self.set_url(server_url)
