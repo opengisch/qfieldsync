@@ -225,7 +225,7 @@ class CloudNetworkAccessManager(QObject):
     def auto_login_attempt(self):
         cfg = self.auth()
 
-        server_url = cfg.uri() or self.server_url
+        server_url = cfg.uri() or self.url
         username = cfg.config("username")
         password = cfg.config("password")
         self.set_url(server_url)
@@ -274,7 +274,7 @@ class CloudNetworkAccessManager(QObject):
         params = {"include-public": should_include_public}
 
         response = requests.get(
-            self.server_url + self._prepare_uri("projects"),
+            self._prepare_uri("projects").toString(),
             headers=headers,
             params=params,
         )
