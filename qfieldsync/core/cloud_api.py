@@ -25,6 +25,7 @@ import tempfile
 import urllib.parse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+from urllib.parse import urlparse
 
 import requests
 from PyQt5.QtNetwork import QSslPreSharedKeyAuthenticator
@@ -214,12 +215,16 @@ class CloudNetworkAccessManager(QObject):
         if not server_url:
             server_url = CloudNetworkAccessManager.server_urls()[0]
 
-        self.url = server_url
+        # Ignore the URL path, as we assume the url is always /api/v1. Assume the URL has a scheme or at least starts with leading //.
+        p = urlparse(server_url)
+        self.url = f"{p.scheme or 'https'}://{p.netloc}/"
         self.preferences.set_value("qfieldCloudServerUrl", server_url)
 
     @property
     def server_url(self):
         url = self.url + "/api/v1/"
+        url = re.sub(r"(\/+api\/+v1)+", "/api/v1/", url)
+
         return re.sub(r"([^:]/)(/)+", r"\1", url)
 
     def auto_login_attempt(self):
