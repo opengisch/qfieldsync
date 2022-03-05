@@ -25,8 +25,14 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from PyQt5.QtCore import QUrl
-from qgis.PyQt.QtCore import QAbstractListModel, QModelIndex, QObject, Qt, pyqtSignal
+from qgis.PyQt.QtCore import (
+    QAbstractListModel,
+    QModelIndex,
+    QObject,
+    Qt,
+    QUrl,
+    pyqtSignal,
+)
 from qgis.PyQt.QtNetwork import QNetworkReply
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
@@ -514,13 +520,15 @@ class FileTransfer(QObject):
 
             if (
                 self.type == FileTransfer.Type.DOWNLOAD
-                and not Path(self.fs_filename).is_file()
+                and not self.fs_filename.is_file()
             ):
                 self.error = Exception(
                     f'Downloaded file "{self.fs_filename}" not found!'
                 )
         except Exception as err:
             self.error = err
+            if self.fs_filename.is_file():
+                self.fs_filename.unlink()
 
         self.finished.emit()
 
