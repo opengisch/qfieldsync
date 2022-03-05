@@ -74,7 +74,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.preferences = Preferences()
         self.network_manager = network_manager
 
-        self.buttonBox.button(QDialogButtonBox.Ok).setText(self.tr("Log In"))
+        self.buttonBox.button(QDialogButtonBox.Ok).setText(self.tr("Sign In"))
         self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(
             self.on_login_button_clicked
         )

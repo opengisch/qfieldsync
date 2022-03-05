@@ -652,9 +652,9 @@ class CloudNetworkAccessManager(QObject):
 
         error = self.user_details.get("error")
         if error:
-            return self.tr("Login failed: {}").format(str(error))
+            return self.tr("Sign in failed: {}").format(str(error))
         else:
-            return self.tr("Login failed.")
+            return self.tr("Sign in failed.")
 
     def _clear_cloud_cookies(self, url: QUrl) -> None:
         """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
