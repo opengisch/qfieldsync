@@ -25,6 +25,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from qgis.core import Qgis, QgsMessageLog
 from qgis.PyQt.QtCore import (
     QAbstractListModel,
     QModelIndex,
@@ -278,7 +279,11 @@ class CloudTransferrer(QObject):
 
     def _on_download_finished(self) -> None:
         if not self.import_qfield_project():
-            return
+            QgsMessageLog.logMessage(
+                self.tr("Failed to copy project files to the project directory!"),
+                "QFieldSync",
+                Qgis.Critical,
+            )
 
         self.is_download_active = False
         self.is_finished = True
