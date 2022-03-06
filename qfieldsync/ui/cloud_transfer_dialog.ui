@@ -95,14 +95,11 @@
        </property>
        <item>
         <widget class="QLabel" name="feedbackLabel_2">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
          <property name="text">
-          <string>Project checks</string>
+          <string>The project check provides automatic feedback for some common mistakes when using QField, QFieldSync and QFieldCloud. Lines starting with ERROR show problems in your project configuration that must be fixed before proceeding. Lines starting with WARNING are suggestions what you can improve.</string>
+         </property>
+         <property name="wordWrap">
+           <bool>true</bool>
          </property>
         </widget>
        </item>
