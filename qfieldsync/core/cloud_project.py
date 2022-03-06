@@ -357,7 +357,7 @@ class CloudProject:
                     for f in Path(self.local_dir).glob("**/*")
                     if f.is_file()
                 ]
-                if not f.startswith(".qfieldsync")
+                if not f.startswith(".")
             ]
 
             for filename in local_filenames:
