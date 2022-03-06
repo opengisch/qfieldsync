@@ -538,6 +538,9 @@
                <property name="text">
                 <string/>
                </property>
+               <property name="openExternalLinks">
+                <bool>true</bool>
+               </property>
                <property name="textInteractionFlags">
                 <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
                </property>
@@ -651,30 +654,6 @@
               </property>
              </column>
             </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="projectFilesButtonLayout">
-             <item>
-              <widget class="QPushButton" name="projectFilesToggleExpandButton">
-               <property name="text">
-                <string>Toggle Expand</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="projectFilesButtonLayoutSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
            </item>
           </layout>
          </widget>
