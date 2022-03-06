@@ -284,7 +284,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.infoGroupBox.setVisible(len(localizedDataPathLayers) > 0)
 
     def get_unique_project_name(self, project: QgsProject) -> str:
-        project_name = to_cloud_title(QgsProject.instance().title())
+        project_name = QgsProject.instance().title()
 
         if not project_name:
             project_name = project.baseName()
@@ -296,7 +296,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.network_manager.projects_cache.get_unique_name(project_name) or ""
         )
 
-        return project_name
+        return to_cloud_title(project_name)
 
     def set_dirname(self, dirname: str):
         if self.cloudifyRadioButton.isChecked():
