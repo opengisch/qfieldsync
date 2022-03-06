@@ -204,7 +204,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             lambda: self.on_button_box_clicked()
         )
         self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl("https://qfield.org/docs/"))
+            lambda: QDesktopServices.openUrl(QUrl("https://docs.qfield.org/"))
         )
         self.avatarButton.clicked.connect(lambda: self.on_logout_button_clicked())
 
