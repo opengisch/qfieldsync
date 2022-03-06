@@ -46,10 +46,10 @@
       <item row="2" column="0" colspan="2">
        <widget class="QCheckBox" name="qfieldCloudRememberMe">
         <property name="text">
-         <string>Stay logged in</string>
+         <string>Stay signed in</string>
         </property>
         <property name="toolTip">
-         <string>Store QFieldCloud credentials and automatically login on QGIS startup</string>
+         <string>Store QFieldCloud credentials and automatically sign in on QGIS startup.</string>
         </property>
        </widget>
       </item>

@@ -946,17 +946,17 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             if self.network_manager.url == self.network_manager.server_urls()[0]:
                 self.welcomeLabel.setToolTip(
-                    self.tr("You are logged in with the following username")
+                    self.tr("You are signed in with this username.")
                 )
             else:
                 self.welcomeLabel.setToolTip(
-                    self.tr(
-                        "You are logged in with the following username at {}"
-                    ).format(self.network_manager.url)
+                    self.tr("You are signed in with this username at {}.").format(
+                        self.network_manager.url
+                    )
                 )
         else:
             self.avatarButton.setVisible(False)
-            self.welcomeLabel.setText("Logged out.")
+            self.welcomeLabel.setText("Signed out.")
             self.welcomeLabel.setToolTip("")
 
     def update_ui_state(self) -> None:
