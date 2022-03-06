@@ -229,7 +229,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             create_action.triggered.connect(
                 lambda: CloudProjectsDialog(
                     self.network_manager, iface.mainWindow()
-                ).show_project_form()
+                ).show_create_project()
             )
         elif type(item) is QFieldCloudRootItem:
             projects_overview_action = menu.addAction(
