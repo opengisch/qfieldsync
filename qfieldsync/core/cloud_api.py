@@ -30,6 +30,7 @@ from urllib.parse import urlparse
 import requests
 from PyQt5.QtNetwork import QSslPreSharedKeyAuthenticator
 from qgis.core import (
+    Qgis,
     QgsApplication,
     QgsAuthMethodConfig,
     QgsNetworkAccessManager,
@@ -63,7 +64,11 @@ class disable_nam_timeout:
 
     def __enter__(self):
         self.timeout = self.nam.timeout()
-        self.nam.setTimeout(0)
+        if Qgis.QGIS_VERSION_INT >= 31800:
+            self.nam.setTimeout(0)
+        else:
+            # Set it to ridiculously big timeout of 24h.
+            self.nam.setTimeout(60 * 60 * 24)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.nam.setTimeout(self.timeout)
