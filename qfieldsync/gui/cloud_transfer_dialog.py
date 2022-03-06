@@ -153,7 +153,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             lambda: self.on_project_apply_clicked()
         )
         self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl("https://qfield.org/docs/"))
+            lambda: QDesktopServices.openUrl(QUrl("https://docs.qfield.org/"))
         )
 
         self.preferNoneButton.clicked.connect(self._on_prefer_none_button_clicked)

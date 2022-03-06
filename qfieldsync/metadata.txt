@@ -26,7 +26,7 @@ changelog=
 # Tags are comma separated with spaces allowed
 tags=QField, Android, Synchronization, Offline, qfieldsync
 
-homepage=http://www.qfield.org/docs/qfieldsync/index.html
+homepage=https://docs.qfield.org/get-started/
 tracker=https://github.com/opengisch/QFieldSync/issues
 repository=https://github.com/opengisch/QFieldSync
 category=Plugins
