@@ -327,7 +327,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             else:
                 self.show_end_page(
                     self.tr(
-                        "This cloud project currently has no file stored either locally on on the server."
+                        "This cloud project currently has no file stored either locally or on the server."
                     )
                 )
             # if the cloud project being synchronize matches the currently open project, don't offer to open
