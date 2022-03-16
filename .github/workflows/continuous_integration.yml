@@ -91,7 +91,7 @@ jobs:
           sudo pip install qgis-plugin-ci
       - name: Release
         run: |
-          qgis-plugin-ci release ${GITHUB_REF/refs\/tags\/v/} --transifex-token ${TX_TOKEN} --github-token ${GITHUB_TOKEN} --osgeo-username ${OSGEO_USERNAME} --osgeo-password ${OSGEO_PASSWORD}
+          qgis-plugin-ci release ${GITHUB_REF##*/} --transifex-token ${TX_TOKEN} --github-token ${GITHUB_TOKEN} --osgeo-username ${OSGEO_USERNAME} --osgeo-password ${OSGEO_PASSWORD}
 
   package:
     runs-on: ubuntu-20.04
