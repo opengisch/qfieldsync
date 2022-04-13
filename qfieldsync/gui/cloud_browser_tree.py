@@ -63,7 +63,7 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
 
 
 class QFieldCloudRootItem(QgsDataCollectionItem):
-    """ QFieldCloud root """
+    """QFieldCloud root"""
 
     def __init__(self, network_manager: CloudNetworkAccessManager):
         QgsDataCollectionItem.__init__(
@@ -134,7 +134,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
 
 
 class QFieldCloudGroupItem(QgsDataCollectionItem):
-    """ QFieldCloud group data item. """
+    """QFieldCloud group data item."""
 
     def __init__(self, parent, name, project_type, icon, order):
         super(QFieldCloudGroupItem, self).__init__(parent, name, "/QFieldCloud/" + name)
@@ -170,7 +170,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
 
 
 class QFieldCloudProjectItem(QgsDataItem):
-    """ QFieldCloud project item. """
+    """QFieldCloud project item."""
 
     def __init__(self, parent, project):
         super(QFieldCloudProjectItem, self).__init__(
