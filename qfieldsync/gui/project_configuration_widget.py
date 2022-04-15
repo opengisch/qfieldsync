@@ -25,7 +25,7 @@ from qgis.core import (
     QgsPolygon,
     QgsProject,
 )
-from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget
+from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget, QgsSpinBox
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QLabel
@@ -159,6 +159,13 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         )
         self.digitizingLogsLayerComboBox.setLayer(digitizingLogsLayer)
 
+        self.maximumImageWidthHeight.setClearValueMode(
+            QgsSpinBox.CustomValue, self.tr("No restriction")
+        )
+        self.maximumImageWidthHeight.setValue(
+            self.__project_configuration.maximum_image_width_height
+        )
+
         self.mapUnitsPerPixel.setValue(self.__project_configuration.base_map_mupp)
         self.tileSize.setValue(self.__project_configuration.base_map_tile_size)
         self.onlyOfflineCopyFeaturesInAoi.setChecked(
@@ -227,6 +234,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.mapUnitsPerPixel.value()
         )
         self.__project_configuration.base_map_tile_size = self.tileSize.value()
+
+        self.__project_configuration.maximum_image_width_height = (
+            self.maximumImageWidthHeight.value()
+        )
 
         self.__project_configuration.offline_copy_only_aoi = (
             self.onlyOfflineCopyFeaturesInAoi.isChecked()
