@@ -785,7 +785,7 @@ class TransferFileLogsModel(QAbstractListModel):
             if transfer.file.checkout & ProjectFileCheckout.Cloud:
                 if transfer.is_aborted:
                     return self.tr(
-                        'Aborted "{}" deleting one the cloud'.format(transfer.filename)
+                        'Aborted "{}" deleting on the cloud'.format(transfer.filename)
                     )
                 elif transfer.is_failed:
                     return self.tr(

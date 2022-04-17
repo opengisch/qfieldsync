@@ -85,7 +85,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>This number sets the maximum allowed width or height (in pixels) or an image attached to feature forms.</string>
+         <string>This number sets the maximum allowed width or height (in pixels) of an image attached to feature forms.</string>
         </property>
         <property name="suffix">
          <string> px</string>
