@@ -94,6 +94,10 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.reloadProject()
 
+    def closeEvent(self, event):
+        if Qgis.QGIS_VERSION_INT >= 31900:
+            self.project.dirtySet.disconnect(self._on_dirtyset)
+
     def get_available_actions(self, layer_source):
         if self.use_cloud_actions:
             return layer_source.available_cloud_actions
@@ -248,10 +252,19 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
     def _on_dirtyset_wrapper(self):
         def _on_dirtyset():
-            for layer_source in self.layer_sources:
-                layer_source.read_layer()
+            # the layer might got deleted by the time dirtyset is called
+            try:
+                for layer_source in self.layer_sources:
+                    layer_source.read_layer()
 
-            self.reloadProject()
+                self.reloadProject()
+            except RuntimeError:
+                # just try to remove the dirtyset connection if possible
+                try:
+                    if Qgis.QGIS_VERSION_INT >= 31900:
+                        self.project.dirtySet.disconnect(self._on_dirtyset)
+                except RuntimeError:
+                    pass
 
         return _on_dirtyset
 
