@@ -88,10 +88,6 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.toggleMenu.triggered.connect(self.toggleMenu_triggered)
         self.unsupportedLayersList = list()
 
-        if Qgis.QGIS_VERSION_INT >= 31900:
-            self._on_dirtyset = self._on_dirtyset_wrapper()
-            self.project.dirtySet.connect(self._on_dirtyset)
-
         self.reloadProject()
 
     def get_available_actions(self, layer_source):
@@ -246,15 +242,6 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.reloadProject()
 
-    def _on_dirtyset_wrapper(self):
-        def _on_dirtyset():
-            for layer_source in self.layer_sources:
-                layer_source.read_layer()
-
-            self.reloadProject()
-
-        return _on_dirtyset
-
     def apply(self):
         is_project_dirty = False
 
@@ -266,9 +253,6 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             self.set_layer_action(layer_source, cmb.itemData(cmb.currentIndex()))
 
             is_project_dirty |= layer_source.apply()
-
-        if Qgis.QGIS_VERSION_INT >= 31900:
-            self.project.dirtySet.disconnect(self._on_dirtyset)
 
         if is_project_dirty:
             self.project.setDirty(True)
