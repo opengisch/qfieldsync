@@ -624,6 +624,7 @@ class CloudNetworkAccessManager(QObject):
         except CloudException as err:
             self._login_error = err
             self.login_finished.emit()
+            self.preferences.set_value("qfieldCloudRememberMe", False)
             return
 
         self.user_details = {
