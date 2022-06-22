@@ -46,6 +46,7 @@ from qgis.PyQt.QtNetwork import (
 
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.utils.qt_utils import strip_html
 
 
 class CloudException(Exception):
@@ -238,8 +239,10 @@ class CloudNetworkAccessManager(QObject):
         server_url = cfg.uri() or self.url
         username = cfg.config("username")
         password = cfg.config("password")
-        self.set_url(server_url)
-        self.login(username, password)
+
+        if username and password:
+            self.set_url(server_url)
+            self.login(username, password)
 
     def login(self, username: str, password: str) -> Optional[QNetworkReply]:
         """Login to QFieldCloud"""
