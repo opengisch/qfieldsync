@@ -23,7 +23,7 @@ from functools import partial
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import QSize, Qt
-from qgis.PyQt.QtGui import QIcon, QPainter, QPainterPath, QPixmap
+from qgis.PyQt.QtGui import QIcon, QPainter, QPainterPath, QPixmap, QTextDocument
 
 
 def selectFolder(line_edit_widget):
@@ -85,3 +85,12 @@ def rounded_pixmap(img_path: str, diameter: int) -> QPixmap:
     painter.drawPixmap(0, 0, pixmap)
 
     return target_pixmap
+
+
+def strip_html(text: str) -> str:
+    # strip HTML tags
+    doc = QTextDocument()
+    doc.setHtml(text)
+    text = doc.toPlainText()
+
+    return text
