@@ -1,6 +1,13 @@
 from pathlib import Path
 
-from qfieldsync.setting_manager import Bool, Dictionary, Scope, SettingManager, String
+from qfieldsync.setting_manager import (
+    Bool,
+    Dictionary,
+    Scope,
+    SettingManager,
+    String,
+    Stringlist,
+)
 
 pluginName = "QFieldSync"
 
@@ -17,6 +24,7 @@ class Preferences(SettingManager):
             String("importDirectory", Scope.Global, str(home.joinpath("QField/import")))
         )
         self.add_setting(String("importDirectoryProject", Scope.Project, None))
+        self.add_setting(Stringlist("attachmentDirs", Scope.Project, ["DCIM"]))
         self.add_setting(Dictionary("qfieldCloudProjectLocalDirs", Scope.Global, {}))
         self.add_setting(Dictionary("qfieldCloudLastProjectFiles", Scope.Global, {}))
         self.add_setting(String("qfieldCloudServerUrl", Scope.Global, ""))

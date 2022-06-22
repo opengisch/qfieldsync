@@ -146,6 +146,7 @@ class PackageDialog(QDialog, DialogUi):
             export_folder,
             area_of_interest,
             area_of_interest_crs,
+            self.qfield_preferences.value("attachmentDirs"),
             self.offline_editing,
         )
 
