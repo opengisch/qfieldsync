@@ -604,6 +604,10 @@ class CloudNetworkAccessManager(QObject):
         try:
             self.json_object(reply)
             self.set_token("", True)
+            authcfg = self.preferences.value("qfieldCloudAuthcfg")
+            auth_manager = QgsApplication.authManager()
+            auth_manager.clearCachedConfig(authcfg)
+            auth_manager.removeAuthenticationConfig(authcfg)
             self.logout_success.emit()
         except CloudException as err:
             self.logout_failed.emit(str(err))
