@@ -46,6 +46,7 @@ from qgis.PyQt.QtNetwork import (
 
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.utils.qt_utils import strip_html
 
 
 class CloudException(Exception):
@@ -238,8 +239,10 @@ class CloudNetworkAccessManager(QObject):
         server_url = cfg.uri() or self.url
         username = cfg.config("username")
         password = cfg.config("password")
-        self.set_url(server_url)
-        self.login(username, password)
+
+        if username and password:
+            self.set_url(server_url)
+            self.login(username, password)
 
     def login(self, username: str, password: str) -> Optional[QNetworkReply]:
         """Login to QFieldCloud"""
@@ -604,6 +607,10 @@ class CloudNetworkAccessManager(QObject):
         try:
             self.json_object(reply)
             self.set_token("", True)
+            authcfg = self.preferences.value("qfieldCloudAuthcfg")
+            auth_manager = QgsApplication.authManager()
+            auth_manager.clearCachedConfig(authcfg)
+            auth_manager.removeAuthenticationConfig(authcfg)
             self.logout_success.emit()
         except CloudException as err:
             self.logout_failed.emit(str(err))
@@ -651,7 +658,16 @@ class CloudNetworkAccessManager(QObject):
             return ""
 
         error = self.user_details.get("error")
-        html = '<a href="https://app.qfield.cloud/accounts/password/reset/">Forgot password?</a>'
+        if self._login_error:
+            if self._login_error.httpCode >= 500:
+                error = self.tr("Server error {}").format(self._login_error.httpCode)
+            else:
+                error = str(error)
+
+        error = strip_html(error).strip()
+        html = '<a href="https://app.qfield.cloud/accounts/password/reset/">{}?</a>'.format(
+            self.tr("Forgot password")
+        )
         if error:
             return self.tr("Sign in failed: {}. {}").format(str(error), html)
         else:
