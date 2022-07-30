@@ -23,7 +23,7 @@
 import os
 
 from qgis.core import Qgis, QgsApplication, QgsProject
-from qgis.PyQt.QtCore import QDir, Qt
+from qgis.PyQt.QtCore import QDir, Qt, QUrl
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
@@ -178,8 +178,9 @@ class PackageDialog(QDialog, DialogUi):
                 "Finished creating the project at {result_folder}. Please copy this folder to "
                 "your QField device."
             ).format(
-                result_folder='<a href="{folder}">{folder}</a>'.format(
-                    folder=export_folder
+                result_folder='<a href="{folder}">{display_folder}</a>'.format(
+                    folder=QUrl.fromLocalFile(export_folder).toString(),
+                    display_folder=QDir.toNativeSeparators(export_folder),
                 )
             )
             status = Qgis.Success
