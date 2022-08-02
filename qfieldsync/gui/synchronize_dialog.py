@@ -32,7 +32,7 @@ from qfieldsync.core.preferences import Preferences
 from qfieldsync.libqfieldsync import ProjectConfiguration
 from qfieldsync.libqfieldsync.utils.exceptions import NoProjectFoundError
 from qfieldsync.libqfieldsync.utils.file_utils import (
-    copy_images,
+    copy_attachments,
     get_project_in_folder,
     import_file_checksum,
 )
@@ -137,10 +137,13 @@ class SynchronizeDialog(QDialog, DialogUi):
             if original_path.exists() and open_project(
                 str(original_path), backup_project_path
             ):
-                copy_images(
-                    os.path.join(qfield_path, "DCIM"),
-                    os.path.join(original_path.parent, "DCIM"),
-                )
+                for attachment_dir in self.preferences.value("attachmentDirs"):
+                    copy_attachments(
+                        qfield_path,
+                        original_path.parent,
+                        attachment_dir,
+                    )
+
                 # save the data_file_checksum to the project and save it
                 imported_files_checksums.append(import_file_checksum(str(qfield_path)))
                 ProjectConfiguration(

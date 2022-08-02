@@ -26,12 +26,13 @@ from qgis.core import (
     QgsProject,
 )
 from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget, QgsSpinBox
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QLabel
+from qgis.PyQt.QtCore import QEvent, QLibraryInfo, QObject, Qt
+from qgis.PyQt.QtGui import QIcon, QKeySequence
+from qgis.PyQt.QtWidgets import QLabel, QListWidgetItem
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
+from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
 from qfieldsync.libqfieldsync import (
     LayerSource,
@@ -46,6 +47,17 @@ WidgetUi, _ = loadUiType(
 )
 
 
+class EventEater(QObject):
+    def eventFilter(self, widget, event):
+        if event.type() == QEvent.KeyPress:
+            if event.matches(QKeySequence.Backspace) or event.matches(
+                QKeySequence.Delete
+            ):
+                widget.takeItem(widget.currentRow())
+
+        return super().eventFilter(widget, event)
+
+
 class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
     """
     Configuration widget for QFieldSync on a particular project.
@@ -57,6 +69,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.setupUi(self)
 
         self.project = QgsProject.instance()
+        self.preferences = Preferences()
         self.__project_configuration = ProjectConfiguration(self.project)
         self.areaOfInterestExtentWidget = QgsExtentWidget(self)
         self.areaOfInterestExtentWidget.setToolTip(
@@ -94,6 +107,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.onLayerActionPreferenceChanged
         )
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
+
+        self.attachmentDirsListWidget.itemChanged.connect(self.onItemChanged)
+        self.event_eater = EventEater()
+        self.attachmentDirsListWidget.installEventFilter(self.event_eater)
 
         self.reloadProject()
 
@@ -178,6 +195,15 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.__project_configuration.layer_action_preference == "offline"
         )
 
+        attachment_dirs = [*self.preferences.value("attachmentDirs")]
+        attachment_dirs.append("")
+
+        for attachment_dir in attachment_dirs:
+            item = QListWidgetItem()
+            item.setText(attachment_dir)
+            item.setFlags(item.flags() | Qt.ItemIsEditable)
+            self.attachmentDirsListWidget.addItem(item)
+
         if self.unsupportedLayersList:
             self.unsupportedLayersLabel.setVisible(True)
 
@@ -257,6 +283,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             "online" if self.preferOnlineLayersRadioButton.isChecked() else "offline"
         )
 
+        v = QLibraryInfo.version()
+        match_flag = (
+            Qt.MatchRegularExpression
+            if v.majorVersion() > 5 and v.minorVersion() >= 15
+            else Qt.MatchRegExp
+        )
+        keys = {}
+        for item in self.attachmentDirsListWidget.findItems("^\\S+$", match_flag):
+            keys[item.text()] = 1
+        self.preferences.set_value("attachmentDirs", list(keys.keys()))
+
     def onLayerActionPreferenceChanged(self):
         """Triggered when prefer online or offline radio buttons have been changed"""
         prefer_online = self.preferOnlineLayersRadioButton.isChecked()
@@ -273,6 +310,43 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             idx, _cloud_action = layer_source.preferred_cloud_action(prefer_online)
             cmb.setCurrentIndex(idx)
             layer_source.cloud_action = cmb.itemData(cmb.currentIndex())
+
+    def onItemChanged(self, item):
+        current_idx = self.attachmentDirsListWidget.indexFromItem(item)
+        text = item.text()
+
+        v = QLibraryInfo.version()
+        match_flag = (
+            Qt.MatchRegularExpression
+            if v.majorVersion() > 5 and v.minorVersion() >= 15
+            else Qt.MatchRegExp
+        )
+        empty_items = self.attachmentDirsListWidget.findItems("^\\s*$", match_flag)
+
+        # remove all empty items
+        for empty_item in empty_items:
+            idx = self.attachmentDirsListWidget.indexFromItem(empty_item)
+            self.attachmentDirsListWidget.takeItem(idx.row())
+
+        # add new empty item in the end
+        item = QListWidgetItem()
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        self.attachmentDirsListWidget.addItem(item)
+
+        idx_correction = 0 if text.strip() == "" else 1
+
+        # set current item to the next element in the list and trigger editing
+        self.attachmentDirsListWidget.setCurrentRow(
+            min(
+                self.attachmentDirsListWidget.count(),
+                current_idx.row() + idx_correction,
+            )
+        )
+
+        if text != "":
+            self.attachmentDirsListWidget.editItem(
+                self.attachmentDirsListWidget.currentItem()
+            )
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():

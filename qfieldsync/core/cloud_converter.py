@@ -25,8 +25,9 @@ from qgis.core import QgsMapLayer, QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QObject, pyqtSignal
 from qgis.utils import iface
 
+from qfieldsync.core.preferences import Preferences
 from qfieldsync.libqfieldsync.layer import LayerSource
-from qfieldsync.libqfieldsync.utils.file_utils import copy_images
+from qfieldsync.libqfieldsync.utils.file_utils import copy_attachments
 from qfieldsync.libqfieldsync.utils.qgis import (
     get_qgis_files_within_dir,
     make_temp_qgis_file,
@@ -119,10 +120,12 @@ class CloudConverter(QObject):
                 )
 
             # export the DCIM folder
-            copy_images(
-                str(Path(original_project_path).parent.joinpath("DCIM")),
-                str(project_path.parent.joinpath("DCIM")),
-            )
+            for attachment_dir in Preferences().value("attachmentDirs"):
+                copy_attachments(
+                    Path(original_project_path).parent,
+                    project_path.parent,
+                    attachment_dir,
+                )
 
             title = self.project.title()
             title_suffix = self.tr("(QFieldCloud)")

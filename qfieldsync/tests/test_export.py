@@ -58,6 +58,7 @@ class OfflineConverterTest(unittest.TestCase):
             export_folder,
             "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
             QgsProject.instance().crs().authid(),
+            ["DCIM"],
             offline_editing,
         )
         offline_converter.convert()
@@ -106,6 +107,7 @@ class OfflineConverterTest(unittest.TestCase):
             export_folder,
             "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
             QgsProject.instance().crs().authid(),
+            ["DCIM"],
             offline_editing,
         )
         offline_converter.convert()
