@@ -24,7 +24,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from qgis.core import QgsApplication, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import (
     QDateTime,
     QItemSelectionModel,
@@ -184,6 +184,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectCreatePage.layout().addWidget(self.createProjectWidget)
         self.createProjectWidget.finished.connect(
             lambda: self.on_create_project_finished()
+        )
+        self.createProjectWidget.error.connect(
+            lambda m: self.on_create_project_error(m)
         )
         self.createProjectWidget.canceled.connect(
             lambda: self.on_create_project_canceled()
@@ -921,6 +924,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_create_project_finished(self) -> None:
         self.projectsStack.setCurrentWidget(self.projectsListPage)
+
+    def on_create_project_error(self, message) -> None:
+        self.feedbackLabel.setText(message)
+        self.feedbackLabel.setVisible(True)
+        iface.messageBar().pushMessage(message, Qgis.Critical, 0)
 
     def on_create_project_canceled(self) -> None:
         self.projectsStack.setCurrentWidget(self.projectsListPage)

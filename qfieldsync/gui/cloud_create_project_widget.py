@@ -39,11 +39,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_api import (
-    CloudException,
-    CloudNetworkAccessManager,
-    from_reply,
-)
+from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
 from qfieldsync.core.cloud_converter import CloudConverter
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
@@ -68,6 +64,7 @@ WidgetUi, _ = loadUiType(
 
 class CloudCreateProjectWidget(QWidget, WidgetUi):
     finished = pyqtSignal()
+    error = pyqtSignal(str)
     canceled = pyqtSignal()
 
     def __init__(
@@ -218,10 +215,10 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         except CloudException as err:
             QApplication.restoreOverrideCursor()
             critical_message = self.tr(
-                "QFieldCloud rejected project creation: {}"
-            ).format(from_reply(err.reply))
-            self.iface.messageBar().pushMessage(critical_message, Qgis.Critical, 0)
-            self.close()
+                "QFieldCloud rejected project creation:\n{}"
+            ).format(err)
+            self.error.emit(critical_message)
+            self.stackedWidget.setCurrentWidget(self.projectDetailsPage)
             return
         # save `local_dir` configuration permanently, `CloudProject` constructor does this for free
         cloud_project = CloudProject(
