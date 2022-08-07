@@ -97,7 +97,6 @@ class WindowsIconFixWorkDir(object):
 
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
-    _current_cloud_project = None
 
     def __init__(
         self,
@@ -114,7 +113,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.setWindowModality(Qt.WindowModal)
         self.preferences = Preferences()
         self.network_manager = network_manager
-        self._current_cloud_project = project
+        self._current_cloud_project_id = project.id if project else None
         self.transfer_dialog = None
         self.project_transfer = None
 
@@ -183,7 +182,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.projectCreatePage.layout().addWidget(self.createProjectWidget)
         self.createProjectWidget.finished.connect(
-            lambda: self.on_create_project_finished()
+            lambda project_id: self.on_create_project_finished(project_id)
         )
         self.createProjectWidget.error.connect(
             lambda m: self.on_create_project_error(m)
@@ -272,14 +271,20 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     @property
     def current_cloud_project(self) -> Optional[CloudProject]:
-        return self._current_cloud_project
+        return self.network_manager.projects_cache.find_project(
+            self._current_cloud_project_id
+        )
 
     @current_cloud_project.setter
     def current_cloud_project(self, value: Optional[CloudProject]):
-        if self._current_cloud_project == value:
+        if (
+            (value is not None and self._current_cloud_project_id == value.id)
+            or value is None
+            and self._current_cloud_project_id is None
+        ):
             return
 
-        self._current_cloud_project = value
+        self._current_cloud_project_id = value.id if value else None
         self.update_project_table_selection()
         self.update_ui_state()
 
@@ -922,7 +927,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             QUrl(self.network_manager.url + self.current_cloud_project.url)
         )
 
-    def on_create_project_finished(self) -> None:
+    def on_create_project_finished(self, project_id) -> None:
+        self._current_cloud_project_id = project_id
         self.projectsStack.setCurrentWidget(self.projectsListPage)
 
     def on_create_project_error(self, message) -> None:
@@ -982,7 +988,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         font = QFont()
 
         for row_idx in range(self.projectsTable.rowCount()):
-            cloud_project = self.projectsTable.item(row_idx, 0).data(Qt.UserRole)
+            cloud_project: CloudProject = self.projectsTable.item(row_idx, 0).data(
+                Qt.UserRole
+            )
             is_currently_open_project = (
                 cloud_project
                 == self.network_manager.projects_cache.currently_open_project
@@ -993,7 +1001,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.projectsTable.item(row_idx, 0).setFont(font)
             self.projectsTable.item(row_idx, 1).setFont(font)
 
-            if cloud_project == self.current_cloud_project:
+            if (
+                self.current_cloud_project is None
+                and self._current_cloud_project_id == cloud_project.id
+            ) or cloud_project == self.current_cloud_project:
                 index = self.projectsTable.model().index(row_idx, 0)
                 self.projectsTable.setCurrentIndex(index)
                 self.projectsTable.selectionModel().select(
@@ -1022,6 +1033,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
     def on_projects_table_selection_changed(self) -> None:
+        if self.projectsTable.selectionModel().hasSelection():
+            row_idx = self.projectsTable.currentRow()
+            self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(
+                Qt.UserRole
+            )
+
         self.update_project_buttons()
 
     def update_project_buttons(self) -> None:
