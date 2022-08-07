@@ -63,7 +63,7 @@ WidgetUi, _ = loadUiType(
 
 
 class CloudCreateProjectWidget(QWidget, WidgetUi):
-    finished = pyqtSignal()
+    finished = pyqtSignal(str)
     error = pyqtSignal(str)
     canceled = pyqtSignal()
 
@@ -227,7 +227,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         if self.createCloudRadioButton.isChecked():
             self.uploadProgressBar.setValue(100)
-            self.after_project_creation_action()
+            self.after_project_creation_action(cloud_project.id)
         elif self.cloudifyRadioButton.isChecked():
             self.cloud_transferrer = CloudTransferrer(
                 self.network_manager, cloud_project
@@ -240,12 +240,12 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             )
             self.cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [])
 
-    def after_project_creation_action(self):
+    def after_project_creation_action(self, project_id: str):
         QApplication.restoreOverrideCursor()
 
         self.network_manager.projects_cache.refresh()
 
-        self.finished.emit()
+        self.finished.emit(project_id)
 
     def update_info_visibility(self):
         """
@@ -338,7 +338,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         )
         self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
 
-        self.after_project_creation_action()
+        self.after_project_creation_action(self.cloud_transferrer.cloud_project.id)
 
     def on_show_warning(self, _, message):
         self.iface.messageBar().pushMessage(message, Qgis.Warning, 0)
