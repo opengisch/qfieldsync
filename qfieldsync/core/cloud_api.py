@@ -81,7 +81,10 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 
     message = ""
     try:
-        payload = reply.readAll().data().decode()
+        payload = reply.readAll().data()
+        # workaround to https://github.com/qgis/QGIS/issues/49687
+        content_length = reply.header(QNetworkRequest.ContentLengthHeader)
+        payload = payload[:content_length].decode()
 
         try:
             resp = json.loads(payload)
