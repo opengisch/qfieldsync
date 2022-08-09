@@ -26,6 +26,7 @@ from qgis.core import Qgis, QgsMapLayer, QgsProject
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
 from qgis.PyQt.uic import loadUiType
 
+from qfieldsync.core.message_bus import message_bus
 from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.libqfieldsync.layer import LayerSource
@@ -80,6 +81,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
 
     def apply(self):
         old_layer_action = self.layer_source.action
+        old_layer_cloud_action = self.layer_source.cloud_action
         old_is_geometry_locked = self.layer_source.is_geometry_locked
 
         self.layer_source.cloud_action = self.cloudLayerActionComboBox.itemData(
@@ -94,8 +96,11 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         # apply always the photo_namings (to store default values on first apply as well)
         if (
             self.layer_source.action != old_layer_action
+            or self.layer_source.cloud_action != old_layer_cloud_action
             or self.layer_source.is_geometry_locked != old_is_geometry_locked
             or self.photoNamingTable.rowCount() > 0
         ):
             self.layer_source.apply()
             self.project.setDirty(True)
+
+            message_bus.messaged.emit("layer_config_saved")

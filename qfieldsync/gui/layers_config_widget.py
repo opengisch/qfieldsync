@@ -38,6 +38,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
+from qfieldsync.core.message_bus import message_bus
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.libqfieldsync.layer import LayerSource, SyncAction
 
@@ -87,6 +88,8 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.multipleToggleButton.setPopupMode(QToolButton.InstantPopup)
         self.toggleMenu.triggered.connect(self.toggleMenu_triggered)
         self.unsupportedLayersList = list()
+
+        message_bus.messaged.connect(lambda msg: self._on_message_bus_messaged(msg))
 
         self.reloadProject()
 
@@ -256,3 +259,15 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         if is_project_dirty:
             self.project.setDirty(True)
+
+    def _on_message_bus_messaged(self, msg: str) -> None:
+        # when MapLayerConfigWidget.apply() detects changes in layer settings,
+        # the event is emitted with `layer_config_saved` as a message.
+        # check ./gui/map_layer_config_widget.py
+        if msg != "layer_config_saved":
+            return
+
+        for layer_source in self.layer_sources:
+            layer_source.read_layer()
+
+        self.reloadProject()
