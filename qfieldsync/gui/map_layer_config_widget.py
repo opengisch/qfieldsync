@@ -81,6 +81,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
 
     def apply(self):
         old_layer_action = self.layer_source.action
+        old_layer_cloud_action = self.layer_source.cloud_action
         old_is_geometry_locked = self.layer_source.is_geometry_locked
 
         self.layer_source.cloud_action = self.cloudLayerActionComboBox.itemData(
@@ -95,6 +96,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         # apply always the photo_namings (to store default values on first apply as well)
         if (
             self.layer_source.action != old_layer_action
+            or self.layer_source.cloud_action != old_layer_cloud_action
             or self.layer_source.is_geometry_locked != old_is_geometry_locked
             or self.photoNamingTable.rowCount() > 0
         ):
