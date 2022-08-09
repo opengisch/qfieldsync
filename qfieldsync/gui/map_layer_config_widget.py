@@ -26,6 +26,7 @@ from qgis.core import Qgis, QgsMapLayer, QgsProject
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
 from qgis.PyQt.uic import loadUiType
 
+from qfieldsync.core.message_bus import message_bus
 from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.libqfieldsync.layer import LayerSource
@@ -99,3 +100,5 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         ):
             self.layer_source.apply()
             self.project.setDirty(True)
+
+            message_bus.messaged.emit("layer_config_saved")
