@@ -289,6 +289,17 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.update_project_table_selection()
         self.update_ui_state()
 
+    def set_feedback(self, msg, color: str = Qt.red):
+        color_hex = QColor(color).name()
+        self.feedbackLabel.setStyleSheet(f"QLabel {{ color: {color_hex}; }}")
+
+        if msg:
+            self.feedbackLabel.setVisible(True)
+            self.feedbackLabel.setText(msg)
+        else:
+            self.feedbackLabel.setVisible(False)
+            self.feedbackLabel.setText("")
+
     def on_auth_accepted(self):
         self.network_manager.projects_cache.refresh()
         self.update_welcome_label()
@@ -296,13 +307,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
-        self.feedbackLabel.setVisible(False)
-        self.feedbackLabel.setText("")
+        self.set_feedback("Loading projects list…", Qt.blue)
 
     def on_projects_cached_projects_error(self, error: str) -> None:
         self.projectsStack.setEnabled(True)
-        self.feedbackLabel.setVisible(True)
-        self.feedbackLabel.setText(error)
+        self.set_feedback(error)
 
     def on_projects_cached_projects_updated(self) -> None:
         self.projectsStack.setEnabled(True)
@@ -311,8 +320,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_projects_cached_project_files_started(self, project_id: str) -> None:
         self.projectFilesTab.setEnabled(False)
-        self.feedbackLabel.setVisible(False)
-        self.feedbackLabel.setText("")
+        self.set_feedback(None)
 
     def on_projects_cached_project_files_error(
         self, project_id: str, error: str
@@ -322,10 +330,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.current_cloud_project and self.current_cloud_project.id != project_id:
             return
 
-        self.feedbackLabel.setText(
-            "Obtaining project files list failed: {}".format(error)
-        )
-        self.feedbackLabel.setVisible(True)
+        self.set_feedback("Obtaining project files list failed: {}".format(error))
 
     def on_project_files_toggle_expand_button_clicked(self) -> None:
         should_expand = not self.projectFilesTree.topLevelItem(0).data(1, Qt.UserRole)
@@ -491,25 +496,22 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     ) -> None:
         progress = int((bytes_received / bytes_total) * 100) if bytes_total > 0 else 100
 
-        self.feedbackLabel.setVisible(True)
-        self.feedbackLabel.setText(
+        self.set_feedback(
             self.tr('Downloading file "{}" at {}%…').format(transfer.filename, progress)
         )
 
     def on_download_file_finished(self, transfer: FileTransfer) -> None:
         if transfer.is_failed:
-            self.feedbackLabel.setText(
+            self.set_feedback(
                 self.tr(
                     'Downloading file "{}" failed: {}'.format(
                         transfer.name, str(transfer.error)
                     )
                 )
             )
-            self.feedbackLabel.setVisible(True)
             return
 
-        self.feedbackLabel.setVisible(False)
-        self.feedbackLabel.setText("")
+        self.set_feedback(None)
 
     def on_use_current_project_directory_action_triggered(self, _toggled: bool) -> None:
         self.localDirLineEdit.setText(str(Path(QgsProject.instance().homePath())))
@@ -533,15 +535,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_logout_button_clicked(self) -> None:
         self.avatarButton.setEnabled(False)
-        self.feedbackLabel.setVisible(False)
+        self.set_feedback(None)
         self.network_manager.logout()
 
     def on_refresh_button_clicked(self) -> None:
         self.network_manager.projects_cache.refresh()
 
     def show_projects(self) -> None:
-        self.feedbackLabel.setText("")
-        self.feedbackLabel.setVisible(False)
+        self.set_feedback(None)
 
         self.projectsTable.setRowCount(0)
         self.projectsTable.setSortingEnabled(False)
@@ -549,6 +550,15 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.network_manager.projects_cache.projects is None:
             self.network_manager.projects_cache.refresh()
             return
+
+        if len(self.network_manager.projects_cache.projects) == 0:
+            self.set_feedback(
+                "You don't have any projects, create some by clicking the button in the bottom bar.",
+                Qt.blue,
+            )
+            return
+
+        self.projectsTable.setEnabled(True)
 
         for cloud_project in self.network_manager.projects_cache.projects:
             if (
@@ -802,10 +812,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         try:
             self.network_manager.handle_response(reply, False)
         except CloudException as err:
-            self.feedbackLabel.setText(
-                self.tr("Project delete failed: {}").format(str(err))
-            )
-            self.feedbackLabel.setVisible(True)
+            self.set_feedback(self.tr("Project delete failed: {}").format(str(err)))
             return
 
         self.network_manager.projects_cache.refresh()
@@ -905,10 +912,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 return
 
             self.projectsFormPage.setEnabled(False)
-            self.feedbackLabel.setVisible(True)
 
             self.current_cloud_project.update_data(cloud_project_data)
-            self.feedbackLabel.setText(self.tr("Updating project…"))
+            self.set_feedback(self.tr("Updating project…"))
 
             reply = self.network_manager.update_project(
                 self.current_cloud_project.id,
@@ -940,8 +946,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setCurrentWidget(self.projectsListPage)
 
     def on_create_project_error(self, message) -> None:
-        self.feedbackLabel.setText(message)
-        self.feedbackLabel.setVisible(True)
+        self.set_feedback(message)
         iface.messageBar().pushMessage(message, Qgis.Critical, 0)
 
     def on_create_project_canceled(self) -> None:
@@ -1031,12 +1036,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         try:
             self.network_manager.json_object(reply)
         except CloudException as err:
-            self.feedbackLabel.setText("Project update failed: {}".format(str(err)))
-            self.feedbackLabel.setVisible(True)
+            self.set_feedback("Project update failed: {}".format(str(err)))
             return
 
         self.projectsStack.setCurrentWidget(self.projectsListPage)
-        self.feedbackLabel.setVisible(False)
+        self.set_feedback(None)
 
         self.network_manager.projects_cache.refresh()
 
@@ -1142,6 +1146,5 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.close()
 
     def _on_logout_failed(self, err: str) -> None:
-        self.feedbackLabel.setText("Sign out failed: {}".format(str(err)))
-        self.feedbackLabel.setVisible(True)
+        self.set_feedback("Sign out failed: {}".format(str(err)))
         self.avatarButton.setEnabled(True)
