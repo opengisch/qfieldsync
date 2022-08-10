@@ -114,6 +114,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.preferences = Preferences()
         self.network_manager = network_manager
         self._current_cloud_project_id = project.id if project else None
+        self._suggest_upload_files = False
         self.transfer_dialog = None
         self.project_transfer = None
 
@@ -619,6 +620,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsTable.setSortingEnabled(True)
         self.update_project_table_selection()
 
+        if self._suggest_upload_files:
+            self._suggest_upload_files = False
+
+            self.sync()
+
     def sync(self) -> None:
         assert self.current_cloud_project is not None
         self.show_sync_popup()
@@ -930,6 +936,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_create_project_finished(self, project_id) -> None:
         self._current_cloud_project_id = project_id
+        self._suggest_upload_files = True
         self.projectsStack.setCurrentWidget(self.projectsListPage)
 
     def on_create_project_error(self, message) -> None:
