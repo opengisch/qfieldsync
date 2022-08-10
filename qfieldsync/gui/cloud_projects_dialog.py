@@ -721,6 +721,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     QMessageBox.critical(self, title, feedback_msg)
                 elif feedback == LocalDirFeedback.Warning:
                     QMessageBox.warning(self, title, feedback_msg)
+                    break
 
                 local_dir = None
                 continue
