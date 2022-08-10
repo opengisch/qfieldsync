@@ -102,11 +102,14 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
         pass
 
     if not message:
-        message = "[HTTP-{}/QT-{}] {}".format(
-            reply.attribute(QNetworkRequest.HttpStatusCodeAttribute),
-            reply.error(),
-            reply.errorString(),
-        )
+        status_str = ""
+
+        http_status = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        if http_status is not None:
+            status_str += f"HTTP-{http_status}/"
+
+        status_str += f"QT-{reply.error()}"
+        message = f"[{status_str}] {reply.errorString()}"
 
     return CloudException(reply, Exception(message))
 
@@ -663,7 +666,9 @@ class CloudNetworkAccessManager(QObject):
 
         error = self.user_details.get("error")
         if self._login_error:
-            if self._login_error.httpCode >= 500:
+            if self._login_error.httpCode is None:
+                error = str(self._login_error)
+            elif self._login_error.httpCode >= 500:
                 error = self.tr("Server error {}").format(self._login_error.httpCode)
             else:
                 error = str(error)
