@@ -89,7 +89,10 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.toggleMenu.triggered.connect(self.toggleMenu_triggered)
         self.unsupportedLayersList = list()
 
-        message_bus.messaged.connect(lambda msg: self._on_message_bus_messaged(msg))
+        self._on_message_bus_messaged_wrapper = (
+            lambda msg: self._on_message_bus_messaged(msg)
+        )
+        message_bus.messaged.connect(self._on_message_bus_messaged_wrapper)
 
         self.reloadProject()
 
@@ -270,4 +273,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         for layer_source in self.layer_sources:
             layer_source.read_layer()
 
-        self.reloadProject()
+        # quite ugly workaround, but this method sometimes operates on deleted objects,
+        # so we need to make sure we don't get exceptions
+        try:
+            self.reloadProject()
+        except Exception:
+            message_bus.messaged.disconnect(self._on_message_bus_messaged_wrapper)
