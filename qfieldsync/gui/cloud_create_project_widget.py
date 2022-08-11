@@ -201,10 +201,14 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.project.setTitle(self.get_cloud_project_name())
             self.project.setDirty()
 
+        description = (
+            self.projectDescriptionTextEdit.toPlainText()
+            or self.project.metadata().abstract()
+        )
         reply = self.network_manager.create_project(
             self.get_cloud_project_name(),
             self.network_manager.auth().config("username"),
-            self.project.metadata().abstract(),
+            description,
             True,
         )
         reply.finished.connect(lambda: self.on_create_project_finished(reply))
