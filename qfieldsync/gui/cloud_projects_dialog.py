@@ -913,7 +913,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.projectsFormPage.setEnabled(False)
 
-            self.current_cloud_project.update_data(cloud_project_data)
             self.set_feedback(self.tr("Updating project…"))
 
             reply = self.network_manager.update_project(
