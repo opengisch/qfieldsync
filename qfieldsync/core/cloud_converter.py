@@ -21,8 +21,8 @@
 
 from pathlib import Path
 
-from qgis.core import QgsMapLayer, QgsProject
-from qgis.PyQt.QtCore import QCoreApplication, QObject, pyqtSignal
+from qgis.core import QgsMapLayer, QgsProject, QgsVirtualLayerDefinition
+from qgis.PyQt.QtCore import QCoreApplication, QObject, QUrl, pyqtSignal
 from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
@@ -97,7 +97,25 @@ class CloudConverter(QObject):
                     if layer_source.is_localized_path:
                         continue
 
-                if layer.type() == QgsMapLayer.VectorLayer:
+                if layer.dataProvider().name() == "virtual":
+                    url = QUrl.fromEncoded(layer.source().encode("ascii"))
+                    valid = url.isValid()
+                    if valid:
+                        definition = QgsVirtualLayerDefinition.fromUrl(url)
+                        for source in definition.sourceLayers():
+                            if not source.isReferenced():
+                                valid = False
+                                break
+                    if not valid:
+                        # virtual layers with non-referenced sources are not supported
+                        self.warning.emit(
+                            self.tr("Cloud Converter"),
+                            self.tr(
+                                "The virtual layer '{}' is not valid or contains non-referenced source(s) and could not be converted and was therefore removed from the cloud project."
+                            ).format(layer.name()),
+                        )
+                        self.project.removeMapLayer(layer)
+                elif layer.type() == QgsMapLayer.VectorLayer:
                     if not layer_source.convert_to_gpkg(self.export_dirname):
                         # something went wrong, remove layer and inform the user that layer will be missing
                         self.warning.emit(
