@@ -107,6 +107,7 @@ class CloudConverter(QObject):
                             ).format(layer.name()),
                         )
                         self.project.removeMapLayer(layer)
+                        continue
                 else:
                     layer_source.copy(self.export_dirname, list())
                 layer.setCustomProperty(
