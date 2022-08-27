@@ -97,35 +97,40 @@ class CloudConverter(QObject):
                     if layer_source.is_localized_path:
                         continue
 
-                if layer.dataProvider().name() == "virtual":
-                    url = QUrl.fromEncoded(layer.source().encode("ascii"))
-                    valid = url.isValid()
-                    if valid:
-                        definition = QgsVirtualLayerDefinition.fromUrl(url)
-                        for source in definition.sourceLayers():
-                            if not source.isReferenced():
-                                valid = False
-                                break
-                    if not valid:
-                        # virtual layers with non-referenced sources are not supported
-                        self.warning.emit(
-                            self.tr("Cloud Converter"),
-                            self.tr(
-                                "The virtual layer '{}' is not valid or contains non-referenced source(s) and could not be converted and was therefore removed from the cloud project."
-                            ).format(layer.name()),
-                        )
-                        self.project.removeMapLayer(layer)
-                elif layer.type() == QgsMapLayer.VectorLayer:
-                    if not layer_source.convert_to_gpkg(self.export_dirname):
-                        # something went wrong, remove layer and inform the user that layer will be missing
-                        self.warning.emit(
-                            self.tr("Cloud Converter"),
-                            self.tr(
-                                "The layer '{}' could not be converted and was therefore removed from the cloud project."
-                            ).format(layer.name()),
-                        )
-                        self.project.removeMapLayer(layer)
-                        continue
+                if layer.type() == QgsMapLayer.VectorLayer:
+                    if (
+                        layer.dataProvider()
+                        and layer.dataProvider().name() == "virtual"
+                    ):
+                        url = QUrl.fromEncoded(layer.source().encode("ascii"))
+                        valid = url.isValid()
+                        if valid:
+                            definition = QgsVirtualLayerDefinition.fromUrl(url)
+                            for source in definition.sourceLayers():
+                                if not source.isReferenced():
+                                    valid = False
+                                    break
+                        if not valid:
+                            # virtual layers with non-referenced sources are not supported
+                            self.warning.emit(
+                                self.tr("Cloud Converter"),
+                                self.tr(
+                                    "The virtual layer '{}' is not valid or contains non-referenced source(s) and could not be converted and was therefore removed from the cloud project."
+                                ).format(layer.name()),
+                            )
+                            self.project.removeMapLayer(layer)
+                            continue
+                    else:
+                        if not layer_source.convert_to_gpkg(self.export_dirname):
+                            # something went wrong, remove layer and inform the user that layer will be missing
+                            self.warning.emit(
+                                self.tr("Cloud Converter"),
+                                self.tr(
+                                    "The layer '{}' could not be converted and was therefore removed from the cloud project."
+                                ).format(layer.name()),
+                            )
+                            self.project.removeMapLayer(layer)
+                            continue
                 else:
                     layer_source.copy(self.export_dirname, list())
                 layer.setCustomProperty(
