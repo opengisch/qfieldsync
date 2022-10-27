@@ -22,7 +22,7 @@
 """
 import os
 
-from qgis.core import Qgis, QgsMapLayer, QgsProject
+from qgis.core import QgsMapLayer, QgsProject
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
 from qgis.PyQt.uic import loadUiType
 
@@ -79,7 +79,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.photoNamingTable.setLayerColumnHidden(True)
 
         # append the photo naming table to the layout
-        if Qgis.QGIS_VERSION_INT >= 31300 and layer.type() == QgsMapLayer.VectorLayer:
+        if layer.type() == QgsMapLayer.VectorLayer:
             self.layout().insertRow(-1, self.tr("Photo naming"), self.photoNamingTable)
             self.photoNamingTable.setEnabled(self.photoNamingTable.rowCount() > 0)
 
@@ -88,7 +88,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.relationshipConfigurationTable.setLayerColumnHidden(True)
 
         # append the relationship configuration table to the layout
-        if Qgis.QGIS_VERSION_INT >= 31300 and layer.type() == QgsMapLayer.VectorLayer:
+        if layer.type() == QgsMapLayer.VectorLayer:
             self.layout().insertRow(
                 -1,
                 self.tr("Relationship configuration"),
