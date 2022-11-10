@@ -69,7 +69,7 @@
           <string>The project check provides automatic feedback for some common mistakes when using QField, QFieldSync and QFieldCloud. Lines starting with ERROR show problems in your project configuration that must be fixed before proceeding. Lines starting with WARNING are suggestions what you can improve.</string>
          </property>
          <property name="wordWrap">
-           <bool>true</bool>
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -266,22 +266,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>button_box</sender>
-   <signal>accepted()</signal>
-   <receiver>QFieldPackageDialogBase</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
