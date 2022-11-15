@@ -158,13 +158,16 @@ class PackageDialog(QDialog, DialogUi):
         )
 
         try:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
             offline_convertor.convert()
             self.do_post_offline_convert_action(True)
         except Exception as err:
             self.do_post_offline_convert_action(False)
             raise err
+        finally:
+            QApplication.restoreOverrideCursor()
 
-        self.close()
+        self.accept()
 
         self.progress_group.setEnabled(False)
 
@@ -235,11 +238,6 @@ class PackageDialog(QDialog, DialogUi):
         self.update_info_visibility()
 
     def update_total(self, current, layer_count, message):
-        if current == layer_count and (current == 100 or current == 0):
-            QApplication.restoreOverrideCursor()
-        elif current == 0 and layer_count == 100:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-
         self.totalProgressBar.setMaximum(layer_count)
         self.totalProgressBar.setValue(current)
         self.statusLabel.setText(message)
