@@ -20,11 +20,15 @@
 """
 import os
 from functools import partial
+from typing import Callable, Optional
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import QRectF, QSize, Qt
 from qgis.PyQt.QtGui import QIcon, QPainter, QPainterPath, QPixmap, QTextDocument
 from qgis.PyQt.QtSvg import QSvgRenderer
+from qgis.PyQt.QtWidgets import QTreeWidgetItem
+
+from .file_utils import DirectoryTreeDict, DirectoryTreeType
 
 
 def selectFolder(line_edit_widget):
@@ -97,3 +101,24 @@ def strip_html(text: str) -> str:
     text = doc.toPlainText()
 
     return text
+
+
+def build_file_tree_widget_from_dict(
+    parent_item: QTreeWidgetItem,
+    node: DirectoryTreeDict,
+    build_item_cb: Optional[Callable] = None,
+):
+    item = QTreeWidgetItem()
+
+    if node["type"] == DirectoryTreeType.DIRECTORY:
+        for subnode in node["content"]:
+            build_file_tree_widget_from_dict(item, subnode, build_item_cb)
+
+    item.setText(0, node["path"].name)
+
+    should_add = None
+    if build_item_cb:
+        should_add = build_item_cb(item, node)
+
+    if should_add is None or should_add:
+        parent_item.addChild(item)

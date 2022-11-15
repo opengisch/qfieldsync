@@ -24,8 +24,8 @@ import os
 from pathlib import Path
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QDir
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
+from qgis.PyQt.QtCore import QDir, Qt
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QTreeWidgetItem
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
@@ -37,8 +37,16 @@ from qfieldsync.libqfieldsync.utils.file_utils import (
     import_file_checksum,
 )
 from qfieldsync.libqfieldsync.utils.qgis import make_temp_qgis_file, open_project
+from qfieldsync.utils.file_utils import (
+    DirectoryTreeDict,
+    DirectoryTreeType,
+    path_to_dict,
+)
 from qfieldsync.utils.qgis_utils import import_checksums_of_project
-from qfieldsync.utils.qt_utils import make_folder_selector
+from qfieldsync.utils.qt_utils import (
+    build_file_tree_widget_from_dict,
+    make_folder_selector,
+)
 
 DialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/synchronize_dialog.ui")
@@ -62,7 +70,11 @@ class SynchronizeDialog(QDialog, DialogUi):
             import_dir = self.preferences.value("importDirectory")
 
         self.qfieldDir.setText(QDir.toNativeSeparators(import_dir))
-        self.qfieldDir_button.clicked.connect(make_folder_selector(self.qfieldDir))
+        self.qfieldDir_button.clicked.connect(lambda: self.on_qfield_dir_chosen())
+        self.qfieldDir.textChanged.connect(lambda: self.on_qfield_dir_changed())
+        self.dirsToCopyRefreshButton.clicked.connect(
+            lambda: self.update_dirs_to_sync_tree()
+        )
 
         self.offline_editing_done = False
 
@@ -70,8 +82,16 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
         project = QgsProject.instance()
         current_path = Path(project.fileName())
-        qfield_path = Path(self.qfieldDir.text())
+        qfield_project_str_path = self.qfieldDir.text()
+        qfield_path = Path(qfield_project_str_path)
         self.preferences.set_value("importDirectoryProject", str(qfield_path))
+        self.preferences.set_value(
+            "importDirsToCopy",
+            {
+                **self.preferences.value("importDirsToCopy"),
+                qfield_project_str_path: self.extract_dirs_to_copy(),
+            },
+        )
         backup_project_path = make_temp_qgis_file(project)
 
         try:
@@ -137,12 +157,28 @@ class SynchronizeDialog(QDialog, DialogUi):
             if original_path.exists() and open_project(
                 str(original_path), backup_project_path
             ):
-                for attachment_dir in self.preferences.value("attachmentDirs"):
-                    copy_attachments(
-                        qfield_path,
-                        original_path.parent,
-                        attachment_dir,
-                    )
+                import_dirs_to_copy = self.preferences.value("importDirsToCopy").get(
+                    qfield_project_str_path, {}
+                )
+
+                # use the import dirs to copy selection if available, otherwise keep the old behavior
+                if import_dirs_to_copy:
+                    for path, should_copy in import_dirs_to_copy.items():
+                        if not should_copy:
+                            continue
+
+                        copy_attachments(
+                            qfield_path,
+                            original_path.parent,
+                            path,
+                        )
+                else:
+                    for attachment_dir in self.preferences.value("attachmentDirs"):
+                        copy_attachments(
+                            qfield_path,
+                            original_path.parent,
+                            attachment_dir,
+                        )
 
                 # save the data_file_checksum to the project and save it
                 imported_files_checksums.append(import_file_checksum(str(qfield_path)))
@@ -184,3 +220,85 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.offline_editing.progressModeSet.disconnect(self.update_mode)
         self.offline_editing.progressUpdated.disconnect(self.update_value)
         self.offline_editing_done = True
+
+    def extract_dirs_to_copy(self):
+        def extract_dirs_data(root_item: QTreeWidgetItem):
+            data = {}
+            for i in range(root_item.childCount()):
+                item = root_item.child(i)
+                relative_path = item.data(0, Qt.UserRole)
+                is_checked = item.checkState(0) == Qt.Checked
+                data[relative_path] = is_checked
+
+                if item.childCount() > 0:
+                    data.update(extract_dirs_data(item))
+
+            return data
+
+        dirs_to_copy = extract_dirs_data(self.dirsToCopyTreeWidget.invisibleRootItem())
+
+        return dirs_to_copy
+
+    def update_dirs_to_sync_tree(self):
+        if not self.qfieldDir.text():
+            return
+
+        qfield_project_str_path = self.qfieldDir.text()
+        qfield_dir_path = Path(qfield_project_str_path)
+        dirs_to_copy = self.preferences.value("importDirsToCopy").get(
+            qfield_project_str_path, {}
+        )
+
+        if not qfield_dir_path.is_dir():
+            return
+
+        self.dirsToCopyTreeWidget.clear()
+
+        def build_item_cb(item: QTreeWidgetItem, node: DirectoryTreeDict):
+            relative_path = node["path"].relative_to(qfield_dir_path)
+            str_path = str(relative_path)
+
+            # TODO decide whether or not to take into account the attachment_dirs into account
+            # attachment_dirs = self.preferences.value("attachmentDirs") # TODO move this in the outer scope
+            # matches = False
+
+            # for attachment_dir in attachment_dirs:
+            #     if str_path.startswith(attachment_dir):
+            #         matches = True
+
+            # if not matches:
+            #     return False
+
+            check_state = (
+                Qt.Checked if dirs_to_copy.get(str_path, True) else Qt.Unchecked
+            )
+
+            item.setCheckState(0, check_state)
+            item.setExpanded(True)
+            item.setData(0, Qt.UserRole, str_path)
+            item.setToolTip(0, str(node["path"].absolute()))
+            item.setFlags(
+                item.flags()
+                | Qt.ItemIsUserCheckable
+                | Qt.ItemIsSelectable
+                | Qt.ItemIsAutoTristate
+            )
+
+        root_item = self.dirsToCopyTreeWidget.invisibleRootItem()
+        dict_paths = path_to_dict(qfield_dir_path, dirs_only=True)
+
+        if dict_paths["type"] == DirectoryTreeType.DIRECTORY:
+            for subnode in dict_paths["content"]:
+                build_file_tree_widget_from_dict(
+                    root_item,
+                    subnode,
+                    build_item_cb,
+                )
+
+    def on_qfield_dir_chosen(self):
+        make_folder_selector(self.qfieldDir)()
+        self.update_dirs_to_sync_tree()
+
+    def on_qfield_dir_changed(self):
+        qfield_dir_path = Path(self.qfieldDir.text())
+        self.dirsToCopyRefreshButton.setEnabled(qfield_dir_path.is_dir())

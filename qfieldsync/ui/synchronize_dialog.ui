@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>413</width>
-    <height>320</height>
+    <height>435</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,6 +37,86 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QgsCollapsibleGroupBox" name="advancedOptionsGroupBox">
+     <property name="title">
+      <string>Advanced</string>
+     </property>
+     <property name="saveCollapsedState">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QVBoxLayout" name="dirsToCopyLayout">
+        <item>
+         <widget class="QLabel" name="dirsToCopyLabel">
+          <property name="text">
+           <string>Directories to be imported</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="dirsToCopyTreeWidget">
+          <column>
+           <property name="text">
+            <string>Directory</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="dirsToCopyButtonsLayout">
+          <item>
+           <widget class="QToolButton" name="dirsToCopyRefreshButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Refresh directories</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../resources/refresh.svg</normaloff>../resources/refresh.svg</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="dirsToCopyButtonsLeftSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="dirsToCopySelectAllButton">
+            <property name="text">
+             <string>Select All</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="dirsToCopyDeselectAllButton">
+            <property name="text">
+             <string>Deselect All</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="progress_group">
@@ -103,6 +183,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsCollapsibleGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>qgscollapsiblegroupbox.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
