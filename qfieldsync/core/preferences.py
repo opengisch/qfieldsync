@@ -23,7 +23,8 @@ class Preferences(SettingManager):
         self.add_setting(
             String("importDirectory", Scope.Global, str(home.joinpath("QField/import")))
         )
-        self.add_setting(String("importDirectoryProject", Scope.Project, None))
+        self.add_setting(Dictionary("importDirectoryProject", Scope.Project, {}))
+        self.add_setting(Dictionary("importDirsToCopy", Scope.Global, {}))
         self.add_setting(Stringlist("attachmentDirs", Scope.Project, ["DCIM"]))
         self.add_setting(Dictionary("qfieldCloudProjectLocalDirs", Scope.Global, {}))
         self.add_setting(Dictionary("qfieldCloudLastProjectFiles", Scope.Global, {}))
