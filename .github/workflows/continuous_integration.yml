@@ -52,7 +52,7 @@ jobs:
         run: |
           docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
-  test-18-04:
+  test-22-04:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
