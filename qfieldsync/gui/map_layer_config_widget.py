@@ -31,7 +31,7 @@ from qfieldsync.core.message_bus import message_bus
 from qfieldsync.gui.relationship_configuration_widget import (
     RelationshipConfigurationTableWidget,
 )
-from qfieldsync.gui.resource_naming_widget import ResourceNamingTableWidget
+from qfieldsync.gui.attachment_naming_widget import AttachmentNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.libqfieldsync.layer import LayerSource
 
@@ -75,14 +75,14 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.isGeometryLockedCheckBox.setEnabled(self.layer_source.can_lock_geometry)
         self.isGeometryLockedCheckBox.setChecked(self.layer_source.is_geometry_locked)
 
-        self.resourceNamingTable = ResourceNamingTableWidget()
-        self.resourceNamingTable.addLayerFields(self.layer_source)
-        self.resourceNamingTable.setLayerColumnHidden(True)
+        self.attachmentNamingTable = AttachmentNamingTableWidget()
+        self.attachmentNamingTable.addLayerFields(self.layer_source)
+        self.attachmentNamingTable.setLayerColumnHidden(True)
 
-        # append the resource naming table to the layout
+        # append the attachment naming table to the layout
         if layer.type() == QgsMapLayer.VectorLayer:
             self.layout().insertRow(
-                -1, self.tr("Attachment\nnaming"), self.resourceNamingTable
+                -1, self.tr("Attachment\nnaming"), self.attachmentNamingTable
             )
             tip = QLabel(
                 self.tr(
@@ -91,7 +91,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             )
             tip.setWordWrap(True)
             self.layout().insertRow(-1, "", tip)
-            self.resourceNamingTable.setEnabled(self.resourceNamingTable.rowCount() > 0)
+            self.attachmentNamingTable.setEnabled(self.attachmentNamingTable.rowCount() > 0)
 
         self.relationshipConfigurationTable = RelationshipConfigurationTableWidget()
         self.relationshipConfigurationTable.addLayerFields(self.layer_source)
@@ -120,15 +120,15 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.cableLayerActionComboBox.currentIndex()
         )
         self.layer_source.is_geometry_locked = self.isGeometryLockedCheckBox.isChecked()
-        self.resourceNamingTable.syncLayerSourceValues()
+        self.attachmentNamingTable.syncLayerSourceValues()
         self.relationshipConfigurationTable.syncLayerSourceValues()
 
-        # apply always the resource naming (to store default values on first apply as well)
+        # apply always the attachment naming (to store default values on first apply as well)
         if (
             self.layer_source.action != old_layer_action
             or self.layer_source.cloud_action != old_layer_cloud_action
             or self.layer_source.is_geometry_locked != old_is_geometry_locked
-            or self.resourceNamingTable.rowCount() > 0
+            or self.attachmentNamingTable.rowCount() > 0
             or self.relationshipConfigurationTable.rowCount() > 0
         ):
             self.layer_source.apply()
