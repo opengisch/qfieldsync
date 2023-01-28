@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- ResourceNamingWidget
+ AttachmentNamingTableWidget
                                  A QGIS plugin
  Sync your projects to QField on android
                              -------------------
@@ -27,9 +27,9 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
 
 
-class ResourceNamingTableWidget(QTableWidget):
+class AttachmentNamingTableWidget(QTableWidget):
     def __init__(self):
-        super(ResourceNamingTableWidget, self).__init__()
+        super(AttachmentNamingTableWidget, self).__init__()
 
         self.setColumnCount(3)
         self.setHorizontalHeaderLabels(
@@ -54,7 +54,6 @@ class ResourceNamingTableWidget(QTableWidget):
             ews = layer.editorWidgetSetup(i)
 
             if ews.type() == "ExternalResource":
-                # for later: if ews.config().get('DocumentViewer', QgsExternalResourceWidget.NoContent) == QgsExternalResourceWidget.Image:
                 self.insertRow(row)
                 item = QTableWidgetItem(layer.name())
                 item.setData(Qt.UserRole, layer_source)
@@ -70,7 +69,7 @@ class ResourceNamingTableWidget(QTableWidget):
                     if "DocumentViewer" in ews.config()
                     else 0
                 )
-                expression = layer_source.resource_naming(field.name(), resource_type)
+                expression = layer_source.attachment_naming(field.name(), resource_type)
                 ew.setExpression(expression)
                 self.setCellWidget(row, 2, ew)
 
@@ -84,7 +83,7 @@ class ResourceNamingTableWidget(QTableWidget):
             layer_source = self.item(i, 0).data(Qt.UserRole)
             field_name = self.item(i, 1).text()
             new_expression = self.cellWidget(i, 2).currentText()
-            layer_source.set_resource_naming(field_name, new_expression)
+            layer_source.set_attachment_naming(field_name, new_expression)
 
             if should_apply:
                 layer_source.apply()
