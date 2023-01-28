@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- QFieldSyncDialog
+ ResourceNamingWidget
                                  A QGIS plugin
  Sync your projects to QField on android
                              -------------------
@@ -27,9 +27,9 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
 
 
-class PhotoNamingTableWidget(QTableWidget):
+class ResourceNamingTableWidget(QTableWidget):
     def __init__(self):
-        super(PhotoNamingTableWidget, self).__init__()
+        super(ResourceNamingTableWidget, self).__init__()
 
         self.setColumnCount(3)
         self.setHorizontalHeaderLabels(
@@ -65,7 +65,12 @@ class PhotoNamingTableWidget(QTableWidget):
                 self.setItem(row, 1, item)
                 ew = QgsFieldExpressionWidget()
                 ew.setLayer(layer)
-                expression = layer_source.photo_naming(field.name())
+                resource_type = (
+                    ews.config()["DocumentViewer"]
+                    if "DocumentViewer" in ews.config()
+                    else 0
+                )
+                expression = layer_source.resource_naming(field.name(), resource_type)
                 ew.setExpression(expression)
                 self.setCellWidget(row, 2, ew)
 
@@ -79,7 +84,7 @@ class PhotoNamingTableWidget(QTableWidget):
             layer_source = self.item(i, 0).data(Qt.UserRole)
             field_name = self.item(i, 1).text()
             new_expression = self.cellWidget(i, 2).currentText()
-            layer_source.set_photo_naming(field_name, new_expression)
+            layer_source.set_resource_naming(field_name, new_expression)
 
             if should_apply:
                 layer_source.apply()

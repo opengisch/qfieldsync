@@ -24,13 +24,14 @@ import os
 
 from qgis.core import QgsMapLayer, QgsProject
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
+from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.message_bus import message_bus
-from qfieldsync.gui.photo_naming_widget import PhotoNamingTableWidget
 from qfieldsync.gui.relationship_configuration_widget import (
     RelationshipConfigurationTableWidget,
 )
+from qfieldsync.gui.resource_naming_widget import ResourceNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.libqfieldsync.layer import LayerSource
 
@@ -74,14 +75,23 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.isGeometryLockedCheckBox.setEnabled(self.layer_source.can_lock_geometry)
         self.isGeometryLockedCheckBox.setChecked(self.layer_source.is_geometry_locked)
 
-        self.photoNamingTable = PhotoNamingTableWidget()
-        self.photoNamingTable.addLayerFields(self.layer_source)
-        self.photoNamingTable.setLayerColumnHidden(True)
+        self.resourceNamingTable = ResourceNamingTableWidget()
+        self.resourceNamingTable.addLayerFields(self.layer_source)
+        self.resourceNamingTable.setLayerColumnHidden(True)
 
-        # append the photo naming table to the layout
+        # append the resource naming table to the layout
         if layer.type() == QgsMapLayer.VectorLayer:
-            self.layout().insertRow(-1, self.tr("Photo naming"), self.photoNamingTable)
-            self.photoNamingTable.setEnabled(self.photoNamingTable.rowCount() > 0)
+            self.layout().insertRow(
+                -1, self.tr("Attachment\nnaming"), self.resourceNamingTable
+            )
+            tip = QLabel(
+                self.tr(
+                    "In your expressions, use #~filename~# and #~extension~# tags to refer to attachement file name and extension."
+                )
+            )
+            tip.setWordWrap(True)
+            self.layout().insertRow(-1, "", tip)
+            self.resourceNamingTable.setEnabled(self.resourceNamingTable.rowCount() > 0)
 
         self.relationshipConfigurationTable = RelationshipConfigurationTableWidget()
         self.relationshipConfigurationTable.addLayerFields(self.layer_source)
@@ -91,7 +101,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         if layer.type() == QgsMapLayer.VectorLayer:
             self.layout().insertRow(
                 -1,
-                self.tr("Relationship configuration"),
+                self.tr("Relationship\nconfiguration"),
                 self.relationshipConfigurationTable,
             )
             self.relationshipConfigurationTable.setEnabled(
@@ -110,15 +120,15 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.cableLayerActionComboBox.currentIndex()
         )
         self.layer_source.is_geometry_locked = self.isGeometryLockedCheckBox.isChecked()
-        self.photoNamingTable.syncLayerSourceValues()
+        self.resourceNamingTable.syncLayerSourceValues()
         self.relationshipConfigurationTable.syncLayerSourceValues()
 
-        # apply always the photo_namings (to store default values on first apply as well)
+        # apply always the resource naming (to store default values on first apply as well)
         if (
             self.layer_source.action != old_layer_action
             or self.layer_source.cloud_action != old_layer_cloud_action
             or self.layer_source.is_geometry_locked != old_is_geometry_locked
-            or self.photoNamingTable.rowCount() > 0
+            or self.resourceNamingTable.rowCount() > 0
             or self.relationshipConfigurationTable.rowCount() > 0
         ):
             self.layer_source.apply()
