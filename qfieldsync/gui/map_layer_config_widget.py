@@ -28,10 +28,10 @@ from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.message_bus import message_bus
+from qfieldsync.gui.attachment_naming_widget import AttachmentNamingTableWidget
 from qfieldsync.gui.relationship_configuration_widget import (
     RelationshipConfigurationTableWidget,
 )
-from qfieldsync.gui.attachment_naming_widget import AttachmentNamingTableWidget
 from qfieldsync.gui.utils import set_available_actions
 from qfieldsync.libqfieldsync.layer import LayerSource
 
@@ -86,12 +86,14 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             )
             tip = QLabel(
                 self.tr(
-                    "In your expressions, use #~filename~# and #~extension~# tags to refer to attachement file name and extension."
+                    "In your expressions, use {filename} and {extension} tags to refer to attachment filenames and extensions."
                 )
             )
             tip.setWordWrap(True)
             self.layout().insertRow(-1, "", tip)
-            self.attachmentNamingTable.setEnabled(self.attachmentNamingTable.rowCount() > 0)
+            self.attachmentNamingTable.setEnabled(
+                self.attachmentNamingTable.rowCount() > 0
+            )
 
         self.relationshipConfigurationTable = RelationshipConfigurationTableWidget()
         self.relationshipConfigurationTable.addLayerFields(self.layer_source)
