@@ -69,7 +69,10 @@ class AttachmentNamingTableWidget(QTableWidget):
                     if "DocumentViewer" in ews.config()
                     else 0
                 )
-                expression = layer_source.attachment_naming(field.name(), resource_type)
+                expression = layer_source.attachment_naming(
+                    field.name(),
+                    layer_source.get_attachment_type_by_int_value(resource_type),
+                )
                 ew.setExpression(expression)
                 self.setCellWidget(row, 2, ew)
 
