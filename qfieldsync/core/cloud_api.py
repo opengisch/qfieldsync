@@ -401,7 +401,9 @@ class CloudNetworkAccessManager(QObject):
                 b"Authorization", "Token {}".format(self._token).encode("utf-8")
             )
 
-        reply = self._nam.get(request)
+        with disable_nam_timeout(self._nam):
+            reply = self._nam.get(request)
+
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -421,7 +423,9 @@ class CloudNetworkAccessManager(QObject):
             QNetworkRequest.UserVerifiedRedirectPolicy,
         )
 
-        reply = self._nam.get(request)
+        with disable_nam_timeout(self._nam):
+            reply = self._nam.get(request)
+
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -464,7 +468,10 @@ class CloudNetworkAccessManager(QObject):
             )
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
-        reply = self._nam.post(request, payload_bytes)
+
+        with disable_nam_timeout(self._nam):
+            reply = self._nam.post(request, payload_bytes)
+
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -487,7 +494,10 @@ class CloudNetworkAccessManager(QObject):
             )
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
-        reply = self._nam.put(request, payload_bytes)
+
+        with disable_nam_timeout(self._nam):
+            reply = self._nam.put(request, payload_bytes)
+
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -511,7 +521,9 @@ class CloudNetworkAccessManager(QObject):
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
 
-        reply = self._nam.sendCustomRequest(request, b"PATCH", payload_bytes)
+        with disable_nam_timeout(self._nam):
+            reply = self._nam.sendCustomRequest(request, b"PATCH", payload_bytes)
+
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
@@ -531,7 +543,9 @@ class CloudNetworkAccessManager(QObject):
                 b"Authorization", "Token {}".format(self._token).encode("utf-8")
             )
 
-        reply = self._nam.deleteResource(request)
+        with disable_nam_timeout(self._nam):
+            reply = self._nam.deleteResource(request)
+
         reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
         reply.setParent(self)
 
