@@ -65,7 +65,10 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
             lambda: self.start_synchronization()
         )
-        import_dir = self.preferences.value("importDirectoryProject")
+        try:
+            import_dir = self.preferences.value("importDirectoryProject")
+        except ValueError:
+            import_dir = None
         if not import_dir:
             import_dir = self.preferences.value("importDirectory")
 
