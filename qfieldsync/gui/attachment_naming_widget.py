@@ -49,32 +49,21 @@ class AttachmentNamingTableWidget(QTableWidget):
         if layer.type() != QgsMapLayer.VectorLayer:
             return
 
-        for i, field in enumerate(layer.fields()):
+        for field_name in layer_source.get_attachment_fields().keys():
             row = self.rowCount()
-            ews = layer.editorWidgetSetup(i)
 
-            if ews.type() == "ExternalResource":
-                self.insertRow(row)
-                item = QTableWidgetItem(layer.name())
-                item.setData(Qt.UserRole, layer_source)
-                item.setFlags(Qt.ItemIsEnabled)
-                self.setItem(row, 0, item)
-                item = QTableWidgetItem(field.name())
-                item.setFlags(Qt.ItemIsEnabled)
-                self.setItem(row, 1, item)
-                ew = QgsFieldExpressionWidget()
-                ew.setLayer(layer)
-                resource_type = (
-                    ews.config()["DocumentViewer"]
-                    if "DocumentViewer" in ews.config()
-                    else 0
-                )
-                expression = layer_source.attachment_naming(
-                    field.name(),
-                    layer_source.get_attachment_type_by_int_value(resource_type),
-                )
-                ew.setExpression(expression)
-                self.setCellWidget(row, 2, ew)
+            self.insertRow(row)
+            item = QTableWidgetItem(layer.name())
+            item.setData(Qt.UserRole, layer_source)
+            item.setFlags(Qt.ItemIsEnabled)
+            self.setItem(row, 0, item)
+            item = QTableWidgetItem(field_name)
+            item.setFlags(Qt.ItemIsEnabled)
+            self.setItem(row, 1, item)
+            ew = QgsFieldExpressionWidget()
+            ew.setLayer(layer)
+            ew.setExpression(layer_source.attachment_naming(field_name))
+            self.setCellWidget(row, 2, ew)
 
         self.resizeColumnsToContents()
 
