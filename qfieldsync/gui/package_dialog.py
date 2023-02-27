@@ -29,6 +29,7 @@ from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessag
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
 from qfieldsync.libqfieldsync.project_checker import ProjectChecker
@@ -52,6 +53,7 @@ class PackageDialog(QDialog, DialogUi):
         self.offline_editing = offline_editing
         self.project = project
         self.qfield_preferences = Preferences()
+        self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
         self.project_lbl.setText(get_project_title(self.project))
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
@@ -100,6 +102,11 @@ class PackageDialog(QDialog, DialogUi):
         self.nextButton.setVisible(False)
         self.button_box.setVisible(False)
 
+        self.advancedOptionsGroupBox.layout().addWidget(self.dirsToCopyWidget)
+
+        self.dirsToCopyWidget.set_path(QgsProject().instance().homePath())
+        self.dirsToCopyWidget.refresh_tree()
+
         feedback = None
         if os.path.exists(self.project.fileName()):
             feedback = self.project_checker.check()
@@ -140,6 +147,7 @@ class PackageDialog(QDialog, DialogUi):
         )
 
         self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
+        self.dirsToCopyWidget.save_settings()
 
         offline_convertor = OfflineConverter(
             self.project,
@@ -148,6 +156,7 @@ class PackageDialog(QDialog, DialogUi):
             area_of_interest_crs,
             self.qfield_preferences.value("attachmentDirs"),
             self.offline_editing,
+            dirs_to_copy=self.dirsToCopyWidget.dirs_to_copy(),
         )
 
         # progress connections
