@@ -88,7 +88,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
-          sudo pip install qgis-plugin-ci
+          sudo pip install --pre qgis-plugin-ci
       - name: Release
         run: |
           RELEASE_VERSION=${GITHUB_REF##*/}
