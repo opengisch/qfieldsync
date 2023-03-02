@@ -116,7 +116,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
-          sudo pip install qgis-plugin-ci
+          sudo pip install --pre qgis-plugin-ci
       - name: Release
         run: |
           qgis-plugin-ci package ${{ github.event.inputs.ref }} --transifex-token ${TX_TOKEN}
@@ -137,7 +137,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install dependencies
-        run: sudo pip install qgis-plugin-ci
+        run: sudo pip install --pre qgis-plugin-ci
       - name: 🌍 Push translations
         run: |
           qgis-plugin-ci push-translation ${TX_TOKEN}
