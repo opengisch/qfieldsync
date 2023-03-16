@@ -568,6 +568,9 @@ class CloudNetworkAccessManager(QObject):
 
         multi_part = QHttpMultiPart(QHttpMultiPart.FormDataType)
         multi_part.setParent(self)
+        multi_part.setBoundary(
+            b"boundary_.oOo.QFieldRoxAndYouKnowItDXMtCoIPQV84CAX3rDyv83393"
+        )
 
         # most of the time there is no other payload
         if payload is not None:
