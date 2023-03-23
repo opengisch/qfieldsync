@@ -25,7 +25,13 @@ from typing import Callable
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QWidget
+from qgis.PyQt.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QMainWindow,
+    QWidget,
+)
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core import Preferences
@@ -113,6 +119,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.hide()
 
     def on_rejected(self) -> None:
+        QApplication.restoreOverrideCursor()
         if self.parent():
             self.parent().setEnabled(True)
             self.setEnabled(True)
@@ -148,6 +155,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.show()
 
     def on_login_button_clicked(self) -> None:
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
 
@@ -163,6 +172,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.preferences.set_value("qfieldCloudRememberMe", remember_me)
 
     def on_login_finished(self) -> None:
+        QApplication.restoreOverrideCursor()
         if self.parent():
             self.parent().setEnabled(True)
             self.setEnabled(True)
