@@ -25,7 +25,13 @@ from typing import Callable
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QWidget, QApplication
+from qgis.PyQt.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QMainWindow,
+    QWidget,
+)
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core import Preferences
