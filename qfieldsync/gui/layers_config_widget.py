@@ -270,8 +270,11 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         if msg != "layer_config_saved":
             return
 
-        for layer_source in self.layer_sources:
-            layer_source.read_layer()
+        for layer_source in self.layer_sources.copy():
+            try:
+                layer_source.read_layer()
+            except RuntimeError:
+                self.layer_sources.remove(layer_source)
 
         # quite ugly workaround, but this method sometimes operates on deleted objects,
         # so we need to make sure we don't get exceptions
