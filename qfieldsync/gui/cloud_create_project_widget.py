@@ -5,7 +5,7 @@
                                  A QGIS plugin
  Sync your projects to QField on android
                              -------------------
-        begin                : 2021-057-22
+        begin                : 2021-07-22
         git sha              : $Format:%H$
         copyright            : (C) 2015 by OPENGIS.ch
         email                : info@opengis.ch
