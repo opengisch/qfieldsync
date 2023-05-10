@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- QFieldCloudCreateProjectWidget
+ QFieldSync
                                  A QGIS plugin
  Sync your projects to QField on android
                              -------------------
