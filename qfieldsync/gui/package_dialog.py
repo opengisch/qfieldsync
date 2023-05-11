@@ -29,6 +29,7 @@ from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessag
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
@@ -114,7 +115,8 @@ class PackageDialog(QDialog, DialogUi):
         if feedback and feedback.count > 0:
             has_errors = len(feedback.error_feedbacks) > 0
 
-            self.feedbackText.setText(str(feedback))
+            feedback_table = CheckerFeedbackTable(feedback)
+            self.feedbackTableWrapperLayout.addWidget(feedback_table)
             self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
             self.nextButton.setVisible(True)
             self.nextButton.setEnabled(not has_errors)

@@ -74,7 +74,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="feedbackText"/>
+        <layout class="QVBoxLayout" name="feedbackTableWrapperLayout"/>
        </item>
        <item>
         <spacer name="verticalSpacer">

@@ -104,11 +104,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="feedbackText">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="feedbackTableWrapperLayout"/>
        </item>
        <item>
         <spacer name="verticalSpacer">
