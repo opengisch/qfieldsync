@@ -791,7 +791,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.launch()
 
     def on_project_delete_button_clicked(self) -> None:
-        username = self.usernameLineEdit.text()
+        username = self.network_manager.user_details["username"]
         project_name = self.current_cloud_project.name
         expected_input = f"{username}/{project_name}"
 
