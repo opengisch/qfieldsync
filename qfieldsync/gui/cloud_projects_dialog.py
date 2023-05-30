@@ -54,8 +54,8 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
-    QMenu,
     QInputDialog,
+    QMenu,
     QMessageBox,
     QPushButton,
     QTableWidgetItem,
@@ -792,28 +792,32 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_project_delete_button_clicked(self) -> None:
         def ask(remark: Optional[str] = None):
-            remark = self.tr(remark or "Are you sure you want to delete this QFieldCloud project?")
+            remark = self.tr(
+                remark or "Are you sure you want to delete this QFieldCloud project?"
+            )
             return QInputDialog().getText(
-                self, 
+                self,
                 self.tr("Delete QFieldCloud project"),
-                self.tr('{} To confirm deletion please type "<b>{}</b>". NB: Your local files will not be deleted.'
-                ).format(remark, self.current_cloud_project.name)
+                self.tr(
+                    '{} To confirm deletion please type "<b>{}</b>". NB: Your local files will not be deleted.'
+                ).format(remark, self.current_cloud_project.name),
             )
 
         ok, text = ask()
-        
+
         if ok:
             clean_text = text.strip()
             while clean_text != self.current_cloud_project.name:
-                updated_ok, updated_text = ask("<p style='color:red'>Incorrect project name!</p>")
+                updated_ok, updated_text = ask(
+                    "<p style='color:red'>Incorrect project name!</p>"
+                )
                 if not updated_ok:
                     return
                 clean_text = updated_text.strip()
-        
+
             self.projectsStack.setEnabled(False)
             reply = self.network_manager.delete_project(self.current_cloud_project.id)
             reply.finished.connect(lambda: self.on_delete_project_reply_finished(reply))
-
 
     def on_delete_project_reply_finished(self, reply: QNetworkReply) -> None:
         self.projectsStack.setEnabled(True)
