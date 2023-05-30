@@ -805,7 +805,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if ok:
             clean_text = text.strip()
             while clean_text != self.current_cloud_project.name:
-                updated_ok, updated_text = ask("Incorrect project name.")
+                updated_ok, updated_text = ask("<p style='color:red'>Incorrect project name!</p>")
                 if not updated_ok:
                     return
                 clean_text = updated_text.strip()
