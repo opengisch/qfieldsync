@@ -803,12 +803,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 ).format(remark, self.current_cloud_project.name),
             )
 
-        ok, text = ask()
+        text, ok = ask()
 
         if ok:
             clean_text = text.strip()
             while clean_text != self.current_cloud_project.name:
-                updated_ok, updated_text = ask(
+                updated_text, updated_ok = ask(
                     "<p style='color:red'>Incorrect project name!</p>"
                 )
                 if not updated_ok:
