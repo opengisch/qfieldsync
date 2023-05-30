@@ -793,13 +793,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_project_delete_button_clicked(self) -> None:
         def ask(remark: Optional[str] = None):
             remark = self.tr(
-                remark or "Are you sure you want to delete this QFieldCloud project?"
+                remark
+                or "<p><b>Are you sure you want to delete this QFieldCloud project?</b></p>"
             )
             return QInputDialog().getText(
                 self,
                 self.tr("Delete QFieldCloud project"),
                 self.tr(
-                    '{} To confirm deletion please type "<b>{}</b>". NB: Your local files will not be deleted.'
+                    '{} To confirm deletion please type "<em>{}</em>". NB: Your local files will not be deleted.'
                 ).format(remark, self.current_cloud_project.name),
             )
 
