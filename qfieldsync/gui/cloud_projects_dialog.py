@@ -791,18 +791,27 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.launch()
 
     def on_project_delete_button_clicked(self) -> None:
-        text, ok = QInputDialog().getText(
-            self, 
-            self.tr("Delete QFieldCloud project"),
-            self.tr(
-                'Are you sure you want to delete your QFieldCloud project? If so please type "{}". NB: Your local files will not be deleted.'
-            ).format(self.current_cloud_project.name),
-        )
+        def ask(remark: Optional[str] = None):
+            remark = remark or "Are you sure you want to delete this QFieldCloud project? If so "
+            return QInputDialog().getText(
+                self, 
+                self.tr("Delete QFieldCloud project"),
+                self.tr('{} please type "{}". NB: Your local files will not be deleted.'
+                ).format(remark, self.current_cloud_project.name)
+            )
 
-        if ok and text == self.current_cloud_project.name:
+        ok, text = ask()
+        if ok and text:
+            while text != self.current_cloud_project.name:
+                updated_ok, updated_text = ask("Incorrect project name, ")
+                if not updated_ok:
+                    return
+                text = updated_text
+        
             self.projectsStack.setEnabled(False)
             reply = self.network_manager.delete_project(self.current_cloud_project.id)
             reply.finished.connect(lambda: self.on_delete_project_reply_finished(reply))
+
 
     def on_delete_project_reply_finished(self, reply: QNetworkReply) -> None:
         self.projectsStack.setEnabled(True)
