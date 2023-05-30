@@ -791,6 +791,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.launch()
 
     def on_project_delete_button_clicked(self) -> None:
+        username = self.usernameLineEdit.text()
+        project_name = self.current_cloud_project.name
+        expected_input = f"{username}/{project_name}"
+
         def ask(remark: Optional[str] = None):
             remark = self.tr(
                 remark
@@ -801,14 +805,14 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.tr("Delete QFieldCloud project"),
                 self.tr(
                     '{} To confirm deletion please type "<em>{}</em>". NB: Your local files will not be deleted.'
-                ).format(remark, self.current_cloud_project.name),
+                ).format(remark, expected_input),
             )
 
         text, ok = ask()
 
         if ok:
             clean_text = text.strip()
-            while clean_text != self.current_cloud_project.name:
+            while clean_text != expected_input:
                 updated_text, updated_ok = ask(
                     "<p style='color:red'>Incorrect project name!</p>"
                 )
