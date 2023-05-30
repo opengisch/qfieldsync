@@ -792,21 +792,23 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_project_delete_button_clicked(self) -> None:
         def ask(remark: Optional[str] = None):
-            remark = remark or "Are you sure you want to delete this QFieldCloud project? If so "
+            remark = self.tr(remark or "Are you sure you want to delete this QFieldCloud project?")
             return QInputDialog().getText(
                 self, 
                 self.tr("Delete QFieldCloud project"),
-                self.tr('{} please type "{}". NB: Your local files will not be deleted.'
+                self.tr('{} To confirm deletion please type "<b>{}</b>". NB: Your local files will not be deleted.'
                 ).format(remark, self.current_cloud_project.name)
             )
 
         ok, text = ask()
-        if ok and text:
-            while text != self.current_cloud_project.name:
-                updated_ok, updated_text = ask("Incorrect project name, ")
+        
+        if ok:
+            clean_text = text.strip()
+            while clean_text != self.current_cloud_project.name:
+                updated_ok, updated_text = ask("Incorrect project name.")
                 if not updated_ok:
                     return
-                text = updated_text
+                clean_text = updated_text.strip()
         
             self.projectsStack.setEnabled(False)
             reply = self.network_manager.delete_project(self.current_cloud_project.id)
