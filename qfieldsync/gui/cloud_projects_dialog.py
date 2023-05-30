@@ -795,26 +795,28 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         project_name = self.current_cloud_project.name
         expected_input = f"{username}/{project_name}"
 
-        def ask(maybe_warning: Optional[str] = ""):
+        def ask(maybe_warning: str = ""):
             delete_msg = self.tr("Delete QFieldCloud project")
             are_you_sure = self.tr(
                 "Are you sure you want to delete this QFieldCloud project?"
             )
-            to_do = self.tr("To confirm deletion, please type")
-            nb = self.tr("Your local files will not be deleted")
+            confirm_with = self.tr("To confirm deletion, please type")
+            reassuring_remark = self.tr(
+                "The project will be permanently deleted from QFieldCloud, your local copy will remain unaffected"
+            )
             return QInputDialog().getText(
                 self,
                 delete_msg,
-                f"<p><b>{are_you_sure}</b></p>{maybe_warning}<p>{to_do} <em>{expected_input}</em>. NB: {nb}.</p>",
+                f"<p><b>{are_you_sure}</b></p>{maybe_warning}<p>{confirm_with} <em>{expected_input}</em>. {reassuring_remark}.</p>",
             )
 
         text, ok = ask()
 
         if ok:
             clean_text = text.strip()
-            warning = self.tr("Incorrect project name!")
+            error = self.tr("Incorrect project name!")
             while clean_text != expected_input:
-                updated_text, updated_ok = ask(f"<p style='color:red'>{warning}</p>")
+                updated_text, updated_ok = ask(f"<p style='color:red'>{error}</p>")
                 if not updated_ok:
                     return
                 clean_text = updated_text.strip()
