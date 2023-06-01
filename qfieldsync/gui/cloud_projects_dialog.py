@@ -54,6 +54,7 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
+    QInputDialog,
     QMenu,
     QMessageBox,
     QPushButton,
@@ -790,21 +791,39 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.launch()
 
     def on_project_delete_button_clicked(self) -> None:
-        button_pressed = QMessageBox.question(
-            self,
-            self.tr("Delete QFieldCloud project"),
-            self.tr(
-                'Are you sure you want to delete the QFieldCloud project "{}"? Nevertheless, your local files will remain.'
-            ).format(self.current_cloud_project.name),
-        )
+        username = self.network_manager.user_details["username"]
+        project_name = self.current_cloud_project.name
+        expected_input = f"{username}/{project_name}"
 
-        if button_pressed != QMessageBox.Yes:
-            return
+        def ask(maybe_warning: str = ""):
+            delete_msg = self.tr("Delete QFieldCloud project")
+            are_you_sure = self.tr(
+                "Are you sure you want to delete this QFieldCloud project?"
+            )
+            confirm_with = self.tr("To confirm deletion, please type")
+            reassuring_remark = self.tr(
+                "The project will be permanently deleted from QFieldCloud, your local copy will remain unaffected"
+            )
+            return QInputDialog().getText(
+                self,
+                delete_msg,
+                f"<p><b>{are_you_sure}</b></p>{maybe_warning}<p>{confirm_with} <em>{expected_input}</em>. {reassuring_remark}.</p>",
+            )
 
-        self.projectsStack.setEnabled(False)
+        text, ok = ask()
 
-        reply = self.network_manager.delete_project(self.current_cloud_project.id)
-        reply.finished.connect(lambda: self.on_delete_project_reply_finished(reply))
+        if ok:
+            clean_text = text.strip()
+            error = self.tr("Incorrect project name!")
+            while clean_text != expected_input:
+                updated_text, updated_ok = ask(f"<p style='color:red'>{error}</p>")
+                if not updated_ok:
+                    return
+                clean_text = updated_text.strip()
+
+            self.projectsStack.setEnabled(False)
+            reply = self.network_manager.delete_project(self.current_cloud_project.id)
+            reply.finished.connect(lambda: self.on_delete_project_reply_finished(reply))
 
     def on_delete_project_reply_finished(self, reply: QNetworkReply) -> None:
         self.projectsStack.setEnabled(True)
