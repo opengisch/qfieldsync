@@ -20,8 +20,10 @@
 """
 
 
+import unittest
+
 from qgis.core import QgsOfflineEditing, QgsProject
-from qgis.testing import start_app, unittest
+from qgis.testing import start_app
 from qgis.testing.mocked import get_iface
 
 from qfieldsync.gui.package_dialog import PackageDialog

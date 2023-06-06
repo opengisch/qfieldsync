@@ -22,9 +22,10 @@
 import os
 import shutil
 import tempfile
+import unittest
 
 from qgis.core import Qgis, QgsOfflineEditing, QgsProject
-from qgis.testing import start_app, unittest
+from qgis.testing import start_app
 from qgis.testing.mocked import get_iface
 
 from qfieldsync.libqfieldsync import OfflineConverter
