@@ -69,7 +69,7 @@ jobs:
           sudo apt install qgis
           sudo pip3 install pytest mock
 
-          xvfb-run pytest
+          xvfb-run pytest qfieldsync/tests
 
   release:
     runs-on: ubuntu-22.04

@@ -19,5 +19,5 @@
 set -e
 
 pushd /usr/src
-xvfb-run pytest
+xvfb-run pytest qfieldsync/tests
 popd
