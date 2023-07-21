@@ -48,6 +48,7 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
+from qfieldsync.libqfieldsync.offline_converter import ExportType
 from qfieldsync.libqfieldsync.project_checker import ProjectChecker
 from qfieldsync.libqfieldsync.utils.file_utils import get_unique_empty_dirname
 from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
@@ -216,7 +217,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         feedback = None
         if self.cloud_project and self.cloud_project.is_current_qgis_project:
             checker = ProjectChecker(QgsProject.instance())
-            feedback = checker.check()
+            feedback = checker.check(ExportType.Cloud)
 
         if feedback and feedback.count > 0:
             has_errors = len(feedback.error_feedbacks) > 0
