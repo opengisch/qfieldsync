@@ -3,7 +3,7 @@
 /***************************************************************************
  QFieldCloudCreateProjectWidget
                                  A QGIS plugin
- Sync your projects to QField on android
+ Sync your projects to QField
                              -------------------
         begin                : 2021-057-22
         git sha              : $Format:%H$
