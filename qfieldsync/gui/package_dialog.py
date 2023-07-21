@@ -3,7 +3,7 @@
 /***************************************************************************
  QFieldSyncDialog
                                  A QGIS plugin
- Sync your projects to QField on android
+ Sync your projects to QField
                              -------------------
         begin                : 2015-05-20
         git sha              : $Format:%H$

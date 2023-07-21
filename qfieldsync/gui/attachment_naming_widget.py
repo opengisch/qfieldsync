@@ -3,7 +3,7 @@
 /***************************************************************************
  AttachmentNamingTableWidget
                                  A QGIS plugin
- Sync your projects to QField on android
+ Sync your projects to QField
                              -------------------
         begin                : 2020-06-15
         git sha              : $Format:%H$

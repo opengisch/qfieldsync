@@ -3,7 +3,7 @@
 /***************************************************************************
  CloudProjectsDialog
                                  A QGIS plugin
- Sync your projects to QField on android
+ Sync your projects to QField
                              -------------------
         begin                : 2020-07-28
         git sha              : $Format:%H$
