@@ -3,7 +3,7 @@
 /***************************************************************************
  QFieldSync
                                  A QGIS plugin
- Sync your projects to QField on android
+ Sync your projects to QField
                              -------------------
         begin                : 2023-04-11
         git sha              : $Format:%H$
@@ -47,7 +47,7 @@ class CheckerFeedbackTable(QTableWidget):
 
                 # first column
                 item = QTableWidgetItem(str(feedback.level.name))
-                item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                item.setFlags(Qt.ItemIsEnabled)
                 self.setItem(row, 0, item)
 
                 # second column
@@ -57,13 +57,25 @@ class CheckerFeedbackTable(QTableWidget):
                     source = self.tr("Project")
 
                 item = QTableWidgetItem(source)
-                item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                item.setFlags(Qt.ItemIsEnabled)
                 self.setItem(row, 1, item)
 
                 # third column
+                item = QTableWidgetItem()
+                item.setFlags(Qt.ItemIsEnabled)
+                self.setItem(row, 2, item)
+
                 label = QLabel(feedback.message)
                 label.setWordWrap(True)
                 label.setMargin(5)
+                label.setTextFormat(Qt.MarkdownText)
+                label.setTextInteractionFlags(
+                    Qt.TextSelectableByMouse
+                    | Qt.TextSelectableByKeyboard
+                    | Qt.LinksAccessibleByMouse
+                    | Qt.LinksAccessibleByKeyboard
+                )
+                label.setOpenExternalLinks(True)
                 # label.setTextInteractionFlags(Qt.TextSelectableByMouse)
                 self.setCellWidget(row, 2, label)
 
