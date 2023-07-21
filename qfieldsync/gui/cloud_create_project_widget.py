@@ -127,6 +127,10 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             )
         )
 
+        self.projectOwnerRefreshButton.clicked.connect(
+            lambda: self.on_project_owner_refresh_button_click()
+        )
+
     def restart(self):
         self.stackedWidget.setCurrentWidget(self.selectTypePage)
 
@@ -216,7 +220,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         )
         reply = self.network_manager.create_project(
             self.get_cloud_project_name(),
-            self.network_manager.auth().config("username"),
+            self.projectOwnerComboBox.currentText(),
             description,
             True,
         )
@@ -337,6 +341,40 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         self.localDirLineEdit.setText(QDir.toNativeSeparators(dirname))
 
+    def refresh_project_owners(self):
+        self.projectOwnerComboBox.setEnabled(False)
+        self.projectOwnerComboBox.clear()
+        self.projectOwnerComboBox.addItem(
+            self.network_manager.auth().config("username")
+        )
+        self.projectOwnerRefreshButton.setEnabled(False)
+        self.projectOwnerFeedbackLabel.setVisible(False)
+
+        reply = self.network_manager.get_user_organizations(
+            self.network_manager.auth().config("username")
+        )
+        reply.finished.connect(lambda: self.on_refresh_project_owners_finished(reply))
+
+    def on_refresh_project_owners_finished(self, reply):
+        items = [
+            self.network_manager.auth().config("username"),
+        ]
+        try:
+            payload = self.network_manager.json_array(reply)
+
+            for org in payload:
+                items.append(org["username"])
+        except CloudException:
+            self.projectOwnerFeedbackLabel.setVisible(True)
+            self.projectOwnerFeedbackLabel.setText(
+                self.tr("Failed to obtain the potential project owners.")
+            )
+
+        self.projectOwnerComboBox.clear()
+        self.projectOwnerComboBox.addItems(items)
+        self.projectOwnerComboBox.setEnabled(True)
+        self.projectOwnerRefreshButton.setEnabled(True)
+
     def on_update_total_progressbar(self, current, layer_count, message):
         self.convertProgressBar.setMaximum(layer_count)
         self.convertProgressBar.setValue(current)
@@ -366,6 +404,8 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.projectNameLineEdit.setText(project_name)
         self.projectDescriptionTextEdit.setText(self.project.metadata().abstract())
 
+        self.refresh_project_owners()
+
         if self.cloudifyRadioButton.isChecked():
             project_filename = (
                 project_name.lower()
@@ -385,6 +425,9 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
                 self.set_dirname(str(Path(self.project.fileName()).parent))
 
         self.update_info_visibility()
+
+    def on_project_owner_refresh_button_click(self):
+        self.refresh_project_owners()
 
     def on_back_button_clicked(self):
         self.stackedWidget.setCurrentWidget(self.selectTypePage)
