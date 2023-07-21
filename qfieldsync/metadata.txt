@@ -24,7 +24,7 @@ changelog=
     Check out the complete changelog on: https://github.com/opengisch/qfieldsync/releases
 
 # Tags are comma separated with spaces allowed
-tags=QField, Android, Synchronization, Offline, qfieldsync
+tags=QField, Android, iOS, Windows, Linux, mobile, smartphone, tablet, QFieldCloud, cloud, fieldwork, GNSS, GPS, sensors, Synchronization, Offline, qfieldsync
 
 homepage=https://docs.qfield.org/get-started/
 tracker=https://github.com/opengisch/QFieldSync/issues
