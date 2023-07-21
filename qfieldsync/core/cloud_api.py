@@ -682,14 +682,16 @@ class CloudNetworkAccessManager(QObject):
 
         error = self.user_details.get("error")
         if self._login_error:
-            if self._login_error.httpCode is None:
+            if self._login_error.httpCode is None or (
+                self._login_error.httpCode >= 400 and self._login_error.httpCode < 500
+            ):
                 error = str(self._login_error)
             elif self._login_error.httpCode >= 500:
                 error = self.tr("Server error {}").format(self._login_error.httpCode)
-            else:
-                error = str(error)
 
-        error = strip_html(error).strip()
+        if error:
+            error = strip_html(error).strip()
+
         html = '<a href="https://app.qfield.cloud/accounts/password/reset/">{}?</a>'.format(
             self.tr("Forgot password")
         )
