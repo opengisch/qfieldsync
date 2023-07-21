@@ -936,8 +936,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             reply = self.network_manager.update_project(
                 self.current_cloud_project.id,
-                self.current_cloud_project.name,
-                self.current_cloud_project.description,
+                cloud_project_data["name"],
+                cloud_project_data["description"],
             )
             reply.finished.connect(lambda: self.on_update_project_finished(reply))
 
