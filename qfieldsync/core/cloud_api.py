@@ -680,23 +680,24 @@ class CloudNetworkAccessManager(QObject):
         if self.has_token():
             return ""
 
-        error = self.user_details.get("error")
+        error_str = ""
         if self._login_error:
-            if self._login_error.httpCode is None:
-                error = str(self._login_error)
-            elif self._login_error.httpCode >= 500:
-                error = self.tr("Server error {}").format(self._login_error.httpCode)
-            else:
-                error = str(error)
+            http_code = self._login_error.httpCode
+            if http_code and http_code >= 500:
+                error_str = self.tr("Server error {}").format(http_code)
+            elif http_code is None or (http_code >= 400 and http_code < 500):
+                error_str = str(self._login_error)
+        
+        error_str = strip_html(error_str).strip()
 
-        error = strip_html(error).strip()
+        if not error_str:
+            error_str = self.tr("Sign in failed.")
+
         html = '<a href="https://app.qfield.cloud/accounts/password/reset/">{}?</a>'.format(
             self.tr("Forgot password")
         )
-        if error:
-            return self.tr("Sign in failed: {}. {}").format(str(error), html)
-        else:
-            return self.tr("Sign in failed. {}").format(html)
+
+        return self.tr("{}. {}").format(error_str, html)
 
     def _clear_cloud_cookies(self, url: QUrl) -> None:
         """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
