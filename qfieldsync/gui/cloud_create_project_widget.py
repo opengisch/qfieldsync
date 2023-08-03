@@ -25,10 +25,10 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import QDir, QRegularExpression, Qt, QTimer, pyqtSignal
-from qgis.PyQt.QtGui import QIcon, QRegularExpressionValidator
+from qgis.PyQt.QtCore import QDir, QRegularExpression, Qt, QTimer, QUrl, pyqtSignal
+from qgis.PyQt.QtGui import QDesktopServices, QIcon, QRegularExpressionValidator
 from qgis.PyQt.QtWidgets import (
     QAction,
     QApplication,
@@ -99,8 +99,10 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.nextButton.clicked.connect(self.on_next_button_clicked)
         self.backButton.clicked.connect(self.on_back_button_clicked)
         self.createButton.clicked.connect(self.on_create_button_clicked)
-        self.dirnameButton.clicked.connect(self.on_dirname_button_clicked)
-        self.dirnameLineEdit.textChanged.connect(self.on_dirname_line_edit_text_changed)
+        self.localDirButton.clicked.connect(self.on_local_dir_button_clicked)
+        self.localDirLineEdit.textChanged.connect(
+            self.on_dirname_line_edit_text_changed
+        )
 
         self.use_current_project_directory_action = QAction(
             QIcon(), self.tr("Use Current Project Directory")
@@ -108,14 +110,23 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.use_current_project_directory_action.triggered.connect(
             self.on_use_current_project_directory_action_triggered
         )
-        self.dirnameButton.setMenu(QMenu())
-        self.dirnameButton.setPopupMode(QToolButton.MenuButtonPopup)
-        self.dirnameButton.menu().addAction(self.use_current_project_directory_action)
+        self.localDirButton.setMenu(QMenu())
+        self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
+        self.localDirButton.menu().addAction(self.use_current_project_directory_action)
+
+        self.localDirOpenButton.clicked.connect(self.on_local_dir_open_button_clicked)
+        self.localDirOpenButton.setIcon(
+            QgsApplication.getThemeIcon("/mActionFileOpen.svg")
+        )
 
         self.projectNameLineEdit.setValidator(
             QRegularExpressionValidator(
                 QRegularExpression("^[a-zA-Z][-a-zA-Z0-9_]{2,}$")
             )
+        )
+
+        self.projectOwnerRefreshButton.clicked.connect(
+            lambda: self.on_project_owner_refresh_button_click()
         )
 
     def restart(self):
@@ -142,7 +153,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
                 )
                 return
 
-        if get_qgis_files_within_dir(self.dirnameLineEdit.text()):
+        if get_qgis_files_within_dir(self.localDirLineEdit.text()):
             QMessageBox.warning(
                 None,
                 self.tr("Warning"),
@@ -163,7 +174,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.project.setTitle(self.get_cloud_project_name())
             self.project.setDirty()
 
-        cloud_convertor = CloudConverter(self.project, self.dirnameLineEdit.text())
+        cloud_convertor = CloudConverter(self.project, self.localDirLineEdit.text())
 
         cloud_convertor.warning.connect(self.on_show_warning)
         cloud_convertor.total_progress_updated.connect(self.on_update_total_progressbar)
@@ -207,7 +218,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         )
         reply = self.network_manager.create_project(
             self.get_cloud_project_name(),
-            self.network_manager.auth().config("username"),
+            self.projectOwnerComboBox.currentText(),
             description,
             True,
         )
@@ -226,7 +237,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             return
         # save `local_dir` configuration permanently, `CloudProject` constructor does this for free
         cloud_project = CloudProject(
-            {**payload, "local_dir": self.dirnameLineEdit.text()}
+            {**payload, "local_dir": self.localDirLineEdit.text()}
         )
 
         if self.createCloudRadioButton.isChecked():
@@ -314,19 +325,53 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         else:
             raise NotImplementedError("Unknown create new button radio.")
 
-        self.dirnameFeedbackLabel.setText(feedback_msg)
+        self.localDirFeedbackLabel.setText(feedback_msg)
 
         if feedback == LocalDirFeedback.Error:
-            self.dirnameFeedbackLabel.setStyleSheet("color: red;")
+            self.localDirFeedbackLabel.setStyleSheet("color: red;")
             self.createButton.setEnabled(False)
         elif feedback == LocalDirFeedback.Warning:
-            self.dirnameFeedbackLabel.setStyleSheet("color: orange;")
+            self.localDirFeedbackLabel.setStyleSheet("color: orange;")
             self.createButton.setEnabled(True)
         else:
-            self.dirnameFeedbackLabel.setStyleSheet("color: green;")
+            self.localDirFeedbackLabel.setStyleSheet("color: green;")
             self.createButton.setEnabled(True)
 
-        self.dirnameLineEdit.setText(QDir.toNativeSeparators(dirname))
+        self.localDirLineEdit.setText(QDir.toNativeSeparators(dirname))
+
+    def refresh_project_owners(self):
+        self.projectOwnerComboBox.setEnabled(False)
+        self.projectOwnerComboBox.clear()
+        self.projectOwnerComboBox.addItem(
+            self.network_manager.auth().config("username")
+        )
+        self.projectOwnerRefreshButton.setEnabled(False)
+        self.projectOwnerFeedbackLabel.setVisible(False)
+
+        reply = self.network_manager.get_user_organizations(
+            self.network_manager.auth().config("username")
+        )
+        reply.finished.connect(lambda: self.on_refresh_project_owners_finished(reply))
+
+    def on_refresh_project_owners_finished(self, reply):
+        items = [
+            self.network_manager.auth().config("username"),
+        ]
+        try:
+            payload = self.network_manager.json_array(reply)
+
+            for org in payload:
+                items.append(org["username"])
+        except CloudException:
+            self.projectOwnerFeedbackLabel.setVisible(True)
+            self.projectOwnerFeedbackLabel.setText(
+                self.tr("Failed to obtain the potential project owners.")
+            )
+
+        self.projectOwnerComboBox.clear()
+        self.projectOwnerComboBox.addItems(items)
+        self.projectOwnerComboBox.setEnabled(True)
+        self.projectOwnerRefreshButton.setEnabled(True)
 
     def on_update_total_progressbar(self, current, layer_count, message):
         self.convertProgressBar.setMaximum(layer_count)
@@ -357,6 +402,8 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.projectNameLineEdit.setText(project_name)
         self.projectDescriptionTextEdit.setText(self.project.metadata().abstract())
 
+        self.refresh_project_owners()
+
         if self.cloudifyRadioButton.isChecked():
             project_filename = (
                 project_name.lower()
@@ -377,6 +424,9 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         self.update_info_visibility()
 
+    def on_project_owner_refresh_button_click(self):
+        self.refresh_project_owners()
+
     def on_back_button_clicked(self):
         self.stackedWidget.setCurrentWidget(self.selectTypePage)
 
@@ -388,15 +438,22 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.infoLabel.setText(self.createCloudInfoLabel.text())
             self.create_empty_cloud_project()
 
-    def on_dirname_button_clicked(self):
+    def on_local_dir_button_clicked(self):
         dirname = self.cloud_projects_dialog.select_local_dir()
 
         if dirname:
             self.set_dirname(dirname)
-            self.dirnameLineEdit.setText(str(Path(dirname)))
+            self.localDirLineEdit.setText(str(Path(dirname)))
 
     def on_dirname_line_edit_text_changed(self, text: str):
-        self.set_dirname(self.dirnameLineEdit.text())
+        local_dir = self.localDirLineEdit.text()
+        self.localDirOpenButton.setEnabled(bool(local_dir) and Path(local_dir).exists())
+        self.set_dirname(local_dir)
 
     def on_use_current_project_directory_action_triggered(self):
-        self.dirnameLineEdit.setText(str(Path(self.project.fileName()).parent))
+        self.localDirLineEdit.setText(str(Path(self.project.fileName()).parent))
+
+    def on_local_dir_open_button_clicked(self) -> None:
+        dirname = self.localDirLineEdit.text()
+        if dirname and Path(dirname).exists():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(dirname))
