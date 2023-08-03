@@ -155,10 +155,35 @@
           <string>Project Details</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="projectOwnerHLayout">
+            <item>
+             <widget class="QComboBox" name="projectOwnerComboBox"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="projectOwnerRefreshButton">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../resources/refresh.svg</normaloff>../resources/refresh.svg</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="projectNameLabel">
             <property name="text">
              <string>Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="projectOwnerLabel">
+            <property name="text">
+             <string>Owner</string>
             </property>
            </widget>
           </item>
@@ -182,6 +207,25 @@
             </property>
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="projectOwnerFeedbackLabel">
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: red;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
             </property>
            </widget>
           </item>
@@ -231,6 +275,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QLabel" name="localDirFeedbackLabel">
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: red;</string>
+            </property>
             <property name="text">
              <string/>
             </property>
