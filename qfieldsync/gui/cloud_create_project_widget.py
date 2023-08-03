@@ -99,7 +99,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.nextButton.clicked.connect(self.on_next_button_clicked)
         self.backButton.clicked.connect(self.on_back_button_clicked)
         self.createButton.clicked.connect(self.on_create_button_clicked)
-        self.localDirButton.clicked.connect(lambda: self.on_local_dir_button_clicked())
+        self.localDirButton.clicked.connect(self.on_local_dir_button_clicked)
         self.localDirLineEdit.textChanged.connect(
             self.on_dirname_line_edit_text_changed
         )
@@ -114,9 +114,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
         self.localDirButton.menu().addAction(self.use_current_project_directory_action)
 
-        self.localDirOpenButton.clicked.connect(
-            lambda: self.on_local_dir_open_button_clicked()
-        )
+        self.localDirOpenButton.clicked.connect(self.on_local_dir_open_button_clicked)
         self.localDirOpenButton.setIcon(
             QgsApplication.getThemeIcon("/mActionFileOpen.svg")
         )
