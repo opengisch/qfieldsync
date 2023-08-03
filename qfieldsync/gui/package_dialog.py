@@ -29,9 +29,11 @@ from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessag
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
+from qfieldsync.libqfieldsync.offline_converter import ExportType
 from qfieldsync.libqfieldsync.project_checker import ProjectChecker
 from qfieldsync.libqfieldsync.utils.file_utils import fileparts
 from qfieldsync.libqfieldsync.utils.qgis import get_project_title
@@ -109,12 +111,13 @@ class PackageDialog(QDialog, DialogUi):
 
         feedback = None
         if os.path.exists(self.project.fileName()):
-            feedback = self.project_checker.check()
+            feedback = self.project_checker.check(ExportType.Cable)
 
         if feedback and feedback.count > 0:
             has_errors = len(feedback.error_feedbacks) > 0
 
-            self.feedbackText.setText(str(feedback))
+            feedback_table = CheckerFeedbackTable(feedback)
+            self.feedbackTableWrapperLayout.addWidget(feedback_table)
             self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
             self.nextButton.setVisible(True)
             self.nextButton.setEnabled(not has_errors)
@@ -156,6 +159,7 @@ class PackageDialog(QDialog, DialogUi):
             area_of_interest_crs,
             self.qfield_preferences.value("attachmentDirs"),
             self.offline_editing,
+            ExportType.Cable,
             dirs_to_copy=self.dirsToCopyWidget.dirs_to_copy(),
         )
 
