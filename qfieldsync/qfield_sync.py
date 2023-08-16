@@ -300,6 +300,13 @@ class QFieldSync(object):
             separator_before=True,
         )
 
+        # Menu icon
+        self.get_qfield_action().setIcon(
+            QIcon(
+                os.path.join(os.path.dirname(__file__), "resources", "qfield_logo.svg")
+            )
+        )
+
         self.iface.registerMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
 
         if Qgis.QGIS_VERSION_INT >= 31500:
