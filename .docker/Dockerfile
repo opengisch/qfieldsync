@@ -8,6 +8,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements.txt /tmp/
+RUN pip3 install --upgrade pip
 RUN pip3 install -r /tmp/requirements.txt
 
 ENV LANG=C.UTF-8

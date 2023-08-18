@@ -3,7 +3,7 @@
 /***************************************************************************
  QFieldSync
                                  A QGIS plugin
- Sync your projects to QField
+ Sync your projects to QField on android
                              -------------------
         begin                : 2015-05-20
         copyright            : (C) 2015 by OPENGIS.ch
@@ -25,8 +25,16 @@
 from __future__ import absolute_import
 
 import os
+import pathlib
+import sys
 
 import qgis.utils
+
+src_dir = pathlib.Path(__file__).parent.resolve()
+
+libqfieldsync_whl = src_dir / "libqfieldsync.whl"
+if libqfieldsync_whl.exists():
+    sys.path.append(str(libqfieldsync_whl))
 
 
 # noinspection PyPep8Naming
