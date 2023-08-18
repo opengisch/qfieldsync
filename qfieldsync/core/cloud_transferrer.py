@@ -25,6 +25,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from libqfieldsync.utils.file_utils import copy_multifile
 from qgis.core import Qgis, QgsMessageLog
 from qgis.PyQt.QtCore import (
     QAbstractListModel,
@@ -38,7 +39,6 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.libqfieldsync.utils.file_utils import copy_multifile
 
 
 class CloudTransferrer(QObject):

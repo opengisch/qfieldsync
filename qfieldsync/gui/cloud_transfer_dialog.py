@@ -26,6 +26,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Callable, Dict, List
 
+from libqfieldsync.offline_converter import ExportType
+from libqfieldsync.project_checker import ProjectChecker
+from libqfieldsync.utils.file_utils import get_unique_empty_dirname
+from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QShowEvent
@@ -48,10 +52,6 @@ from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFile
 from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
-from qfieldsync.libqfieldsync.offline_converter import ExportType
-from qfieldsync.libqfieldsync.project_checker import ProjectChecker
-from qfieldsync.libqfieldsync.utils.file_utils import get_unique_empty_dirname
-from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 
 from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 

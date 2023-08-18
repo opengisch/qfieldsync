@@ -23,6 +23,14 @@
 import os
 from pathlib import Path
 
+from libqfieldsync import ProjectConfiguration
+from libqfieldsync.utils.exceptions import NoProjectFoundError
+from libqfieldsync.utils.file_utils import (
+    copy_attachments,
+    get_project_in_folder,
+    import_file_checksum,
+)
+from libqfieldsync.utils.qgis import make_temp_qgis_file, open_project
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QDir
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
@@ -30,14 +38,6 @@ from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
-from qfieldsync.libqfieldsync import ProjectConfiguration
-from qfieldsync.libqfieldsync.utils.exceptions import NoProjectFoundError
-from qfieldsync.libqfieldsync.utils.file_utils import (
-    copy_attachments,
-    get_project_in_folder,
-    import_file_checksum,
-)
-from qfieldsync.libqfieldsync.utils.qgis import make_temp_qgis_file, open_project
 from qfieldsync.utils.qgis_utils import import_checksums_of_project
 from qfieldsync.utils.qt_utils import make_folder_selector
 

@@ -26,11 +26,11 @@ from enum import IntFlag
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
+from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QDir
 
 from qfieldsync.core.preferences import Preferences
-from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 
 
 class ProjectFileCheckout(IntFlag):

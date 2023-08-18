@@ -25,6 +25,9 @@ import os
 from pathlib import Path
 from typing import Optional
 
+from libqfieldsync.layer import LayerSource
+from libqfieldsync.utils.file_utils import fileparts, get_unique_empty_dirname
+from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QDir, QRegularExpression, Qt, QTimer, QUrl, pyqtSignal
@@ -45,12 +48,6 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
-from qfieldsync.libqfieldsync.layer import LayerSource
-from qfieldsync.libqfieldsync.utils.file_utils import (
-    fileparts,
-    get_unique_empty_dirname,
-)
-from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qfieldsync.utils.cloud_utils import (
     LocalDirFeedback,
     local_dir_feedback,

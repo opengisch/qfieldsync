@@ -19,6 +19,12 @@
 """
 import os
 
+from libqfieldsync import (
+    LayerSource,
+    ProjectConfiguration,
+    ProjectProperties,
+    SyncAction,
+)
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsMapLayerProxyModel,
@@ -34,12 +40,6 @@ from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
-from qfieldsync.libqfieldsync import (
-    LayerSource,
-    ProjectConfiguration,
-    ProjectProperties,
-    SyncAction,
-)
 
 WidgetUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/project_configuration_widget.ui"),

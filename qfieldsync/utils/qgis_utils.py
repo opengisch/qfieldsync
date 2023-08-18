@@ -21,11 +21,10 @@
 
 from typing import List
 
+from libqfieldsync import ProjectConfiguration
+from libqfieldsync.utils.file_utils import get_project_in_folder
+from libqfieldsync.utils.qgis import open_project
 from qgis.core import QgsProject
-
-from qfieldsync.libqfieldsync import ProjectConfiguration
-from qfieldsync.libqfieldsync.utils.file_utils import get_project_in_folder
-from qfieldsync.libqfieldsync.utils.qgis import open_project
 
 
 def import_checksums_of_project(dirname: str) -> List[str]:
