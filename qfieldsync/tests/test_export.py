@@ -22,6 +22,7 @@
 import shutil
 import tempfile
 from pathlib import Path
+from typing import List
 
 from qgis.core import Qgis, QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
@@ -45,6 +46,9 @@ class OfflineConverterTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.source_dir)
         shutil.rmtree(self.target_dir)
+
+    def _path_contents(self, dir_path: Path) -> List[str]:
+        return list(map(lambda p: str(p.relative_to(dir_path)), dir_path.iterdir()))
 
     @property
     def data_dir(self) -> Path:
@@ -76,7 +80,7 @@ class OfflineConverterTest(unittest.TestCase):
         )
         offline_converter.convert()
 
-        files = list(self.target_dir.iterdir())
+        files = self._path_contents(self.target_dir)
 
         self.assertIn("project_qfield.qgs", files)
         self.assertIn("france_parts_shape.shp", files)
@@ -84,11 +88,13 @@ class OfflineConverterTest(unittest.TestCase):
         self.assertIn("curved_polys.gpkg", files)
         self.assertIn("spatialite.db", files)
 
-        dcim_files = list(self.target_dir.joinpath("DCIM").iterdir())
+        dcim_files = self._path_contents(self.target_dir.joinpath("DCIM"))
         self.assertIn("qfield-photo_1.jpg", dcim_files)
         self.assertIn("qfield-photo_2.jpg", dcim_files)
         self.assertIn("qfield-photo_3.jpg", dcim_files)
-        dcim_subfiles = list(self.target_dir.joinpath("DCIM", "subfolder").iterdir())
+        dcim_subfiles = self._path_contents(
+            self.target_dir.joinpath("DCIM", "subfolder")
+        )
         self.assertIn("qfield-photo_sub_1.jpg", dcim_subfiles)
         self.assertIn("qfield-photo_sub_2.jpg", dcim_subfiles)
         self.assertIn("qfield-photo_sub_3.jpg", dcim_subfiles)
