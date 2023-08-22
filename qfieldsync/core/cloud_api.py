@@ -687,7 +687,7 @@ class CloudNetworkAccessManager(QObject):
                 error_str = self.tr("Server error {}").format(http_code)
             elif http_code is None or (http_code >= 400 and http_code < 500):
                 error_str = str(self._login_error)
-        
+
         error_str = strip_html(error_str).strip()
 
         if not error_str:
