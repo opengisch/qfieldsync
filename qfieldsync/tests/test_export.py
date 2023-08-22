@@ -52,7 +52,7 @@ class OfflineConverterTest(unittest.TestCase):
 
     def load_project(self, path):
         project = QgsProject.instance()
-        self.assertTrue(project.read(path))
+        self.assertTrue(project.read(str(path)))
         return project
 
     def test_copy(self):
