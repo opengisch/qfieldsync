@@ -24,7 +24,7 @@ import tempfile
 from pathlib import Path
 from typing import List
 
-from libqfieldsync import ExportType, OfflineConverter
+from libqfieldsync.offline_converter import ExportType, OfflineConverter
 from qgis.core import Qgis, QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
