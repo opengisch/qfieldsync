@@ -71,8 +71,7 @@ jobs:
           sudo pip3 install --upgrade pip
           sudo pip3 install pytest nose2 mock
 
-          pip3 wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
-          pip3 install libqfieldsync-*.whl
+          pip3 install -r requirements.txt
 
           xvfb-run pytest
 
