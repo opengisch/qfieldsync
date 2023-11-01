@@ -49,6 +49,12 @@
    <item>
     <widget class="QWidget" name="loginFormGroup" native="true">
      <layout class="QFormLayout" name="formLayout_3">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item row="0" column="0">
        <widget class="QLabel" name="serverUrlLabel">
         <property name="text">
