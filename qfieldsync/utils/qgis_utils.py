@@ -21,7 +21,7 @@
 
 from typing import List
 
-from libqfieldsync import ProjectConfiguration
+from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.utils.file_utils import get_project_in_folder
 from libqfieldsync.utils.qgis import open_project
 from qgis.core import QgsProject

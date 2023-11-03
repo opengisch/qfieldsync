@@ -23,7 +23,7 @@
 import os
 from pathlib import Path
 
-from libqfieldsync import ProjectConfiguration
+from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.utils.exceptions import NoProjectFoundError
 from libqfieldsync.utils.file_utils import (
     copy_attachments,

@@ -22,8 +22,9 @@
 """
 import os
 
-from libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
-from libqfieldsync.offline_converter import ExportType
+from libqfieldsync.layer import LayerSource
+from libqfieldsync.offline_converter import ExportType, OfflineConverter
+from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
 from libqfieldsync.utils.qgis import get_project_title

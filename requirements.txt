@@ -6,4 +6,4 @@ future
 transifex-client
 
 # TODO: point to a commit on master after merging https://github.com/opengisch/libqfieldsync/pull/49
-libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/b53c4d5852025e9881b159d65ca59352c4225a63.tar.gz
+libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/0b0551f89d7866e0fef199d4561af9586c5aae1f.tar.gz

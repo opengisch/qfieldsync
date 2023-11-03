@@ -19,12 +19,8 @@
 """
 import os
 
-from libqfieldsync import (
-    LayerSource,
-    ProjectConfiguration,
-    ProjectProperties,
-    SyncAction,
-)
+from libqfieldsync.layer import LayerSource, SyncAction
+from libqfieldsync.project import ProjectConfiguration, ProjectProperties
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsMapLayerProxyModel,
