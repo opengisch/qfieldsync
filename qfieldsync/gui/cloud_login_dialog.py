@@ -54,6 +54,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     ):
         if CloudLoginDialog.instance:
             CloudLoginDialog.instance.show()
+            CloudLoginDialog.instance.raise_()
+            CloudLoginDialog.instance.activateWindow()
             return CloudLoginDialog.instance
 
         CloudLoginDialog.instance = CloudLoginDialog(network_manager, parent)
@@ -153,6 +155,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         if not cfg.config("token") or not self.parent():
             self.show()
+            self.raise_()
+            self.activateWindow()
 
     def on_login_button_clicked(self) -> None:
         QApplication.setOverrideCursor(Qt.WaitCursor)
