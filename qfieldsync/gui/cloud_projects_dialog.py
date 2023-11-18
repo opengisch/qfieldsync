@@ -121,20 +121,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.update_welcome_label()
 
-        if self.network_manager.has_token():
-            self.show_projects()
-            self.show()
-            self.createButton.setEnabled(True)
-        else:
-            CloudLoginDialog.show_auth_dialog(
-                self.network_manager,
-                lambda: self.on_auth_accepted(),
-                lambda: self.close(),
-                parent=self,
-            )
-            self.hide()
-            self.createButton.setEnabled(False)
-
         self.use_current_project_directory_action = QAction(
             QIcon(), self.tr("Use Current Project Directory")
         )
@@ -175,6 +161,20 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.deleteButton.setEnabled(False)
 
+        self.show()
+
+        if self.network_manager.has_token():
+            self.show_projects()
+            self.createButton.setEnabled(True)
+        else:
+            CloudLoginDialog.show_auth_dialog(
+                self.network_manager,
+                lambda: self.on_auth_accepted(),
+                lambda: self.close(),
+                parent=self,
+            )
+            self.createButton.setEnabled(False)
+
         self.projectsStack.setCurrentWidget(self.projectsListPage)
         self.createProjectWidget = CloudCreateProjectWidget(
             iface,
@@ -182,6 +182,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             QgsProject.instance(),
             self,
         )
+
         self.projectCreatePage.layout().addWidget(self.createProjectWidget)
         self.createProjectWidget.finished.connect(
             lambda project_id: self.on_create_project_finished(project_id)
