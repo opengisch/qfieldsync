@@ -25,9 +25,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Tuple
 
+from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.PyQt.QtCore import QObject
-
-from qfieldsync.libqfieldsync.utils.qgis import get_qgis_files_within_dir
 
 
 class LocalDirFeedback(Enum):

@@ -22,6 +22,12 @@
 """
 import os
 
+from libqfieldsync.layer import LayerSource
+from libqfieldsync.offline_converter import ExportType, OfflineConverter
+from libqfieldsync.project import ProjectConfiguration
+from libqfieldsync.project_checker import ProjectChecker
+from libqfieldsync.utils.file_utils import fileparts
+from libqfieldsync.utils.qgis import get_project_title
 from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, QUrl
 from qgis.PyQt.QtGui import QIcon
@@ -32,11 +38,6 @@ from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
-from qfieldsync.libqfieldsync import LayerSource, OfflineConverter, ProjectConfiguration
-from qfieldsync.libqfieldsync.offline_converter import ExportType
-from qfieldsync.libqfieldsync.project_checker import ProjectChecker
-from qfieldsync.libqfieldsync.utils.file_utils import fileparts
-from qfieldsync.libqfieldsync.utils.qgis import get_project_title
 
 from ..utils.qt_utils import make_folder_selector
 

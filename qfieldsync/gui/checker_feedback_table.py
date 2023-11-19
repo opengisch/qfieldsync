@@ -21,10 +21,9 @@
  ***************************************************************************/
 """
 
+from libqfieldsync.project_checker import ProjectCheckerFeedback
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel, QTableWidget, QTableWidgetItem
-
-from qfieldsync.libqfieldsync.project_checker import ProjectCheckerFeedback
 
 
 class CheckerFeedbackTable(QTableWidget):

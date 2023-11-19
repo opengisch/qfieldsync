@@ -22,6 +22,7 @@
 """
 import os
 
+from libqfieldsync.layer import LayerSource
 from qgis.core import QgsMapLayer, QgsProject
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
 from qgis.PyQt.QtWidgets import QLabel
@@ -33,7 +34,6 @@ from qfieldsync.gui.relationship_configuration_widget import (
     RelationshipConfigurationTableWidget,
 )
 from qfieldsync.gui.utils import set_available_actions
-from qfieldsync.libqfieldsync.layer import LayerSource
 
 WidgetUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/map_layer_config_widget.ui")

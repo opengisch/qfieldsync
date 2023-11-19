@@ -21,17 +21,14 @@
 
 from pathlib import Path
 
+from libqfieldsync.layer import LayerSource
+from libqfieldsync.utils.file_utils import copy_attachments
+from libqfieldsync.utils.qgis import get_qgis_files_within_dir, make_temp_qgis_file
 from qgis.core import QgsMapLayer, QgsProject, QgsVirtualLayerDefinition
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QUrl, pyqtSignal
 from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
-from qfieldsync.libqfieldsync.layer import LayerSource
-from qfieldsync.libqfieldsync.utils.file_utils import copy_attachments
-from qfieldsync.libqfieldsync.utils.qgis import (
-    get_qgis_files_within_dir,
-    make_temp_qgis_file,
-)
 from qfieldsync.utils.qgis_utils import open_project
 
 

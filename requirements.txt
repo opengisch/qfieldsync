@@ -4,3 +4,6 @@ flake8-respect-noqa
 pytest
 future
 transifex-client
+
+# TODO: point to a commit on master after merging https://github.com/opengisch/libqfieldsync/pull/49
+libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/master.tar.gz

@@ -169,3 +169,5 @@ qfieldsync/resources_rc.py
 
 .vscode/**
 .qt_for_python/**
+
+qfieldsync/libqfieldsync.whl

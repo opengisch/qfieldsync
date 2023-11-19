@@ -24,11 +24,10 @@ import tempfile
 from pathlib import Path
 from typing import List
 
+from libqfieldsync.offline_converter import ExportType, OfflineConverter
 from qgis.core import Qgis, QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
-
-from qfieldsync.libqfieldsync.offline_converter import ExportType, OfflineConverter
 
 start_app()
 

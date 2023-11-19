@@ -23,6 +23,7 @@
 import os
 from typing import Callable
 
+from libqfieldsync.layer import LayerSource, SyncAction
 from PyQt5.QtWidgets import QPushButton
 from qgis.core import Qgis, QgsMapLayerModel, QgsProject
 from qgis.PyQt.QtCore import Qt
@@ -40,7 +41,6 @@ from qgis.utils import iface
 
 from qfieldsync.core.message_bus import message_bus
 from qfieldsync.gui.utils import set_available_actions
-from qfieldsync.libqfieldsync.layer import LayerSource, SyncAction
 
 LayersConfigWidgetUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/layers_config_widget.ui")
