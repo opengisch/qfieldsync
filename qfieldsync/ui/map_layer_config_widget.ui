@@ -39,20 +39,51 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QCheckBox" name="isGeometryLockedCheckBox">
-     <property name="toolTip">
-      <string>When enabled, this option disables adding and deleting features, as well as modifying the geometries of existing features.</string>
-     </property>
-     <property name="text">
-      <string>Lock geometries</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QCheckBox" name="isGeometryLockedCheckBox">
+       <property name="toolTip">
+        <string>When enabled, this option disables adding and deleting features, as well as modifying the geometries of existing features.</string>
+       </property>
+       <property name="text">
+        <string>Lock geometries</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QgsPropertyOverrideButton" name="isGeometryLockedDDButton">
+       <property name="text">
+        <string>…</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
    <item row="1" column="1">
     <widget class="QComboBox" name="cableLayerActionComboBox"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsPropertyOverrideButton</class>
+   <extends>QToolButton</extends>
+   <header>qgspropertyoverridebutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
