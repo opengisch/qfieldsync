@@ -23,7 +23,7 @@
 import os
 
 from libqfieldsync.layer import LayerSource
-from qgis.core import QgsMapLayer, QgsProject
+from qgis.core import QgsMapLayer, QgsProject, QgsProperty, QgsPropertyDefinition
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
 from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
@@ -55,6 +55,8 @@ class MapLayerConfigWidgetFactory(QgsMapLayerConfigWidgetFactory):
 
 
 class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
+    PROPERTY_GEOMETRY_LOCKED = 1
+
     def __init__(self, layer, canvas, parent):
         super(MapLayerConfigWidget, self).__init__(layer, canvas, parent)
         self.setupUi(self)
@@ -72,8 +74,35 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.layer_source.action,
         )
 
-        self.isGeometryLockedCheckBox.setEnabled(self.layer_source.can_lock_geometry)
-        self.isGeometryLockedCheckBox.setChecked(self.layer_source.is_geometry_locked)
+        if layer.type() == QgsMapLayer.VectorLayer:
+            prop = QgsProperty.fromExpression(
+                self.layer_source.geometry_locked_expression
+            )
+            prop.setActive(self.layer_source.is_geometry_locked_expression_active)
+            prop_definition = QgsPropertyDefinition(
+                "is_geometry_locked",
+                QgsPropertyDefinition.DataType.DataTypeBoolean,
+                "Geometry Locked",
+                "",
+            )
+            self.isGeometryLockedDDButton.init(
+                MapLayerConfigWidget.PROPERTY_GEOMETRY_LOCKED,
+                prop,
+                prop_definition,
+                None,
+                False,
+            )
+            self.isGeometryLockedDDButton.setVectorLayer(layer)
+
+            self.isGeometryLockedCheckBox.setEnabled(
+                self.layer_source.can_lock_geometry
+            )
+            self.isGeometryLockedCheckBox.setChecked(
+                self.layer_source.is_geometry_locked
+            )
+        else:
+            self.isGeometryLockedDDButton.setVisible(False)
+            self.isGeometryLockedCheckBox.setVisible(False)
 
         self.attachmentNamingTable = AttachmentNamingTableWidget()
         self.attachmentNamingTable.addLayerFields(self.layer_source)
@@ -122,6 +151,9 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.cableLayerActionComboBox.currentIndex()
         )
         self.layer_source.is_geometry_locked = self.isGeometryLockedCheckBox.isChecked()
+        prop = self.isGeometryLockedDDButton.toProperty()
+        self.layer_source.is_geometry_locked_expression_active = prop.isActive()
+        self.layer_source.geometry_locked_expression = prop.asExpression()
         self.attachmentNamingTable.syncLayerSourceValues()
         self.relationshipConfigurationTable.syncLayerSourceValues()
 
