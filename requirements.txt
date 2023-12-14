@@ -5,5 +5,4 @@ pytest
 future
 transifex-client
 
-# TODO: point to a commit on master after merging https://github.com/opengisch/libqfieldsync/pull/49
-libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/master.tar.gz
+libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/f3999a47f5c8394970f4fc95885a046a5b6d3a73.tar.gz
