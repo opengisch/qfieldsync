@@ -118,8 +118,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: plugin
-          path: plugin.zip
+          name: qfieldsync-plugin
+          path: qfieldsync.dev.zip
   package:
     runs-on: ubuntu-22.04
     env:
