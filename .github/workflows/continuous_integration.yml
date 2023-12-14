@@ -94,7 +94,7 @@ jobs:
           sudo pip install qgis-plugin-ci
       - name: Package libqfieldsync
         run: |
-          python3 -m pip install pip -U
+          python3 -m pip install pip -U  # https://github.com/pypa/setuptools/issues/3269
           pip wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
           mv libqfieldsync-*.whl qfieldsync/libqfieldsync.whl
       - name: Release
