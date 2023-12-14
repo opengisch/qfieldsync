@@ -79,11 +79,10 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       OSGEO_USERNAME: mkuhn
-      # OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
+      OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
       GITHUB_REF: ${{ github.ref }}
-    # if: ${{ github.event_name == 'release' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -99,6 +98,7 @@ jobs:
           pip wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
           mv libqfieldsync-*.whl qfieldsync/libqfieldsync.whl
       - name: Release
+        if: ${{ github.event_name == 'release' }}
         run: |
           RELEASE_VERSION=${GITHUB_REF##*/}
           RELEASE_TAG=${GITHUB_REF##*/}
@@ -110,6 +110,16 @@ jobs:
               --osgeo-password ${OSGEO_PASSWORD} \
               --asset-path qfieldsync/libqfieldsync.whl
 
+      - name: Release
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          qgis-plugin-ci package dev \
+              --asset-path qfieldsync/libqfieldsync.whl
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: plugin
+          path: plugin.zip
   package:
     runs-on: ubuntu-22.04
     env:
