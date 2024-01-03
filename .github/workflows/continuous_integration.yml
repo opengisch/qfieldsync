@@ -110,16 +110,16 @@ jobs:
               --osgeo-password ${OSGEO_PASSWORD} \
               --asset-path qfieldsync/libqfieldsync.whl
 
-      - name: Release
+      - name: Package
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          qgis-plugin-ci package dev \
+          qgis-plugin-ci package 0.1 \
               --asset-path qfieldsync/libqfieldsync.whl
 
       - uses: actions/upload-artifact@v3
         with:
           name: qfieldsync-plugin
-          path: qfieldsync.dev.zip
+          path: qfieldsync.0.1.zip
   package:
     runs-on: ubuntu-22.04
     env:
