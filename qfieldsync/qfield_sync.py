@@ -64,8 +64,9 @@ class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
 
 
 class QFieldSyncOptionsFactory(QgsOptionsWidgetFactory):
-    def __init__(self):
+    def __init__(self, qfieldSync):
         super(QgsOptionsWidgetFactory, self).__init__()
+        self.qfieldSync = qfieldSync
 
     def icon(self):
         return QIcon(
@@ -73,7 +74,7 @@ class QFieldSyncOptionsFactory(QgsOptionsWidgetFactory):
         )
 
     def createWidget(self, parent):
-        return PreferencesWidget(parent)
+        return PreferencesWidget(self.qfieldSync, parent)
 
 
 class QFieldSync(object):
@@ -125,15 +126,15 @@ class QFieldSync(object):
         self.offline_editing = QgsOfflineEditing()
         self.preferences = Preferences()
 
-        QgsProject.instance().readProject.connect(self.update_button_enabled_status)
-        QgsProject.instance().cleared.connect(self.update_button_enabled_status)
+        QgsProject.instance().readProject.connect(self.update_action_enabled_status)
+        QgsProject.instance().cleared.connect(self.update_action_enabled_status)
 
         # store warnings from last run
         self.last_action_warnings = []
 
         self.network_manager = CloudNetworkAccessManager(self.iface.mainWindow())
         self.network_manager.projects_cache.projects_updated.connect(
-            self.update_button_enabled_status
+            self.update_action_enabled_status
         )
 
         self.cloud_item_provider = QFieldCloudItemProvider(self.network_manager)
@@ -264,19 +265,36 @@ class QFieldSync(object):
             parent=self.iface.mainWindow(),
         )
 
-        self.push_action = self.add_action(
+        self.push_action_toolbar = self.add_action(
             QIcon(os.path.join(os.path.dirname(__file__), "resources/package.svg")),
             text=self.tr("Package for QField"),
             callback=self.show_package_dialog,
             parent=self.iface.mainWindow(),
             separator_before=True,
+            add_to_menu=False,
+        )
+        self.push_action_menu = self.add_action(
+            QIcon(os.path.join(os.path.dirname(__file__), "resources/package.svg")),
+            text=self.tr("Package for QField"),
+            callback=self.show_package_dialog,
+            parent=self.iface.mainWindow(),
+            separator_before=True,
+            add_to_toolbar=False,
         )
 
-        self.sync_action = self.add_action(
+        self.sync_action_toolbar = self.add_action(
             QIcon(os.path.join(os.path.dirname(__file__), "resources/synchronize.svg")),
             text=self.tr("Synchronize from QField"),
             callback=self.show_synchronize_dialog,
             parent=self.iface.mainWindow(),
+            add_to_menu=False,
+        )
+        self.sync_action_menu = self.add_action(
+            QIcon(os.path.join(os.path.dirname(__file__), "resources/synchronize.svg")),
+            text=self.tr("Synchronize from QField"),
+            callback=self.show_synchronize_dialog,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False,
         )
 
         self.add_action(
@@ -288,7 +306,6 @@ class QFieldSync(object):
             text=self.tr("Configure Current Project"),
             callback=self.show_project_configuration_dialog,
             parent=self.iface.mainWindow(),
-            separator_before=True,
         )
 
         self.add_action(
@@ -315,11 +332,12 @@ class QFieldSync(object):
             self.iface.registerProjectPropertiesWidgetFactory(
                 self.project_properties_factory
             )
-        self.options_factory = QFieldSyncOptionsFactory()
+        self.options_factory = QFieldSyncOptionsFactory(self)
         self.options_factory.setTitle(self.tr("QField"))
         self.iface.registerOptionsWidgetFactory(self.options_factory)
 
-        self.update_button_enabled_status()
+        self.update_button_visibility()
+        self.update_action_enabled_status()
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -396,7 +414,7 @@ class QFieldSync(object):
         self.push_dlg.show()
 
         self.push_dlg.finished.connect(self.push_dialog_finished)
-        self.update_button_enabled_status()
+        self.update_action_enabled_status()
 
     def show_project_configuration_dialog(self):
         """
@@ -453,17 +471,28 @@ class QFieldSync(object):
     def push_dialog_finished(self):
         """
         When the push dialog is closed, make sure it's no longer
-        enabled before entering update_button_enabled_status()
+        enabled before entering update_action_enabled_status()
         """
         try:
             self.push_dlg.setEnabled(False)
         except RuntimeError:
             pass
-        self.update_button_enabled_status()
+        self.update_action_enabled_status()
 
-    def update_button_enabled_status(self):
+    def update_button_visibility(self):
         """
-        Will update the plugin buttons according to open dialog and project properties.
+        Will update the plugin toolbar buttons according to open dialog and project properties.
+        """
+        self.push_action_toolbar.setVisible(
+            self.preferences.value("showPackagingActions")
+        )
+        self.sync_action_toolbar.setVisible(
+            self.preferences.value("showPackagingActions")
+        )
+
+    def update_action_enabled_status(self):
+        """
+        Will update the plugin actions according to open dialog and project properties.
         """
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.cloud_synchronize_action.setEnabled(True)
@@ -476,9 +505,11 @@ class QFieldSync(object):
             dialog_is_enabled = False
 
         if self.offline_editing.isOfflineProject() or dialog_is_enabled:
-            self.push_action.setEnabled(False)
+            self.push_action_toolbar.setEnabled(False)
+            self.push_action_menu.setEnabled(False)
         else:
-            self.push_action.setEnabled(True)
+            self.push_action_toolbar.setEnabled(True)
+            self.push_action_menu.setEnabled(True)
 
     def get_qfield_action(self) -> QAction:
         actions = self.iface.pluginMenu().actions()

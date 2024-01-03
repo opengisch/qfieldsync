@@ -35,7 +35,8 @@ WidgetUi, _ = loadUiType(
 
 
 class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
-    def __init__(self, parent=None):
+    def __init__(self, qfieldSync, parent=None):
+        self.qfieldSync = qfieldSync
         preferences = Preferences()
         SettingDialog.__init__(self, setting_manager=preferences)
         super().__init__(parent, setting_manager=preferences)
@@ -54,3 +55,4 @@ class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
 
     def apply(self):
         self.set_values_from_widgets()
+        self.qfieldSync.update_button_visibility()
