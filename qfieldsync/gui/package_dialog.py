@@ -24,6 +24,7 @@ import os
 
 from libqfieldsync.layer import LayerSource
 from libqfieldsync.offline_converter import ExportType, OfflineConverter
+from libqfieldsync.offliners import QgisCoreOffliner
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
@@ -53,7 +54,7 @@ class PackageDialog(QDialog, DialogUi):
         self.setupUi(self)
 
         self.iface = iface
-        self.offline_editing = offline_editing
+        self.offliner = QgisCoreOffliner(offline_editing=offline_editing)
         self.project = project
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
@@ -82,7 +83,7 @@ class PackageDialog(QDialog, DialogUi):
         # self.refresh_devices()
         self.setup_gui()
 
-        self.offline_editing.warning.connect(self.show_warning)
+        self.offliner.warning.connect(self.show_warning)
 
     def update_progress(self, sent, total):
         progress = float(sent) / total * 100
@@ -159,7 +160,7 @@ class PackageDialog(QDialog, DialogUi):
             area_of_interest,
             area_of_interest_crs,
             self.qfield_preferences.value("attachmentDirs"),
-            self.offline_editing,
+            self.offliner,
             ExportType.Cable,
             dirs_to_copy=self.dirsToCopyWidget.dirs_to_copy(),
         )
