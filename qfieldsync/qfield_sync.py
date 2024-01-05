@@ -146,7 +146,11 @@ class QFieldSync(object):
             self.cloud_item_gui_provider
         )
 
-        # autologin
+        # first run check
+        if self.preferences.value("firstRun"):
+            self.preferences.set_value("firstRun", False)
+
+        # auto login check
         if self.preferences.value("qfieldCloudRememberMe"):
             self.network_manager.auto_login_attempt()
 
