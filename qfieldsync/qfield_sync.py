@@ -113,8 +113,8 @@ class QFieldSync(object):
         self.actions = []
         self.menu = self.tr("&QFieldSync")
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar("QFieldSync")
-        self.toolbar.setObjectName("QFieldSync")
+        self.toolbar = self.iface.addToolBar(self.tr("QFieldSync Toolbar"))
+        self.toolbar.setObjectName("QFieldSync Toolbar")
 
         # instance of the map config widget factory, shown in layer properties
         self.mapLayerConfigWidgetFactory = MapLayerConfigWidgetFactory(
