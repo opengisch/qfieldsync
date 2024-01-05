@@ -35,3 +35,4 @@ class Preferences(SettingManager):
         self.add_setting(
             String("cloudDirectory", Scope.Global, str(home.joinpath("QField/cloud")))
         )
+        self.add_setting(Bool("firstRun", Scope.Global, True))
