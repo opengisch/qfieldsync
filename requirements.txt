@@ -5,4 +5,5 @@ pytest
 future
 transifex-client
 
-libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/a6162194f5b7e2448da26d3cf67ed542653c4012.tar.gz
+# NOTE `libqfielsync` version should be defined in the `*.tar.gz` format, not `git+https://` to make `wheel` happy
+libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/8ee725ca401b5d083edd8feed733803b8709d496.tar.gz
