@@ -407,6 +407,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def build_files_tree(self):
         assert self.project_transfer
 
+        self.filesTree.clear()
+
         # NOTE algorithmic part
         # ##########
         # The "cloud_files" objects are assumed to be sorted alphabetically by name.
