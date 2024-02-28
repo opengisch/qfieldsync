@@ -104,6 +104,51 @@
             </widget>
            </item>
            <item row="4" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QCheckBox" name="forceAutoPush">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Automatically push pending changes on the following interval</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QgsSpinBox" name="forceAutoPushInterval">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="suffix">
+                <string> minutes</string>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>2880</number>
+               </property>
+               <property name="value">
+                <number>30</number>
+               </property>
+               <property name="showClearButton">
+                <bool>true</bool>
+               </property>
+               <property name="clearValue">
+                <number>30</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="5" column="0" colspan="3">
             <spacer name="verticalSpacer_2">
              <property name="orientation">
               <enum>Qt::Vertical</enum>

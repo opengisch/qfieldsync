@@ -104,6 +104,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         )
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
 
+        self.forceAutoPush.clicked.connect(self.onForceAutoPushClicked)
+
         self.attachmentDirsListWidget.itemChanged.connect(self.onItemChanged)
         self.event_eater = EventEater()
         self.attachmentDirsListWidget.installEventFilter(self.event_eater)
@@ -189,6 +191,14 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         )
         self.preferOfflineLayersRadioButton.setChecked(
             self.__project_configuration.layer_action_preference == "offline"
+        )
+
+        self.forceAutoPush.setChecked(self.__project_configuration.force_auto_push)
+        self.forceAutoPushInterval.setEnabled(
+            self.__project_configuration.force_auto_push
+        )
+        self.forceAutoPushInterval.setValue(
+            self.__project_configuration.force_auto_push_interval_mins
         )
 
         attachment_dirs = [*self.preferences.value("attachmentDirs")]
@@ -279,6 +289,11 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             "online" if self.preferOnlineLayersRadioButton.isChecked() else "offline"
         )
 
+        self.__project_configuration.force_auto_push = self.forceAutoPush.isChecked()
+        self.__project_configuration.force_auto_push_interval_mins = (
+            self.forceAutoPushInterval.value()
+        )
+
         v = QLibraryInfo.version()
         match_flag = (
             Qt.MatchRegularExpression
@@ -289,6 +304,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         for item in self.attachmentDirsListWidget.findItems("^\\S+$", match_flag):
             keys[item.text()] = 1
         self.preferences.set_value("attachmentDirs", list(keys.keys()))
+
+    def onForceAutoPushClicked(self, checked):
+        self.forceAutoPushInterval.setEnabled(checked)
 
     def onLayerActionPreferenceChanged(self):
         """Triggered when prefer online or offline radio buttons have been changed"""
