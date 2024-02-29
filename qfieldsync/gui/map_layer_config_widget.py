@@ -85,14 +85,16 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.measurementTypeComboBox.addItem(
             "Elapsed time (seconds since start of tracking)"
         )
-        self.measurementTypeComboBox.addItem("Timestamp (milliseconds since epoch)")
-        self.measurementTypeComboBox.addItem("Ground speed")
-        self.measurementTypeComboBox.addItem("Bearing")
-        self.measurementTypeComboBox.addItem("Horizontal accuracy")
-        self.measurementTypeComboBox.addItem("Vertical accuracy")
-        self.measurementTypeComboBox.addItem("PDOP")
-        self.measurementTypeComboBox.addItem("HDOP")
-        self.measurementTypeComboBox.addItem("VDOP")
+        self.measurementTypeComboBox.addItem(
+            self.tr("Timestamp (milliseconds since epoch)")
+        )
+        self.measurementTypeComboBox.addItem(self.tr("Ground speed"))
+        self.measurementTypeComboBox.addItem(self.tr("Bearing"))
+        self.measurementTypeComboBox.addItem(self.tr("Horizontal accuracy"))
+        self.measurementTypeComboBox.addItem(self.tr("Vertical accuracy"))
+        self.measurementTypeComboBox.addItem(self.tr("PDOP"))
+        self.measurementTypeComboBox.addItem(self.tr("HDOP"))
+        self.measurementTypeComboBox.addItem(self.tr("VDOP"))
 
         if layer.type() == QgsMapLayer.VectorLayer:
             prop = QgsProperty.fromExpression(
