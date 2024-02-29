@@ -82,6 +82,18 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.relationshipConfigurationTable.addLayerFields(self.layer_source)
         self.relationshipConfigurationTable.setLayerColumnHidden(True)
 
+        self.measurementTypeComboBox.addItem(
+            "Elapsed time (seconds since start of tracking)"
+        )
+        self.measurementTypeComboBox.addItem("Timestamp (milliseconds since epoch)")
+        self.measurementTypeComboBox.addItem("Ground speed")
+        self.measurementTypeComboBox.addItem("Bearing")
+        self.measurementTypeComboBox.addItem("Horizontal accuracy")
+        self.measurementTypeComboBox.addItem("Vertical accuracy")
+        self.measurementTypeComboBox.addItem("PDOP")
+        self.measurementTypeComboBox.addItem("HDOP")
+        self.measurementTypeComboBox.addItem("VDOP")
+
         if layer.type() == QgsMapLayer.VectorLayer:
             prop = QgsProperty.fromExpression(
                 self.layer_source.geometry_locked_expression
@@ -133,6 +145,34 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.relationshipConfigurationTable.setEnabled(
                 self.relationshipConfigurationTable.rowCount() > 0
             )
+
+            self.trackingSessionGroupBox.setChecked(
+                self.layer_source.tracking_session_active
+            )
+            self.timeRequirementCheckBox.setChecked(
+                self.layer_source.tracking_time_requirement_active
+            )
+            self.timeRequirementIntervalSecondsSpinBox.setValue(
+                self.layer_source.tracking_time_requirement_interval_seconds
+            )
+            self.distanceRequirementCheckBox.setChecked(
+                self.layer_source.tracking_distance_requirement_active
+            )
+            self.distanceRequirementMinimumMetersSpinBox.setValue(
+                self.layer_source.tracking_distance_requirement_minimum_meters
+            )
+            self.sensorDataRequirementCheckBox.setChecked(
+                self.layer_source.tracking_sensor_data_requirement_active
+            )
+            self.allRequirementsCheckBox.setChecked(
+                self.layer_source.tracking_all_requirements_active
+            )
+            self.erroneousDistanceSafeguardCheckBox.setChecked(
+                self.layer_source.tracking_erroneous_distance_safeguard_active
+            )
+            self.measurementTypeComboBox.setCurrentIndex(
+                self.layer_source.tracking_measurement_type
+            )
         else:
             self.isGeometryLockedDDButton.setVisible(False)
             self.isGeometryLockedCheckBox.setVisible(False)
@@ -141,9 +181,9 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.trackingSessionGroupBox.setVisible(False)
 
     def apply(self):
-        old_layer_action = self.layer_source.action
-        old_layer_cloud_action = self.layer_source.cloud_action
-        old_is_geometry_locked = self.layer_source.is_geometry_locked
+        self.layer_source.action
+        self.layer_source.cloud_action
+        self.layer_source.is_geometry_locked
 
         self.layer_source.cloud_action = self.cloudLayerActionComboBox.itemData(
             self.cloudLayerActionComboBox.currentIndex()
@@ -158,15 +198,34 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.attachmentNamingTable.syncLayerSourceValues()
         self.relationshipConfigurationTable.syncLayerSourceValues()
 
-        # apply always the attachment naming (to store default values on first apply as well)
-        if (
-            self.layer_source.action != old_layer_action
-            or self.layer_source.cloud_action != old_layer_cloud_action
-            or self.layer_source.is_geometry_locked != old_is_geometry_locked
-            or self.attachmentNamingTable.rowCount() > 0
-            or self.relationshipConfigurationTable.rowCount() > 0
-        ):
-            self.layer_source.apply()
-            self.project.setDirty(True)
+        self.layer_source.tracking_session_active = (
+            self.trackingSessionGroupBox.isChecked()
+        )
+        self.layer_source.tracking_time_requirement_active = (
+            self.timeRequirementCheckBox.isChecked()
+        )
+        self.layer_source.tracking_time_requirement_interval_seconds = (
+            self.timeRequirementIntervalSecondsSpinBox.value()
+        )
+        self.layer_source.tracking_distance_requirement_active = (
+            self.distanceRequirementCheckBox.isChecked()
+        )
+        self.layer_source.tracking_distance_requirement_minimum_meters = (
+            self.distanceRequirementMinimumMetersSpinBox.value()
+        )
+        self.layer_source.tracking_sensor_data_requirement_active = (
+            self.sensorDataRequirementCheckBox.isChecked()
+        )
+        self.layer_source.tracking_all_requirements_active = (
+            self.allRequirementsCheckBox.isChecked()
+        )
+        self.layer_source.tracking_erroneous_distance_safeguard_active = (
+            self.erroneousDistanceSafeguardCheckBox.isChecked()
+        )
+        self.layer_source.tracking_measurement_type = (
+            self.measurementTypeComboBox.currentIndex()
+        )
 
+        if self.layer_source.apply():
+            self.project.setDirty(True)
             message_bus.messaged.emit("layer_config_saved")

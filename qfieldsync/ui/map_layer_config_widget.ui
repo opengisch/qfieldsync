@@ -225,7 +225,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="measureValueLabel">
+           <widget class="QLabel" name="measurementTypeLabel">
             <property name="text">
              <string>Measure (M) value attached to vertices</string>
             </property>
@@ -235,7 +235,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="measureValueComboBox">
+           <widget class="QComboBox" name="measurementTypeComboBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>1</horstretch>
