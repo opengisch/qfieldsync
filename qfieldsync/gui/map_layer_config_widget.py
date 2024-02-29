@@ -172,6 +172,9 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.erroneousDistanceSafeguardCheckBox.setChecked(
                 self.layer_source.tracking_erroneous_distance_safeguard_active
             )
+            self.erroneousDistanceSafeguardMaximumMetersSpinBox.setValue(
+                self.layer_source.tracking_erroneous_distance_safeguard_maximum_meters
+            )
             self.measurementTypeComboBox.setCurrentIndex(
                 self.layer_source.tracking_measurement_type
             )
@@ -223,6 +226,9 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         )
         self.layer_source.tracking_erroneous_distance_safeguard_active = (
             self.erroneousDistanceSafeguardCheckBox.isChecked()
+        )
+        self.layer_source.tracking_erroneous_distance_safeguard_maximum_meters = (
+            self.erroneousDistanceSafeguardMaximumMetersSpinBox.value()
         )
         self.layer_source.tracking_measurement_type = (
             self.measurementTypeComboBox.currentIndex()
