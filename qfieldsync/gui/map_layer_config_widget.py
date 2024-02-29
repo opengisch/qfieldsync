@@ -74,6 +74,14 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.layer_source.action,
         )
 
+        self.attachmentNamingTable = AttachmentNamingTableWidget()
+        self.attachmentNamingTable.addLayerFields(self.layer_source)
+        self.attachmentNamingTable.setLayerColumnHidden(True)
+
+        self.relationshipConfigurationTable = RelationshipConfigurationTableWidget()
+        self.relationshipConfigurationTable.addLayerFields(self.layer_source)
+        self.relationshipConfigurationTable.setLayerColumnHidden(True)
+
         if layer.type() == QgsMapLayer.VectorLayer:
             prop = QgsProperty.fromExpression(
                 self.layer_source.geometry_locked_expression
@@ -100,17 +108,9 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.isGeometryLockedCheckBox.setChecked(
                 self.layer_source.is_geometry_locked
             )
-        else:
-            self.isGeometryLockedDDButton.setVisible(False)
-            self.isGeometryLockedCheckBox.setVisible(False)
 
-        self.attachmentNamingTable = AttachmentNamingTableWidget()
-        self.attachmentNamingTable.addLayerFields(self.layer_source)
-        self.attachmentNamingTable.setLayerColumnHidden(True)
-
-        # append the attachment naming table to the layout
-        if layer.type() == QgsMapLayer.VectorLayer:
-            self.layout().insertRow(
+            # append the attachment naming table to the layout
+            self.attachmentsRelationsLayout.insertRow(
                 -1, self.tr("Attachment\nnaming"), self.attachmentNamingTable
             )
             tip = QLabel(
@@ -119,18 +119,13 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
                 )
             )
             tip.setWordWrap(True)
-            self.layout().insertRow(-1, "", tip)
+            self.attachmentsRelationsLayout.insertRow(-1, "", tip)
             self.attachmentNamingTable.setEnabled(
                 self.attachmentNamingTable.rowCount() > 0
             )
 
-        self.relationshipConfigurationTable = RelationshipConfigurationTableWidget()
-        self.relationshipConfigurationTable.addLayerFields(self.layer_source)
-        self.relationshipConfigurationTable.setLayerColumnHidden(True)
-
-        # append the relationship configuration table to the layout
-        if layer.type() == QgsMapLayer.VectorLayer:
-            self.layout().insertRow(
+            # append the relationship configuration table to the layout
+            self.attachmentsRelationsLayout.insertRow(
                 -1,
                 self.tr("Relationship\nconfiguration"),
                 self.relationshipConfigurationTable,
@@ -138,6 +133,12 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.relationshipConfigurationTable.setEnabled(
                 self.relationshipConfigurationTable.rowCount() > 0
             )
+        else:
+            self.isGeometryLockedDDButton.setVisible(False)
+            self.isGeometryLockedCheckBox.setVisible(False)
+
+            self.attachmentsRelationsGroupBox.setVisible(False)
+            self.trackingSessionGroupBox.setVisible(False)
 
     def apply(self):
         old_layer_action = self.layer_source.action
