@@ -140,20 +140,16 @@ class PackageDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
 
         export_folder = self.get_export_folder_from_dialog()
-        if self.__project_configuration.offline_copy_only_aoi:
-            area_of_interest = (
-                self.__project_configuration.area_of_interest
-                if self.__project_configuration.area_of_interest
-                else self.iface.mapCanvas().extent().asWktPolygon()
-            )
-            area_of_interest_crs = (
-                self.__project_configuration.area_of_interest_crs
-                if self.__project_configuration.area_of_interest_crs
-                else QgsProject.instance().crs().authid()
-            )
-        else:
-            area_of_interest = ""
-            area_of_interest_crs = QgsProject.instance().crs().authid()
+        area_of_interest = (
+            self.__project_configuration.area_of_interest
+            if self.__project_configuration.area_of_interest
+            else self.iface.mapCanvas().extent().asWktPolygon()
+        )
+        area_of_interest_crs = (
+            self.__project_configuration.area_of_interest_crs
+            if self.__project_configuration.area_of_interest_crs
+            else QgsProject.instance().crs().authid()
+        )
 
         self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
         self.dirsToCopyWidget.save_settings()
