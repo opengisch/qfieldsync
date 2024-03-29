@@ -25,6 +25,7 @@ import os
 from libqfieldsync.layer import LayerSource
 from libqfieldsync.offline_converter import ExportType, OfflineConverter
 
+# TODO this try/catch was added due to module structure changes in QFS 4.8.0. Remove this as enough time has passed since March 2024.
 try:
     from libqfieldsync.offliners import QgisCoreOffliner
 except ModuleNotFoundError:
