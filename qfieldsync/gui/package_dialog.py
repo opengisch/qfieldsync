@@ -24,11 +24,7 @@ import os
 
 from libqfieldsync.layer import LayerSource
 from libqfieldsync.offline_converter import ExportType, OfflineConverter
-try:
-    from libqfieldsync.offliners import QgisCoreOffliner
-except ModuleNotFoundError:
-    from qgis.PyQt.QtWidgets import QMessageBox
-    QMessageBox.warning(None, 'Please restart QGIS', 'To finalize the QFieldSync upgrade, please restart QGIS.')
+from libqfieldsync.offliners import QgisCoreOffliner
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
