@@ -24,7 +24,7 @@ import os
 
 from libqfieldsync.layer import LayerSource
 from qgis.core import QgsMapLayer, QgsProject, QgsProperty, QgsPropertyDefinition
-from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory
+from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory, QgsSpinBox
 from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
 
@@ -82,6 +82,10 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.relationshipConfigurationTable.addLayerFields(self.layer_source)
         self.relationshipConfigurationTable.setLayerColumnHidden(True)
 
+        self.valueMapButtonInterfaceSpinBox.setClearValueMode(
+            QgsSpinBox.CustomValue, self.tr("Disabled")
+        )
+
         self.measurementTypeComboBox.addItem(
             "Elapsed time (seconds since start of tracking)"
         )
@@ -122,6 +126,11 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.isGeometryLockedCheckBox.setChecked(
                 self.layer_source.is_geometry_locked
             )
+
+            self.valueMapButtonInterfaceSpinBox.setValue(
+                self.layer_source.value_map_button_interface_threshold
+            )
+            self.valueMapButtonInterfaceSpinBox.setVisible(True)
 
             # append the attachment naming table to the layout
             self.attachmentsRelationsLayout.insertRow(
@@ -182,6 +191,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.isGeometryLockedDDButton.setVisible(False)
             self.isGeometryLockedCheckBox.setVisible(False)
 
+            self.valueMapButtonInterfaceSpinBox.setVisible(False)
             self.attachmentsRelationsGroupBox.setVisible(False)
             self.trackingSessionGroupBox.setVisible(False)
 
@@ -200,6 +210,11 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         prop = self.isGeometryLockedDDButton.toProperty()
         self.layer_source.is_geometry_locked_expression_active = prop.isActive()
         self.layer_source.geometry_locked_expression = prop.asExpression()
+        print(self.valueMapButtonInterfaceSpinBox.value())
+        print(self.valueMapButtonInterfaceSpinBox.value())
+        self.layer_source.value_map_button_interface_threshold = (
+            self.valueMapButtonInterfaceSpinBox.value()
+        )
         self.attachmentNamingTable.syncLayerSourceValues()
         self.relationshipConfigurationTable.syncLayerSourceValues()
 
