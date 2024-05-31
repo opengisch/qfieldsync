@@ -87,9 +87,57 @@
    <item>
     <widget class="QGroupBox" name="attachmentsRelationsGroupBox">
      <property name="title">
-      <string>Attachments and Relationships Settings</string>
+      <string>Feature Form, Attachments and Relationships Settings</string>
      </property>
      <layout class="QFormLayout" name="attachmentsRelationsLayout">
+      <item row="0" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="valueMapButtonInterfaceLayout">
+        <item>
+         <widget class="QLabel" name="valueMapButtonInterfaceLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Item threshold under which value map editor widgets will use a toggle buttons interface</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QgsSpinBox" name="valueMapButtonInterfaceSpinBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="suffix">
+           <string> item(s)</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>9999999</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="showClearButton">
+           <bool>true</bool>
+          </property>
+           <property name="clearValue">
+            <bool>false</bool>
+           </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>
