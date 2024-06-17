@@ -38,4 +38,5 @@ pip install -e libqfieldsync
 ```
 
 NOTE On more recent Linux distributions you might get an error `error: externally-managed-environment` and you have to pass additional `--break-system-packages`.
+
 Despite the name, we promise this is not going to break system packages.
