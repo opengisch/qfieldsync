@@ -383,15 +383,8 @@
             <property name="text">
              <string>Revert geofencing logic</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QLabel" name="geofencingInvertedLogicLabel">
-            <property name="text">
+            <property name="toolTip">
              <string>When the geofencing logic is reverted, the user alert will occur when the position is located outside the geofencing areas.</string>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
             </property>
            </widget>
           </item>
