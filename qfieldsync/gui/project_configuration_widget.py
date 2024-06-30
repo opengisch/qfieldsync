@@ -110,6 +110,19 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.event_eater = EventEater()
         self.attachmentDirsListWidget.installEventFilter(self.event_eater)
 
+        self.geofencingBehaviorComboBox.addItem(
+            self.tr("Alert users when inside an area"),
+            ProjectProperties.GeofencingBehavior.ALERT_INSIDE_AREAS,
+        )
+        self.geofencingBehaviorComboBox.addItem(
+            self.tr("Alert users when outside all areas"),
+            ProjectProperties.GeofencingBehavior.ALERT_OUTSIDE_AREAS,
+        )
+        self.geofencingBehaviorComboBox.addItem(
+            self.tr("Inform users when entering and leaving an area"),
+            ProjectProperties.GeofencingBehavior.INFORM_ENTER_LEAVE_AREAS,
+        )
+
         self.reloadProject()
 
     def reloadProject(self):
@@ -185,8 +198,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         )
         self.geofencingLayerComboBox.setLayer(geofencingLayer)
 
-        self.geofencingInvertLogicCheckBox.setChecked(
-            self.__project_configuration.geofencing_invert_logic
+        self.geofencingBehaviorComboBox.setCurrentIndex(
+            self.geofencingBehaviorComboBox.findData(
+                self.__project_configuration.geofencing_behavior
+            )
         )
 
         # Advanced settings
@@ -291,8 +306,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         except AttributeError:
             pass
 
-        self.__project_configuration.geofencing_invert_logic = (
-            self.geofencingInvertLogicCheckBox.isChecked()
+        self.__project_configuration.geofencing_behavior = (
+            self.geofencingBehaviorComboBox.currentData()
         )
 
         # Advanced settings
