@@ -368,7 +368,7 @@
           <item row="0" column="0" colspan="2">
            <widget class="QLabel" name="geofencingIntroductionLabel">
             <property name="text">
-             <string>When geofencing is activated, QField will provider feedback to users when the device position falls within or outside of areas defined by a selected polygon layer.</string>
+             <string>QField provides real-time feedback to users when their device position falls within or outside of areas defined by a selected polygon layer.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
