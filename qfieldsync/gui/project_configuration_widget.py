@@ -110,6 +110,19 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.event_eater = EventEater()
         self.attachmentDirsListWidget.installEventFilter(self.event_eater)
 
+        self.geofencingBehaviorComboBox.addItem(
+            self.tr("Alert users when inside an area"),
+            ProjectProperties.GeofencingBehavior.ALERT_INSIDE_AREAS,
+        )
+        self.geofencingBehaviorComboBox.addItem(
+            self.tr("Alert users when outside all areas"),
+            ProjectProperties.GeofencingBehavior.ALERT_OUTSIDE_AREAS,
+        )
+        self.geofencingBehaviorComboBox.addItem(
+            self.tr("Inform users when entering and leaving an area"),
+            ProjectProperties.GeofencingBehavior.INFORM_ENTER_LEAVE_AREAS,
+        )
+
         self.reloadProject()
 
     def reloadProject(self):
@@ -144,10 +157,16 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.mapThemeComboBox.addItem(theme)
 
         self.layerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
+
+        self.geofencingLayerComboBox.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.geofencingLayerComboBox.setAllowEmptyLayer(True)
+
         self.digitizingLogsLayerComboBox.setFilters(QgsMapLayerProxyModel.PointLayer)
         self.digitizingLogsLayerComboBox.setAllowEmptyLayer(True)
 
         self.__project_configuration = ProjectConfiguration(self.project)
+
+        # Base map settings
         self.createBaseMapGroupBox.setChecked(
             self.__project_configuration.create_base_map
         )
@@ -169,6 +188,23 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         )
         self.layerComboBox.setLayer(layer)
 
+        # Geofencing settings
+        self.geofencingGroupBox.setChecked(
+            self.__project_configuration.geofencing_active
+        )
+
+        geofencingLayer = QgsProject.instance().mapLayer(
+            self.__project_configuration.geofencing_layer
+        )
+        self.geofencingLayerComboBox.setLayer(geofencingLayer)
+
+        self.geofencingBehaviorComboBox.setCurrentIndex(
+            self.geofencingBehaviorComboBox.findData(
+                self.__project_configuration.geofencing_behavior
+            )
+        )
+
+        # Advanced settings
         digitizingLogsLayer = QgsProject.instance().mapLayer(
             self.__project_configuration.digitizing_logs_layer
         )
@@ -229,29 +265,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.cloudLayersConfigWidget.apply()
         self.cableLayersConfigWidget.apply()
 
+        # Base map settings
         self.__project_configuration.create_base_map = (
             self.createBaseMapGroupBox.isChecked()
         )
-        self.__project_configuration.base_map_theme = (
-            self.mapThemeComboBox.currentText()
-        )
-
-        # try/pass these because the save button is global for all
-        # project settings, not only QField
-        try:
-            self.__project_configuration.base_map_layer = (
-                self.layerComboBox.currentLayer().id()
-            )
-        except AttributeError:
-            pass
-        try:
-            self.__project_configuration.digitizing_logs_layer = (
-                self.digitizingLogsLayerComboBox.currentLayer().id()
-                if self.digitizingLogsLayerComboBox.currentLayer()
-                else ""
-            )
-        except AttributeError:
-            pass
 
         if self.singleLayerRadioButton.isChecked():
             self.__project_configuration.base_map_type = (
@@ -261,6 +278,47 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.__project_configuration.base_map_type = (
                 ProjectProperties.BaseMapType.MAP_THEME
             )
+
+        self.__project_configuration.base_map_theme = (
+            self.mapThemeComboBox.currentText()
+        )
+
+        # try/pass layer ID fetching because the save button is global for all
+        # project settings, not only QField
+        try:
+            self.__project_configuration.base_map_layer = (
+                self.layerComboBox.currentLayer().id()
+            )
+        except AttributeError:
+            pass
+
+        # Geofencing settings
+        self.__project_configuration.geofencing_active = (
+            self.geofencingGroupBox.isChecked()
+        )
+
+        try:
+            self.__project_configuration.geofencing_layer = (
+                self.geofencingLayerComboBox.currentLayer().id()
+                if self.geofencingLayerComboBox.currentLayer()
+                else ""
+            )
+        except AttributeError:
+            pass
+
+        self.__project_configuration.geofencing_behavior = (
+            self.geofencingBehaviorComboBox.currentData()
+        )
+
+        # Advanced settings
+        try:
+            self.__project_configuration.digitizing_logs_layer = (
+                self.digitizingLogsLayerComboBox.currentLayer().id()
+                if self.digitizingLogsLayerComboBox.currentLayer()
+                else ""
+            )
+        except AttributeError:
+            pass
 
         self.__project_configuration.base_map_mupp = float(
             self.mapUnitsPerPixel.value()
