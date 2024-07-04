@@ -20,7 +20,7 @@ on:
 jobs:
   code_check:
     name: Code check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
 
   # Run unit tests
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -68,7 +68,6 @@ jobs:
 
           sudo apt update
           sudo apt install qgis
-          sudo pip3 install --upgrade pip
           sudo pip3 install pytest nose2 mock
 
           pip3 install -r requirements.txt
@@ -76,7 +75,7 @@ jobs:
           xvfb-run pytest
 
   release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       OSGEO_USERNAME: mkuhn
       OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
@@ -94,7 +93,6 @@ jobs:
           sudo pip install qgis-plugin-ci
       - name: Package libqfieldsync
         run: |
-          python3 -m pip install pip -U  # https://github.com/pypa/setuptools/issues/3269
           pip wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
           mv libqfieldsync-*.whl qfieldsync/libqfieldsync.whl
       - name: Release
@@ -121,7 +119,7 @@ jobs:
           name: qfieldsync-plugin
           path: qfieldsync.0.1.zip
   package:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
@@ -147,7 +145,7 @@ jobs:
           path: ./qfieldsync.${{ github.event.inputs.ref }}.zip
 
   translations:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
     if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
