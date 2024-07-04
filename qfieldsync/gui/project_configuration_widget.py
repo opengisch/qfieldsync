@@ -204,6 +204,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             )
         )
 
+        self.geofencingPreventDigitizingCheckBox.setChecked(
+            self.__project_configuration.geofencing_prevent_digitizing
+        )
+
         # Advanced settings
         digitizingLogsLayer = QgsProject.instance().mapLayer(
             self.__project_configuration.digitizing_logs_layer
@@ -308,6 +312,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
         self.__project_configuration.geofencing_behavior = (
             self.geofencingBehaviorComboBox.currentData()
+        )
+
+        self.__project_configuration.geofencing_prevent_digitizing = (
+            self.geofencingPreventDigitizingCheckBox.isChecked()
         )
 
         # Advanced settings
