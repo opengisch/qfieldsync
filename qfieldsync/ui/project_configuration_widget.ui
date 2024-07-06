@@ -396,7 +396,7 @@
            <widget class="QComboBox" name="geofencingBehaviorComboBox"/>
           </item>
           <item row="3" column="0" colspan="2">
-           <widget class="QCheckBox" name="geofencingPreventDigitizingCheckBox">
+           <widget class="QCheckBox" name="geofencingShouldPreventDigitizingCheckBox">
             <property name="text">
              <string>Prevent digitizing when alerting</string>
             </property>
