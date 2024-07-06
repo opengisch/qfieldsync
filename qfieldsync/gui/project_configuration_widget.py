@@ -190,7 +190,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
         # Geofencing settings
         self.geofencingGroupBox.setChecked(
-            self.__project_configuration.geofencing_active
+            self.__project_configuration.geofencing_is_active
         )
 
         geofencingLayer = QgsProject.instance().mapLayer(
@@ -204,8 +204,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             )
         )
 
-        self.geofencingPreventDigitizingCheckBox.setChecked(
-            self.__project_configuration.geofencing_prevent_digitizing
+        self.geofencingShouldPreventDigitizingCheckBox.setChecked(
+            self.__project_configuration.geofencing_should_prevent_digitizing
         )
 
         # Advanced settings
@@ -297,7 +297,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             pass
 
         # Geofencing settings
-        self.__project_configuration.geofencing_active = (
+        self.__project_configuration.geofencing_is_active = (
             self.geofencingGroupBox.isChecked()
         )
 
@@ -314,8 +314,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.geofencingBehaviorComboBox.currentData()
         )
 
-        self.__project_configuration.geofencing_prevent_digitizing = (
-            self.geofencingPreventDigitizingCheckBox.isChecked()
+        self.__project_configuration.geofencing_should_prevent_digitizing = (
+            self.geofencingShouldPreventDigitizingCheckBox.isChecked()
         )
 
         # Advanced settings
