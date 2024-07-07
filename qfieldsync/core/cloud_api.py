@@ -115,7 +115,6 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
 
 
 class CloudNetworkAccessManager(QObject):
-
     token_changed = pyqtSignal()
     login_finished = pyqtSignal()
     logout_success = pyqtSignal()
@@ -726,7 +725,6 @@ class CloudReply:
 
 
 class CloudProjectsCache(QObject):
-
     projects_started = pyqtSignal()
     projects_updated = pyqtSignal()
     projects_error = pyqtSignal(str)

@@ -19,9 +19,10 @@
  ***************************************************************************/
 """
 
+# TODO check if this file should have any contents at all???
 # import qgis libs so that ve set the correct sip api version
-import pkgutil
+import pkgutil  # pylint: disable=W0611  # NOQA
 
 import qgis  # pylint: disable=W0611  # NOQA
 
-import qfieldsync
+import qfieldsync  # pylint: disable=W0611  # NOQA

@@ -183,9 +183,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             else:
                 self.show_project_local_dir_selection()
         else:
-            if (
-                self.network_manager.projects_cache.is_currently_open_project_cloud_local
-            ):
+            if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
                 reply = self.network_manager.projects_cache.refresh()
                 reply.finished.connect(lambda: self.show_project_compatibility_page())
 
