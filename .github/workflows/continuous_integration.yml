@@ -22,21 +22,11 @@ jobs:
     name: Code check
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
+      - uses: actions/setup-python@v3
 
-      - name: Install pipenv
-        run: pip install pipenv
-
-      - name: Check code formatting
-        run: |
-          pipenv install pre_commit
-          pipenv run python -m pre_commit run --all-files
+      - uses: pre-commit/action@v3.0.1
 
   # Run unit tests
   test:
