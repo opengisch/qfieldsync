@@ -55,7 +55,7 @@ jobs:
 
       - name: Test
         run: |
-          docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
+          docker compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
   test-22-04:
     runs-on: ubuntu-22.04
@@ -75,6 +75,10 @@ jobs:
           sudo apt install qgis
           sudo pip3 install pytest nose2 mock
 
+          # Upgrading `pip` fixes: "WARNING: Generating metadata for package libqfieldsync produced metadata for project name unknown. Fix your #egg=libqfieldsync fragments."
+          pip3 install --upgrade pip
+
+          # Install dependencies, including `libqfieldsync`
           pip3 install -r requirements.txt
 
           xvfb-run pytest

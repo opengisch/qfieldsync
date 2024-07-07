@@ -1,6 +1,7 @@
 flake8==2.5.5
 pep8-naming
 flake8-respect-noqa
+nose2
 pytest
 future
 transifex-client
