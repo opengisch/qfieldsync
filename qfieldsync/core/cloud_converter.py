@@ -42,7 +42,6 @@ class CloudConverter(QObject):
         project: QgsProject,
         export_dirname: str,
     ):
-
         super(CloudConverter, self).__init__(parent=None)
         self.project = project
         self.__layers = list()

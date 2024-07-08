@@ -24,11 +24,9 @@
 
 from __future__ import absolute_import
 
-import os
 import pathlib
 import sys
 
-import qgis.utils
 
 src_dir = pathlib.Path(__file__).parent.resolve()
 

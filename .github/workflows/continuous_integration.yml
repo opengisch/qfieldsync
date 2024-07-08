@@ -20,24 +20,17 @@ on:
 jobs:
   code_check:
     name: Code check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install pipenv
-        run: pip install pipenv
-      - name: Check code formatting
-        run: |
-          pipenv install pre_commit
-          pipenv run python -m pre_commit run --all-files
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v3
+
+      - uses: pre-commit/action@v3.0.1
 
   # Run unit tests
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -46,20 +39,22 @@ jobs:
       QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Test
         run: |
-          docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
+          docker compose -f .docker/docker-compose.yml run qgis /usr/src/.docker/run-docker-tests.sh
 
   test-22-04:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Test
         run: |
           wget -qO - https://qgis.org/downloads/qgis-2022.gpg.key | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/qgis-archive.gpg --import
@@ -68,15 +63,19 @@ jobs:
 
           sudo apt update
           sudo apt install qgis
-          sudo pip3 install --upgrade pip
           sudo pip3 install pytest nose2 mock
 
+          # Upgrading `pip` fixes: "WARNING: Generating metadata for package libqfieldsync produced metadata for project name unknown. Fix your #egg=libqfieldsync fragments."
+          pip3 install --upgrade pip
+
+          # Install dependencies, including `libqfieldsync`
           pip3 install -r requirements.txt
 
           xvfb-run pytest
 
   release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name == 'release' }}
     env:
       OSGEO_USERNAME: mkuhn
       OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
@@ -85,20 +84,21 @@ jobs:
       GITHUB_REF: ${{ github.ref }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
           sudo pip install qgis-plugin-ci
+
       - name: Package libqfieldsync
         run: |
-          python3 -m pip install pip -U  # https://github.com/pypa/setuptools/issues/3269
           pip wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
           mv libqfieldsync-*.whl qfieldsync/libqfieldsync.whl
+
       - name: Release
-        if: ${{ github.event_name == 'release' }}
         run: |
           RELEASE_VERSION=${GITHUB_REF##*/}
           RELEASE_TAG=${GITHUB_REF##*/}
@@ -110,36 +110,29 @@ jobs:
               --osgeo-password ${OSGEO_PASSWORD} \
               --asset-path qfieldsync/libqfieldsync.whl
 
-      - name: Package
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          qgis-plugin-ci package 0.1 \
-              --asset-path qfieldsync/libqfieldsync.whl
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: qfieldsync-plugin
-          path: qfieldsync.0.1.zip
   package:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
       GITHUB_REF: ${{ github.ref }}
-    if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           ref: ${{ github.event.inputs.ref }}
+
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
           sudo pip install qgis-plugin-ci
+
       - name: Release
         run: |
           qgis-plugin-ci package ${{ github.event.inputs.ref }} --transifex-token ${TX_TOKEN}
+
       - name: Upload release assets
         uses: actions/upload-artifact@v2
         with:
@@ -147,17 +140,19 @@ jobs:
           path: ./qfieldsync.${{ github.event.inputs.ref }}.zip
 
   translations:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
     if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Install dependencies
         run: sudo pip install qgis-plugin-ci
+
       - name: 🌍 Push translations
         run: |
           qgis-plugin-ci push-translation ${TX_TOKEN}

@@ -400,7 +400,6 @@ class CloudTransferrer(QObject):
 
 
 class FileTransfer(QObject):
-
     progress = pyqtSignal(int, int)
     finished = pyqtSignal()
 
