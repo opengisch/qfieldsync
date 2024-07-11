@@ -24,7 +24,7 @@ import os
 from typing import Callable
 
 from libqfieldsync.layer import LayerSource, SyncAction
-from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QPushButton, QCheckBox, QLineEdit
 from qgis.core import Qgis, QgsMapLayerModel, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
@@ -56,6 +56,17 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.project = project
         self.use_cloud_actions = use_cloud_actions
         self.layer_sources = layer_sources
+
+        # Add checkbox and text box filters
+        self.showVisibleLayersOnlyCheckbox = QCheckBox(self.tr("Show Visible Layers Only"))
+        self.textFilterBox = QLineEdit()
+        self.textFilterBox.setPlaceholderText(self.tr("Filter layers..."))
+        # Add to layout
+        self.gridLayout.addWidget(self.showVisibleLayersOnlyCheckbox)
+        self.gridLayout.addWidget(self.textFilterBox)
+        # Add reload project actions
+        self.showVisibleLayersOnlyCheckbox.stateChanged.connect(self.reloadProject)
+        self.textFilterBox.textChanged.connect(self.reloadProject)
 
         self.multipleToggleButton.setIcon(
             QIcon(
@@ -128,7 +139,20 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
+        
+        # Get filtered layers
+        show_visible_only = self.showVisibleLayersOnlyCheckbox.isChecked()
+        text_filter = self.textFilterBox.text().lower()
+        
         for layer_source in self.layer_sources:
+            layer_name = layer_source.layer.name().lower()
+            layer_visible = QgsProject.instance().layerTreeRoot().findLayer(layer_source.layer.id()).isVisible()
+            # Apply filter
+            if show_visible_only and not layer_visible:
+                continue
+            if text_filter and text_filter not in layer_name:
+                continue
+            
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer_source.layer.name())
@@ -141,6 +165,13 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             available_actions = self.get_available_actions(layer_source)
             set_available_actions(
                 cmb, available_actions, self.get_layer_action(layer_source)
+            )
+            
+            # Save the current action for the layer
+            cmb.currentIndexChanged.connect(
+                lambda index, l_source=layer_source: self.set_layer_action(
+                    l_source, cmb.itemData(index)
+                )
             )
 
             properties_btn = QPushButton()
