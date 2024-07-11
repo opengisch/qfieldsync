@@ -58,7 +58,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.layer_sources = layer_sources
 
         # Add checkbox and text box filters
-        self.showVisibleLayersOnlyCheckbox = QCheckBox(self.tr("Show Visible Layers Only"))
+        self.showVisibleLayersOnlyCheckbox = QCheckBox(
+            self.tr("Show Visible Layers Only")
+        )
         self.textFilterBox = QLineEdit()
         self.textFilterBox.setPlaceholderText(self.tr("Filter layers..."))
         # Add to layout
@@ -146,11 +148,13 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         
         for layer_source in self.layer_sources:
             layer_name = layer_source.layer.name().lower()
-            layer_visible = QgsProject.instance().layerTreeRoot().findLayer(layer_source.layer.id()).isVisible()
+            layer_visible = QgsProject.instance().layerTreeRoot().findLayer(
+                layer_source.layer.id()
+            ).isVisible()
             # Apply filter
             if show_visible_only and not layer_visible:
                 continue
-            if text_filter and text_filter not in layer_name:
+            if (text_filter) and (text_filter not in layer_name):
                 continue
             
             count = self.layersTable.rowCount()
