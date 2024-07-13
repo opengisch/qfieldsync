@@ -159,7 +159,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 continue
             if (text_filter) and (text_filter not in layer_name):
                 continue
-            
+
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer_source.layer.name())
