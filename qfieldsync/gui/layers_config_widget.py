@@ -141,16 +141,19 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        
+
         # Get filtered layers
         show_visible_only = self.showVisibleLayersOnlyCheckbox.isChecked()
         text_filter = self.textFilterBox.text().lower()
-        
+
         for layer_source in self.layer_sources:
             layer_name = layer_source.layer.name().lower()
-            layer_visible = QgsProject.instance().layerTreeRoot().findLayer(
-                layer_source.layer.id()
-            ).isVisible()
+            layer_visible = (
+                QgsProject.instance()
+                .layerTreeRoot()
+                .findLayer(layer_source.layer.id())
+                .isVisible()
+            )
             # Apply filter
             if show_visible_only and not layer_visible:
                 continue
@@ -170,7 +173,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             set_available_actions(
                 cmb, available_actions, self.get_layer_action(layer_source)
             )
-            
+
             # Save the current action for the layer
             cmb.currentIndexChanged.connect(
                 lambda index, l_source=layer_source: self.set_layer_action(
