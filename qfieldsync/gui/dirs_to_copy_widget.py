@@ -155,4 +155,3 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
                 #  print(i, checked_state)
 
         set_checked_state(self.dirsTreeWidget.invisibleRootItem())
-
