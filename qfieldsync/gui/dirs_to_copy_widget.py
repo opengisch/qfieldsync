@@ -150,8 +150,6 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
             item.setCheckState(0, checked_state)
 
             for i in range(item.childCount()):
-                child_item = item.child(i)
-                set_checked_state(child_item)
-                #  print(i, checked_state)
+                set_checked_state(item.child(i))
 
         set_checked_state(self.dirsTreeWidget.invisibleRootItem())
