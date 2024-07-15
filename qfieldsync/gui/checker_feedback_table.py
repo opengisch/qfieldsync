@@ -38,6 +38,15 @@ class CheckerFeedbackTable(QTableWidget):
         self.setRowCount(0)
         self.setMinimumHeight(100)
 
+        # When too much feedback, make sure the table does not force the buttons of the containing dialog to be below the screen edge.
+        try:
+            from qgis.utils import iface
+
+            max_height = int(iface.mapCanvas().size().height() / 3 * 2)
+        except Exception:
+            max_height = 400
+        self.setMaximumHeight(max_height)
+
         for layer_id in checker_feedback.feedbacks.keys():
             for feedback in checker_feedback.feedbacks[layer_id]:
                 row = self.rowCount()
