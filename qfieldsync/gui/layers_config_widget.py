@@ -144,7 +144,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         # Get filtered layers
         show_visible_only = self.showVisibleLayersOnlyCheckbox.isChecked()
-        text_filter = self.textFilterBox.text().lower()
+        filter_text = self.textFilterBox.text().lower()
 
         for layer_source in self.layer_sources:
             layer_name = layer_source.layer.name().lower()
