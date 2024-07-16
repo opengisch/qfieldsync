@@ -158,7 +158,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             if show_visible_only and not layer_visible:
                 continue
 
-            if text_filter and text_filter not in layer_name:
+            if filter_text and filter_text not in layer_name:
                 continue
 
             count = self.layersTable.rowCount()
@@ -176,11 +176,10 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             )
 
             # Save the current action for the layer
-            cmb.currentIndexChanged.connect(
-                lambda index, l_source=layer_source: self.set_layer_action(
-                    l_source, cmb.itemData(index)
-                )
-            )
+            def on_current_index_changed(index, layer_source):
+                self.set_layer_action(layer_source, cmb.itemData(index))
+
+            cmb.currentIndexChanged.connect(on_current_index_changed)
 
             properties_btn = QPushButton()
             properties_btn.setText(self.tr("Properties"))
