@@ -64,8 +64,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.textFilterBox = QLineEdit()
         self.textFilterBox.setPlaceholderText(self.tr("Filter layers..."))
         # Add to layout
-        self.gridLayout.addWidget(self.showVisibleLayersOnlyCheckbox)
-        self.gridLayout.addWidget(self.textFilterBox)
+        self.gridLayout.addWidget(self.showVisibleLayersOnlyCheckbox, 0, 1)
+        self.gridLayout.addWidget(self.textFilterBox, 0, 2)
+        self.gridLayout.addWidget(self.multipleToggleButton, 0, 3)
         # Add reload project actions
         self.showVisibleLayersOnlyCheckbox.stateChanged.connect(self.reloadProject)
         self.textFilterBox.textChanged.connect(self.reloadProject)
@@ -179,8 +180,10 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             def on_current_index_changed(index, layer_source):
                 self.set_layer_action(layer_source, cmb.itemData(index))
 
-            cmb.currentIndexChanged.connect(on_current_index_changed)
+            def cmb_index_changed(index):
+                on_current_index_changed(index, layer_source)
 
+            cmb.currentIndexChanged.connect(cmb_index_changed)
             properties_btn = QPushButton()
             properties_btn.setText(self.tr("Properties"))
             properties_btn.clicked.connect(self.propertiesBtn_clicked(layer_source))
