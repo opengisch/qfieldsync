@@ -157,7 +157,8 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             # Apply filter
             if show_visible_only and not layer_visible:
                 continue
-            if (text_filter) and (text_filter not in layer_name):
+
+            if text_filter and text_filter not in layer_name:
                 continue
 
             count = self.layersTable.rowCount()
