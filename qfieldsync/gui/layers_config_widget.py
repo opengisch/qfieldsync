@@ -24,7 +24,7 @@ import os
 from typing import Callable
 
 from libqfieldsync.layer import LayerSource, SyncAction
-from PyQt5.QtWidgets import QPushButton, QCheckBox, QLineEdit
+from PyQt5.QtWidgets import QPushButton
 from qgis.core import Qgis, QgsMapLayerModel, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
@@ -56,20 +56,6 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.project = project
         self.use_cloud_actions = use_cloud_actions
         self.layer_sources = layer_sources
-
-        # Add checkbox and text box filters
-        self.showVisibleLayersOnlyCheckbox = QCheckBox(
-            self.tr("Show Visible Layers Only")
-        )
-        self.textFilterBox = QLineEdit()
-        self.textFilterBox.setPlaceholderText(self.tr("Filter layers..."))
-        # Add to layout
-        self.gridLayout.addWidget(self.showVisibleLayersOnlyCheckbox, 0, 1)
-        self.gridLayout.addWidget(self.textFilterBox, 0, 2)
-        self.gridLayout.addWidget(self.multipleToggleButton, 0, 3)
-        # Add reload project actions
-        self.showVisibleLayersOnlyCheckbox.stateChanged.connect(self.reloadProject)
-        self.textFilterBox.textChanged.connect(self.reloadProject)
 
         self.multipleToggleButton.setIcon(
             QIcon(
@@ -107,6 +93,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             lambda msg: self._on_message_bus_messaged(msg)
         )
         message_bus.messaged.connect(self._on_message_bus_messaged_wrapper)
+
+        self.showVisibleLayersOnlyCheckbox.stateChanged.connect(self.reloadProject)
+        self.textFilterBox.textChanged.connect(self.reloadProject)
 
         self.reloadProject()
 
@@ -176,14 +165,6 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 cmb, available_actions, self.get_layer_action(layer_source)
             )
 
-            # Save the current action for the layer
-            def on_current_index_changed(index, layer_source):
-                self.set_layer_action(layer_source, cmb.itemData(index))
-
-            def cmb_index_changed(index):
-                on_current_index_changed(index, layer_source)
-
-            cmb.currentIndexChanged.connect(cmb_index_changed)
             properties_btn = QPushButton()
             properties_btn.setText(self.tr("Properties"))
             properties_btn.clicked.connect(self.propertiesBtn_clicked(layer_source))
