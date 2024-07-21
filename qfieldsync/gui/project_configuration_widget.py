@@ -36,6 +36,7 @@ from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
+from qfieldsync.gui.mapthemes_config_widget import MapThemesConfigWidget
 
 WidgetUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/project_configuration_widget.ui"),
@@ -152,7 +153,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.cloudExportTab.layout().addWidget(infoLabel, 0, 2)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
 
-        # Load Map Themes
+        # Map Themes configuration widgets
         for theme in self.project.mapThemeCollection().mapThemes():
             self.mapThemeComboBox.addItem(theme)
 
@@ -165,6 +166,11 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.digitizingLogsLayerComboBox.setAllowEmptyLayer(True)
 
         self.__project_configuration = ProjectConfiguration(self.project)
+
+        self.mapThemesConfigWidget = MapThemesConfigWidget(
+            self.project, self.__project_configuration.map_themes_active_layer
+        )
+        self.mapThemesGroupBox.layout().addWidget(self.mapThemesConfigWidget)
 
         # Base map settings
         self.createBaseMapGroupBox.setChecked(
@@ -370,6 +376,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         for item in self.attachmentDirsListWidget.findItems("^\\S+$", match_flag):
             keys[item.text()] = 1
         self.preferences.set_value("attachmentDirs", list(keys.keys()))
+
+        self.__project_configuration.map_themes_active_layer = (
+            self.mapThemesConfigWidget.createConfiguration()
+        )
 
     def onForceAutoPushClicked(self, checked):
         self.forceAutoPushInterval.setEnabled(checked)
