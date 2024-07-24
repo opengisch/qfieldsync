@@ -5,9 +5,9 @@
                                  A QGIS plugin
  Sync your projects to QField
                              -------------------
-        begin                : 2020-10-10
+        begin                : 2024-07-22
         git sha              : $Format:%H$
-        copyright            : (C) 2020 by OPENGIS.ch
+        copyright            : (C) 2024 by OPENGIS.ch
         email                : info@opengis.ch
  ***************************************************************************/
 
