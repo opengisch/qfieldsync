@@ -136,17 +136,21 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         show_visible_only = self.showVisibleLayersOnlyCheckbox.isChecked()
         filter_text = self.textFilterBox.text().lower()
 
-        for layer_source in self.layer_sources:
+        layers = []
+        if show_visible_only:
+            for layer_source in self.layer_sources:
+                if (
+                    QgsProject.instance()
+                    .layerTreeRoot()
+                    .findLayer(layer_source.layer.id())
+                    .isVisible()
+                ):
+                    layers.append(layer_source)
+        else:
+            layers = self.layer_sources
+
+        for layer_source in layers:
             layer_name = layer_source.layer.name().lower()
-            layer_visible = (
-                QgsProject.instance()
-                .layerTreeRoot()
-                .findLayer(layer_source.layer.id())
-                .isVisible()
-            )
-            # Apply filter
-            if show_visible_only and not layer_visible:
-                continue
 
             if filter_text and filter_text not in layer_name:
                 continue
