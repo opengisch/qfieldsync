@@ -94,6 +94,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         )
         message_bus.messaged.connect(self._on_message_bus_messaged_wrapper)
 
+        self.showVisibleLayersOnlyCheckbox.stateChanged.connect(self.reloadProject)
+        self.textFilterBox.textChanged.connect(self.reloadProject)
+
         self.reloadProject()
 
     def get_available_actions(self, layer_source):
@@ -128,7 +131,30 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
-        for layer_source in self.layer_sources:
+
+        # Get filtered layers
+        show_visible_only = self.showVisibleLayersOnlyCheckbox.isChecked()
+        filter_text = self.textFilterBox.text().lower()
+
+        layers = []
+        if show_visible_only:
+            for layer_source in self.layer_sources:
+                if (
+                    QgsProject.instance()
+                    .layerTreeRoot()
+                    .findLayer(layer_source.layer.id())
+                    .isVisible()
+                ):
+                    layers.append(layer_source)
+        else:
+            layers = self.layer_sources
+
+        for layer_source in layers:
+            layer_name = layer_source.layer.name().lower()
+
+            if filter_text and filter_text not in layer_name:
+                continue
+
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer_source.layer.name())
