@@ -88,15 +88,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.11'
-
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
-          sudo pip install qgis-plugin-ci
+          sudo pip install qgis-plugin-ci --break-system-packages
 
       - name: Package libqfieldsync
         run: |
@@ -156,7 +151,7 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        run: sudo pip install qgis-plugin-ci
+        run: sudo pip install qgis-plugin-ci --break-system-packages
 
       - name: 🌍 Push translations
         run: |
