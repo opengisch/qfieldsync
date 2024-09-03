@@ -309,7 +309,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
-        self.set_feedback("Loading projects list…", Qt.blue)
+        self.set_feedback(self.tr("Loading projects list…"), Qt.blue)
 
     def on_projects_cached_projects_error(self, error: str) -> None:
         self.projectsStack.setEnabled(True)
@@ -332,7 +332,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.current_cloud_project and self.current_cloud_project.id != project_id:
             return
 
-        self.set_feedback("Obtaining project files list failed: {}".format(error))
+        self.set_feedback(
+            self.tr("Obtaining project files list failed: {}").format(error)
+        )
 
     def on_project_files_toggle_expand_button_clicked(self) -> None:
         should_expand = not self.projectFilesTree.topLevelItem(0).data(1, Qt.UserRole)
@@ -555,7 +557,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         if len(self.network_manager.projects_cache.projects) == 0:
             self.set_feedback(
-                "You don't have any projects, create some by clicking the button in the bottom bar.",
+                self.tr(
+                    "You don't have any projects, create some by clicking the button in the bottom bar."
+                ),
                 Qt.blue,
             )
             return
