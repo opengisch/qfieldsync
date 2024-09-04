@@ -40,6 +40,7 @@ from qgis.PyQt.QtGui import (
     QFont,
     QIcon,
     QPainter,
+    QPalette,
     QPen,
     QPixmap,
     QRegularExpressionValidator,
@@ -309,7 +310,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
-        self.set_feedback(self.tr("Loading projects list…"), Qt.blue)
+        self.set_feedback(
+            self.tr("Loading projects list…"), self.palette().color(QPalette.WindowText)
+        )
 
     def on_projects_cached_projects_error(self, error: str) -> None:
         self.projectsStack.setEnabled(True)
@@ -560,7 +563,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.tr(
                     "You don't have any projects, create your first one by clicking the button in the bottom bar."
                 ),
-                Qt.blue,
+                self.palette().color(QPalette.WindowText),
             )
             return
 
