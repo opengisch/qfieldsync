@@ -558,7 +558,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if len(self.network_manager.projects_cache.projects) == 0:
             self.set_feedback(
                 self.tr(
-                    "You don't have any projects, create some by clicking the button in the bottom bar."
+                    "You don't have any projects, create your first one by clicking the button in the bottom bar."
                 ),
                 Qt.blue,
             )
