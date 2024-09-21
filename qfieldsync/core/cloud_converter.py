@@ -20,6 +20,7 @@
 """
 
 from pathlib import Path
+import re
 
 from libqfieldsync.layer import LayerSource
 from libqfieldsync.utils.file_utils import copy_attachments
@@ -50,6 +51,15 @@ class CloudConverter(QObject):
         self.trUtf8 = self.tr
 
         self.export_dirname = Path(export_dirname)
+
+        # Define forbidden characters for Windows filenames
+        self.forbidden_chars_pattern = re.compile(r'[<>:"/\\|?*]')
+
+    def is_valid_filename(self, filename: str) -> bool:
+        """
+        Check if the filename contains any forbidden characters.
+        """
+        return not self.forbidden_chars_pattern.search(filename)
 
     def convert(self) -> None:  # noqa: C901
         """
@@ -128,6 +138,17 @@ class CloudConverter(QObject):
                             self.project.removeMapLayer(layer)
                             continue
                 else:
+                    # Validate filenames before copying
+                    if not self.is_valid_filename(layer.name()):
+                        self.warning.emit(
+                            self.tr("Cloud Converter"),
+                            self.tr(
+                                "The layer '{}' has an invalid filename and was therefore removed from the cloud project."
+                            ).format(layer.name()),
+                        )
+                        self.project.removeMapLayer(layer)
+                        continue
+
                     layer_source.copy(self.export_dirname, list())
                 layer.setCustomProperty(
                     "QFieldSync/cloud_action", layer_source.default_cloud_action
