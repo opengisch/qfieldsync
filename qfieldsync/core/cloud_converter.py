@@ -20,10 +20,13 @@
 """
 
 from pathlib import Path
-import re
 
 from libqfieldsync.layer import LayerSource
-from libqfieldsync.utils.file_utils import copy_attachments
+from libqfieldsync.utils.file_utils import (
+    copy_attachments,
+    is_valid_filename,
+    is_valid_path,
+)
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir, make_temp_qgis_file
 from qgis.core import QgsMapLayer, QgsProject, QgsVirtualLayerDefinition
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QUrl, pyqtSignal
@@ -51,15 +54,6 @@ class CloudConverter(QObject):
         self.trUtf8 = self.tr
 
         self.export_dirname = Path(export_dirname)
-
-        # Define forbidden characters for Windows filenames
-        self.forbidden_chars_pattern = re.compile(r'[<>:"/\\|?*]')
-
-    def is_valid_filename(self, filename: str) -> bool:
-        """
-        Check if the filename contains any forbidden characters.
-        """
-        return not self.forbidden_chars_pattern.search(filename)
 
     def convert(self) -> None:  # noqa: C901
         """
@@ -138,12 +132,14 @@ class CloudConverter(QObject):
                             self.project.removeMapLayer(layer)
                             continue
                 else:
-                    # Validate filenames before copying
-                    if not self.is_valid_filename(layer.name()):
+                    # Validate filenames and paths before copying
+                    if not is_valid_filename(layer.name()) or not is_valid_path(
+                        layer.source()
+                    ):
                         self.warning.emit(
                             self.tr("Cloud Converter"),
                             self.tr(
-                                "The layer '{}' has an invalid filename and was therefore removed from the cloud project."
+                                "The layer '{}' has an invalid filename or path and was therefore removed from the cloud project."
                             ).format(layer.name()),
                         )
                         self.project.removeMapLayer(layer)
