@@ -22,11 +22,7 @@
 from pathlib import Path
 
 from libqfieldsync.layer import LayerSource
-from libqfieldsync.utils.file_utils import (
-    copy_attachments,
-    is_valid_filename,
-    is_valid_path,
-)
+from libqfieldsync.utils.file_utils import copy_attachments
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir, make_temp_qgis_file
 from qgis.core import QgsMapLayer, QgsProject, QgsVirtualLayerDefinition
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QUrl, pyqtSignal
@@ -34,6 +30,7 @@ from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qgis_utils import open_project
+from qfieldsync.utils.file_utils import is_valid_filename, is_valid_path
 
 
 class CloudConverter(QObject):
