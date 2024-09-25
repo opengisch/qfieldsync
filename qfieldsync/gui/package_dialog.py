@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 import os
+from pathlib import Path
 
 from libqfieldsync.layer import LayerSource
 from libqfieldsync.offline_converter import ExportType, OfflineConverter
@@ -54,8 +55,6 @@ from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 
-from ..utils.qt_utils import make_folder_selector
-
 DialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/package_dialog.ui")
 )
@@ -73,7 +72,6 @@ class PackageDialog(QDialog, DialogUi):
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
-        self.project_lbl.setText(get_project_title(self.project))
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
             self.package_project
@@ -105,15 +103,13 @@ class PackageDialog(QDialog, DialogUi):
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
-        export_dirname = self.qfield_preferences.value("exportDirectoryProject")
-        if not export_dirname:
-            export_dirname = os.path.join(
-                self.qfield_preferences.value("exportDirectory"),
-                fileparts(QgsProject.instance().fileName())[1],
-            )
+        self.packagedProjectTitleLineEdit.setText(get_project_title(self.project))
+        self.packagedProjectFileWidget.setFilter("QGIS Project Files (*.qgs)")
+        self.packagedProjectFileWidget.setConfirmOverwrite(True)
+        self.packagedProjectFileWidget.setFilePath(
+            self.get_export_filename_suggestion()
+        )
 
-        self.manualDir.setText(QDir.toNativeSeparators(str(export_dirname)))
-        self.manualDir_btn.clicked.connect(make_folder_selector(self.manualDir))
         self.update_info_visibility()
 
         self.nextButton.clicked.connect(lambda: self.show_package_page())
@@ -140,10 +136,27 @@ class PackageDialog(QDialog, DialogUi):
         else:
             self.show_package_page()
 
-    def get_export_folder_from_dialog(self):
+    def get_export_folder(self):
         """Get the export folder according to the inputs in the selected"""
-        # manual
-        return self.manualDir.text()
+        export_dirname = self.qfield_preferences.value("exportDirectoryProject")
+        if not export_dirname:
+            export_dirname = os.path.join(
+                self.qfield_preferences.value("exportDirectory"),
+                fileparts(QgsProject.instance().fileName())[1],
+            )
+        return QDir.toNativeSeparators(str(export_dirname))
+
+    def get_export_filename_suggestion(self):
+        export_folder = Path(self.get_export_folder())
+        full_project_name_suggestion = export_folder.joinpath(
+            f"{self.project.baseName()}_qfield.qgs"
+        )
+        return str(full_project_name_suggestion)
+
+    def set_export_filename_suggested(self):
+        self.packagedProjectFileWidget.setFilePath(
+            self.get_export_filename_suggestion()
+        )
 
     def show_package_page(self):
         self.nextButton.setVisible(False)
@@ -153,7 +166,7 @@ class PackageDialog(QDialog, DialogUi):
     def package_project(self):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
 
-        export_folder = self.get_export_folder_from_dialog()
+        packaged_project_file = Path(self.packagedProjectFileWidget.filePath())
         area_of_interest = (
             self.__project_configuration.area_of_interest
             if self.__project_configuration.area_of_interest
@@ -165,18 +178,21 @@ class PackageDialog(QDialog, DialogUi):
             else QgsProject.instance().crs().authid()
         )
 
-        self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
+        self.qfield_preferences.set_value(
+            "exportDirectoryProject", packaged_project_file.parent
+        )
         self.dirsToCopyWidget.save_settings()
 
         offline_convertor = OfflineConverter(
             self.project,
-            export_folder,
+            packaged_project_file,
             area_of_interest,
             area_of_interest_crs,
             self.qfield_preferences.value("attachmentDirs"),
             self.offliner,
             ExportType.Cable,
             dirs_to_copy=self.dirsToCopyWidget.dirs_to_copy(),
+            export_title=self.packagedProjectTitleLineEdit.text(),
         )
 
         # progress connections
@@ -206,7 +222,7 @@ class PackageDialog(QDialog, DialogUi):
         with a nice link to open the result folder.
         """
         if is_success:
-            export_folder = self.get_export_folder_from_dialog()
+            export_folder = str(Path(self.packagedProjectFileWidget.filePath()).parent)
             result_message = self.tr(
                 "Finished creating the project at {result_folder}. Please copy this folder to "
                 "your QField device."
