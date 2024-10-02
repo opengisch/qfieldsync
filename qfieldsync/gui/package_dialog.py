@@ -42,7 +42,7 @@ except ModuleNotFoundError:
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
-from libqfieldsync.utils.qgis import get_project_title
+from libqfieldsync.utils.qgis import get_project_title, open_project
 from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, QUrl
 from qgis.PyQt.QtGui import QIcon
@@ -189,6 +189,7 @@ class PackageDialog(QDialog, DialogUi):
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             offline_convertor.convert()
+            open_project(self.project.fileName())
             self.do_post_offline_convert_action(True)
         except Exception as err:
             self.do_post_offline_convert_action(False)
