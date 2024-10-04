@@ -130,9 +130,7 @@ class CloudConverter(QObject):
                             continue
                 else:
                     # Validate filenames and paths before copying
-                    if not is_valid_filename(layer.name()) or not is_valid_path(
-                        layer.source()
-                    ):
+                    if not is_valid_path(str(layer.filename)):
                         self.warning.emit(
                             self.tr("Cloud Converter"),
                             self.tr(
