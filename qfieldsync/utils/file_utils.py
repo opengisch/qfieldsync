@@ -74,7 +74,7 @@ def is_valid_filename(filename: str) -> bool:
     return bool(pattern.match(filename))
 
 
-def is_valid_path(path: str) -> bool:
+def is_valid_filepath(path: str) -> bool:
     """
     Check if the entire path is valid.
     """

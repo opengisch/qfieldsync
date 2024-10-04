@@ -30,7 +30,7 @@ from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qgis_utils import open_project
-from qfieldsync.utils.file_utils import is_valid_filename, is_valid_path
+from qfieldsync.utils.file_utils import is_valid_filepath
 
 
 class CloudConverter(QObject):
@@ -130,7 +130,7 @@ class CloudConverter(QObject):
                             continue
                 else:
                     # Validate filenames and paths before copying
-                    if not is_valid_path(str(layer.filename)):
+                    if not is_valid_filepath(str(layer.filename)):
                         self.warning.emit(
                             self.tr("Cloud Converter"),
                             self.tr(
