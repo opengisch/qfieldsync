@@ -74,7 +74,7 @@ class PackageDialog(QDialog, DialogUi):
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
         self.original_project_title = project.title()
-        self.new_project_title.setText(self.original_title_project)
+        self.packaged_project_title.setText(self.original_title_project)
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
             self.package_project
