@@ -69,7 +69,10 @@ def is_valid_filename(filename: str) -> bool:
     Check if the filename is valid.
     """
     pattern = re.compile(
-        r'\A(?!(?:COM[0-9]|CON|LPT[0-9]|NUL|PRN|AUX|com[0-9]|con|lpt[0-9]|nul|prn|aux)|\s|[\.]{2,})[^\\\/:*"?<>|]{1,254}(?<![\s\.])\z'
+        r'^(?!.*[<>:"/\\|?*])'
+        r"(?!(?:COM[0-9]|CON|LPT[0-9]|NUL|PRN|AUX|com[0-9]|con|lpt[0-9]|nul|prn|aux)$)"
+        r'[^\\\/:*"?<>|]{1,254}'
+        r"(?<![\s\.])$"
     )
     return bool(pattern.match(filename))
 

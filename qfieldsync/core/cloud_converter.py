@@ -128,18 +128,18 @@ class CloudConverter(QObject):
                             )
                             self.project.removeMapLayer(layer)
                             continue
-                else:
-                    # Validate filenames and paths before copying
-                    if not is_valid_filepath(str(layer.filename)):
-                        self.warning.emit(
-                            self.tr("Cloud Converter"),
-                            self.tr(
-                                "The layer '{}' has an invalid filename or path and was therefore removed from the cloud project."
-                            ).format(layer.name()),
-                        )
-                        self.project.removeMapLayer(layer)
-                        continue
 
+                        # Validate filenames and paths before copying
+                        if not is_valid_filepath(layer_source.filename):
+                            self.warning.emit(
+                                self.tr("Cloud Converter"),
+                                self.tr(
+                                    "The layer '{}' has an invalid filename or path and was therefore removed from the cloud project."
+                                ).format(layer.name()),
+                            )
+                            self.project.removeMapLayer(layer)
+                            continue
+                else:
                     layer_source.copy(self.export_dirname, list())
                 layer.setCustomProperty(
                     "QFieldSync/cloud_action", layer_source.default_cloud_action
