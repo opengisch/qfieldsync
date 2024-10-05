@@ -42,7 +42,7 @@ except ModuleNotFoundError:
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
-from libqfieldsync.utils.qgis import open_project
+from libqfieldsync.utils.qgis import open_project, make_temp_qgis_file
 from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, QUrl
 from qgis.PyQt.QtGui import QIcon
@@ -70,11 +70,15 @@ class PackageDialog(QDialog, DialogUi):
         self.iface = iface
         self.offliner = QgisCoreOffliner(offline_editing=offline_editing)
         self.project = project
+        self.original_project_path = self.project.fileName()
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
         self.original_project_title = project.title()
-        self.packaged_project_title.setText(self.original_title_project)
+        self.packaged_project_title.setText(self.original_project_title)
+        self.packaged_project_name.setText(self.project.baseName())
+        self.tmp_project = make_temp_qgis_file(self.project)
+
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
             self.package_project
@@ -169,7 +173,13 @@ class PackageDialog(QDialog, DialogUi):
         self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
         self.dirsToCopyWidget.save_settings()
 
-        self.project.setTitle(self.new_project_title.text())
+        tmp_path = os.path.dirname(self.tmp_project)
+
+        new_project_path = os.path.join(
+            tmp_path, f"{self.packaged_project_name.text()}.qgs"
+        )
+        self.project.write(new_project_path)
+        self.project.setFileName(new_project_path)
 
         offline_convertor = OfflineConverter(
             self.project,
@@ -192,8 +202,7 @@ class PackageDialog(QDialog, DialogUi):
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             offline_convertor.convert()
-            self.project.setTitle(self.original_title_project)
-            open_project(self.project.fileName())
+            open_project(self.original_project_path)
             self.do_post_offline_convert_action(True)
         except Exception as err:
             self.do_post_offline_convert_action(False)
