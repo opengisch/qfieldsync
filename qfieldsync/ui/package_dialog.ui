@@ -28,7 +28,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="packaged_project_name">
+    <widget class="QLineEdit" name="packaged_project_filename">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
