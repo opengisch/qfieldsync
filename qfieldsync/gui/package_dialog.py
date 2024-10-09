@@ -74,8 +74,7 @@ class PackageDialog(QDialog, DialogUi):
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
-        self.original_project_title = project.title()
-        self.packaged_project_title.setText(self.original_project_title)
+        self.packaged_project_title.setText(get_project_title(self.project))
         self.packaged_project_name.setText(self.project.baseName())
         self.tmp_project = make_temp_qgis_file(self.project)
 
