@@ -70,7 +70,7 @@ class PackageDialog(QDialog, DialogUi):
         self.iface = iface
         self.offliner = QgisCoreOffliner(offline_editing=offline_editing)
         self.project = project
-        self.original_project_path = self.project.fileName()
+        self._original_project_path = self.project.fileName()
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
