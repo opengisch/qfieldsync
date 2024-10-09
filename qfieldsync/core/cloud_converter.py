@@ -164,6 +164,7 @@ class CloudConverter(QObject):
             if is_converted:
                 iface.addProject(str(project_path))
             else:
+                print("cloud_converter", original_project_path, backup_project_path)
                 open_project(original_project_path, backup_project_path)
 
         self.total_progress_updated.emit(100, 100, self.tr("Finished"))

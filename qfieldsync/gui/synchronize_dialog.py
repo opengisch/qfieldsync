@@ -146,6 +146,8 @@ class SynchronizeDialog(QDialog, DialogUi):
                     )
                 )
 
+            print("start_synchronization", str(original_path), backup_project_path)
+
             if original_path.exists() and open_project(
                 str(original_path), backup_project_path
             ):
