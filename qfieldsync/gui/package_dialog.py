@@ -76,7 +76,7 @@ class PackageDialog(QDialog, DialogUi):
         self.__project_configuration = ProjectConfiguration(self.project)
         self.packaged_project_title.setText(get_project_title(self.project))
         self.packaged_project_name.setText(self.project.baseName())
-        self.tmp_project = make_temp_qgis_file(self.project)
+        self.tmp_project_filename = make_temp_qgis_file(self.project)
 
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
