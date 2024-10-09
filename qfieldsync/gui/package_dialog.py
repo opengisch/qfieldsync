@@ -172,7 +172,7 @@ class PackageDialog(QDialog, DialogUi):
         self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
         self.dirsToCopyWidget.save_settings()
 
-        tmp_path = os.path.dirname(self.tmp_project)
+        tmp_project_filepath = Path(self.tmp_project_filename).parent
 
         new_project_path = os.path.join(
             tmp_path, f"{self.packaged_project_name.text()}.qgs"
