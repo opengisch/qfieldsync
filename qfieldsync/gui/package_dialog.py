@@ -42,7 +42,7 @@ except ModuleNotFoundError:
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
-from libqfieldsync.utils.qgis import open_project, make_temp_qgis_file
+from libqfieldsync.utils.qgis import get_project_title
 from qgis.core import Qgis, QgsApplication, QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, QUrl
 from qgis.PyQt.QtGui import QIcon
@@ -70,13 +70,11 @@ class PackageDialog(QDialog, DialogUi):
         self.iface = iface
         self.offliner = QgisCoreOffliner(offline_editing=offline_editing)
         self.project = project
-        self._original_project_path = self.project.fileName()
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
+        self.packaged_project_filename.setText(self.project.baseName())
         self.packaged_project_title.setText(get_project_title(self.project))
-        self.packaged_project_name.setText(self.project.baseName())
-        self.tmp_project_filename = make_temp_qgis_file(self.project)
 
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
@@ -172,17 +170,11 @@ class PackageDialog(QDialog, DialogUi):
         self.qfield_preferences.set_value("exportDirectoryProject", export_folder)
         self.dirsToCopyWidget.save_settings()
 
-        tmp_project_filepath = Path(self.tmp_project_filename).parent
-
-        new_project_path = os.path.join(
-            tmp_path, f"{self.packaged_project_name.text()}.qgs"
-        )
-        self.project.write(new_project_path)
-        self.project.setFileName(new_project_path)
-
         offline_convertor = OfflineConverter(
             self.project,
             export_folder,
+            self.packaged_project_filename.text(),
+            self.packaged_project_title.text(),
             area_of_interest,
             area_of_interest_crs,
             self.qfield_preferences.value("attachmentDirs"),
@@ -201,7 +193,6 @@ class PackageDialog(QDialog, DialogUi):
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             offline_convertor.convert()
-            open_project(self.original_project_path)
             self.do_post_offline_convert_action(True)
         except Exception as err:
             self.do_post_offline_convert_action(False)

@@ -20,7 +20,7 @@
       <string notr="true">bold</string>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Packaged Project Name&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Packaged Project Name&lt;/span&gt;&lt;/p&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
