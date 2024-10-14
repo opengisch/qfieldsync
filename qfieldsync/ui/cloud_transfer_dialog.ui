@@ -416,7 +416,7 @@
            <item row="1" column="1">
             <widget class="QLineEdit" name="projectLocalDirValueLineEdit">
              <property name="styleSheet">
-              <string notr="true">[readOnly=&quot;true&quot;] {color: #808080; background-color: #F0F0F0;}&quot;);</string>
+              <string notr="true">[readOnly=&quot;true&quot;] {color: #808080; background-color: #F0F0F0;}</string>
              </property>
              <property name="readOnly">
               <bool>true</bool>
