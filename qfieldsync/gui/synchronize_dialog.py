@@ -113,7 +113,9 @@ class SynchronizeDialog(QDialog, DialogUi):
                 self.offline_editing.synchronize()
 
             project_config = ProjectConfiguration(QgsProject.instance())
-            original_path = Path(project_config.original_project_path or "")
+            original_path = Path(
+                current_path or project_config.original_project_path or ""
+            )
 
             if not original_path.exists():
                 answer = QMessageBox.warning(

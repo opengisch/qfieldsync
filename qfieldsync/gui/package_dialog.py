@@ -73,7 +73,9 @@ class PackageDialog(QDialog, DialogUi):
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
-        self.project_lbl.setText(get_project_title(self.project))
+        self.packaged_project_filename.setText(self.project.baseName())
+        self.packaged_project_title.setText(get_project_title(self.project))
+
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
             self.package_project
@@ -171,6 +173,8 @@ class PackageDialog(QDialog, DialogUi):
         offline_convertor = OfflineConverter(
             self.project,
             export_folder,
+            self.packaged_project_filename.text(),
+            self.packaged_project_title.text(),
             area_of_interest,
             area_of_interest_crs,
             self.qfield_preferences.value("attachmentDirs"),
