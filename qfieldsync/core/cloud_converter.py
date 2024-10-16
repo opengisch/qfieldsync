@@ -30,6 +30,7 @@ from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qgis_utils import open_project
+from qfieldsync.utils.file_utils import is_valid_filepath
 
 
 class CloudConverter(QObject):
@@ -123,6 +124,17 @@ class CloudConverter(QObject):
                                 self.tr("Cloud Converter"),
                                 self.tr(
                                     "The layer '{}' could not be converted and was therefore removed from the cloud project."
+                                ).format(layer.name()),
+                            )
+                            self.project.removeMapLayer(layer)
+                            continue
+
+                        # Validate filenames and paths before copying
+                        if not is_valid_filepath(layer_source.filename):
+                            self.warning.emit(
+                                self.tr("Cloud Converter"),
+                                self.tr(
+                                    "The layer '{}' has an invalid filename or path and was therefore removed from the cloud project."
                                 ).format(layer.name()),
                             )
                             self.project.removeMapLayer(layer)

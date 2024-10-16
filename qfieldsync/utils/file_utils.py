@@ -21,6 +21,7 @@
 from enum import Enum
 from pathlib import Path
 from typing import List, TypedDict, Union
+import re
 
 PathLike = Union[Path, str]
 
@@ -61,3 +62,30 @@ def path_to_dict(path: PathLike, dirs_only: bool = False) -> DirectoryTreeDict:
     node["content"].sort(key=lambda node: node["path"].name)
 
     return node
+
+
+def is_valid_filename(filename: str) -> bool:
+    """
+    Check if the filename is valid.
+    """
+    pattern = re.compile(
+        r'^(?!.*[<>:"/\\|?*])'
+        r"(?!(?:COM[0-9]|CON|LPT[0-9]|NUL|PRN|AUX|com[0-9]|con|lpt[0-9]|nul|prn|aux)$)"
+        r'[^\\\/:*"?<>|]{1,254}'
+        r"(?<![\s\.])$"
+    )
+    return bool(pattern.match(filename))
+
+
+def is_valid_filepath(path: str) -> bool:
+    """
+    Check if the entire path is valid.
+    """
+    try:
+        path_obj = Path(path)
+        for part in path_obj.parts:
+            if not is_valid_filename(part):
+                return False
+        return True
+    except Exception:
+        return False
