@@ -226,9 +226,14 @@ class CloudNetworkAccessManager(QObject):
         if not server_url:
             server_url = CloudNetworkAccessManager.server_urls()[0]
 
-        # Ignore the URL path, as we assume the url is always /api/v1. Assume the URL has a scheme or at least starts with leading //.
+        # Ignore the URL path in certain conditions. Assume the URL has a scheme or at least starts with leading //.
         p = urlparse(server_url)
-        self.url = f"{p.scheme or 'https'}://{p.netloc}/"
+
+        if p.path.startswith("/api") or p.path == "/":
+            self.url = f"{p.scheme or 'https'}://{p.netloc}/"
+        else:
+            self.url = f"{p.scheme or 'https'}://{p.netloc}{p.path}"
+        
         self.preferences.set_value("qfieldCloudServerUrl", server_url)
 
     @property
