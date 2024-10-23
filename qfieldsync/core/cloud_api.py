@@ -340,7 +340,13 @@ class CloudNetworkAccessManager(QObject):
     def get_files(self, project_id: str, client: str = "qgis") -> QNetworkReply:
         """Get project files and their versions"""
 
-        return self.cloud_get(["files", project_id], {"client": client})
+        return self.cloud_get(
+            ["files", project_id],
+            {
+                "client": client,
+                "skip_metadata": 1,
+            },
+        )
 
     def get_file(self, url: QUrl, local_filename: str) -> QNetworkReply:
         """Download file from external URL"""
