@@ -84,7 +84,7 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
 
 
 class ProjectFile:
-    def __init__(self, data: Dict[str, Any], local_dir: str = None) -> None:
+    def __init__(self, data: Dict[str, Any], local_dir: Optional[str] = None) -> None:
         self._local_dir = local_dir
         self._temp_dir = None
         self._data = data
@@ -149,6 +149,8 @@ class ProjectFile:
     def local_size(self) -> Optional[int]:
         if not self.local_path_exists:
             return
+
+        assert self.local_path
 
         return self.local_path.stat().st_size
 
