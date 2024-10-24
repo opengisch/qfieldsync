@@ -7,43 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>599</width>
-    <height>570</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Package Project for QField</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Project:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="textFormat">
-        <enum>Qt::RichText</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="project_lbl">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
@@ -111,16 +81,25 @@
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Export Directory</string>
+          <string>Packaged Project Title</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
-           <widget class="QLineEdit" name="manualDir"/>
+           <widget class="QLineEdit" name="packagedProjectTitleLineEdit"/>
           </item>
-          <item row="0" column="1">
-           <widget class="QToolButton" name="manualDir_btn">
-            <property name="text">
-             <string>...</string>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Packaged Project Filename</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0" colspan="2">
+           <widget class="QgsFileWidget" name="packagedProjectFileWidget">
+            <property name="storageMode">
+             <enum>QgsFileWidget::SaveFile</enum>
             </property>
            </widget>
           </item>
@@ -278,6 +257,11 @@
    <extends>QGroupBox</extends>
    <header>qgscollapsiblegroupbox.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QgsFileWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsfilewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
