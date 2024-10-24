@@ -74,7 +74,7 @@ class PackageDialog(QDialog, DialogUi):
         self.__project_configuration = ProjectConfiguration(self.project)
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
-            self.package_project
+            self.run_package_project
         )
         self.button_box.button(QDialogButtonBox.Reset).setText(
             self.tr("Configure current project...")
@@ -162,6 +162,20 @@ class PackageDialog(QDialog, DialogUi):
         self.nextButton.setVisible(False)
         self.button_box.setVisible(True)
         self.stackedWidget.setCurrentWidget(self.packagePage)
+
+    def run_package_project(self):
+        export_packaged_project = Path(self.packagedProjectFileWidget.filePath())
+
+        if export_packaged_project.suffix != ".qgs":
+            QMessageBox.critical(
+                self,
+                self.tr("Invalid File"),
+                self.tr('The filename must have a ".qgs" extension.'),
+            )
+            return
+
+        else:
+            self.package_project()
 
     def package_project(self):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
