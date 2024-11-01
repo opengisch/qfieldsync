@@ -136,7 +136,7 @@ class PackageDialog(QDialog, DialogUi):
         else:
             self.show_package_page()
 
-    def get_export_folder(self):
+    def get_export_folder(self) -> str:
         """Get the export folder according to the inputs in the selected"""
         export_dirname = self.qfield_preferences.value("exportDirectoryProject")
         if not export_dirname:
@@ -146,14 +146,14 @@ class PackageDialog(QDialog, DialogUi):
             )
         return QDir.toNativeSeparators(str(export_dirname))
 
-    def get_export_filename_suggestion(self):
+    def get_export_filename_suggestion(self) -> str:
         export_folder = Path(self.get_export_folder())
         full_project_name_suggestion = export_folder.joinpath(
             f"{self.project.baseName()}_qfield.qgs"
         )
         return str(full_project_name_suggestion)
 
-    def set_export_filename_suggested(self):
+    def set_export_filename_suggested(self) -> None:
         self.packagedProjectFileWidget.setFilePath(
             self.get_export_filename_suggestion()
         )
@@ -163,13 +163,13 @@ class PackageDialog(QDialog, DialogUi):
         self.button_box.setVisible(True)
         self.stackedWidget.setCurrentWidget(self.packagePage)
 
-    def run_package_project(self):
+    def run_package_project(self) -> None:
         export_packaged_project = Path(self.packagedProjectFileWidget.filePath())
 
         if export_packaged_project.suffix != ".qgs":
             QMessageBox.critical(
                 self,
-                self.tr("Invalid File"),
+                self.tr("Invalid Filename"),
                 self.tr('The filename must have a ".qgs" extension.'),
             )
             return
