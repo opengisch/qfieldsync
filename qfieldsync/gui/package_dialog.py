@@ -136,27 +136,19 @@ class PackageDialog(QDialog, DialogUi):
         else:
             self.show_package_page()
 
-    def get_export_folder(self) -> str:
-        """Get the export folder according to the inputs in the selected"""
+    def get_export_filename_suggestion(self) -> str:
+        """Get the suggested export filename"""
         export_dirname = self.qfield_preferences.value("exportDirectoryProject")
         if not export_dirname:
             export_dirname = os.path.join(
                 self.qfield_preferences.value("exportDirectory"),
                 fileparts(QgsProject.instance().fileName())[1],
             )
-        return QDir.toNativeSeparators(str(export_dirname))
-
-    def get_export_filename_suggestion(self) -> str:
-        export_folder = Path(self.get_export_folder())
+        export_folder = Path(QDir.toNativeSeparators(str(export_dirname)))
         full_project_name_suggestion = export_folder.joinpath(
             f"{self.project.baseName()}_qfield.qgs"
         )
         return str(full_project_name_suggestion)
-
-    def set_export_filename_suggested(self) -> None:
-        self.packagedProjectFileWidget.setFilePath(
-            self.get_export_filename_suggestion()
-        )
 
     def show_package_page(self):
         self.nextButton.setVisible(False)
