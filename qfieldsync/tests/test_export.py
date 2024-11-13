@@ -70,7 +70,7 @@ class OfflineConverterTest(unittest.TestCase):
         offline_editing = QgsOfflineEditing()
         offline_converter = OfflineConverter(
             project,
-            str(self.target_dir),
+            self.target_dir.joinpath("project_qfield.qgs"),
             "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
             QgsProject.instance().crs().authid(),
             ["DCIM"],
@@ -110,7 +110,7 @@ class OfflineConverterTest(unittest.TestCase):
         offline_editing = QgsOfflineEditing()
         offline_converter = OfflineConverter(
             project,
-            str(self.target_dir),
+            self.target_dir.joinpath("project_qfield.qgs"),
             "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
             QgsProject.instance().crs().authid(),
             ["DCIM"],
