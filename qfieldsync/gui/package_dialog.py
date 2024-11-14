@@ -55,6 +55,8 @@ from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
 from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 
+MAX_LENGTH_CHARS_FILEPATH = 200
+
 DialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/package_dialog.ui")
 )
@@ -74,7 +76,7 @@ class PackageDialog(QDialog, DialogUi):
         self.__project_configuration = ProjectConfiguration(self.project)
         self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
         self.button_box.button(QDialogButtonBox.Save).clicked.connect(
-            self.run_package_project
+            self.package_project
         )
         self.button_box.button(QDialogButtonBox.Reset).setText(
             self.tr("Configure current project...")
@@ -109,6 +111,13 @@ class PackageDialog(QDialog, DialogUi):
         self.packagedProjectFileWidget.setFilePath(
             self.get_export_filename_suggestion()
         )
+
+        self.packagedProjectFileWidget.lineEdit().textChanged.connect(
+            self._validate_packaged_project_filename
+        )
+        self.packagedProjectFileFeedbackLabel.setStyleSheet("color: red;")
+        self.packagedProjectFileFeedbackLabel.setWordWrap(True)
+        self.packagedProjectFileFeedbackLabel.hide()
 
         self.update_info_visibility()
 
@@ -155,19 +164,31 @@ class PackageDialog(QDialog, DialogUi):
         self.button_box.setVisible(True)
         self.stackedWidget.setCurrentWidget(self.packagePage)
 
-    def run_package_project(self) -> None:
+    def _validate_packaged_project_filename(self) -> None:
+        """Check multiple conditions for the packaged project file and show feedback."""
         export_packaged_project = Path(self.packagedProjectFileWidget.filePath())
+        feedback_messages = []
 
-        if export_packaged_project.suffix != ".qgs":
-            QMessageBox.critical(
-                self,
-                self.tr("Invalid Filename"),
-                self.tr('The filename must have a ".qgs" extension.'),
+        if export_packaged_project.suffix.lower() != ".qgs":
+            feedback_messages.append(
+                self.tr('The filename must have a ".qgs" extension')
             )
-            return
 
-        else:
-            self.package_project()
+        if len(export_packaged_project.as_posix()) > MAX_LENGTH_CHARS_FILEPATH:
+            feedback_messages.append(
+                self.tr(
+                    "Warning: File path exceeds 200 characters. "
+                    "Longer paths may not be handled properly by your file system."
+                )
+            )
+
+        feedback_text = "\n".join(feedback_messages)
+        self.packagedProjectFileFeedbackLabel.setText(feedback_text)
+        self.packagedProjectFileFeedbackLabel.setVisible(bool(feedback_text))
+
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(
+            not feedback_messages
+        )
 
     def package_project(self):
         self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
