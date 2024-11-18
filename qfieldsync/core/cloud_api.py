@@ -226,7 +226,7 @@ class CloudNetworkAccessManager(QObject):
         if not server_url:
             server_url = CloudNetworkAccessManager.server_urls()[0]
 
-        # Ignore the URL path in certain conditions. Assume the URL has a scheme or at least starts with leading //.
+        # Assume the URL has a scheme or at least starts with leading //.
         p = urlparse(server_url)
 
         if p.path.startswith("/api") or p.path == "/":
