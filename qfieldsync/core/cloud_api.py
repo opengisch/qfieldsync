@@ -226,9 +226,15 @@ class CloudNetworkAccessManager(QObject):
         if not server_url:
             server_url = CloudNetworkAccessManager.server_urls()[0]
 
-        # Ignore the URL path, as we assume the url is always /api/v1. Assume the URL has a scheme or at least starts with leading //.
+        # Assume the URL has a scheme or at least starts with leading //.
         p = urlparse(server_url)
-        self.url = f"{p.scheme or 'https'}://{p.netloc}/"
+
+        # QFieldSync will automatically append `/api/v1` to the path, so prevent double append like `/api/v1/api/v1`.
+        if p.path.startswith("/api/v1"):
+            self.url = f"{p.scheme or 'https'}://{p.netloc}/"
+        else:
+            self.url = f"{p.scheme or 'https'}://{p.netloc}{p.path}"
+
         self.preferences.set_value("qfieldCloudServerUrl", server_url)
 
     @property
