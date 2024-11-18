@@ -229,7 +229,8 @@ class CloudNetworkAccessManager(QObject):
         # Assume the URL has a scheme or at least starts with leading //.
         p = urlparse(server_url)
 
-        if p.path.startswith("/api") or p.path == "/":
+        // QFieldSync will automatically append `/api/v1` to the path, so prevent double append like `/api/v1/api/v1`.
+        if p.path.startswith("/api/v1"):
             self.url = f"{p.scheme or 'https'}://{p.netloc}/"
         else:
             self.url = f"{p.scheme or 'https'}://{p.netloc}{p.path}"
