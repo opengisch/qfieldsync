@@ -206,7 +206,7 @@ class PackageDialog(QDialog, DialogUi):
         )
 
         self.qfield_preferences.set_value(
-            "exportDirectoryProject", packaged_project_file.parent
+            "exportDirectoryProject", str(packaged_project_file.parent)
         )
         self.dirsToCopyWidget.save_settings()
 
