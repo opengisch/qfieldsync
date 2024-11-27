@@ -688,6 +688,11 @@ class CloudNetworkAccessManager(QObject):
             self.avatar_success.emit()
 
     def get_last_login_error(self) -> str:
+        try:
+            requests.get(self.url, timeout=5)
+        except requests.ConnectionError:
+            return self.tr("No internet connection. Check your connection.")
+
         if self.has_token():
             return ""
 
@@ -704,10 +709,9 @@ class CloudNetworkAccessManager(QObject):
         if not error_str:
             error_str = self.tr("Sign in failed.")
 
-        html = '<a href="https://app.qfield.cloud/accounts/password/reset/">{}?</a>'.format(
-            self.tr("Forgot password")
+        html = '<a href="{}accounts/password/reset/">{}?</a>'.format(
+            self.url, self.tr("Forgot password")
         )
-
         return self.tr("{}. {}").format(error_str, html)
 
     def _clear_cloud_cookies(self, url: QUrl) -> None:
