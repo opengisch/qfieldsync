@@ -688,31 +688,45 @@ class CloudNetworkAccessManager(QObject):
             self.avatar_success.emit()
 
     def get_last_login_error(self) -> str:
-        try:
-            requests.get(self.url, timeout=5)
-        except requests.ConnectionError:
-            return self.tr("No internet connection. Check your connection.")
-
         if self.has_token():
             return ""
 
+        suggest_forgotten_password = True
         error_str = ""
+
         if self._login_error:
-            http_code = self._login_error.httpCode
-            if http_code and http_code >= 500:
-                error_str = self.tr("Server error {}").format(http_code)
-            elif http_code is None or (http_code >= 400 and http_code < 500):
-                error_str = str(self._login_error)
+            reply = self._login_error.reply
+
+            if (
+                reply.error() == QNetworkReply.HostNotFoundError
+                # network unreachable goes here
+                or reply.error() == QNetworkReply.UnknownNetworkError
+            ):
+                error_str = self.tr(
+                    "Failed to connect to {}. Check your internet connection.".format(
+                        self.url
+                    )
+                )
+                suggest_forgotten_password = False
+            else:
+                http_code = self._login_error.httpCode
+
+                if http_code and http_code >= 500:
+                    error_str = self.tr("Server error {}").format(http_code)
+                elif http_code is None or (http_code >= 400 and http_code < 500):
+                    error_str = str(self._login_error)
 
         error_str = strip_html(error_str).strip()
 
         if not error_str:
             error_str = self.tr("Sign in failed.")
 
-        html = '<a href="{}accounts/password/reset/">{}?</a>'.format(
-            self.url, self.tr("Forgot password")
-        )
-        return self.tr("{}. {}").format(error_str, html)
+        if suggest_forgotten_password:
+            error_str += ' <a href="{}accounts/password/reset/">{}?</a>'.format(
+                self.url, self.tr("Forgot password")
+            )
+
+        return error_str
 
     def _clear_cloud_cookies(self, url: QUrl) -> None:
         """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
