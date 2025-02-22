@@ -23,9 +23,8 @@
 
 from qgis.core import QgsMapLayerProxyModel
 from qgis.gui import QgsMapLayerComboBox
-
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QTableWidgetItem, QTableWidget
+from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
 
 
 class MapThemesConfigWidget(QTableWidget):
