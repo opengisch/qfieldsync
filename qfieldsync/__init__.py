@@ -27,7 +27,6 @@ from __future__ import absolute_import
 import pathlib
 import sys
 
-
 src_dir = pathlib.Path(__file__).parent.resolve()
 
 libqfieldsync_whl = src_dir / "libqfieldsync.whl"
