@@ -90,8 +90,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.on_cancel_button_clicked
         )
 
-        self.serverUrlLabel.setVisible(False)
-        self.serverUrlCmb.setVisible(False)
         for server_url in self.network_manager.server_urls():
             self.serverUrlCmb.addItem(server_url)
 
@@ -117,6 +115,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.qfieldCloudIcon.mouseDoubleClickEvent = (
             lambda event: self.toggle_server_url_visibility()
         )
+        self.toggle_server_url_visibility(True)
+
         self.rejected.connect(self.on_rejected)
         self.hide()
 
@@ -126,9 +126,16 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.parent().setEnabled(True)
             self.setEnabled(True)
 
-    def toggle_server_url_visibility(self) -> None:
-        self.serverUrlLabel.setVisible(not self.serverUrlLabel.isVisible())
-        self.serverUrlCmb.setVisible(not self.serverUrlCmb.isVisible())
+    def toggle_server_url_visibility(self, state: bool = ...) -> None:
+        if state is ...:
+            state = not self.serverUrlLabel.isVisible()
+        self.serverUrlLabel.setVisible(state)
+        self.serverUrlCmb.setVisible(state)
+        self.qfieldCloudIcon.setToolTip(
+            self.tr(
+                f"Double-click me to {'hide' if state else 'show'} advanced options"
+            )
+        )
 
     def authenticate(self) -> None:
         self.usernameLineEdit.setEnabled(True)
