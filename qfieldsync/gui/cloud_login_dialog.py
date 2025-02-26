@@ -115,7 +115,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.qfieldCloudIcon.mouseDoubleClickEvent = (
             lambda event: self.toggle_server_url_visibility()
         )
-        self.toggle_server_url_visibility(True)
+        self.toggle_server_url_visibility(False)
 
         self.rejected.connect(self.on_rejected)
         self.hide()
