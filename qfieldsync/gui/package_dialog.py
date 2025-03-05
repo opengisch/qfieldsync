@@ -22,9 +22,14 @@
 """
 import os
 from pathlib import Path
+from typing import Optional
 
 from libqfieldsync.layer import LayerSource
-from libqfieldsync.offline_converter import ExportType, OfflineConverter
+from libqfieldsync.offline_converter import (
+    ExportType,
+    OfflineConverter,
+    PackagingCanceledException,
+)
 
 # TODO this try/catch was added due to module structure changes in QFS 4.8.0. Remove this as enough time has passed since March 2024.
 try:
@@ -63,6 +68,8 @@ DialogUi, _ = loadUiType(
 
 
 class PackageDialog(QDialog, DialogUi):
+    _offline_convertor: Optional[OfflineConverter] = None
+
     def __init__(self, iface, project, offline_editing, parent=None):
         """Constructor."""
         super(PackageDialog, self).__init__(parent=parent)
@@ -99,9 +106,19 @@ class PackageDialog(QDialog, DialogUi):
 
         self.offliner.warning.connect(self.show_warning)
 
+        self.rejected.connect(self.cancel)
+
     def update_progress(self, sent, total):
         progress = float(sent) / total * 100
         self.progress_bar.setValue(progress)
+
+    def cancel(self) -> None:
+        """
+        Cancels an ongoing packaging export, if there is any running.
+        Typically used when the user rejects the dialog.
+        """
+        if self._offline_convertor:
+            self._offline_convertor.cancel()
 
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
@@ -210,7 +227,7 @@ class PackageDialog(QDialog, DialogUi):
         )
         self.dirsToCopyWidget.save_settings()
 
-        offline_convertor = OfflineConverter(
+        self._offline_convertor = OfflineConverter(
             self.project,
             packaged_project_file,
             area_of_interest,
@@ -223,21 +240,25 @@ class PackageDialog(QDialog, DialogUi):
         )
 
         # progress connections
-        offline_convertor.total_progress_updated.connect(self.update_total)
-        offline_convertor.task_progress_updated.connect(self.update_task)
-        offline_convertor.warning.connect(
+        self._offline_convertor.total_progress_updated.connect(self.update_total)
+        self._offline_convertor.task_progress_updated.connect(self.update_task)
+        self._offline_convertor.warning.connect(
             lambda title, body: QMessageBox.warning(None, title, body)
         )
 
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
-            offline_convertor.convert()
+            self._offline_convertor.convert()
             self.do_post_offline_convert_action(True)
+        except PackagingCanceledException:
+            # packaging was canceled by user, we do nothing.
+            return
         except Exception as err:
             self.do_post_offline_convert_action(False)
             raise err
         finally:
             QApplication.restoreOverrideCursor()
+            self._offline_convertor = None
 
         self.accept()
 

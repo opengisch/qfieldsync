@@ -229,6 +229,14 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
         self.mapUnitsPerPixel.setValue(self.__project_configuration.base_map_mupp)
         self.tileSize.setValue(self.__project_configuration.base_map_tile_size)
+
+        self.baseMapTilesMinZoomLevelSpinBox.setValue(
+            self.__project_configuration.base_map_tiles_min_zoom_level
+        )
+        self.baseMapTilesMaxZoomLevelSpinBox.setValue(
+            self.__project_configuration.base_map_tiles_max_zoom_level
+        )
+
         self.onlyOfflineCopyFeaturesInAoi.setChecked(
             self.__project_configuration.offline_copy_only_aoi
         )
@@ -338,6 +346,13 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.mapUnitsPerPixel.value()
         )
         self.__project_configuration.base_map_tile_size = self.tileSize.value()
+
+        self.__project_configuration.base_map_tiles_min_zoom_level = (
+            self.baseMapTilesMinZoomLevelSpinBox.value()
+        )
+        self.__project_configuration.base_map_tiles_max_zoom_level = (
+            self.baseMapTilesMaxZoomLevelSpinBox.value()
+        )
 
         self.__project_configuration.maximum_image_width_height = (
             self.maximumImageWidthHeight.value()
