@@ -24,14 +24,27 @@
 
 from __future__ import absolute_import
 
+import importlib
 import pathlib
+import re
 import sys
 
 src_dir = pathlib.Path(__file__).parent.resolve()
 
-libqfieldsync_whl = src_dir / "libqfieldsync.whl"
-if libqfieldsync_whl.exists():
+# remove previously loaded `libqfieldsync.whl` from the python import path
+for python_path in sys.path:
+    if re.search(r"libqfieldsync.*\.whl$", python_path):
+        sys.path.remove(python_path)
+
+# add the new `libqfieldsync.whl` file to the python import path
+for libqfieldsync_whl in src_dir.glob("libqfieldsync*.whl"):
     sys.path.append(str(libqfieldsync_whl))
+
+# force reload all the `libqfieldsync` modules from the new path
+module_names = list(sys.modules.keys())
+for module_name in module_names:
+    if module_name.startswith("libqfieldsync"):
+        importlib.reload(sys.modules[module_name])
 
 
 # noinspection PyPep8Naming
