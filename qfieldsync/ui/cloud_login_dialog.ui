@@ -22,7 +22,7 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="toolTipQfieldCloudIcon">
+     <property name="toolTip">
       <string>Double-click me to show or hide advanced options</string>
      </property>
      <property name="scaledContents">
