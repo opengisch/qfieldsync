@@ -96,7 +96,8 @@ jobs:
       - name: Package libqfieldsync
         run: |
           pip wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
-          mv libqfieldsync-*.whl qfieldsync/libqfieldsync.whl
+          LIBQFIELDSYNC_COMMIT_SHA=$(echo $(grep -o -P '(https://.*.tar.gz)' requirements.txt) | grep -Eo '[0-9a-f]{40}')
+          mv libqfieldsync-*.whl qfieldsync/libqfieldsyncq_${LIBQFIELDSYNC_COMMIT_SHA}.whl
 
       - name: Release
         run: |
