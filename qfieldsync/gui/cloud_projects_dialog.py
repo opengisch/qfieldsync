@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from qgis.core import Qgis, QgsApplication, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsExpressionContextUtils, QgsProject
 from qgis.PyQt.QtCore import (
     QDateTime,
     QItemSelectionModel,
@@ -310,6 +310,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
         self.update_welcome_label()
         self.createButton.setEnabled(True)
+        self.set_variable_cloud_username()
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
@@ -1191,9 +1192,18 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def _on_logout_success(self) -> None:
         self.projectsTable.setRowCount(0)
+        self.remove_variable_cloud_username()
 
         self.close()
 
     def _on_logout_failed(self, err: str) -> None:
         self.set_feedback("Sign out failed: {}".format(str(err)))
         self.avatarButton.setEnabled(True)
+
+    def set_variable_cloud_username(self) -> None:
+        QgsExpressionContextUtils.setGlobalVariable(
+            "cloud_username", self.network_manager.get_username()
+        )
+
+    def remove_variable_cloud_username(self) -> None:
+        QgsExpressionContextUtils.removeGlobalVariable("cloud_username")

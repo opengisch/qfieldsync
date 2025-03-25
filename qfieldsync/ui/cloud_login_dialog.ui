@@ -22,9 +22,6 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="toolTip">
-      <string>Double-click me to show or hide advanced options</string>
-     </property>
      <property name="scaledContents">
       <bool>false</bool>
      </property>
@@ -156,6 +153,9 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="oauth2_buttons_layout"/>
    </item>
    <item>
     <widget class="QLabel" name="loginFeedbackLabel">
