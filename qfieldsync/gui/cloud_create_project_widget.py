@@ -84,7 +84,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         # keep a timer reference
         self.timer = QTimer(self)
 
-        if not self.network_manager.has_token():
+        if not self.network_manager.is_authenticated():
             CloudLoginDialog.show_auth_dialog(
                 self.network_manager, lambda: self.close(), None, parent=self
             )
@@ -332,20 +332,18 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
     def refresh_project_owners(self):
         self.projectOwnerComboBox.setEnabled(False)
         self.projectOwnerComboBox.clear()
-        self.projectOwnerComboBox.addItem(
-            self.network_manager.auth().config("username")
-        )
+        self.projectOwnerComboBox.addItem(self.network_manager.get_username())
         self.projectOwnerRefreshButton.setEnabled(False)
         self.projectOwnerFeedbackLabel.setVisible(False)
 
         reply = self.network_manager.get_user_organizations(
-            self.network_manager.auth().config("username")
+            self.network_manager.get_username()
         )
         reply.finished.connect(lambda: self.on_refresh_project_owners_finished(reply))
 
     def on_refresh_project_owners_finished(self, reply):
         items = [
-            self.network_manager.auth().config("username"),
+            self.network_manager.get_username(),
         ]
         try:
             payload = self.network_manager.json_array(reply)

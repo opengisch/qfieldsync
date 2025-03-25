@@ -8,6 +8,7 @@ from qfieldsync.setting_manager import (
     String,
     Stringlist,
 )
+from qfieldsync.setting_manager.types.integer import Integer
 
 pluginName = "QFieldSync"  # noqa: N816
 
@@ -36,6 +37,7 @@ class Preferences(SettingManager):
         self.add_setting(Dictionary("qfieldCloudLastProjectFiles", Scope.Global, {}))
         self.add_setting(String("qfieldCloudServerUrl", Scope.Global, ""))
         self.add_setting(String("qfieldCloudAuthcfg", Scope.Global, ""))
+        self.add_setting(Integer("qfieldCloudAuthMethod", Scope.Global, 0))
         self.add_setting(Bool("qfieldCloudRememberMe", Scope.Global, False))
         self.add_setting(
             String("cloudDirectory", Scope.Global, str(home.joinpath("QField/cloud")))
