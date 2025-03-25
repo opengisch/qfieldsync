@@ -23,6 +23,7 @@ import json
 import re
 import tempfile
 import urllib.parse
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
@@ -36,7 +37,14 @@ from qgis.core import (
     QgsNetworkAccessManager,
     QgsProject,
 )
-from qgis.PyQt.QtCore import QFileSystemWatcher, QObject, QUrl, QUrlQuery, pyqtSignal
+from qgis.PyQt.QtCore import (
+    QByteArray,
+    QFileSystemWatcher,
+    QObject,
+    QUrl,
+    QUrlQuery,
+    pyqtSignal,
+)
 from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
@@ -114,12 +122,72 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
     return CloudException(reply, Exception(message))
 
 
+class CloudAuthMethod(Enum):
+    NONE = 0
+    CREDENTIALS = 1
+    SSO = 2
+
+
+def build_oauth2_auth_config_from_cloud_method(
+    auth_data: dict, related_uri: str, config_name: str = "qfieldcloud-sso"
+) -> QgsAuthMethodConfig:
+    """Builds a QgsAuthMethodConfig from a method provided by QFieldCloud's auth capabilities.
+
+    Args:
+        auth_data (dict): dict describing an auth method.
+        related_uri (str): URI of the generated auth config.
+        config_name (str, optional): name of the generated auth config. Defaults to "qfieldcloud-oauth2".
+
+    Returns:
+        QgsAuthMethodConfig: QGIS auth config for the provided method.
+    """
+    auth_config_dict = {
+        "method": "oauth2",
+        "accessMethod": 0,
+        "grantFlow": auth_data["grant_flow"],
+        "configType": 1,
+        "clientId": auth_data["client_id"],
+        "clientSecret": auth_data["client_secret"],
+        "extraTokens": auth_data["extra_tokens"],
+        "requestUrl": auth_data["request_url"],
+        "tokenUrl": auth_data["token_url"],
+        "redirectHost": auth_data["redirect_host"],
+        "redirectPort": auth_data["redirect_port"],
+        "redirectUrl": auth_data["redirect_url"],
+        "persistToken": False,
+        "pkceEnabled": auth_data["pkce_enabled"],
+        "refreshTokenUrl": auth_data["refresh_token_url"],
+        "requestTimeout": 30,
+        "version": 1,
+        "scope": auth_data["scope"],
+    }
+
+    auth_config_str = str(auth_config_dict)
+    auth_config_str = auth_config_str.replace("'", '"')
+    auth_config_str = auth_config_str.replace("False", "false")
+    auth_config_str = auth_config_str.replace("True", "true")
+    auth_config_map = {"oauth2config": auth_config_str}
+
+    auth_config = QgsAuthMethodConfig()
+    auth_config.setMethod("OAuth2")
+    auth_config.setVersion(1)
+    auth_config.setName(config_name)
+    auth_config.setUri(related_uri)
+    auth_config.setConfigMap(auth_config_map)
+
+    return auth_config
+
+
 class CloudNetworkAccessManager(QObject):
     token_changed = pyqtSignal()
     login_finished = pyqtSignal()
     logout_success = pyqtSignal()
     logout_failed = pyqtSignal(str)
     avatar_success = pyqtSignal()
+
+    auth_method: CloudAuthMethod = CloudAuthMethod.NONE
+    auth_config: Optional[QgsAuthMethodConfig] = None
+    current_username: Optional[str] = None
 
     def __init__(self, parent=None) -> None:
         """Constructor."""
@@ -133,8 +201,20 @@ class CloudNetworkAccessManager(QObject):
         self.is_login_active = False
 
         url = self.preferences.value("qfieldCloudServerUrl")
+
         # we should always use the QgsNetworkAccessManager instance, otherwise ssl handling is impossible
         self._nam = QgsNetworkAccessManager.instance()
+
+        self.auth_method = CloudAuthMethod(
+            self.preferences.value("qfieldCloudAuthMethod")
+        )
+        pref_auth_config_id = self.preferences.value("qfieldCloudAuthcfg")
+        if pref_auth_config_id and pref_auth_config_id != "":
+            auth_config = QgsAuthMethodConfig()
+            _, config = QgsApplication.authManager().loadAuthenticationConfig(
+                pref_auth_config_id, auth_config, full=True
+            )
+            self.auth_config = config
 
         # use the default URL
         self.set_url(url)
@@ -148,6 +228,8 @@ class CloudNetworkAccessManager(QObject):
         if error:
             if error.httpCode == 401 and not self.is_login_active:
                 self.set_token("", True)
+                self.auth_method = CloudAuthMethod.NONE
+                self.auth_config = None
                 self.logout_success.emit()
             raise error
 
@@ -182,6 +264,16 @@ class CloudNetworkAccessManager(QObject):
             "https://localhost:8002/",
         ]
 
+    def username(self) -> Optional[str]:
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            return self.auth().config("username")
+        elif self.auth_method == CloudAuthMethod.SSO:
+            if self.current_username:
+                return self.current_username
+            else:
+                return None
+        return None
+
     def auth(self) -> QgsAuthMethodConfig:
         auth_manager = QgsApplication.authManager()
 
@@ -189,12 +281,19 @@ class CloudNetworkAccessManager(QObject):
             return QgsAuthMethodConfig()
 
         authcfg = self.preferences.value("qfieldCloudAuthcfg")
+
+        if not authcfg or authcfg == "":
+            return QgsAuthMethodConfig()
+
         cfg = QgsAuthMethodConfig()
         auth_manager.loadAuthenticationConfig(authcfg, cfg, True)
 
         return cfg
 
     def set_auth(self, url, **kwargs: str) -> None:
+        if self.auth_method != CloudAuthMethod.CREDENTIALS:
+            return
+
         if self.url != url:
             self.set_url(url)
 
@@ -208,7 +307,7 @@ class CloudNetworkAccessManager(QObject):
             cfg.setUri(url)
 
             for key, value in kwargs.items():
-                cfg.setConfig(key, value)
+                cfg.setConfig(key, str(value))
 
             auth_manager.updateAuthenticationConfig(cfg)
         else:
@@ -221,6 +320,21 @@ class CloudNetworkAccessManager(QObject):
 
             auth_manager.storeAuthenticationConfig(cfg)
             self.preferences.set_value("qfieldCloudAuthcfg", cfg.id())
+
+    def auth_provider_id(self) -> str:
+        return self.preferences.value("qfieldCloudAuthProviderId")
+
+    def set_auth_provider_id(self, provider_id: str) -> None:
+        self.preferences.set_value("qfieldCloudAuthProviderId", provider_id)
+
+    def set_sso_auth_config(self, auth_config: QgsAuthMethodConfig) -> None:
+        self.auth_method = CloudAuthMethod.SSO
+        self.preferences.set_value("qfieldCloudAuthMethod", CloudAuthMethod.SSO.value)
+        self.auth_config = auth_config
+        QgsApplication.authManager().storeAuthenticationConfig(
+            auth_config, overwrite=True
+        )
+        self.preferences.set_value("qfieldCloudAuthcfg", auth_config.id())
 
     def set_url(self, server_url: str) -> None:
         if not server_url:
@@ -244,22 +358,33 @@ class CloudNetworkAccessManager(QObject):
 
         return re.sub(r"([^:]/)(/)+", r"\1", url)
 
+    def get_auth_capabilities(self) -> QNetworkReply:
+        """Get authentication capabilities from a server"""
+        reply = self.cloud_get("auth/providers/")
+        return reply
+
     def auto_login_attempt(self):
-        cfg = self.auth()
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            cfg = self.auth()
 
-        server_url = cfg.uri() or self.url
-        username = cfg.config("username")
-        password = cfg.config("password")
+            server_url = cfg.uri() or self.url
+            username = cfg.config("username")
+            password = cfg.config("password")
 
-        if username and password:
-            self.set_url(server_url)
-            self.login(username, password)
+            if username and password:
+                self.set_url(server_url)
+            self.login_with_credentials(username, password)
 
-    def login(self, username: str, password: str) -> Optional[QNetworkReply]:
-        """Login to QFieldCloud"""
+        elif self.auth_method == CloudAuthMethod.SSO:
+            self.login_with_sso()
+
+    def login_with_credentials(
+        self, username: str, password: str
+    ) -> Optional[QNetworkReply]:
+        """Login to QFieldCloud with classic login/password method"""
         # don't login multiple times
         if self.is_login_active:
-            return
+            return None
 
         self.is_login_active = True
 
@@ -270,19 +395,53 @@ class CloudNetworkAccessManager(QObject):
                 "password": password,
             },
         )
-        reply.finished.connect(lambda: self._on_login_finished(reply))
+        reply.finished.connect(lambda: self._on_login_with_credentials_finished(reply))
 
         return reply
+
+    def _get_cloud_user_info(self) -> Optional[QNetworkReply]:
+        """Get current user info with a request.
+        This is typically called as a first request
+
+        Returns:
+            Optional[QNetworkReply]: _description_
+        """
+        # don't login multiple times
+        if self.is_login_active:
+            return
+
+        self.is_login_active = True
+
+        reply = self.cloud_get("auth/user/")
+        reply.finished.connect(lambda: self._on_get_user_info_finished(reply))
+
+        return reply
+
+    def login_with_sso(self) -> Optional[QNetworkReply]:
+        return self._get_cloud_user_info()
 
     def get_user(self, token: str) -> QNetworkReply:
         """Gets current user and if token is still valid"""
         return self.cloud_get("auth/user/", {"token": token})
 
-    def logout(self) -> QNetworkReply:
+    def logout(self) -> Optional[QNetworkReply]:
         """Logout to QFieldCloud"""
 
-        reply = self.cloud_post("auth/logout/")
-        reply.finished.connect(lambda: self._on_logout_finished(reply))
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            reply = self.cloud_post("auth/logout/")
+            reply.finished.connect(lambda: self._on_logout_finished(reply))
+        elif self.auth_method == CloudAuthMethod.SSO:
+            authcfg = self.preferences.value("qfieldCloudAuthcfg")
+            auth_manager = QgsApplication.authManager()
+            auth_manager.clearCachedConfig(authcfg)
+            auth_manager.removeAuthenticationConfig(authcfg)
+            self.auth_method = CloudAuthMethod.NONE
+            self.preferences.set_value("qfieldCloudAuthcfg", "")
+            self.auth_config = None
+            self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
+            self.set_auth_provider_id("")
+            self.logout_success.emit()
+            return None
 
         return reply
 
@@ -364,7 +523,7 @@ class CloudNetworkAccessManager(QObject):
 
     def set_token(self, token: str, update_auth: bool = False) -> None:
         """Sets QFieldCloud authentication token to be used by all the following requests. Set to empty string to disable token authentication."""
-        if update_auth:
+        if update_auth and self.auth_method == CloudAuthMethod.CREDENTIALS:
             self.set_auth(self.url, token=token)
 
         if self._token == token:
@@ -374,8 +533,26 @@ class CloudNetworkAccessManager(QObject):
 
         self.token_changed.emit()
 
+    def is_authenticated(self) -> bool:
+        return self.has_token() or self.auth_config is not None
+
     def has_token(self) -> bool:
         return self._token is not None and len(self._token) > 0
+
+    def _set_request_auth(self, request: QNetworkRequest) -> None:
+        """Sets the correct authentication for a request, depending on the current auth method used.
+
+        Args:
+            request (QNetworkRequest): request to update.
+        """
+        if self.auth_method == CloudAuthMethod.CREDENTIALS and self._token:
+            request.setRawHeader(
+                b"Authorization", "Token {}".format(self._token).encode("utf-8")
+            )
+        elif self.auth_method == CloudAuthMethod.SSO and self.auth_config is not None:
+            QgsApplication.authManager().updateNetworkRequest(
+                request, self.auth_config.id()
+            )
 
     def cloud_get(
         self,
@@ -407,10 +584,7 @@ class CloudNetworkAccessManager(QObject):
         )
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self._token:
-            request.setRawHeader(
-                b"Authorization", "Token {}".format(self._token).encode("utf-8")
-            )
+        self._set_request_auth(request)
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.get(request)
@@ -467,16 +641,18 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        self._clear_cloud_cookies(url)
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self._token:
-            request.setRawHeader(
-                b"Authorization", "Token {}".format(self._token).encode("utf-8")
-            )
+        if self.auth_method == CloudAuthMethod.SSO:
+            self._add_csrf_cookies_to_request(url, request)
+            self._add_provider_id_header_to_request(request)
+
+        self._set_request_auth(request)
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
 
@@ -493,16 +669,18 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        self._clear_cloud_cookies(url)
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self._token:
-            request.setRawHeader(
-                b"Authorization", "Token {}".format(self._token).encode("utf-8")
-            )
+        if self.auth_method == CloudAuthMethod.SSO:
+            self._add_csrf_cookies_to_request(url, request)
+            self._add_provider_id_header_to_request(request)
+
+        self._set_request_auth(request)
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
 
@@ -519,16 +697,18 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        self._clear_cloud_cookies(url)
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self._token:
-            request.setRawHeader(
-                b"Authorization", "Token {}".format(self._token).encode("utf-8")
-            )
+        if self.auth_method == CloudAuthMethod.SSO:
+            self._add_csrf_cookies_to_request(url, request)
+            self._add_provider_id_header_to_request(request)
+
+        self._set_request_auth(request)
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
 
@@ -543,16 +723,18 @@ class CloudNetworkAccessManager(QObject):
     def cloud_delete(self, uri: Union[str, List[str]]) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        self._clear_cloud_cookies(url)
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self._token:
-            request.setRawHeader(
-                b"Authorization", "Token {}".format(self._token).encode("utf-8")
-            )
+        if self.auth_method == CloudAuthMethod.SSO:
+            self._add_csrf_cookies_to_request(url, request)
+            self._add_provider_id_header_to_request(request)
+
+        self._set_request_auth(request)
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.deleteResource(request)
@@ -567,15 +749,17 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        self._clear_cloud_cookies(url)
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
 
-        if self._token:
-            request.setRawHeader(
-                b"Authorization", "Token {}".format(self._token).encode("utf-8")
-            )
+        if self.auth_method == CloudAuthMethod.SSO:
+            self._add_csrf_cookies_to_request(url, request)
+            self._add_provider_id_header_to_request(request)
+
+        self._set_request_auth(request)
 
         multi_part = QHttpMultiPart(QHttpMultiPart.FormDataType)
         multi_part.setParent(self)
@@ -649,7 +833,7 @@ class CloudNetworkAccessManager(QObject):
             self.logout_failed.emit(str(err))
             return
 
-    def _on_login_finished(self, reply: QNetworkReply) -> None:
+    def _on_login_with_credentials_finished(self, reply: QNetworkReply) -> None:
         self.is_login_active = False
 
         try:
@@ -678,6 +862,34 @@ class CloudNetworkAccessManager(QObject):
         self.set_token(
             payload["token"], self.preferences.value("qfieldCloudRememberMe")
         )
+        self.login_finished.emit()
+
+    def _on_get_user_info_finished(self, reply: QNetworkReply) -> None:
+        self.is_login_active = False
+
+        try:
+            payload = self.json_object(reply)
+        except CloudException as err:
+            self._login_error = err
+            self.login_finished.emit()
+            self.preferences.set_value("qfieldCloudRememberMe", False)
+            return
+
+        self.user_details = {
+            "username": payload["username"],
+            "avatar_url": payload["avatar_url"],
+        }
+        if payload["avatar_url"]:
+            suffix = payload["avatar_url"].rsplit(".")[-1]
+            avatar_filename = tempfile.mktemp(suffix=f".{suffix}")
+            reply = self.get_file(
+                QUrl(payload["avatar_url"]),
+                avatar_filename,
+            )
+            reply.finished.connect(
+                lambda: self._on_avatar_download_finished(reply, avatar_filename)
+            )
+        self.current_username = payload["username"]
         self.login_finished.emit()
 
     def _on_avatar_download_finished(self, reply: QNetworkReply, filename: str) -> None:
@@ -733,6 +945,29 @@ class CloudNetworkAccessManager(QObject):
         for cookie in self._nam.cookieJar().cookiesForUrl(url):
             self._nam.cookieJar().deleteCookie(cookie)
 
+    def _add_csrf_cookies_to_request(self, url: QUrl, request: QNetworkRequest) -> None:
+        """
+        Adds CSRF cookie to a network request.
+        Required for some QFieldCloud requests, like POST/PUT/PATCH/DELETE.
+        """
+        cookie_jar = self._nam.cookieJar()
+        cookies = cookie_jar.cookiesForUrl(url)
+
+        csrftoken_cookie = next(
+            (cookie for cookie in cookies if cookie.name() == b"csrftoken"), None
+        )
+
+        if csrftoken_cookie:
+            request.setRawHeader(b"X-CSRFToken", csrftoken_cookie.value())
+            request.setRawHeader(b"Referer", url.toEncoded())
+
+    def _add_provider_id_header_to_request(self, request: QNetworkRequest) -> None:
+        """Adds the current provider id to a request, if any. Sometimes required by QFC middleware."""
+        provider_id = self.auth_provider_id()
+
+        if provider_id and len(provider_id) > 0:
+            request.setRawHeader(b"X-QFC-IDP-ID", QByteArray(provider_id.encode()))
+
 
 class CloudReply:
     finished = pyqtSignal()
@@ -776,7 +1011,7 @@ class CloudProjectsCache(QObject):
         self.network_manager.token_changed.connect(self._on_token_changed)
         self.projects_updated.connect(self._on_projects_updated)
 
-        if self.network_manager.has_token():
+        if self.network_manager.is_authenticated():
             self.refresh()
 
     @property
