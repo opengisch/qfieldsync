@@ -25,8 +25,11 @@ from functools import partial
 from typing import Callable, Optional
 from urllib.parse import urlparse
 
-from qgis.PyQt.QtCore import Qt, QTimer
-from qgis.PyQt.QtGui import QCursor, QIcon, QPixmap
+from qgis.core import QgsNetworkAccessManager
+from qgis.PyQt.QtCore import Qt, QTimer, QUrl
+from qgis.PyQt.QtGui import QCursor, QIcon, QPainter, QPixmap
+from qgis.PyQt.QtNetwork import QNetworkRequest
+from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtWidgets import (
     QApplication,
     QDialog,
@@ -198,20 +201,54 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             )
             login_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
-            # if google auth available, we need to display the logo for legal reasons.
-            if auth_method["id"] == "google":
-                login_button.setIcon(
-                    QIcon(
-                        os.path.join(
-                            os.path.dirname(__file__), "../resources/google.svg"
-                        )
-                    )
-                )
+            self.set_sso_provider_button_style(auth_method.get("styles"), login_button)
 
             login_button.clicked.connect(
                 partial(self.on_login_with_sso_provider_button_clicked, auth_method)
             )
             self.oauth2_buttons_layout.addWidget(login_button)
+
+    def set_sso_provider_button_style(
+        self, style_data: dict, button: QPushButton
+    ) -> None:
+        """Apply style to a SSO provider login button.
+
+        Args:
+            style_data (dict): style JSON for the provider, served by QFieldCloud.
+            button (QPushButton): button to apply the style to.
+        """
+
+        theme = style_data.get(self.get_qgis_theme(style_data.keys()))
+        button.setStyleSheet(
+            f"background-color: {theme.get('color_fill')}; border-color: {theme.get('color_stroke')}; color: {theme.get('color_text')};"
+        )
+
+        # download svg logo and apply it to button
+        icon_url = theme.get("logo")
+        icon_req = QNetworkRequest(QUrl(icon_url))
+        icon_reply = QgsNetworkAccessManager.instance().get(icon_req)
+        icon_reply.finished.connect(
+            partial(self.on_get_svg_logo_reply_finished, icon_reply, button)
+        )
+
+    def on_get_svg_logo_reply_finished(self, reply, button: QPushButton) -> None:
+        if reply.error():
+            return
+
+        svg_data = reply.readAll()
+        renderer = QSvgRenderer(svg_data)
+
+        pixmap = QPixmap(32, 32)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+
+        button.setIcon(QIcon(pixmap))
+
+    def get_qgis_theme(self, available_themes: list[str]) -> str:
+        # TODO: get light/dark theme depending on current QGIS theme
+        return "dark"
 
     def authenticate(self) -> None:
         self.usernameLineEdit.setEnabled(True)
