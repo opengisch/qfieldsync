@@ -22,12 +22,12 @@
 """
 import os
 from functools import partial
-from typing import Any, Callable
+from typing import Callable
 from urllib.parse import urlparse
 
-from qgis.core import QgsNetworkAccessManager
+from qgis.core import QgsApplication, QgsNetworkAccessManager
 from qgis.PyQt.QtCore import Qt, QTimer, QUrl
-from qgis.PyQt.QtGui import QCursor, QIcon, QPainter, QPixmap
+from qgis.PyQt.QtGui import QCursor, QIcon, QPainter, QPalette, QPixmap
 from qgis.PyQt.QtNetwork import QNetworkRequest
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtWidgets import (
@@ -60,8 +60,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     instance = None
 
     _fetch_auth_methods_timer: QTimer = QTimer()
-
-    _sso_auth_methods: dict[str, Any] = {}
 
     _sso_login_buttons: list[QPushButton] = []
 
@@ -203,7 +201,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
                 continue
 
             # sso provider: dynamically generate button to login.
-            self._sso_auth_methods[auth_method["id"]] = auth_method
             login_button = QPushButton(
                 self.tr("Sign In with {provider}").format(provider=auth_method["name"])
             )
@@ -227,7 +224,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             button (QPushButton): button to apply the style to.
         """
 
-        theme = style_data.get(self.get_qgis_theme(style_data.keys()))
+        theme = style_data.get(self.extract_theme_from_qgis_settings())
         button.setStyleSheet(
             f"background-color: {theme.get('color_fill')}; border-color: {theme.get('color_stroke')}; color: {theme.get('color_text')};"
         )
@@ -255,9 +252,23 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         button.setIcon(QIcon(pixmap))
 
-    def get_qgis_theme(self, available_themes: list[str]) -> str:
-        # TODO: get light/dark theme depending on current QGIS theme
-        return "dark"
+    def extract_theme_from_qgis_settings(self) -> str:
+        """Finds if the current QGIS theme should use "light" or "dark" theme.
+        Return the most accurate possible "dark" or "light" key.
+        Typically used for styling SSO logins buttons.
+
+        Returns:
+            str: "light" or "dark", based on user's current QGIS settings.
+        """
+        qgis_theme = QgsApplication.instance().themeName()
+        if qgis_theme == "Night Mapping":
+            return "dark"
+        if qgis_theme == "Blend of Gray":
+            return "light"
+        color = QWidget().palette().color(QPalette.Window)
+        if (color.red() + color.green() + color.blue()) / 3 < 120:
+            return "dark"
+        return "light"
 
     def authenticate(self) -> None:
         self.usernameLineEdit.setEnabled(True)
