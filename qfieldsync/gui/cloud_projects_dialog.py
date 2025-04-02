@@ -993,7 +993,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.welcomeLabel.setText(
                 self.tr("Greetings {}.").format(
-                    f'<a href="{self.network_manager.url}">{self.network_manager.username()}</a>'
+                    f'<a href="{self.network_manager.url}">{self.network_manager.get_username()}</a>'
                 )
             )
 

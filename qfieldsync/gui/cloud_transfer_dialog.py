@@ -199,7 +199,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         export_dirname = Path(self.preferences.value("cloudDirectory"))
         export_dirname = export_dirname.joinpath(
             self.cloud_project.name
-            if self.cloud_project.owner == self.network_manager.username()
+            if self.cloud_project.owner == self.network_manager.get_username()
             else f"{self.cloud_project.owner}__{self.cloud_project.name}"
         )
 

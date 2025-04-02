@@ -22,7 +22,7 @@
 """
 import os
 from functools import partial
-from typing import Callable, Optional
+from typing import Any, Callable
 from urllib.parse import urlparse
 
 from qgis.core import QgsNetworkAccessManager
@@ -48,7 +48,7 @@ from qfieldsync.core.cloud_api import (
     CloudAuthMethod,
     CloudException,
     CloudNetworkAccessManager,
-    build_oauth2_auth_config_from_cloud_method,
+    build_oauth2_auth_config,
 )
 
 CloudLoginDialogUi, _ = loadUiType(
@@ -61,8 +61,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
     _fetch_auth_methods_timer: QTimer = QTimer()
 
-    _credentials_auth_method: Optional[dict] = None
-    _sso_auth_methods: Optional[dict] = {}
+    _sso_auth_methods: dict[str, Any] = {}
 
     _sso_login_buttons: list[QPushButton] = []
 
@@ -200,7 +199,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         for auth_method in auth_methods:
             # credentials login: enabled static groupbox.
             if auth_method["id"] == "credentials":
-                self._credentials_auth_method = auth_method
                 self.set_login_groupbox_visibility(self.signInUsernameGroupBox, True)
                 continue
 
@@ -316,8 +314,9 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         password = self.passwordLineEdit.text()
         remember_me = self.rememberMeCheckBox.isChecked()
 
-        self.network_manager.set_auth(server_url, username=username, password=password)
         self.network_manager.set_url(server_url)
+        self.network_manager.set_auth_method(CloudAuthMethod.CREDENTIALS)
+        self.network_manager.set_auth(server_url, username=username, password=password)
         self.network_manager.login_with_credentials(username, password)
 
         self.preferences.set_value("qfieldCloudRememberMe", remember_me)
@@ -344,12 +343,12 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
     def on_login_with_sso_provider_button_clicked(self, provider_data: dict) -> None:
         server_url = self.serverUrlCmb.currentText()
-        auth_config = build_oauth2_auth_config_from_cloud_method(
+        auth_config = build_oauth2_auth_config(
             provider_data,
             server_url,
-            "qfieldcloud-sso",
         )
         self.network_manager.set_url(server_url)
+        self.network_manager.set_auth_method(CloudAuthMethod.SSO)
         self.network_manager.set_sso_auth_config(auth_config)
         self.network_manager.login_with_sso()
 

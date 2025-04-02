@@ -128,15 +128,15 @@ class CloudAuthMethod(Enum):
     SSO = 2
 
 
-def build_oauth2_auth_config_from_cloud_method(
-    auth_data: dict, related_uri: str, config_name: str = "qfieldcloud-sso"
+def build_oauth2_auth_config(
+    auth_data: dict, related_uri: str, config_name: str = "qfieldcloud_sso"
 ) -> QgsAuthMethodConfig:
     """Builds a QgsAuthMethodConfig from a method provided by QFieldCloud's auth capabilities.
 
     Args:
         auth_data (dict): dict describing an auth method.
         related_uri (str): URI of the generated auth config.
-        config_name (str, optional): name of the generated auth config. Defaults to "qfieldcloud-sso".
+        config_name (str, optional): name of the generated auth config. Defaults to "qfieldcloud_sso".
 
     Returns:
         QgsAuthMethodConfig: QGIS auth config for the provided method.
@@ -169,7 +169,7 @@ def build_oauth2_auth_config_from_cloud_method(
     auth_config.setName(config_name)
     auth_config.setUri(related_uri)
     auth_config.setConfig("oauth2config", auth_config_str)
-    auth_config.setConfig("qfieldcloud-sso-id", auth_data["id"])
+    auth_config.setConfig("qfieldcloud_sso_id", auth_data["id"])
 
     return auth_config
 
@@ -260,14 +260,11 @@ class CloudNetworkAccessManager(QObject):
             "https://localhost:8002/",
         ]
 
-    def username(self) -> Optional[str]:
+    def get_username(self) -> Optional[str]:
         if self.auth_method == CloudAuthMethod.CREDENTIALS:
             return self.auth().config("username")
         elif self.auth_method == CloudAuthMethod.SSO:
-            if self.current_username:
-                return self.current_username
-            else:
-                return None
+            return self.current_username
         return None
 
     def auth(self) -> QgsAuthMethodConfig:
@@ -320,16 +317,18 @@ class CloudNetworkAccessManager(QObject):
     def auth_provider_id(self) -> str:
         """
         Returns the provider ID, required for sso auth to QFieldCloud.
-        Should be stored in the QgsAuthMethodConfig with the "qfieldcloud-sso-id" key.
+        Should be stored in the QgsAuthMethodConfig with the "qfieldcloud_sso_id" key.
         """
         auth_method = self.auth()
         if not auth_method:
             return ""
-        return auth_method.config("qfieldcloud-sso-id", "")
+        return auth_method.config("qfieldcloud_sso_id", "")
+
+    def set_auth_method(self, method: CloudAuthMethod) -> None:
+        self.auth_method = method
+        self.preferences.set_value("qfieldCloudAuthMethod", method.value)
 
     def set_sso_auth_config(self, auth_config: QgsAuthMethodConfig) -> None:
-        self.auth_method = CloudAuthMethod.SSO
-        self.preferences.set_value("qfieldCloudAuthMethod", CloudAuthMethod.SSO.value)
         self.auth_config = auth_config
         QgsApplication.authManager().storeAuthenticationConfig(
             auth_config, overwrite=True
@@ -399,12 +398,15 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
+    def login_with_sso(self) -> Optional[QNetworkReply]:
+        return self._get_cloud_user_info()
+
     def _get_cloud_user_info(self) -> Optional[QNetworkReply]:
         """Get current user info with a request.
         This is typically called as a first request
 
         Returns:
-            Optional[QNetworkReply]: _description_
+            Optional[QNetworkReply]: QNetworkReply from the QFieldCloud server.
         """
         # don't login multiple times
         if self.is_login_active:
@@ -416,9 +418,6 @@ class CloudNetworkAccessManager(QObject):
         reply.finished.connect(lambda: self._on_get_user_info_finished(reply))
 
         return reply
-
-    def login_with_sso(self) -> Optional[QNetworkReply]:
-        return self._get_cloud_user_info()
 
     def get_user(self, token: str) -> QNetworkReply:
         """Gets current user and if token is still valid"""
