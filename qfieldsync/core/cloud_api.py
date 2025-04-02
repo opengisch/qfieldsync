@@ -136,7 +136,7 @@ def build_oauth2_auth_config_from_cloud_method(
     Args:
         auth_data (dict): dict describing an auth method.
         related_uri (str): URI of the generated auth config.
-        config_name (str, optional): name of the generated auth config. Defaults to "qfieldcloud-oauth2".
+        config_name (str, optional): name of the generated auth config. Defaults to "qfieldcloud-sso".
 
     Returns:
         QgsAuthMethodConfig: QGIS auth config for the provided method.
@@ -144,36 +144,32 @@ def build_oauth2_auth_config_from_cloud_method(
     auth_config_dict = {
         "method": "oauth2",
         "accessMethod": 0,
-        "grantFlow": auth_data["grant_flow"],
+        "grantFlow": auth_data.get("grant_flow"),
         "configType": 1,
-        "clientId": auth_data["client_id"],
-        "clientSecret": auth_data["client_secret"],
-        "extraTokens": auth_data["extra_tokens"],
-        "requestUrl": auth_data["request_url"],
-        "tokenUrl": auth_data["token_url"],
-        "redirectHost": auth_data["redirect_host"],
-        "redirectPort": auth_data["redirect_port"],
-        "redirectUrl": auth_data["redirect_url"],
+        "clientId": auth_data.get("client_id"),
+        "extraTokens": auth_data.get("extra_tokens"),
+        "requestUrl": auth_data.get("request_url"),
+        "tokenUrl": auth_data.get("token_url"),
+        "redirectHost": auth_data.get("redirect_host"),
+        "redirectPort": auth_data.get("redirect_port"),
+        "redirectUrl": auth_data.get("redirect_url"),
         "persistToken": False,
-        "pkceEnabled": auth_data["pkce_enabled"],
-        "refreshTokenUrl": auth_data["refresh_token_url"],
+        "pkceEnabled": auth_data.get("pkce_enabled"),
+        "refreshTokenUrl": auth_data.get("refresh_token_url"),
         "requestTimeout": 30,
         "version": 1,
-        "scope": auth_data["scope"],
+        "scope": auth_data.get("scope"),
     }
 
-    auth_config_str = str(auth_config_dict)
-    auth_config_str = auth_config_str.replace("'", '"')
-    auth_config_str = auth_config_str.replace("False", "false")
-    auth_config_str = auth_config_str.replace("True", "true")
-    auth_config_map = {"oauth2config": auth_config_str}
+    auth_config_str = json.dumps(auth_config_dict)
 
     auth_config = QgsAuthMethodConfig()
     auth_config.setMethod("OAuth2")
     auth_config.setVersion(1)
     auth_config.setName(config_name)
     auth_config.setUri(related_uri)
-    auth_config.setConfigMap(auth_config_map)
+    auth_config.setConfig("oauth2config", auth_config_str)
+    auth_config.setConfig("qfieldcloud-sso-id", auth_data["id"])
 
     return auth_config
 
@@ -209,7 +205,7 @@ class CloudNetworkAccessManager(QObject):
             self.preferences.value("qfieldCloudAuthMethod")
         )
         pref_auth_config_id = self.preferences.value("qfieldCloudAuthcfg")
-        if pref_auth_config_id and pref_auth_config_id != "":
+        if pref_auth_config_id:
             auth_config = QgsAuthMethodConfig()
             _, config = QgsApplication.authManager().loadAuthenticationConfig(
                 pref_auth_config_id, auth_config, full=True
@@ -322,10 +318,14 @@ class CloudNetworkAccessManager(QObject):
             self.preferences.set_value("qfieldCloudAuthcfg", cfg.id())
 
     def auth_provider_id(self) -> str:
-        return self.preferences.value("qfieldCloudAuthProviderId")
-
-    def set_auth_provider_id(self, provider_id: str) -> None:
-        self.preferences.set_value("qfieldCloudAuthProviderId", provider_id)
+        """
+        Returns the provider ID, required for sso auth to QFieldCloud.
+        Should be stored in the QgsAuthMethodConfig with the "qfieldcloud-sso-id" key.
+        """
+        auth_method = self.auth()
+        if not auth_method:
+            return ""
+        return auth_method.config("qfieldcloud-sso-id", "")
 
     def set_sso_auth_config(self, auth_config: QgsAuthMethodConfig) -> None:
         self.auth_method = CloudAuthMethod.SSO
@@ -371,7 +371,7 @@ class CloudNetworkAccessManager(QObject):
             username = cfg.config("username")
             password = cfg.config("password")
 
-            if username and password:
+            if all([username, password]):
                 self.set_url(server_url)
             self.login_with_credentials(username, password)
 
@@ -439,7 +439,6 @@ class CloudNetworkAccessManager(QObject):
             self.preferences.set_value("qfieldCloudAuthcfg", "")
             self.auth_config = None
             self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
-            self.set_auth_provider_id("")
             self.logout_success.emit()
             return None
 
@@ -553,6 +552,8 @@ class CloudNetworkAccessManager(QObject):
             QgsApplication.authManager().updateNetworkRequest(
                 request, self.auth_config.id()
             )
+            self._add_csrf_cookies_to_request(request.url(), request)
+            self._add_provider_id_header_to_request(request)
 
     def cloud_get(
         self,
@@ -648,10 +649,6 @@ class CloudNetworkAccessManager(QObject):
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self.auth_method == CloudAuthMethod.SSO:
-            self._add_csrf_cookies_to_request(url, request)
-            self._add_provider_id_header_to_request(request)
-
         self._set_request_auth(request)
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
@@ -675,10 +672,6 @@ class CloudNetworkAccessManager(QObject):
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
-
-        if self.auth_method == CloudAuthMethod.SSO:
-            self._add_csrf_cookies_to_request(url, request)
-            self._add_provider_id_header_to_request(request)
 
         self._set_request_auth(request)
 
@@ -704,10 +697,6 @@ class CloudNetworkAccessManager(QObject):
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self.auth_method == CloudAuthMethod.SSO:
-            self._add_csrf_cookies_to_request(url, request)
-            self._add_provider_id_header_to_request(request)
-
         self._set_request_auth(request)
 
         payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
@@ -730,10 +719,6 @@ class CloudNetworkAccessManager(QObject):
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
-        if self.auth_method == CloudAuthMethod.SSO:
-            self._add_csrf_cookies_to_request(url, request)
-            self._add_provider_id_header_to_request(request)
-
         self._set_request_auth(request)
 
         with disable_nam_timeout(self._nam):
@@ -754,10 +739,6 @@ class CloudNetworkAccessManager(QObject):
 
         request = QNetworkRequest(url)
         request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
-
-        if self.auth_method == CloudAuthMethod.SSO:
-            self._add_csrf_cookies_to_request(url, request)
-            self._add_provider_id_header_to_request(request)
 
         self._set_request_auth(request)
 

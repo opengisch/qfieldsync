@@ -25,7 +25,6 @@ from functools import partial
 from typing import Callable, Optional
 from urllib.parse import urlparse
 
-from qgis.core import Qgis, QgsMessageLog
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtGui import QCursor, QIcon, QPixmap
 from qgis.PyQt.QtWidgets import (
@@ -173,19 +172,14 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         """
         self.clear_login_widgets()
         self.network_manager.set_url(self.serverUrlCmb.currentText())
-        self.auth_cap_reply = self.network_manager.get_auth_capabilities()
-        self.auth_cap_reply.finished.connect(self.on_fetch_auth_request_finished)
+        self.auth_methods_reply = self.network_manager.get_auth_capabilities()
+        self.auth_methods_reply.finished.connect(self.on_fetch_auth_methods_finished)
 
-    def on_fetch_auth_request_finished(self) -> None:
+    def on_fetch_auth_methods_finished(self) -> None:
         try:
-            auth_methods = self.network_manager.json_array(self.auth_cap_reply)
-        except CloudException as e:
-            QgsMessageLog.logMessage(
-                f"Could not fetch auth methods from server '{self.serverUrlCmb.currentText()}'",
-                "QFieldSync",
-                Qgis.Warning,
-            )
-            QgsMessageLog.logMessage(str(e), "QFieldSync", Qgis.Critical)
+            auth_methods = self.network_manager.json_array(self.auth_methods_reply)
+        except CloudException:
+            self.set_login_groupbox_visibility(self.signInUsernameGroupBox, True)
             return
 
         self.clear_login_widgets()
@@ -309,7 +303,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         )
         self.network_manager.set_url(server_url)
         self.network_manager.set_sso_auth_config(auth_config)
-        self.network_manager.set_auth_provider_id(provider_data["id"])
         self.network_manager.login_with_sso()
 
     def on_cancel_button_clicked(self):
