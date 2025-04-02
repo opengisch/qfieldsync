@@ -438,6 +438,7 @@ class CloudNetworkAccessManager(QObject):
             self.preferences.set_value("qfieldCloudAuthcfg", "")
             self.auth_config = None
             self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
+            self._clear_cloud_cookies(QUrl(self.url))
             self.logout_success.emit()
             return None
 
