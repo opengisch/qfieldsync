@@ -808,6 +808,10 @@ class CloudNetworkAccessManager(QObject):
             auth_manager = QgsApplication.authManager()
             auth_manager.clearCachedConfig(authcfg)
             auth_manager.removeAuthenticationConfig(authcfg)
+            self.auth_method = CloudAuthMethod.NONE
+            self.preferences.set_value("qfieldCloudAuthcfg", "")
+            self.auth_config = None
+            self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
             self.logout_success.emit()
         except CloudException as err:
             self.logout_failed.emit(str(err))
