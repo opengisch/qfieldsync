@@ -37,6 +37,8 @@ from qgis.PyQt.QtWidgets import (
     QGroupBox,
     QMainWindow,
     QPushButton,
+    QSizePolicy,
+    QSpacerItem,
     QWidget,
 )
 from qgis.PyQt.uic import loadUiType
@@ -61,6 +63,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
     _credentials_auth_method: Optional[dict] = None
     _sso_auth_methods: Optional[dict] = {}
+
+    _sso_login_buttons: list[QPushButton] = []
 
     @staticmethod
     def show_auth_dialog(
@@ -160,11 +164,11 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     def clear_login_widgets(self) -> None:
         self.set_login_groupbox_visibility(self.signInUsernameGroupBox, False)
 
-        # clear sso login buttons layout
-        while self.oauth2_buttons_layout.count():
-            child = self.oauth2_buttons_layout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
+        # clear sso login buttons
+        for push_button in self._sso_login_buttons:
+            push_button.deleteLater()
+
+        self._sso_login_buttons = []
 
     def set_login_groupbox_visibility(self, group_box: QGroupBox, visible: bool):
         group_box.setEnabled(visible)
@@ -187,6 +191,12 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.clear_login_widgets()
 
+        # add vertical space before SSO login buttons
+        vertical_spacer = QSpacerItem(
+            0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+        )
+        self.signInUsernameGroupBox.layout().addItem(vertical_spacer)
+
         for auth_method in auth_methods:
             # credentials login: enabled static groupbox.
             if auth_method["id"] == "credentials":
@@ -206,7 +216,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             login_button.clicked.connect(
                 partial(self.on_login_with_sso_provider_button_clicked, auth_method)
             )
-            self.oauth2_buttons_layout.addWidget(login_button)
+            self.signInUsernameGroupBox.layout().addWidget(login_button)
+            self._sso_login_buttons.append(login_button)
 
     def set_sso_provider_button_style(
         self, style_data: dict, button: QPushButton

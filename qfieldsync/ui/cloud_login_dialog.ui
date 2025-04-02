@@ -155,9 +155,6 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="oauth2_buttons_layout"/>
-   </item>
-   <item>
     <widget class="QLabel" name="loginFeedbackLabel">
      <property name="visible">
       <bool>true</bool>
