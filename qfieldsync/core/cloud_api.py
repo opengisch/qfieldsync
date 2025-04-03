@@ -437,6 +437,7 @@ class CloudNetworkAccessManager(QObject):
             self.auth_method = CloudAuthMethod.NONE
             self.preferences.set_value("qfieldCloudAuthcfg", "")
             self.auth_config = None
+            self.current_username = None
             self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
             self._clear_cloud_cookies(QUrl(self.url))
             self.logout_success.emit()
@@ -533,7 +534,13 @@ class CloudNetworkAccessManager(QObject):
         self.token_changed.emit()
 
     def is_authenticated(self) -> bool:
-        return self.has_token() or self.auth_config is not None
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            return self.has_token()
+        if self.auth_method == CloudAuthMethod.SSO:
+            # If there is no username, it means a request to get it
+            # must be done before being considered authenticated.
+            return self.auth_config and self.current_username
+        return False
 
     def has_token(self) -> bool:
         return self._token is not None and len(self._token) > 0
