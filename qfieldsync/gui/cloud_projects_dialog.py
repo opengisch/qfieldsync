@@ -1179,7 +1179,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def set_variable_cloud_username(self) -> None:
         QgsExpressionContextUtils.setGlobalVariable(
-            "cloud_username", self.network_manager.auth().config("username")
+            "cloud_username", self.network_manager.get_username()
         )
 
     def remove_variable_cloud_username(self) -> None:
