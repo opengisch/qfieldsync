@@ -449,6 +449,10 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
+    def get_basic_reply(self, resource_url: str) -> QNetworkReply:
+        request = QNetworkRequest(QUrl(resource_url))
+        return QgsNetworkAccessManager.instance().get(request)
+
     def get_projects(self, should_include_public: bool = False) -> QNetworkReply:
         """Get QFieldCloud projects"""
         params = {"include-public": "1"} if should_include_public else {}

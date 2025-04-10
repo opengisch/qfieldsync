@@ -25,10 +25,9 @@ from functools import partial
 from typing import Callable
 from urllib.parse import urlparse
 
-from qgis.core import QgsApplication, QgsNetworkAccessManager
-from qgis.PyQt.QtCore import Qt, QTimer, QUrl
+from qgis.core import QgsApplication
+from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtGui import QCursor, QIcon, QPainter, QPalette, QPixmap
-from qgis.PyQt.QtNetwork import QNetworkRequest
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtWidgets import (
     QApplication,
@@ -231,8 +230,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         # download svg logo and apply it to button
         icon_url = theme.get("logo")
-        icon_req = QNetworkRequest(QUrl(icon_url))
-        icon_reply = QgsNetworkAccessManager.instance().get(icon_req)
+        icon_reply = self.network_manager.get_basic_reply(icon_url)
         icon_reply.finished.connect(
             partial(self.on_get_svg_logo_reply_finished, icon_reply, button)
         )
