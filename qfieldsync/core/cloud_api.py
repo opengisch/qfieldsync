@@ -412,11 +412,6 @@ class CloudNetworkAccessManager(QObject):
         Returns:
             Optional[QNetworkReply]: QNetworkReply from the QFieldCloud server.
         """
-        # don't login multiple times
-        if self.is_login_active:
-            return
-
-        self.is_login_active = True
 
         reply = self.cloud_get("auth/user/")
         reply.finished.connect(lambda: self._on_get_user_info_finished(reply))
@@ -861,8 +856,6 @@ class CloudNetworkAccessManager(QObject):
         self.login_finished.emit()
 
     def _on_get_user_info_finished(self, reply: QNetworkReply) -> None:
-        self.is_login_active = False
-
         try:
             payload = self.json_object(reply)
         except CloudException as err:
