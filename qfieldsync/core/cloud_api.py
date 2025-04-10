@@ -403,6 +403,11 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def login_with_sso(self) -> Optional[QNetworkReply]:
+        """
+        Login to QFieldCloud with social provider (e.g. Google).
+        This basically sends a GET user info request to QFC.
+        Which means the OAuth2 QgsAuthMethodConfig will trigger auth in the browser, if required.
+        """
         return self._get_cloud_user_info()
 
     def _get_cloud_user_info(self) -> Optional[QNetworkReply]:
@@ -423,7 +428,7 @@ class CloudNetworkAccessManager(QObject):
         return self.cloud_get("auth/user/", {"token": token})
 
     def logout(self) -> Optional[QNetworkReply]:
-        """Logout to QFieldCloud"""
+        """Logout from QFieldCloud"""
 
         if self.auth_method == CloudAuthMethod.CREDENTIALS:
             reply = self.cloud_post("auth/logout/")
