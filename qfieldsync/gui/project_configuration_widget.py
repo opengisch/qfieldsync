@@ -107,6 +107,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
         self.forceAutoPush.clicked.connect(self.onForceAutoPushClicked)
 
+        self.attachmentDirsListWidget.setMinimumHeight(140)
         self.attachmentDirsListWidget.itemChanged.connect(self.onItemChanged)
         self.event_eater = EventEater()
         self.attachmentDirsListWidget.installEventFilter(self.event_eater)
