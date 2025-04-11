@@ -91,9 +91,12 @@
              </font>
             </property>
             <property name="text">
-             <string>A new blank QFieldCloud project will be created. You will be responsible to move all the project-related files within the selected local directory, with the project file at its root. Project files will only be uploaded when you click the synchronize button. Make sure the selected directory contains no more than one QGIS project file.</string>
+             <string>A new blank QFieldCloud project will be created. You will be responsible to move all the project-related files within the selected local directory, with the project file at its root. Project files will only be uploaded when you click the synchronize button. Make sure the selected directory contains no more than one QGIS project file. Use when you want to keep a direct connection between &lt;a href=&quot;https://docs.qfield.org/get-started/tutorials/advanced-setup-qfc/#postgis&quot;&gt;QFieldCloud and PostGIS.&lt;/a&gt;</string>
             </property>
             <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
              <bool>true</bool>
             </property>
            </widget>
