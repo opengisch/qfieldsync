@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 
-from qgis.core import QgsMapLayerProxyModel
+from qgis.core import Qgis, QgsMapLayerProxyModel
 from qgis.gui import QgsMapLayerComboBox
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
@@ -59,6 +59,8 @@ class MapThemesConfigWidget(QTableWidget):
 
             cmb = QgsMapLayerComboBox()
             cmb.setAllowEmptyLayer(True)
+            if Qgis.QGIS_VERSION_INT >= 32400:
+                cmb.setProject(self.project)
             cmb.setFilters(QgsMapLayerProxyModel.VectorLayer)
             if map_theme in configuration:
                 cmb.setLayer(self.project.mapLayer(configuration[map_theme]))
