@@ -21,7 +21,8 @@
  ***************************************************************************/
 """
 
-from libqfieldsync.project_checker import ProjectCheckerFeedback
+from libqfieldsync.project_checker import Feedback, ProjectCheckerFeedback
+from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
 
@@ -30,10 +31,8 @@ class CheckerFeedbackTable(QTableWidget):
     def __init__(self, checker_feedback: ProjectCheckerFeedback, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setColumnCount(3)
-        self.setHorizontalHeaderLabels(
-            [self.tr("Level"), self.tr("Source"), self.tr("Message")]
-        )
+        self.setColumnCount(2)
+        self.setHorizontalHeaderLabels(["Level", self.tr("Message")])
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.setMinimumHeight(100)
@@ -46,7 +45,16 @@ class CheckerFeedbackTable(QTableWidget):
                 self.insertRow(row)
 
                 # first column
-                item = QTableWidgetItem(str(feedback.level.name))
+                if feedback.level == Feedback.Level.WARNING:
+                    level_icon = "/mIconWarning.svg"
+                    level_text = self.tr("Warning")
+                else:
+                    level_icon = "/mIconCritical.svg"
+                    level_text = self.tr("Error")
+
+                item = QTableWidgetItem(
+                    QgsApplication.getThemeIcon(level_icon), level_text
+                )
                 item.setFlags(Qt.ItemIsEnabled)
                 self.setItem(row, 0, item)
 
@@ -56,16 +64,11 @@ class CheckerFeedbackTable(QTableWidget):
                 else:
                     source = self.tr("Project")
 
-                item = QTableWidgetItem(source)
+                item = QTableWidgetItem()
                 item.setFlags(Qt.ItemIsEnabled)
                 self.setItem(row, 1, item)
 
-                # third column
-                item = QTableWidgetItem()
-                item.setFlags(Qt.ItemIsEnabled)
-                self.setItem(row, 2, item)
-
-                label = QLabel(feedback.message)
+                label = QLabel("**{}**\n\n{}".format(source, feedback.message))
                 label.setWordWrap(True)
                 label.setMargin(5)
                 label.setTextFormat(Qt.MarkdownText)
@@ -76,8 +79,7 @@ class CheckerFeedbackTable(QTableWidget):
                     | Qt.LinksAccessibleByKeyboard
                 )
                 label.setOpenExternalLinks(True)
-                # label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-                self.setCellWidget(row, 2, label)
+                self.setCellWidget(row, 1, label)
 
         self.verticalHeader().hide()
         self.resizeColumnsToContents()
