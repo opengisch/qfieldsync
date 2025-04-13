@@ -30,7 +30,7 @@ from libqfieldsync.offline_converter import ExportType
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import get_unique_empty_dirname
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qgis.core import QgsProject
+from qgis.core import QgsApplication, QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QShowEvent
 from qgis.PyQt.QtWidgets import (
@@ -161,6 +161,13 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.preferNoneButton.clicked.connect(self._on_prefer_none_button_clicked)
         self.preferLocalButton.clicked.connect(self._on_prefer_local_button_clicked)
         self.preferCloudButton.clicked.connect(self._on_prefer_cloud_button_clicked)
+
+        self.localDirOpenButton.clicked.connect(
+            lambda: self.on_local_dir_open_button_clicked()
+        )
+        self.localDirOpenButton.setIcon(
+            QgsApplication.getThemeIcon("/mActionFileOpen.svg")
+        )
 
     def showEvent(self, event: QShowEvent) -> None:
         self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
@@ -366,8 +373,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
             self.explanationLabel.setVisible(True)
 
+            self.cloudProjectNameValueLabel.setOpenExternalLinks(True)
             self.cloudProjectNameValueLabel.setText(
-                '<a href="{}{}">{}</a>'.format(
+                '<a href="{}{}"><b>{}</b></a>'.format(
                     self.network_manager.url,
                     self.cloud_project.url,
                     self.cloud_project.name_with_owner,
@@ -476,6 +484,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self._start_synchronization()
         else:
             raise NotImplementedError()
+
+    def on_local_dir_open_button_clicked(self) -> None:
+        dirname = self.projectLocalDirValueLineEdit.text()
+        if dirname and Path(dirname).exists():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(dirname))
 
     def _start_synchronization(self):
         assert self.cloud_project
