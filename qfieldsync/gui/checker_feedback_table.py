@@ -23,7 +23,7 @@
 
 from libqfieldsync.project_checker import ProjectCheckerFeedback
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QLabel, QTableWidget, QTableWidgetItem
+from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
 
 
 class CheckerFeedbackTable(QTableWidget):
@@ -37,15 +37,7 @@ class CheckerFeedbackTable(QTableWidget):
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.setMinimumHeight(100)
-
-        # When too much feedback, make sure the table does not force the buttons of the containing dialog to be below the screen edge.
-        try:
-            from qgis.utils import iface
-
-            max_height = int(iface.mapCanvas().size().height() / 3 * 2)
-        except Exception:
-            max_height = 400
-        self.setMaximumHeight(max_height)
+        self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
 
         for layer_id in checker_feedback.feedbacks.keys():
             for feedback in checker_feedback.feedbacks[layer_id]:
