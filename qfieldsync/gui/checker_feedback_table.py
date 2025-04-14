@@ -26,6 +26,8 @@ from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
 
+from ..utils.qt_utils import make_icon
+
 
 class CheckerFeedbackTable(QTableWidget):
     def __init__(self, checker_feedback: ProjectCheckerFeedback, *args, **kwargs):
@@ -46,15 +48,13 @@ class CheckerFeedbackTable(QTableWidget):
 
                 # first column
                 if feedback.level == Feedback.Level.WARNING:
-                    level_icon = "/mIconWarning.svg"
+                    level_icon = make_icon("idea.svg")
                     level_text = self.tr("Warning")
                 else:
-                    level_icon = "/mIconCritical.svg"
+                    level_icon = QgsApplication.getThemeIcon("/mIconWarning.svg")
                     level_text = self.tr("Error")
 
-                item = QTableWidgetItem(
-                    QgsApplication.getThemeIcon(level_icon), level_text
-                )
+                item = QTableWidgetItem(level_icon, level_text)
                 item.setFlags(Qt.ItemIsEnabled)
                 self.setItem(row, 0, item)
 
