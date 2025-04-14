@@ -986,3 +986,32 @@ class CloudProjectsCache(QObject):
         for project in self._projects:
             if dirpath == project.local_dir:
                 project.refresh_files()
+
+    def ensure_localized_dataset_project(self) -> Optional[str]:
+        """
+        Ensures that the 'localized_datasets' project exists under the user's organization.
+
+        Returns:
+            str | None: The project ID of the 'localized_datasets' project, or None if creation failed.
+        """
+        try:
+            for project in self.network_manager.projects_cache.projects():
+                if project["name"] == "localized_datasets":
+                    return project["id"]
+
+            account = self.network_manager.account()
+
+            if not account or not account.get("is_organization_owner"):
+                return None
+
+            org_username = account["username"]
+            project_data = self.network_manager.create_project(
+                name="localized_datasets",
+                owner_username=org_username,
+                private=True,
+            )
+            
+            return project_data["id"]
+
+        except Exception as err:
+            self.project_files_error.emit(project_id, str(err))
