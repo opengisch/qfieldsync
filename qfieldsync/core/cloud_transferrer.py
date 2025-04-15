@@ -24,7 +24,7 @@ import shutil
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
+import os
 from libqfieldsync.utils.file_utils import copy_multifile
 from libqfieldsync.layer import LayerSource
 from qgis.core import Qgis, QgsMessageLog, QgsProject
@@ -174,7 +174,6 @@ class CloudTransferrer(QObject):
 
         self._make_backup()
         self._upload()
-        # self.network_manager.ensure_localized_dataset_project()
         self._upload_localized_dataset_files()
 
     def _upload(self) -> None:
@@ -408,31 +407,26 @@ class CloudTransferrer(QObject):
         if not localized_paths:
             return
         
-        localized_project = self.network_manager.ensure_localized_dataset_project()
+        localized_project = self.network_manager.get_localized_datasets_project()
         
-        QgsMessageLog.logMessage(
-                self.tr(localized_project.get("id")),
-                "QFieldSync",
-                Qgis.Critical,
-            )
         localized_project_id = localized_project.get("id")
-        for layer in localized_paths:
+        
+        for full_path, relative_path in localized_paths.items():
             self.network_manager.cloud_upload_files(
-                f"files/{localized_project_id}/{layer}",
-                filenames=[str(layer)],
+                f"files/{localized_project_id}/{relative_path}",
+                filenames=[full_path],
             )
 
     def _get_localized_paths_from_project(self) -> dict[str, Path]:
 
-        localizedDataPathLayers = []
-
+        localized_data = {}
         for layer in list(QgsProject.instance().mapLayers().values()):
             layer_source = LayerSource(layer)
 
             if layer_source.is_localized_path:
-                localizedDataPathLayers.append(layer_source.filename)
+                localized_data[layer.dataProvider().dataSourceUri()] = layer_source.filename
 
-        return localizedDataPathLayers
+        return localized_data
 
 class FileTransfer(QObject):
     progress = pyqtSignal(int, int)

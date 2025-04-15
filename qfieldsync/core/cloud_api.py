@@ -735,7 +735,7 @@ class CloudNetworkAccessManager(QObject):
             self._nam.cookieJar().deleteCookie(cookie)
 
 
-    def ensure_localized_dataset_project(self) -> Optional[str]:
+    def get_localized_datasets_project(self) -> Optional[str]:
         """
         Ensures that the 'localized_datasets' project exists under the user's organization.
 
@@ -745,33 +745,22 @@ class CloudNetworkAccessManager(QObject):
         try:
          
           
-            org_username = self.user_details.get("username")
+            username = self.user_details.get("username")
 
-            if not org_username:
-                QgsMessageLog.logMessage("User not authenticated", "QFieldSync", Qgis.Warning)
-                return None
-            
             existing_projects = self.get_projects_not_async()
 
             for project in existing_projects:
-                if project.get("name") == "localized_datasets":
-                    QgsMessageLog.logMessage(
-                        "'localized_datasets' project already exists."+project.get("id"),
-                        "QFieldSync",
-                        Qgis.Info,
-                    )
+                if project.get("name") == "localized_datasets" and project.get("owner") == username:
                     return project
 
             reply = self.create_project(
                 name="localized_datasets",
-                owner=org_username,
+                owner=username,
                 description="Localized datasets for QField",
                 private=True,
             )
             
             project_data = self.json_object(reply)
-
-            QgsMessageLog.logMessage("Project ID:"+project_data.id, "QFieldSync", Qgis.Warning)
 
             return project_data
 
