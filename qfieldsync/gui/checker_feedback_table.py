@@ -34,7 +34,7 @@ class CheckerFeedbackTable(QTableWidget):
         super().__init__(*args, **kwargs)
 
         self.setColumnCount(2)
-        self.setHorizontalHeaderLabels(["Level", self.tr("Message")])
+        self.setHorizontalHeaderLabels(["  ", self.tr("Message")])
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.setMinimumHeight(100)
@@ -54,8 +54,9 @@ class CheckerFeedbackTable(QTableWidget):
                     level_icon = QgsApplication.getThemeIcon("/mIconWarning.svg")
                     level_text = self.tr("Error")
 
-                item = QTableWidgetItem(level_icon, level_text)
+                item = QTableWidgetItem(level_icon, "")
                 item.setFlags(Qt.ItemIsEnabled)
+                item.setToolTip(level_text)
                 self.setItem(row, 0, item)
 
                 # second column
@@ -66,6 +67,7 @@ class CheckerFeedbackTable(QTableWidget):
 
                 item = QTableWidgetItem()
                 item.setFlags(Qt.ItemIsEnabled)
+                item.setToolTip(level_text)
                 self.setItem(row, 1, item)
 
                 label = QLabel("**{}**\n\n{}".format(source, feedback.message))

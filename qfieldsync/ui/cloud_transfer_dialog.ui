@@ -102,7 +102,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>The project check provides automatic feedback for some common mistakes when using QField, QFieldSync and QFieldCloud. Errors show problems in your project configuration that must be fixed before proceeding. Warnings are suggestions what you can improve.</string>
+          <string>The project checks provides automatic feedback for some common issues when preparing projects for QField and QFieldCloud. Find below a list of improvement suggestions and errors that must be fixed before proceeding.</string>
          </property>
          <property name="wordWrap">
            <bool>true</bool>
