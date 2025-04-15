@@ -35,6 +35,7 @@ from qgis.core import (
     QgsAuthMethodConfig,
     QgsNetworkAccessManager,
     QgsProject,
+    QgsMessageLog
 )
 from qgis.PyQt.QtCore import QFileSystemWatcher, QObject, QUrl, QUrlQuery, pyqtSignal
 from qgis.PyQt.QtNetwork import (
@@ -734,6 +735,54 @@ class CloudNetworkAccessManager(QObject):
             self._nam.cookieJar().deleteCookie(cookie)
 
 
+    def ensure_localized_dataset_project(self) -> Optional[str]:
+        """
+        Ensures that the 'localized_datasets' project exists under the user's organization.
+
+        Returns:
+            str | None: The project ID of the 'localized_datasets' project, or None if creation failed.
+        """
+        try:
+         
+          
+            org_username = self.user_details.get("username")
+
+            if not org_username:
+                QgsMessageLog.logMessage("User not authenticated", "QFieldSync", Qgis.Warning)
+                return None
+            
+            existing_projects = self.get_projects_not_async()
+
+            for project in existing_projects:
+                if project.get("name") == "localized_datasets":
+                    QgsMessageLog.logMessage(
+                        "'localized_datasets' project already exists."+project.get("id"),
+                        "QFieldSync",
+                        Qgis.Info,
+                    )
+                    return project
+
+            reply = self.create_project(
+                name="localized_datasets",
+                owner=org_username,
+                description="Localized datasets for QField",
+                private=True,
+            )
+            
+            project_data = self.json_object(reply)
+
+            QgsMessageLog.logMessage("Project ID:"+project_data.id, "QFieldSync", Qgis.Warning)
+
+            return project_data
+
+        except Exception as err:
+            QgsMessageLog.logMessage(
+                "Error:"+str(err),
+                "QFieldSync",
+                Qgis.Critical,
+            )
+            return None
+
 class CloudReply:
     finished = pyqtSignal()
     sslErrors = pyqtSignal()
@@ -987,31 +1036,3 @@ class CloudProjectsCache(QObject):
             if dirpath == project.local_dir:
                 project.refresh_files()
 
-    def ensure_localized_dataset_project(self) -> Optional[str]:
-        """
-        Ensures that the 'localized_datasets' project exists under the user's organization.
-
-        Returns:
-            str | None: The project ID of the 'localized_datasets' project, or None if creation failed.
-        """
-        try:
-            for project in self.network_manager.projects_cache.projects():
-                if project["name"] == "localized_datasets":
-                    return project["id"]
-
-            account = self.network_manager.account()
-
-            if not account or not account.get("is_organization_owner"):
-                return None
-
-            org_username = account["username"]
-            project_data = self.network_manager.create_project(
-                name="localized_datasets",
-                owner_username=org_username,
-                private=True,
-            )
-            
-            return project_data["id"]
-
-        except Exception as err:
-            self.project_files_error.emit(project_id, str(err))
