@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional
 
 from libqfieldsync.utils.file_utils import copy_multifile
 from libqfieldsync.layer import LayerSource
-from qgis.core import Qgis, QgsMessageLog
+from qgis.core import Qgis, QgsMessageLog, QgsProject
 from qgis.PyQt.QtCore import (
     QAbstractListModel,
     QModelIndex,
@@ -174,6 +174,7 @@ class CloudTransferrer(QObject):
 
         self._make_backup()
         self._upload()
+        # self.network_manager.ensure_localized_dataset_project()
         self._upload_localized_dataset_files()
 
     def _upload(self) -> None:
@@ -406,12 +407,18 @@ class CloudTransferrer(QObject):
 
         if not localized_paths:
             return
-
-        localized_project = self.network_manager.ensure_localized_dataset_project(self.cloud_project)
-
+        
+        localized_project = self.network_manager.ensure_localized_dataset_project()
+        
+        QgsMessageLog.logMessage(
+                self.tr(localized_project.get("id")),
+                "QFieldSync",
+                Qgis.Critical,
+            )
+        localized_project_id = localized_project.get("id")
         for layer in localized_paths:
             self.network_manager.cloud_upload_files(
-                f"files/{localized_project.id}/{layer}",
+                f"files/{localized_project_id}/{layer}",
                 filenames=[str(layer)],
             )
 
@@ -419,14 +426,13 @@ class CloudTransferrer(QObject):
 
         localizedDataPathLayers = []
 
-        for layer in list(self.project.mapLayers().values()):
+        for layer in list(QgsProject.instance().mapLayers().values()):
             layer_source = LayerSource(layer)
 
             if layer_source.is_localized_path:
                 localizedDataPathLayers.append(layer_source.filename)
 
         return localizedDataPathLayers
-
 
 class FileTransfer(QObject):
     progress = pyqtSignal(int, int)
