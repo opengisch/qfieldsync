@@ -95,8 +95,14 @@
        </property>
        <item>
         <widget class="QLabel" name="feedbackLabel_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
-          <string>The project check provides automatic feedback for some common mistakes when using QField, QFieldSync and QFieldCloud. Lines starting with ERROR show problems in your project configuration that must be fixed before proceeding. Lines starting with WARNING are suggestions what you can improve.</string>
+          <string>The project checks provides automatic feedback for some common issues when preparing projects for QField and QFieldCloud. Find below a list of improvement suggestions and errors that must be fixed before proceeding.</string>
          </property>
          <property name="wordWrap">
            <bool>true</bool>
@@ -105,22 +111,6 @@
        </item>
        <item>
         <layout class="QVBoxLayout" name="feedbackTableWrapperLayout"/>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

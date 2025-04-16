@@ -21,31 +21,24 @@
  ***************************************************************************/
 """
 
-from libqfieldsync.project_checker import ProjectCheckerFeedback
+from libqfieldsync.project_checker import Feedback, ProjectCheckerFeedback
+from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QLabel, QTableWidget, QTableWidgetItem
+from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
+
+from ..utils.qt_utils import make_icon
 
 
 class CheckerFeedbackTable(QTableWidget):
     def __init__(self, checker_feedback: ProjectCheckerFeedback, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setColumnCount(3)
-        self.setHorizontalHeaderLabels(
-            [self.tr("Level"), self.tr("Source"), self.tr("Message")]
-        )
+        self.setColumnCount(2)
+        self.setHorizontalHeaderLabels(["", self.tr("Message")])
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.setMinimumHeight(100)
-
-        # When too much feedback, make sure the table does not force the buttons of the containing dialog to be below the screen edge.
-        try:
-            from qgis.utils import iface
-
-            max_height = int(iface.mapCanvas().size().height() / 3 * 2)
-        except Exception:
-            max_height = 400
-        self.setMaximumHeight(max_height)
+        self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
 
         for layer_id in checker_feedback.feedbacks.keys():
             for feedback in checker_feedback.feedbacks[layer_id]:
@@ -54,8 +47,16 @@ class CheckerFeedbackTable(QTableWidget):
                 self.insertRow(row)
 
                 # first column
-                item = QTableWidgetItem(str(feedback.level.name))
+                if feedback.level == Feedback.Level.WARNING:
+                    level_icon = make_icon("idea.svg")
+                    level_text = self.tr("Warning")
+                else:
+                    level_icon = QgsApplication.getThemeIcon("/mIconWarning.svg")
+                    level_text = self.tr("Error")
+
+                item = QTableWidgetItem(level_icon, "")
                 item.setFlags(Qt.ItemIsEnabled)
+                item.setToolTip(level_text)
                 self.setItem(row, 0, item)
 
                 # second column
@@ -64,16 +65,13 @@ class CheckerFeedbackTable(QTableWidget):
                 else:
                     source = self.tr("Project")
 
-                item = QTableWidgetItem(source)
-                item.setFlags(Qt.ItemIsEnabled)
-                self.setItem(row, 1, item)
-
-                # third column
                 item = QTableWidgetItem()
                 item.setFlags(Qt.ItemIsEnabled)
-                self.setItem(row, 2, item)
+                item.setToolTip(level_text)
+                self.setItem(row, 1, item)
 
-                label = QLabel(feedback.message)
+                # we do not escape the values on purpose to support Markdown/HTML
+                label = QLabel("**{}**\n\n{}".format(source, feedback.message))
                 label.setWordWrap(True)
                 label.setMargin(5)
                 label.setTextFormat(Qt.MarkdownText)
@@ -84,8 +82,7 @@ class CheckerFeedbackTable(QTableWidget):
                     | Qt.LinksAccessibleByKeyboard
                 )
                 label.setOpenExternalLinks(True)
-                # label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-                self.setCellWidget(row, 2, label)
+                self.setCellWidget(row, 1, label)
 
         self.verticalHeader().hide()
         self.resizeColumnsToContents()
