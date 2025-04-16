@@ -34,7 +34,7 @@ class CheckerFeedbackTable(QTableWidget):
         super().__init__(*args, **kwargs)
 
         self.setColumnCount(2)
-        self.setHorizontalHeaderLabels(["  ", self.tr("Message")])
+        self.setHorizontalHeaderLabels(["", self.tr("Message")])
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.setMinimumHeight(100)
@@ -70,6 +70,7 @@ class CheckerFeedbackTable(QTableWidget):
                 item.setToolTip(level_text)
                 self.setItem(row, 1, item)
 
+                # we do not escape the values on purpose to support Markdown/HTML
                 label = QLabel("**{}**\n\n{}".format(source, feedback.message))
                 label.setWordWrap(True)
                 label.setMargin(5)

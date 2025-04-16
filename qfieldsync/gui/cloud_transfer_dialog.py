@@ -225,9 +225,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             feedback = checker.check(ExportType.Cloud)
 
         if feedback and feedback.count > 0:
-            has_errors = len(feedback.error_feedbacks) > 0
-
+            # check whether the widget has already been added the guard from adding twice due to repeated showEvent signal
             if self.feedbackTableWrapperLayout.count() == 0:
+                has_errors = len(feedback.error_feedbacks) > 0
                 feedback_table = CheckerFeedbackTable(feedback)
                 self.feedbackTableWrapperLayout.addWidget(feedback_table)
                 self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
