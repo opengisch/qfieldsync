@@ -353,7 +353,9 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     def on_login_with_sso_provider_button_clicked(self, provider_data: dict) -> None:
         server_url = self.serverUrlCmb.currentText()
         auth_config = build_oauth2_auth_config(
-            provider_data, server_url, persist=self.rememberMeCheckBox.isChecked()
+            provider_data,
+            server_url,
+            should_persist=self.rememberMeCheckBox.isChecked(),
         )
         self.network_manager.set_url(server_url)
         self.network_manager.set_auth_method(CloudAuthMethod.SSO)
