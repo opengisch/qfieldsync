@@ -24,9 +24,10 @@ import shutil
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
+import os
 from libqfieldsync.utils.file_utils import copy_multifile
-from qgis.core import Qgis, QgsMessageLog
+from libqfieldsync.layer import LayerSource
+from qgis.core import Qgis, QgsMessageLog, QgsProject
 from qgis.PyQt.QtCore import (
     QAbstractListModel,
     QModelIndex,
@@ -40,6 +41,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 
+from libqfieldsync.utils.file_utils import import_file_checksum
 
 class CloudTransferrer(QObject):
     # TODO show progress of individual files
@@ -173,6 +175,7 @@ class CloudTransferrer(QObject):
 
         self._make_backup()
         self._upload()
+        self._upload_localized_dataset_files()
 
     def _upload(self) -> None:
         assert not self.is_upload_active, "Upload in progress"
@@ -397,6 +400,41 @@ class CloudTransferrer(QObject):
 
     def _on_logout_success(self) -> None:
         self.abort_requests()
+
+    def _upload_localized_dataset_files(self) -> None:
+        """
+        Uploads localized dataset files to the corresponding 'localized_datasets' cloud project.
+        Avoids re-uploading files that are already up-to-date based on checksums.
+        """
+        localized_paths = self._get_localized_paths_from_project()
+
+        if not localized_paths:
+            return
+
+        localized_project = self.network_manager.get_localized_datasets_project(self.cloud_project.owner)
+        
+        if not localized_project:
+            return
+
+        localized_project_id = localized_project.get("id")
+
+        for full_path, relative_path in localized_paths.items():
+        
+            self.network_manager.cloud_upload_files(
+                f"files/{localized_project_id}/{relative_path}",
+                filenames=[full_path],
+            )
+
+    def _get_localized_paths_from_project(self) -> dict[str, Path]:
+
+        localized_data = {}
+        for layer in list(QgsProject.instance().mapLayers().values()):
+            layer_source = LayerSource(layer)
+
+            if layer_source.is_localized_path:
+                localized_data[layer.dataProvider().dataSourceUri()] = layer_source.filename
+
+        return localized_data
 
 
 class FileTransfer(QObject):

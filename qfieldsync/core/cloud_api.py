@@ -35,6 +35,7 @@ from qgis.core import (
     QgsAuthMethodConfig,
     QgsNetworkAccessManager,
     QgsProject,
+    QgsMessageLog
 )
 from qgis.PyQt.QtCore import QFileSystemWatcher, QObject, QUrl, QUrlQuery, pyqtSignal
 from qgis.PyQt.QtNetwork import (
@@ -734,6 +735,48 @@ class CloudNetworkAccessManager(QObject):
             self._nam.cookieJar().deleteCookie(cookie)
 
 
+    def get_localized_datasets_project(self, owner: str) -> Optional[str]:
+        """
+        Retrieve the 'localized_datasets' project ID for a given owner.
+
+        This ensures that the 'localized_datasets' project is retrieved for the specified owner,
+        typically an organization or user that owns the main project. If such a project does not exist,
+        None is returned.
+
+        Args:
+            owner (str): The username of the project owner (person or organization).
+
+        Returns:
+            Optional[str]: The ID of the 'localized_datasets' project if found, otherwise None.
+        """
+        try:
+         
+          
+            existing_projects = self.get_projects_not_async()
+
+            for project in existing_projects:
+                if project.get("name") == "localized_datasets" and project.get("owner") == owner:
+                    return project
+
+            reply = self.create_project(
+                name="localized_datasets",
+                owner=owner,
+                description="Localized datasets for QField(Sync)",
+                private=True,
+            )
+            
+            project_data = self.json_object(reply)
+
+            return project_data
+
+        except Exception as err:
+            QgsMessageLog.logMessage(
+                "Error:"+str(err),
+                "QFieldSync",
+                Qgis.Critical,
+            )
+            return None
+
 class CloudReply:
     finished = pyqtSignal()
     sslErrors = pyqtSignal()
@@ -986,3 +1029,4 @@ class CloudProjectsCache(QObject):
         for project in self._projects:
             if dirpath == project.local_dir:
                 project.refresh_files()
+
