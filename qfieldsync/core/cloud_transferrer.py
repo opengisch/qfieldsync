@@ -41,6 +41,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 
+from libqfieldsync.utils.file_utils import import_file_checksum
 
 class CloudTransferrer(QObject):
     # TODO show progress of individual files
@@ -400,18 +401,25 @@ class CloudTransferrer(QObject):
     def _on_logout_success(self) -> None:
         self.abort_requests()
 
-
     def _upload_localized_dataset_files(self) -> None:
+        """
+        Uploads localized dataset files to the corresponding 'localized_datasets' cloud project.
+        Avoids re-uploading files that are already up-to-date based on checksums.
+        """
         localized_paths = self._get_localized_paths_from_project()
 
         if not localized_paths:
             return
+
+        localized_project = self.network_manager.get_localized_datasets_project(self.cloud_project.owner)
         
-        localized_project = self.network_manager.get_localized_datasets_project()
-        
+        if not localized_project:
+            return
+
         localized_project_id = localized_project.get("id")
-        
+
         for full_path, relative_path in localized_paths.items():
+        
             self.network_manager.cloud_upload_files(
                 f"files/{localized_project_id}/{relative_path}",
                 filenames=[full_path],
@@ -427,6 +435,7 @@ class CloudTransferrer(QObject):
                 localized_data[layer.dataProvider().dataSourceUri()] = layer_source.filename
 
         return localized_data
+
 
 class FileTransfer(QObject):
     progress = pyqtSignal(int, int)

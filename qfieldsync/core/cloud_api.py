@@ -735,28 +735,33 @@ class CloudNetworkAccessManager(QObject):
             self._nam.cookieJar().deleteCookie(cookie)
 
 
-    def get_localized_datasets_project(self) -> Optional[str]:
+    def get_localized_datasets_project(self, owner: str) -> Optional[str]:
         """
-        Ensures that the 'localized_datasets' project exists under the user's organization.
+        Retrieve the 'localized_datasets' project ID for a given owner.
+
+        This ensures that the 'localized_datasets' project is retrieved for the specified owner,
+        typically an organization or user that owns the main project. If such a project does not exist,
+        None is returned.
+
+        Args:
+            owner (str): The username of the project owner (person or organization).
 
         Returns:
-            str | None: The project ID of the 'localized_datasets' project, or None if creation failed.
+            Optional[str]: The ID of the 'localized_datasets' project if found, otherwise None.
         """
         try:
          
           
-            username = self.user_details.get("username")
-
             existing_projects = self.get_projects_not_async()
 
             for project in existing_projects:
-                if project.get("name") == "localized_datasets" and project.get("owner") == username:
+                if project.get("name") == "localized_datasets" and project.get("owner") == owner:
                     return project
 
             reply = self.create_project(
                 name="localized_datasets",
-                owner=username,
-                description="Localized datasets for QField",
+                owner=owner,
+                description="Localized datasets for QField(Sync)",
                 private=True,
             )
             
