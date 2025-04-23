@@ -56,6 +56,10 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qt_utils import strip_html
 
+HTTP_HEADER_CSRF_TOKEN = b"X-CSRFToken"
+HTTP_HEADER_REFERER = b"Referer"
+HTTP_HEADER_IDP_ID = b"X-QFC-IDP-ID"
+
 
 class CloudException(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
@@ -966,15 +970,15 @@ class CloudNetworkAccessManager(QObject):
                 break
 
         if csrftoken_cookie:
-            request.setRawHeader(b"X-CSRFToken", csrftoken_cookie.value())
-            request.setRawHeader(b"Referer", url.toEncoded())
+            request.setRawHeader(HTTP_HEADER_CSRF_TOKEN, csrftoken_cookie.value())
+            request.setRawHeader(HTTP_HEADER_REFERER, url.toEncoded())
 
     def _add_provider_id_header_to_request(self, request: QNetworkRequest) -> None:
         """Adds the current provider id to a request, if any. Sometimes required by QFC middleware."""
         provider_id = self.auth_provider_id()
 
         if provider_id and len(provider_id) > 0:
-            request.setRawHeader(b"X-QFC-IDP-ID", QByteArray(provider_id.encode()))
+            request.setRawHeader(HTTP_HEADER_IDP_ID, QByteArray(provider_id.encode()))
 
 
 class CloudReply:
