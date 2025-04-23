@@ -241,7 +241,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         # download svg logo and apply it to button
         icon_url = theme.get("logo")
-        icon_reply = self.network_manager.get_basic_reply(icon_url)
+        icon_reply = self.network_manager.get_remote_resource(icon_url)
         icon_reply.finished.connect(
             partial(self.on_get_svg_logo_reply_finished, icon_reply, button)
         )

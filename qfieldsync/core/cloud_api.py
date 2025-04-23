@@ -271,7 +271,7 @@ class CloudNetworkAccessManager(QObject):
         ]
 
     def get_username(self) -> Optional[str]:
-        if self.auth_method == CloudAuthMethod.None:
+        if self.auth_method == CloudAuthMethod.NONE:
             return None
         elif self.auth_method == CloudAuthMethod.CREDENTIALS:
             return self.auth().config("username")
@@ -455,7 +455,16 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def get_basic_reply(self, resource_url: str) -> QNetworkReply:
+    def get_remote_resource(self, resource_url: str) -> QNetworkReply:
+        """Gets a remote resource without any specific header.
+        Typically used for fetching static IDP logos.
+
+        Args:
+            resource_url: absolute URL of the resource to get.
+
+        Returns:
+            A QNetworkReply for the requested URL.
+        """
         request = QNetworkRequest(QUrl(resource_url))
         return QgsNetworkAccessManager.instance().get(request)
 
