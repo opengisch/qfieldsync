@@ -50,6 +50,8 @@ from qfieldsync.core.cloud_api import (
 )
 from qfieldsync.gui.utils import extract_theme_from_qgis_settings
 
+FETCH_AUTH_METHODS_TIMER_INTERVAL = 750
+
 CloudLoginDialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_login_dialog.ui")
 )
@@ -102,7 +104,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.buttonBox.setEnabled(False)
         self.buttonBox.hide()
 
-        self._fetch_auth_methods_timer.setInterval(750)
+        self._fetch_auth_methods_timer.setInterval(FETCH_AUTH_METHODS_TIMER_INTERVAL)
         self._fetch_auth_methods_timer.setSingleShot(True)
         self._fetch_auth_methods_timer.timeout.connect(
             self.fetch_server_auth_capabilities
