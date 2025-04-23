@@ -296,6 +296,11 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.activateWindow()
 
     def on_server_url_edit_text_changed(self) -> None:
+        """
+        Triggers an upcoming fetch of QFC auth capabilities, in the near future.
+        Using a timer, doing nothing if the timer is already programmed.
+        Called when server URL text changed event happens.
+        """
         server_url = self.serverUrlCmb.currentText()
         result = urlparse(server_url)
         if all([result.scheme, result.netloc]):
