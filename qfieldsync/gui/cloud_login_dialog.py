@@ -25,9 +25,8 @@ from functools import partial
 from typing import Callable
 from urllib.parse import urlparse
 
-from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import Qt, QTimer
-from qgis.PyQt.QtGui import QCursor, QIcon, QPainter, QPalette, QPixmap
+from qgis.PyQt.QtGui import QCursor, QIcon, QPainter, QPixmap
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtWidgets import (
     QApplication,
@@ -49,6 +48,7 @@ from qfieldsync.core.cloud_api import (
     CloudNetworkAccessManager,
     build_oauth2_auth_config,
 )
+from qfieldsync.gui.utils import extract_theme_from_qgis_settings
 
 CloudLoginDialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_login_dialog.ui")
@@ -223,7 +223,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             button (QPushButton): button to apply the style to.
         """
 
-        theme = style_data.get(self.extract_theme_from_qgis_settings())
+        theme = style_data.get(extract_theme_from_qgis_settings())
         button.setStyleSheet(
             f"background-color: {theme.get('color_fill')}; border-color: {theme.get('color_stroke')}; color: {theme.get('color_text')};"
         )
@@ -249,24 +249,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         painter.end()
 
         button.setIcon(QIcon(pixmap))
-
-    def extract_theme_from_qgis_settings(self) -> str:
-        """Finds if the current QGIS theme should use "light" or "dark" theme.
-        Return the most accurate possible "dark" or "light" key.
-        Typically used for styling SSO logins buttons.
-
-        Returns:
-            str: "light" or "dark", based on user's current QGIS settings.
-        """
-        qgis_theme = QgsApplication.instance().themeName()
-        if qgis_theme == "Night Mapping":
-            return "dark"
-        if qgis_theme == "Blend of Gray":
-            return "light"
-        color = QWidget().palette().color(QPalette.Window)
-        if (color.red() + color.green() + color.blue()) / 3 < 120:
-            return "dark"
-        return "light"
 
     def authenticate(self) -> None:
         self.usernameLineEdit.setEnabled(True)
