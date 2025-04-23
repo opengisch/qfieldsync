@@ -323,8 +323,10 @@ class CloudNetworkAccessManager(QObject):
         Should be stored in the QgsAuthMethodConfig with the "qfieldcloud_sso_id" key.
         """
         auth_method = self.auth()
+
         if not auth_method:
             return ""
+
         return auth_method.config("qfieldcloud_sso_id", "")
 
     def set_auth_method(self, method: CloudAuthMethod) -> None:
