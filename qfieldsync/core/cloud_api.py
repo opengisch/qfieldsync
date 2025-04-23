@@ -60,6 +60,8 @@ HTTP_HEADER_CSRF_TOKEN = b"X-CSRFToken"
 HTTP_HEADER_REFERER = b"Referer"
 HTTP_HEADER_IDP_ID = b"X-QFC-IDP-ID"
 
+CSRF_TOKEN_COOKIE = b"csrftoken"
+
 
 class CloudException(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
@@ -961,7 +963,7 @@ class CloudNetworkAccessManager(QObject):
 
         csrftoken_cookie = None
         for cookie in cookies:
-            if cookie.name() == b"csrftoken":
+            if cookie.name() == CSRF_TOKEN_COOKIE:
                 csrftoken_cookie = cookie
                 break
 
