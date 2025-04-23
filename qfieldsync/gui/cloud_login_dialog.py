@@ -225,7 +225,16 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         theme = style_data.get(extract_theme_from_qgis_settings())
         button.setStyleSheet(
-            f"background-color: {theme.get('color_fill')}; border-color: {theme.get('color_stroke')}; color: {theme.get('color_text')};"
+            """
+            background-color: {color_fill};
+            border-color: {color_stroke};
+            color: {color_text};
+            """.format(
+                # NOTE Ideally we want to escape the values before we inject them into CSS
+                color_fill=theme.get("color_fill"),
+                color_stroke=theme.get("color_stroke"),
+                color_text=theme.get("color_text"),
+            )
         )
 
         # download svg logo and apply it to button
