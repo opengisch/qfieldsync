@@ -211,7 +211,7 @@ class CloudNetworkAccessManager(QObject):
         pref_auth_config_id = self.preferences.value("qfieldCloudAuthcfg")
         if pref_auth_config_id:
             auth_config = QgsAuthMethodConfig()
-            _, config = QgsApplication.authManager().loadAuthenticationConfig(
+            _success, config = QgsApplication.authManager().loadAuthenticationConfig(
                 pref_auth_config_id, auth_config, full=True
             )
             self.auth_config = config
