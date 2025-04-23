@@ -543,13 +543,16 @@ class CloudNetworkAccessManager(QObject):
         self.token_changed.emit()
 
     def is_authenticated(self) -> bool:
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+        if self.auth_method == CloudAuthMethod.NONE:
+            return False
+        elif self.auth_method == CloudAuthMethod.CREDENTIALS:
             return self.has_token()
-        if self.auth_method == CloudAuthMethod.SSO:
+        elif self.auth_method == CloudAuthMethod.SSO:
             # If there is no username, it means a request to get it
             # must be done before being considered authenticated.
             return self.auth_config and self.current_username
-        return False
+        else:
+            raise NotImplementedError(f"Unknown authentication method {self.auth_method}!")
 
     def has_token(self) -> bool:
         return self._token is not None and len(self._token) > 0
