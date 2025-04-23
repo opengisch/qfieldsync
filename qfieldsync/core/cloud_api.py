@@ -288,8 +288,7 @@ class CloudNetworkAccessManager(QObject):
         return cfg
 
     def set_auth(self, url, **kwargs: str) -> None:
-        if self.auth_method != CloudAuthMethod.CREDENTIALS:
-            return
+        assert self.auth_method == CloudAuthMethod.CREDENTIALS
 
         if self.url != url:
             self.set_url(url)
