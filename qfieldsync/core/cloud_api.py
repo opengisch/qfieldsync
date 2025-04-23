@@ -552,7 +552,9 @@ class CloudNetworkAccessManager(QObject):
             # must be done before being considered authenticated.
             return self.auth_config and self.current_username
         else:
-            raise NotImplementedError(f"Unknown authentication method {self.auth_method}!")
+            raise NotImplementedError(
+                f"Unknown authentication method {self.auth_method}!"
+            )
 
     def has_token(self) -> bool:
         return self._token is not None and len(self._token) > 0
@@ -957,9 +959,11 @@ class CloudNetworkAccessManager(QObject):
         cookie_jar = self._nam.cookieJar()
         cookies = cookie_jar.cookiesForUrl(url)
 
-        csrftoken_cookie = next(
-            (cookie for cookie in cookies if cookie.name() == b"csrftoken"), None
-        )
+        csrftoken_cookie = None
+        for cookie in cookies:
+            if cookie.name() == b"csrftoken":
+                csrftoken_cookie = cookie
+                break
 
         if csrftoken_cookie:
             request.setRawHeader(b"X-CSRFToken", csrftoken_cookie.value())
