@@ -214,13 +214,13 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self._sso_login_buttons.append(login_button)
 
     def set_sso_provider_button_style(
-        self, style_data: dict, button: QPushButton
+        self, style_data: dict[str, str], button: QPushButton
     ) -> None:
         """Apply style to a SSO provider login button.
 
         Args:
-            style_data (dict): style JSON for the provider, served by QFieldCloud.
-            button (QPushButton): button to apply the style to.
+            style_data: style JSON for the provider, served by QFieldCloud.
+            button: button to apply the style to.
         """
 
         theme = style_data.get(extract_theme_from_qgis_settings())
