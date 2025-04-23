@@ -279,7 +279,7 @@ class CloudNetworkAccessManager(QObject):
 
         authcfg = self.preferences.value("qfieldCloudAuthcfg")
 
-        if not authcfg or authcfg == "":
+        if not authcfg:
             return QgsAuthMethodConfig()
 
         cfg = QgsAuthMethodConfig()
