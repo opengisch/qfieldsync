@@ -428,10 +428,6 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def get_user(self, token: str) -> QNetworkReply:
-        """Gets current user and if token is still valid"""
-        return self.cloud_get("auth/user/", {"token": token})
-
     def logout(self) -> Optional[QNetworkReply]:
         """Logout from QFieldCloud"""
 
