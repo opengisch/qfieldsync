@@ -132,15 +132,15 @@ def build_oauth2_auth_config(
     auth_data: dict[str, Any],
     related_uri: str,
     config_name: str = "qfieldcloud_sso",
-    should_persist: bool = True,
+    should_persist_token: bool = True,
 ) -> QgsAuthMethodConfig:
     """Builds a QgsAuthMethodConfig from a method provided by QFieldCloud's auth capabilities.
 
     Args:
-        auth_data (dict): dict describing an auth method.
-        related_uri (str): URI of the generated auth config.
-        config_name (str, optional): name of the generated auth config. Defaults to "qfieldcloud_sso".
-        should_persist (bool, optional): if the token should be persistent. Defaults to True.
+        auth_data: dict describing an auth method.
+        related_uri: URI of the generated auth config.
+        config_name: name of the generated auth config. Defaults to "qfieldcloud_sso".
+        should_persist_token: if the token should be persistent. Defaults to True.
 
     Returns:
         QgsAuthMethodConfig: QGIS auth config for the provided method.
@@ -157,7 +157,7 @@ def build_oauth2_auth_config(
         "redirectHost": auth_data.get("redirect_host"),
         "redirectPort": auth_data.get("redirect_port"),
         "redirectUrl": auth_data.get("redirect_url"),
-        "persistToken": should_persist,
+        "persistToken": should_persist_token,
         "pkceEnabled": auth_data.get("pkce_enabled"),
         "refreshTokenUrl": auth_data.get("refresh_token_url"),
         "requestTimeout": 30,

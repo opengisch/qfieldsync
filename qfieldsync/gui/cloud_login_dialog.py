@@ -351,7 +351,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         auth_config = build_oauth2_auth_config(
             provider_data,
             server_url,
-            should_persist=self.rememberMeCheckBox.isChecked(),
+            should_persist_token=self.rememberMeCheckBox.isChecked(),
         )
         self.network_manager.set_url(server_url)
         self.network_manager.set_auth_method(CloudAuthMethod.SSO)
