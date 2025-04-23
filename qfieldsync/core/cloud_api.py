@@ -271,11 +271,14 @@ class CloudNetworkAccessManager(QObject):
         ]
 
     def get_username(self) -> Optional[str]:
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+        if self.auth_method == CloudAuthMethod.None:
+            return None
+        elif self.auth_method == CloudAuthMethod.CREDENTIALS:
             return self.auth().config("username")
         elif self.auth_method == CloudAuthMethod.SSO:
             return self.current_username
-        return None
+        else:
+            raise NotImplementedError("Unknown auth method: {self.auth_method}")
 
     def auth(self) -> QgsAuthMethodConfig:
         auth_manager = QgsApplication.authManager()
