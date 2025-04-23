@@ -881,6 +881,7 @@ class CloudNetworkAccessManager(QObject):
             "username": payload["username"],
             "avatar_url": payload["avatar_url"],
         }
+
         if payload["avatar_url"]:
             suffix = payload["avatar_url"].rsplit(".")[-1]
             avatar_filename = tempfile.mktemp(suffix=f".{suffix}")
@@ -891,6 +892,7 @@ class CloudNetworkAccessManager(QObject):
             reply.finished.connect(
                 lambda: self._on_avatar_download_finished(reply, avatar_filename)
             )
+
         self.current_username = payload["username"]
         self.login_finished.emit()
 
