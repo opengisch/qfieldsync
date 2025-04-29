@@ -878,10 +878,13 @@ class CloudNetworkAccessManager(QObject):
             reply.finished.connect(
                 lambda: self._on_avatar_download_finished(reply, avatar_filename)
             )
-        self.set_auth(self.url, username=payload["username"])
-        self.set_token(
-            payload["token"], self.preferences.value("qfieldCloudRememberMe")
-        )
+
+        if self.auth_method == CloudAuthMethod.CREDENTIALS:
+            self.set_auth(self.url, username=payload["username"])
+            self.set_token(
+                payload["token"], self.preferences.value("qfieldCloudRememberMe")
+            )
+
         self.login_finished.emit()
 
     def _on_get_user_info_finished(self, reply: QNetworkReply) -> None:
@@ -926,7 +929,7 @@ class CloudNetworkAccessManager(QObject):
         suggest_forgotten_password = True
         error_str = ""
 
-        if self._login_error:
+        if hasattr(self, "_login_error"):
             reply = self._login_error.reply
 
             if (
