@@ -235,9 +235,9 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             color: {color_text};
             """.format(
                 # NOTE Ideally we want to escape the values before we inject them into CSS
-                color_fill=theme.get("color_fill"),
-                color_stroke=theme.get("color_stroke"),
-                color_text=theme.get("color_text"),
+                color_fill=theme.get("color_fill", "#ffffff"),
+                color_stroke=theme.get("color_stroke", "#747775"),
+                color_text=theme.get("color_text", "#1F1F1F"),
             )
         )
 
