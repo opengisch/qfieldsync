@@ -41,7 +41,7 @@ def set_available_actions(combobox, actions, default_action):
             combobox.setCurrentIndex(combobox.count() - 1)
 
 
-def extract_theme_from_qgis_settings() -> str:
+def extract_theme_from_qgis_settings() -> Literal["light", "dark"]:
     """Finds if the current QGIS theme should use "light" or "dark" theme.
     Return the most accurate possible "dark" or "light" key.
     Typically used for styling SSO logins buttons.
