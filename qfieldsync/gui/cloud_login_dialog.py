@@ -60,6 +60,8 @@ CloudLoginDialogUi, _ = loadUiType(
 class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     instance = None
 
+    # timer used to avoid spamming QFC server,
+    # when fetching server's auth providers.
     _fetch_auth_methods_timer: QTimer = QTimer()
 
     _sso_login_buttons: list[QPushButton] = []
