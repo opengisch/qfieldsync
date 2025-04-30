@@ -50,11 +50,16 @@ def extract_theme_from_qgis_settings() -> str:
         "light" or "dark", based on user's current QGIS settings.
     """
     qgis_theme = QgsApplication.instance().themeName()
+
     if qgis_theme == "Night Mapping":
         return "dark"
+
     if qgis_theme == "Blend of Gray":
         return "light"
+
     color = QWidget().palette().color(QPalette.Window)
+
     if (color.red() + color.green() + color.blue()) / 3 < 120:
         return "dark"
+
     return "light"
