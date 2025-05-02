@@ -278,6 +278,30 @@
           </widget>
          </item>
          <item>
+          <widget class="QLabel" name="localizedDatasetsUploadLabel">
+           <property name="text">
+            <string>Uploading localized datasets</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QProgressBar" name="localizedDatasetsUploadProgressBar">
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="localizedDatasetsUploadProgressFeedbackLabel">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="downloadLabel">
            <property name="text">
             <string>Downloading</string>
@@ -441,6 +465,16 @@
            <string>Action</string>
           </property>
          </column>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="uploadLocalizedDatasetsCheck">
+         <property name="text">
+          <string>Upload missing localized dataset(s)</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
