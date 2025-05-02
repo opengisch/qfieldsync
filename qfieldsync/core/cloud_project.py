@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Union
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
+from libqfieldsync.utils.bad_layer_handler import bad_layer_handler
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QDir
 
@@ -357,6 +358,10 @@ class CloudProject:
                 continue
 
             yield project_file
+    
+    @property
+    def localized_dataset_files(self) -> Optional[List]:
+        print(self.local_project_file)
 
     @property
     def is_current_qgis_project(self) -> bool:

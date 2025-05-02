@@ -257,7 +257,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             reply = self.network_manager.projects_cache.get_project_files(
                 self.cloud_project.id
             )
+            
+            print(self.cloud_project.local_project_file)
+            #localized_project = self.network_manager.get_localized_datasets_project(self.cloud_project.owner)
+            #if not localized_project:                
             reply.finished.connect(lambda: self.prepare_project_transfer())
+            
 
     def show_end_page(
         self, feedback: str = "", logs_model: TransferFileLogsModel = None
