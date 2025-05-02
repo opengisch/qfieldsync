@@ -96,11 +96,12 @@ jobs:
       - name: Package libqfieldsync
         run: |
           pip wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
-          LIBQFIELDSYNC_COMMIT_SHA=$(echo $(grep -o -P '(https://.*.tar.gz)' requirements.txt) | grep -Eo '[0-9a-f]{40}')
-          mv libqfieldsync-*.whl qfieldsync/libqfieldsyncq_${LIBQFIELDSYNC_COMMIT_SHA}.whl
+          LIBQFIELDSYNC_COMMIT_SHA=$(echo $(grep -o -P '((https://github\.com/opengisch/libqfieldsync/.*.tar.gz))' requirements.txt) | grep -Eo '[0-9a-f]{40}')
+          mv libqfieldsync-*.whl qfieldsync/libqfieldsync_${LIBQFIELDSYNC_COMMIT_SHA}.whl
 
       - name: Release
         run: |
+          LIBQFIELDSYNC_COMMIT_SHA=$(echo $(grep -o -P '((https://github\.com/opengisch/libqfieldsync/.*.tar.gz))' requirements.txt) | grep -Eo '[0-9a-f]{40}')
           RELEASE_VERSION=${GITHUB_REF##*/}
           RELEASE_TAG=${GITHUB_REF##*/}
           qgis-plugin-ci release ${RELEASE_VERSION} \
@@ -109,7 +110,7 @@ jobs:
               --github-token ${GITHUB_TOKEN} \
               --osgeo-username ${OSGEO_USERNAME} \
               --osgeo-password ${OSGEO_PASSWORD} \
-              --asset-path qfieldsync/libqfieldsync.whl
+              --asset-path qfieldsync/libqfieldsync_${LIBQFIELDSYNC_COMMIT_SHA}.whl
 
   package:
     runs-on: ubuntu-24.04
