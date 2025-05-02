@@ -33,11 +33,18 @@ from qgis.core import (
     Qgis,
     QgsApplication,
     QgsAuthMethodConfig,
+    QgsMessageLog,
     QgsNetworkAccessManager,
     QgsProject,
-    QgsMessageLog
 )
-from qgis.PyQt.QtCore import QEventLoop, QFileSystemWatcher, QObject, QUrl, QUrlQuery, pyqtSignal
+from qgis.PyQt.QtCore import (
+    QEventLoop,
+    QFileSystemWatcher,
+    QObject,
+    QUrl,
+    QUrlQuery,
+    pyqtSignal,
+)
 from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
@@ -748,7 +755,7 @@ class CloudNetworkAccessManager(QObject):
             for project in self.projects_cache.projects:
                 if project.name == "localized_datasets" and project.owner == owner:
                     return project
-            
+
             # If not, refresh the projects cache and check again
             self.projects_cache.refresh_not_async()
             for project in self.projects_cache.projects:
@@ -765,7 +772,7 @@ class CloudNetworkAccessManager(QObject):
             loop = QEventLoop()
             reply.finished.connect(loop.quit)
             loop.exec()
-            
+
             self.projects_cache.refresh_not_async()
             for project in self.projects_cache.projects:
                 if project.name == "localized_datasets" and project.owner == owner:
@@ -773,7 +780,7 @@ class CloudNetworkAccessManager(QObject):
 
         except Exception as err:
             QgsMessageLog.logMessage(
-                "Error:"+str(err),
+                "Error:" + str(err),
                 "QFieldSync",
                 Qgis.Critical,
             )
@@ -1037,4 +1044,3 @@ class CloudProjectsCache(QObject):
         for project in self._projects:
             if dirpath == project.local_dir:
                 project.refresh_files()
-

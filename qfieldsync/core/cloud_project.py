@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Union
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qgis.core import Qgis, QgsProject, QgsProviderRegistry, QgsProviderMetadata
+from qgis.core import Qgis, QgsProject, QgsProviderRegistry
 from qgis.PyQt.QtCore import QDir
 
 from qfieldsync.core.preferences import Preferences
@@ -361,7 +361,7 @@ class CloudProject:
                 continue
 
             yield project_file
-    
+
     @property
     def is_current_qgis_project(self) -> bool:
         project_home_path = QgsProject.instance().homePath()
@@ -395,7 +395,11 @@ class CloudProject:
         return None
 
     def get_localized_dataset_files(self, localized_data_paths) -> List[Path]:
-        if len(localized_data_paths) > 0 and self.local_project_file and self.local_project_file.local_path_exists:
+        if (
+            len(localized_data_paths) > 0
+            and self.local_project_file
+            and self.local_project_file.local_path_exists
+        ):
             read_flags = QgsProject.ReadFlags()
             read_flags |= QgsProject.FlagDontLoadLayouts
             read_flags |= QgsProject.FlagTrustLayerMetadata
@@ -405,9 +409,11 @@ class CloudProject:
             temporary_project.read(str(self.local_project_file.local_path), read_flags)
             layers = temporary_project.mapLayers()
             localized_datasets_files = []
-            for (layer_id, layer) in layers.items():
-                if layer.dataProvider():                    
-                    metadata = QgsProviderRegistry.instance().providerMetadata(layer.dataProvider().name())
+            for layer_id, layer in layers.items():
+                if layer.dataProvider():
+                    metadata = QgsProviderRegistry.instance().providerMetadata(
+                        layer.dataProvider().name()
+                    )
                     metadata.decodeUri(layer.source())
                     filename = metadata.decodeUri(layer.source()).get("path", "")
                     if filename:

@@ -24,10 +24,9 @@ import shutil
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-import os
+
 from libqfieldsync.utils.file_utils import copy_multifile
-from libqfieldsync.layer import LayerSource
-from qgis.core import Qgis, QgsApplication, QgsMessageLog, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsMessageLog
 from qgis.PyQt.QtCore import (
     QAbstractListModel,
     QModelIndex,
@@ -41,7 +40,6 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 
-from libqfieldsync.utils.file_utils import import_file_checksum
 
 class CloudTransferrer(QObject):
     # TODO show progress of individual files
@@ -58,7 +56,10 @@ class CloudTransferrer(QObject):
     delete_finished = pyqtSignal()
 
     def __init__(
-        self, network_manager: CloudNetworkAccessManager, cloud_project: CloudProject, localized_datasets_project: CloudProject = None
+        self,
+        network_manager: CloudNetworkAccessManager,
+        cloud_project: CloudProject,
+        localized_datasets_project: CloudProject = None,
     ) -> None:
         super(CloudTransferrer, self).__init__(parent=None)
         assert cloud_project.local_dir
@@ -99,7 +100,9 @@ class CloudTransferrer(QObject):
         self.temp_dir.joinpath(FileTransfer.Type.UPLOAD.value).mkdir()
         self.temp_dir.joinpath(FileTransfer.Type.DOWNLOAD.value).mkdir()
 
-        self.localized_datasets_upload_finished.connect(self._on_localized_datasets_upload_finished)
+        self.localized_datasets_upload_finished.connect(
+            self._on_localized_datasets_upload_finished
+        )
         self.upload_finished.connect(self._on_upload_finished)
         self.delete_finished.connect(self._on_delete_finished)
         self.download_finished.connect(self._on_download_finished)
@@ -173,19 +176,31 @@ class CloudTransferrer(QObject):
             list(self._files_to_download.values()),
             FileTransfer.Type.DOWNLOAD,
         )
-        
+
         self._localized_datasets_files_to_upload = []
 
-        localized_data_paths = QgsApplication.instance().localizedDataPathRegistry().paths()
-        if self.localized_datasets_project and localized_datasets_files and localized_data_paths:
+        localized_data_paths = (
+            QgsApplication.instance().localizedDataPathRegistry().paths()
+        )
+        if (
+            self.localized_datasets_project
+            and localized_datasets_files
+            and localized_data_paths
+        ):
             for localized_data_path in localized_data_paths:
                 for localized_datasets_file in localized_datasets_files:
                     if localized_datasets_file.startswith(localized_data_path):
-                        self._localized_datasets_files_to_upload.append(ProjectFile(
-                            {"name": localized_datasets_file[len(localized_data_path)+1:]},
-                            local_dir=localized_datasets_file
-                        ))
-            
+                        self._localized_datasets_files_to_upload.append(
+                            ProjectFile(
+                                {
+                                    "name": localized_datasets_file[
+                                        len(localized_data_path) + 1 :
+                                    ]
+                                },
+                                local_dir=localized_datasets_file,
+                            )
+                        )
+
             self.throttled_localized_datasets_uploader = ThrottledFileTransferrer(
                 self.network_manager,
                 self.localized_datasets_project,
@@ -232,7 +247,9 @@ class CloudTransferrer(QObject):
         fraction = min(bytes_transferred / max(self.total_upload_bytes, 1), 1)
         self.localized_datasets_upload_progress.emit(fraction)
 
-    def _on_throttled_localized_datasets_upload_error(self, filename: str, error: str) -> None:
+    def _on_throttled_localized_datasets_upload_error(
+        self, filename: str, error: str
+    ) -> None:
         self.throttled_localized_datasets_uploader.abort()
 
     def _on_throttled_localized_datasets_upload_finished(self) -> None:
@@ -457,10 +474,16 @@ class CloudTransferrer(QObject):
             return
 
         self.is_localized_datasets_upload_active = True
-        
-        self.throttled_localized_datasets_uploader.error.connect(self._on_throttled_localized_datasets_upload_error)
-        self.throttled_localized_datasets_uploader.progress.connect(self._on_throttled_localized_datasets_upload_progress)
-        self.throttled_localized_datasets_uploader.finished.connect(self._on_throttled_localized_datasets_upload_finished)
+
+        self.throttled_localized_datasets_uploader.error.connect(
+            self._on_throttled_localized_datasets_upload_error
+        )
+        self.throttled_localized_datasets_uploader.progress.connect(
+            self._on_throttled_localized_datasets_upload_progress
+        )
+        self.throttled_localized_datasets_uploader.finished.connect(
+            self._on_throttled_localized_datasets_upload_finished
+        )
         self.throttled_localized_datasets_uploader.transfer()
 
 
@@ -669,7 +692,7 @@ class ThrottledFileTransferrer(QObject):
         files: List[ProjectFile],
         transfer_type: FileTransfer.Type,
         max_parallel_requests: int = 8,
-        use_file_local_dir = False,
+        use_file_local_dir=False,
     ) -> None:
         super(QObject, self).__init__()
 
@@ -680,7 +703,11 @@ class ThrottledFileTransferrer(QObject):
         self.filenames = [f.name for f in files]
         self.max_parallel_requests = max_parallel_requests
         self.finished_count = 0
-        self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync") if cloud_project.local_dir else None
+        self.temp_dir = (
+            Path(cloud_project.local_dir).joinpath(".qfieldsync")
+            if cloud_project.local_dir
+            else None
+        )
         self.transfer_type = transfer_type
 
         for file in self.files:
@@ -689,7 +716,9 @@ class ThrottledFileTransferrer(QObject):
                 self.cloud_project,
                 self.transfer_type,
                 file,
-                Path(file.local_dir) if use_file_local_dir else self.temp_dir.joinpath(str(self.transfer_type.value), file.name),
+                Path(file.local_dir)
+                if use_file_local_dir
+                else self.temp_dir.joinpath(str(self.transfer_type.value), file.name),
             )
             transfer.progress.connect(
                 lambda *args: self._on_transfer_progress(transfer, *args)
@@ -772,7 +801,7 @@ class TransferFileLogsModel(QAbstractListModel):
                 for filename, transfer in transferrer.transfers.items():
                     self.filename_to_index[filename] = len(self.transfers)
                     self.transfers.append(transfer)
-                
+
                 transferrer.file_finished.connect(self._on_updated_transfer)
                 transferrer.error.connect(self._on_updated_transfer)
                 transferrer.progress.connect(self._on_updated_transfer)

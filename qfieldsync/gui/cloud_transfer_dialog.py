@@ -30,7 +30,7 @@ from libqfieldsync.offline_converter import ExportType
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import get_unique_empty_dirname
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qgis.core import QgsApplication, QgsProject, QgsLocalizedDataPathRegistry
+from qgis.core import QgsApplication, QgsProject
 from qgis.PyQt.QtCore import QDir, Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QShowEvent
 from qgis.PyQt.QtWidgets import (
@@ -49,7 +49,7 @@ from qgis.utils import iface
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
-from qfieldsync.core.cloud_transferrer import CloudTransferrer, FileTransfer, TransferFileLogsModel
+from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 
@@ -261,7 +261,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.cloud_project.id
             )
             reply.finished.connect(lambda: self.check_localized_datasets())
-            
 
     def show_end_page(
         self, feedback: str = "", logs_model: TransferFileLogsModel = None
@@ -314,19 +313,29 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.detailedLogEndPageListView.setModel(logs_model)
             self.detailedLogEndPageListView.setModelColumn(0)
 
-            
     def check_localized_datasets(self):
-        localized_data_paths = QgsApplication.instance().localizedDataPathRegistry().paths()
+        localized_data_paths = (
+            QgsApplication.instance().localizedDataPathRegistry().paths()
+        )
         if localized_data_paths:
-            self.localized_datasets_files = self.cloud_project.get_localized_dataset_files(localized_data_paths)
+            self.localized_datasets_files = (
+                self.cloud_project.get_localized_dataset_files(localized_data_paths)
+            )
             if self.localized_datasets_files:
-                self.localized_datasets_project = self.network_manager.get_localized_datasets_project(self.cloud_project.owner)
-                if self.localized_datasets_project and self.localized_datasets_project.id != self.cloud_project.id:
-                   reply = self.network_manager.projects_cache.get_project_files(
-                       self.localized_datasets_project.id
-                   )
-                   reply.finished.connect(lambda: self.prepare_project_transfer())
-                   return
+                self.localized_datasets_project = (
+                    self.network_manager.get_localized_datasets_project(
+                        self.cloud_project.owner
+                    )
+                )
+                if (
+                    self.localized_datasets_project
+                    and self.localized_datasets_project.id != self.cloud_project.id
+                ):
+                    reply = self.network_manager.projects_cache.get_project_files(
+                        self.localized_datasets_project.id
+                    )
+                    reply.finished.connect(lambda: self.prepare_project_transfer())
+                    return
 
         self.prepare_project_transfer()
 
@@ -345,17 +354,29 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         # Remove files that are already present remotely, override should be done manually
         if self.localized_datasets_project and self.localized_datasets_files:
-            localized_data_paths = QgsApplication.instance().localizedDataPathRegistry().paths()
-            localized_datasets_project_files = self.localized_datasets_project.get_files()
+            localized_data_paths = (
+                QgsApplication.instance().localizedDataPathRegistry().paths()
+            )
+            localized_datasets_project_files = (
+                self.localized_datasets_project.get_files()
+            )
             localized_datasets_project_names = []
             for localized_datasets_project_file in localized_datasets_project_files:
-                localized_datasets_project_names.append(localized_datasets_project_file.name)
+                localized_datasets_project_names.append(
+                    localized_datasets_project_file.name
+                )
             for localized_data_path in localized_data_paths:
                 for localized_datasets_file in self.localized_datasets_files[:]:
-                    if localized_datasets_file[len(localized_data_path)+1:] in localized_datasets_project_names:
+                    if (
+                        localized_datasets_file[len(localized_data_path) + 1 :]
+                        in localized_datasets_project_names
+                    ):
                         self.localized_datasets_files.remove(localized_datasets_file)
 
-        if len(list(self.cloud_project.files_to_sync)) == 0 and len(self.localized_datasets_files) == 0:
+        if (
+            len(list(self.cloud_project.files_to_sync)) == 0
+            and len(self.localized_datasets_files) == 0
+        ):
             files_total = len(self.cloud_project.get_files())
             if files_total > 0:
                 self.show_end_page(
@@ -380,7 +401,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             return
 
         print(self.localized_datasets_files)
-        self.uploadLocalizedDatasetsCheck.setVisible(len(self.localized_datasets_files) != 0)
+        self.uploadLocalizedDatasetsCheck.setVisible(
+            len(self.localized_datasets_files) != 0
+        )
         self.project_transfer = CloudTransferrer(
             self.network_manager,
             self.cloud_project,
@@ -582,8 +605,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
             hasLocalizedDatasetsUploads = len(self.localized_datasets_files) > 0
             self.localizedDatasetsUploadLabel.setVisible(hasLocalizedDatasetsUploads)
-            self.localizedDatasetsUploadProgressBar.setVisible(hasLocalizedDatasetsUploads)
-            self.localizedDatasetsUploadProgressFeedbackLabel.setVisible(hasLocalizedDatasetsUploads)
+            self.localizedDatasetsUploadProgressBar.setVisible(
+                hasLocalizedDatasetsUploads
+            )
+            self.localizedDatasetsUploadProgressFeedbackLabel.setVisible(
+                hasLocalizedDatasetsUploads
+            )
 
             hasUploads = len(files["to_upload"]) > 0
             self.uploadLabel.setVisible(hasUploads)
@@ -610,7 +637,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             assert self.project_transfer
 
             self.project_transfer.sync(
-                files["to_upload"], files["to_download"], files["to_delete"], self.localized_datasets_files
+                files["to_upload"],
+                files["to_download"],
+                files["to_delete"],
+                self.localized_datasets_files,
             )
 
             assert self.project_transfer.transfers_model
@@ -925,18 +955,24 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         if localized_datasets_upload_count:
             if localized_datasets_upload_count > 1:
                 localized_datasets_upload_message += self.tr(
-                    "{} localized datasets to copy to QFieldCloud.".format(localized_datasets_upload_count)
+                    "{} localized datasets to copy to QFieldCloud.".format(
+                        localized_datasets_upload_count
+                    )
                 )
             elif localized_datasets_upload_count == 1:
-                localized_datasets_upload_message += self.tr("1 localized dataset to copy to QFieldCloud.")
-            
+                localized_datasets_upload_message += self.tr(
+                    "1 localized dataset to copy to QFieldCloud."
+                )
+
             self.localizedDatasetsUploadProgressBar.setValue(0)
             self.localizedDatasetsUploadProgressBar.setEnabled(True)
         else:
             self.localizedDatasetsUploadProgressBar.setValue(100)
             self.localizedDatasetsUploadProgressBar.setEnabled(False)
             localized_datasets_upload_message = self.tr("Nothing to do on QFieldCloud.")
-        self.localizedDatasetsUploadProgressFeedbackLabel.setText(localized_datasets_upload_message)
+        self.localizedDatasetsUploadProgressFeedbackLabel.setText(
+            localized_datasets_upload_message
+        )
 
         upload_message = ""
         if upload_count or cloud_delete_count:
