@@ -37,7 +37,7 @@ from qgis.core import (
     QgsProject,
     QgsMessageLog
 )
-from qgis.PyQt.QtCore import QFileSystemWatcher, QObject, QUrl, QUrlQuery, pyqtSignal
+from qgis.PyQt.QtCore import QEventLoop, QFileSystemWatcher, QObject, QUrl, QUrlQuery, pyqtSignal
 from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
@@ -745,14 +745,14 @@ class CloudNetworkAccessManager(QObject):
         """
         try:
             # Check if the project is already in the projects cache
-            for project in self.projects_cache.projects():
-                if project.get("name") == "localized_datasets" and project.get("owner") == owner:
+            for project in self.projects_cache.projects:
+                if project.name == "localized_datasets" and project.owner == owner:
                     return project
             
             # If not, refresh the projects cache and check again
             self.projects_cache.refresh_not_async()
-            for project in self.projects_cache.projects():
-                if project.get("name") == "localized_datasets" and project.get("owner") == owner:
+            for project in self.projects_cache.projects:
+                if project.name == "localized_datasets" and project.owner == owner:
                     return project
 
             # We're finally sure it's not present yet, create one
@@ -762,8 +762,14 @@ class CloudNetworkAccessManager(QObject):
                 description="Localized datasets",
                 private=True,
             )
-            project_data = self.json_object(reply)
-            return project_data
+            loop = QEventLoop()
+            reply.finished.connect(loop.quit)
+            loop.exec()
+            
+            self.projects_cache.refresh_not_async()
+            for project in self.projects_cache.projects:
+                if project.name == "localized_datasets" and project.owner == owner:
+                    return project
 
         except Exception as err:
             QgsMessageLog.logMessage(
