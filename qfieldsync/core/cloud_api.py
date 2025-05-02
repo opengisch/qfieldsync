@@ -729,12 +729,6 @@ class CloudNetworkAccessManager(QObject):
 
         return error_str
 
-    def _clear_cloud_cookies(self, url: QUrl) -> None:
-        """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
-        for cookie in self._nam.cookieJar().cookiesForUrl(url):
-            self._nam.cookieJar().deleteCookie(cookie)
-
-
     def get_localized_datasets_project(self, owner: str) -> Optional[str]:
         """
         Retrieve the 'localized_datasets' project ID for a given owner.
@@ -744,29 +738,31 @@ class CloudNetworkAccessManager(QObject):
         None is returned.
 
         Args:
-            owner (str): The username of the project owner (person or organization).
+            owner: The username of the project owner (person or organization).
 
         Returns:
-            Optional[str]: The ID of the 'localized_datasets' project if found, otherwise None.
+            The 'localized_datasets' project data if found, otherwise None.
         """
         try:
-         
-          
-            existing_projects = self.get_projects_not_async()
-
-            for project in existing_projects:
+            # Check if the project is already in the projects cache
+            for project in self.projects_cache.projects():
+                if project.get("name") == "localized_datasets" and project.get("owner") == owner:
+                    return project
+            
+            # If not, refresh the projects cache and check again
+            self.projects_cache.refresh_not_async()
+            for project in self.projects_cache.projects():
                 if project.get("name") == "localized_datasets" and project.get("owner") == owner:
                     return project
 
+            # We're finally sure it's not present yet, create one
             reply = self.create_project(
                 name="localized_datasets",
                 owner=owner,
-                description="Localized datasets for QField(Sync)",
+                description="Localized datasets",
                 private=True,
             )
-            
             project_data = self.json_object(reply)
-
             return project_data
 
         except Exception as err:
@@ -776,6 +772,12 @@ class CloudNetworkAccessManager(QObject):
                 Qgis.Critical,
             )
             return None
+
+    def _clear_cloud_cookies(self, url: QUrl) -> None:
+        """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
+        for cookie in self._nam.cookieJar().cookiesForUrl(url):
+            self._nam.cookieJar().deleteCookie(cookie)
+
 
 class CloudReply:
     finished = pyqtSignal()
