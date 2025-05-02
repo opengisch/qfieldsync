@@ -368,7 +368,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             for localized_data_path in localized_data_paths:
                 for localized_datasets_file in self.localized_datasets_files[:]:
                     if (
-                        localized_datasets_file[len(localized_data_path) + 1 :]
+                        localized_datasets_file.startswith(localized_data_path)
+                        and Path(localized_datasets_file)
+                        .relative_to(localized_data_path)
+                        .as_posix()
                         in localized_datasets_project_names
                     ):
                         self.localized_datasets_files.remove(localized_datasets_file)
@@ -400,7 +403,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.openProjectCheck.setVisible(False)
             return
 
-        print(self.localized_datasets_files)
         self.uploadLocalizedDatasetsCheck.setVisible(
             len(self.localized_datasets_files) != 0
         )
@@ -603,7 +605,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
                 self.traverse_tree_item(item, files)
 
-            hasLocalizedDatasetsUploads = len(self.localized_datasets_files) > 0
+            hasLocalizedDatasetsUploads = (
+                len(self.localized_datasets_files) > 0
+                and self.uploadLocalizedDatasetsCheck.isChecked()
+            )
             self.localizedDatasetsUploadLabel.setVisible(hasLocalizedDatasetsUploads)
             self.localizedDatasetsUploadProgressBar.setVisible(
                 hasLocalizedDatasetsUploads
@@ -640,7 +645,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 files["to_upload"],
                 files["to_download"],
                 files["to_delete"],
-                self.localized_datasets_files,
+                self.localized_datasets_files
+                if self.uploadLocalizedDatasetsCheck.isChecked()
+                else [],
             )
 
             assert self.project_transfer.transfers_model
@@ -941,7 +948,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         cloud_delete_count = 0
         download_count = len(files["to_download"])
         upload_count = len(files["to_upload"])
-        localized_datasets_upload_count = len(self.localized_datasets_files)
+        localized_datasets_upload_count = (
+            len(self.localized_datasets_files)
+            if self.uploadLocalizedDatasetsCheck.isChecked()
+            else 0
+        )
 
         for f in files["to_delete"]:
             total_delete_count += 1

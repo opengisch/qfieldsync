@@ -190,14 +190,15 @@ class CloudTransferrer(QObject):
             for localized_data_path in localized_data_paths:
                 for localized_datasets_file in localized_datasets_files:
                     if localized_datasets_file.startswith(localized_data_path):
+                        localized_datasets_name = (
+                            Path(localized_datasets_file)
+                            .relative_to(localized_data_path)
+                            .as_posix()
+                        )
                         self._localized_datasets_files_to_upload.append(
                             ProjectFile(
-                                {
-                                    "name": localized_datasets_file[
-                                        len(localized_data_path) + 1 :
-                                    ]
-                                },
-                                local_dir=localized_datasets_file,
+                                {"name": localized_datasets_name},
+                                local_dir=localized_data_path,
                             )
                         )
 
@@ -716,7 +717,7 @@ class ThrottledFileTransferrer(QObject):
                 self.cloud_project,
                 self.transfer_type,
                 file,
-                Path(file.local_dir)
+                Path(file.local_dir).joinpath(file.name)
                 if use_file_local_dir
                 else self.temp_dir.joinpath(str(self.transfer_type.value), file.name),
             )
