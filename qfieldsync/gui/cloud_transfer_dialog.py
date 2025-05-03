@@ -119,6 +119,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.cloud_project = cloud_project
         self.project_transfer = None
         self.is_project_download = False
+        self.is_project_compatible_page_prepared = False
 
         self.localized_datasets_project = None
         self.localized_datasets_files = []
@@ -222,14 +223,14 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         )
 
     def show_project_compatibility_page(self):
-        feedback = None
-        if self.cloud_project and self.cloud_project.is_current_qgis_project:
-            checker = ProjectChecker(QgsProject.instance())
-            feedback = checker.check(ExportType.Cloud)
+        if not self.is_project_compatible_page_prepared:
+            feedback = None
+            if self.cloud_project and self.cloud_project.is_current_qgis_project:
+                checker = ProjectChecker(QgsProject.instance())
+                feedback = checker.check(ExportType.Cloud)
 
-        if feedback and feedback.count > 0:
-            # check whether the widget has already been added the guard from adding twice due to repeated showEvent signal
-            if self.feedbackTableWrapperLayout.count() == 0:
+            if feedback and feedback.count > 0:
+                # check whether the widget has already been added the guard from adding twice due to repeated showEvent signal
                 has_errors = len(feedback.error_feedbacks) > 0
                 feedback_table = CheckerFeedbackTable(feedback)
                 self.feedbackTableWrapperLayout.addWidget(feedback_table)
@@ -237,8 +238,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
                 self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(not has_errors)
                 self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Next"))
-        else:
-            self.show_project_files_fetching_page()
+            else:
+                self.show_project_files_fetching_page()
+
+            self.is_project_compatible_page_prepared = True
 
     def show_project_files_fetching_page(self):
         self.stackedWidget.setCurrentWidget(self.getProjectFilesPage)
@@ -318,25 +321,27 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             QgsApplication.instance().localizedDataPathRegistry().paths()
         )
         if localized_data_paths:
-            self.localized_datasets_files = (
-                self.cloud_project.get_localized_dataset_files(localized_data_paths)
+            localized_datasets_files = self.cloud_project.get_localized_dataset_files(
+                localized_data_paths
             )
-            if self.localized_datasets_files:
-                self.localized_datasets_project = (
+            if localized_datasets_files:
+                localized_datasets_project = (
                     self.network_manager.get_localized_datasets_project(
                         self.cloud_project.owner
                     )
                 )
-                if (
-                    self.localized_datasets_project
-                    and self.localized_datasets_project.id != self.cloud_project.id
-                ):
-                    reply = self.network_manager.projects_cache.get_project_files(
-                        self.localized_datasets_project.id
-                    )
-                    reply.finished.connect(lambda: self.prepare_project_transfer())
-                    return
-
+                if localized_datasets_project:
+                    if localized_datasets_project.id != self.cloud_project.id and (
+                        localized_datasets_project.user_role == "admin"
+                        or localized_datasets_project.user_role == "manager"
+                    ):
+                        self.localized_datasets_project = localized_datasets_project
+                        self.localized_datasets_files = localized_datasets_files
+                        reply = self.network_manager.projects_cache.get_project_files(
+                            localized_datasets_project.id
+                        )
+                        reply.finished.connect(lambda: self.prepare_project_transfer())
+                        return
         self.prepare_project_transfer()
 
     def prepare_project_transfer(self):
