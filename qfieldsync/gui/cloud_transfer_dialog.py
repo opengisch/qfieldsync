@@ -362,9 +362,13 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
             localized_datasets_project_names = []
             for localized_datasets_project_file in localized_datasets_project_files:
-                localized_datasets_project_names.append(
-                    localized_datasets_project_file.name
-                )
+                # If the file is already on the cloud, add to names to exclude
+                if bool(
+                    localized_datasets_project_file.checkout & ProjectFileCheckout.Cloud
+                ):
+                    localized_datasets_project_names.append(
+                        localized_datasets_project_file.name
+                    )
             for localized_data_path in localized_data_paths:
                 for localized_datasets_file in self.localized_datasets_files[:]:
                     if (
