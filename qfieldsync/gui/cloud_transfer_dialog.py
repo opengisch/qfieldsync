@@ -425,55 +425,60 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.explanationLabel.setVisible(False)
 
         self.build_files_tree()
-        if self.is_project_download:
+        if (
+            self.is_project_download
+            and len(list(Path(self.cloud_project.local_dir).glob("**/*"))) == 0
+        ):
+            # Empty directory, proceed with automated synchronization
             self._file_tree_set_checkboxes(ProjectFileCheckout.Cloud)
             self._start_synchronization()
-        else:
-            if self.cloud_project.user_role == "reader":
-                self.preferNoneButton.setVisible(False)
-                self.preferLocalButton.setVisible(False)
-                self.preferCloudButton.setVisible(False)
+            return
 
-            self.stackedWidget.setCurrentWidget(self.filesPage)
-            self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
-            self.explanationLabel.setVisible(True)
+        if self.cloud_project.user_role == "reader":
+            self.preferNoneButton.setVisible(False)
+            self.preferLocalButton.setVisible(False)
+            self.preferCloudButton.setVisible(False)
 
-            self.cloudProjectNameValueLabel.setOpenExternalLinks(True)
-            self.cloudProjectNameValueLabel.setText(
-                '<a href="{}{}"><b>{}</b></a>'.format(
-                    self.network_manager.url,
-                    self.cloud_project.url,
-                    self.cloud_project.name_with_owner,
-                )
+        self.stackedWidget.setCurrentWidget(self.filesPage)
+        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
+        self.explanationLabel.setVisible(True)
+
+        self.cloudProjectNameValueLabel.setOpenExternalLinks(True)
+        self.cloudProjectNameValueLabel.setText(
+            '<a href="{}{}"><b>{}</b></a>'.format(
+                self.network_manager.url,
+                self.cloud_project.url,
+                self.cloud_project.name_with_owner,
             )
-            self.projectLocalDirValueLineEdit.setText(
-                self.cloud_project.local_dir,
-            )
-            self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(True)
+        )
+        self.projectLocalDirValueLineEdit.setText(
+            self.cloud_project.local_dir,
+        )
+        self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(True)
+        self.buttonBox.button(QDialogButtonBox.Apply).setText(
+            self.tr("Perform Actions")
+            if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
+            else self.tr("Upload Project")
+        )
+
+        if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0:
             self.buttonBox.button(QDialogButtonBox.Apply).setText(
                 self.tr("Perform Actions")
-                if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
-                else self.tr("Upload Project")
             )
-
-            if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0:
-                self.buttonBox.button(QDialogButtonBox.Apply).setText(
-                    self.tr("Perform Actions")
+            self.explanationLabel.setText(
+                self.tr(
+                    "Some of the files on QFieldCloud differ from the files stored in the local project directory. "
                 )
-                self.explanationLabel.setText(
-                    self.tr(
-                        "Some of the files on QFieldCloud differ from the files stored in the local project directory. "
-                    )
+            )
+        else:
+            self.buttonBox.button(QDialogButtonBox.Apply).setText(
+                self.tr("Upload Files")
+            )
+            self.explanationLabel.setText(
+                self.tr(
+                    "All files in the local project directory will be uploaded to QFieldCloud. "
                 )
-            else:
-                self.buttonBox.button(QDialogButtonBox.Apply).setText(
-                    self.tr("Upload Files")
-                )
-                self.explanationLabel.setText(
-                    self.tr(
-                        "All files in the local project directory will be uploaded to QFieldCloud. "
-                    )
-                )
+            )
 
     def build_files_tree(self):
         assert self.project_transfer
