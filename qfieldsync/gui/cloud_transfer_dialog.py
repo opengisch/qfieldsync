@@ -317,31 +317,29 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.detailedLogEndPageListView.setModelColumn(0)
 
     def check_localized_datasets(self):
-        localized_data_paths = (
-            QgsApplication.instance().localizedDataPathRegistry().paths()
-        )
-        if localized_data_paths:
-            localized_datasets_files = self.cloud_project.get_localized_dataset_files(
-                localized_data_paths
-            )
-            if localized_datasets_files:
-                localized_datasets_project = (
-                    self.network_manager.get_localized_datasets_project(
-                        self.cloud_project.owner
-                    )
+        localized_datasets_files = self.cloud_project.get_localized_dataset_files()
+        if len(localized_datasets_files) > 0:
+            localized_datasets_project = (
+                self.network_manager.get_or_create_localized_datasets_project(
+                    self.cloud_project.owner
                 )
-                if localized_datasets_project:
-                    if localized_datasets_project.id != self.cloud_project.id and (
-                        localized_datasets_project.user_role == "admin"
-                        or localized_datasets_project.user_role == "manager"
-                    ):
-                        self.localized_datasets_project = localized_datasets_project
-                        self.localized_datasets_files = localized_datasets_files
-                        reply = self.network_manager.projects_cache.get_project_files(
-                            localized_datasets_project.id
-                        )
-                        reply.finished.connect(lambda: self.prepare_project_transfer())
-                        return
+            )
+            if (
+                localized_datasets_project
+                and localized_datasets_project.id != self.cloud_project.id
+                and (
+                    localized_datasets_project.user_role == "admin"
+                    or localized_datasets_project.user_role == "manager"
+                )
+            ):
+                self.localized_datasets_project = localized_datasets_project
+                self.localized_datasets_files = localized_datasets_files
+                reply = self.network_manager.projects_cache.get_project_files(
+                    localized_datasets_project.id
+                )
+                reply.finished.connect(lambda: self.prepare_project_transfer())
+                return
+
         self.prepare_project_transfer()
 
     def prepare_project_transfer(self):
@@ -377,10 +375,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             for localized_data_path in localized_data_paths:
                 for localized_datasets_file in self.localized_datasets_files[:]:
                     if (
-                        localized_datasets_file.startswith(localized_data_path)
-                        and Path(localized_datasets_file)
-                        .relative_to(localized_data_path)
-                        .as_posix()
+                        localized_datasets_file.local_dir.startswith(
+                            localized_data_path
+                        )
+                        and localized_datasets_file.name
                         in localized_datasets_project_names
                     ):
                         self.localized_datasets_files.remove(localized_datasets_file)
@@ -612,6 +610,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 "to_upload": [],
                 "to_download": [],
                 "to_delete": [],
+                "localized_datasets_to_upload": [],
             }
 
             for item_idx in range(self.filesTree.topLevelItemCount()):
@@ -619,10 +618,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
                 self.traverse_tree_item(item, files)
 
-            hasLocalizedDatasetsUploads = (
-                len(self.localized_datasets_files) > 0
-                and self.uploadLocalizedDatasetsCheck.isChecked()
-            )
+            if self.uploadLocalizedDatasetsCheck.isChecked():
+                files["localized_datasets_to_upload"] = self.localized_datasets_files
+
+            hasLocalizedDatasetsUploads = len(files["localized_datasets_to_upload"])
             self.localizedDatasetsUploadLabel.setVisible(hasLocalizedDatasetsUploads)
             self.localizedDatasetsUploadProgressBar.setVisible(
                 hasLocalizedDatasetsUploads
@@ -659,9 +658,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 files["to_upload"],
                 files["to_download"],
                 files["to_delete"],
-                self.localized_datasets_files
-                if self.uploadLocalizedDatasetsCheck.isChecked()
-                else [],
+                files["localized_datasets_to_upload"],
             )
 
             assert self.project_transfer.transfers_model
@@ -962,11 +959,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         cloud_delete_count = 0
         download_count = len(files["to_download"])
         upload_count = len(files["to_upload"])
-        localized_datasets_upload_count = (
-            len(self.localized_datasets_files)
-            if self.uploadLocalizedDatasetsCheck.isChecked()
-            else 0
-        )
+        localized_datasets_upload_count = len(files["localized_datasets_to_upload"])
 
         for f in files["to_delete"]:
             total_delete_count += 1

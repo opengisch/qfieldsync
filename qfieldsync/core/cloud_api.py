@@ -736,7 +736,7 @@ class CloudNetworkAccessManager(QObject):
 
         return error_str
 
-    def get_localized_datasets_project(self, owner: str) -> Optional[str]:
+    def get_or_create_localized_datasets_project(self, owner: str) -> Optional[str]:
         """
         Retrieve the 'localized_datasets' project ID for a given owner.
 
@@ -748,7 +748,7 @@ class CloudNetworkAccessManager(QObject):
             owner: The username of the project owner (person or organization).
 
         Returns:
-            The 'localized_datasets' project data if found, otherwise None.
+            The 'localized_datasets' project data if found or successfully created, otherwise None.
         """
         try:
             # Check if the project is already in the projects cache

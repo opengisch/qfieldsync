@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Union
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qgis.core import Qgis, QgsProject, QgsProviderRegistry
+from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
 from qgis.PyQt.QtCore import QDir
 
 from qfieldsync.core.preferences import Preferences
@@ -394,7 +394,10 @@ class CloudProject:
 
         return None
 
-    def get_localized_dataset_files(self, localized_data_paths) -> List[Path]:
+    def get_localized_dataset_files(self) -> List[ProjectFile]:
+        localized_data_paths = (
+            QgsApplication.instance().localizedDataPathRegistry().paths()
+        )
         if (
             len(localized_data_paths) > 0
             and self.local_project_file
@@ -403,11 +406,14 @@ class CloudProject:
             read_flags = QgsProject.ReadFlags()
             read_flags |= QgsProject.FlagDontLoadLayouts
             read_flags |= QgsProject.FlagTrustLayerMetadata
+
             if Qgis.versionInt() >= 32600:
                 read_flags |= QgsProject.FlagDontLoad3DViews
+
             temporary_project = QgsProject()
             temporary_project.read(str(self.local_project_file.local_path), read_flags)
             layers = temporary_project.mapLayers()
+
             localized_datasets_files = []
             for layer_id, layer in layers.items():
                 if layer.dataProvider():
@@ -415,11 +421,23 @@ class CloudProject:
                         layer.dataProvider().name()
                     )
                     metadata.decodeUri(layer.source())
+
                     filename = metadata.decodeUri(layer.source()).get("path", "")
                     if filename:
                         for localized_data_path in localized_data_paths:
                             if filename.startswith(localized_data_path):
-                                localized_datasets_files.append(filename)
+                                localized_datasets_name = (
+                                    Path(filename)
+                                    .relative_to(localized_data_path)
+                                    .as_posix()
+                                )
+                                localized_datasets_files.append(
+                                    ProjectFile(
+                                        {"name": localized_datasets_name},
+                                        local_dir=localized_data_path,
+                                    )
+                                )
+
             return localized_datasets_files
         else:
             return []
