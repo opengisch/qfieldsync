@@ -399,48 +399,52 @@ class CloudProject:
             QgsApplication.instance().localizedDataPathRegistry().paths()
         )
         if (
-            len(localized_data_paths) > 0
-            and self.local_project_file
-            and self.local_project_file.local_path_exists
+            len(localized_data_paths) == 0
+            or not self.local_project_file
+            or not self.local_project_file.local_path_exists
         ):
-            read_flags = QgsProject.ReadFlags()
-            read_flags |= QgsProject.FlagDontLoadLayouts
-            read_flags |= QgsProject.FlagTrustLayerMetadata
-
-            if Qgis.versionInt() >= 32600:
-                read_flags |= QgsProject.FlagDontLoad3DViews
-
-            temporary_project = QgsProject()
-            temporary_project.read(str(self.local_project_file.local_path), read_flags)
-            layers = temporary_project.mapLayers()
-
-            localized_datasets_files = []
-            for layer_id, layer in layers.items():
-                if layer.dataProvider():
-                    metadata = QgsProviderRegistry.instance().providerMetadata(
-                        layer.dataProvider().name()
-                    )
-                    metadata.decodeUri(layer.source())
-
-                    filename = metadata.decodeUri(layer.source()).get("path", "")
-                    if filename:
-                        for localized_data_path in localized_data_paths:
-                            if filename.startswith(localized_data_path):
-                                localized_datasets_name = (
-                                    Path(filename)
-                                    .relative_to(localized_data_path)
-                                    .as_posix()
-                                )
-                                localized_datasets_files.append(
-                                    ProjectFile(
-                                        {"name": localized_datasets_name},
-                                        local_dir=localized_data_path,
-                                    )
-                                )
-
-            return localized_datasets_files
-        else:
             return []
+
+        read_flags = QgsProject.ReadFlags()
+        read_flags |= QgsProject.FlagDontLoadLayouts
+        read_flags |= QgsProject.FlagTrustLayerMetadata
+
+        if Qgis.versionInt() >= 32600:
+            read_flags |= QgsProject.FlagDontLoad3DViews
+
+        temporary_project = QgsProject()
+        temporary_project.read(str(self.local_project_file.local_path), read_flags)
+        layers = temporary_project.mapLayers()
+
+        localized_datasets_files = []
+        for layer_id, layer in layers.items():
+            if not layer.dataProvider():
+                continue
+
+            metadata = QgsProviderRegistry.instance().providerMetadata(
+                layer.dataProvider().name()
+            )
+            metadata.decodeUri(layer.source())
+
+            filename = metadata.decodeUri(layer.source()).get("path", "")
+            if not filename:
+                continue
+
+            for localized_data_path in localized_data_paths:
+                if not filename.startswith(localized_data_path):
+                    continue
+
+                localized_datasets_name = (
+                    Path(filename).relative_to(localized_data_path).as_posix()
+                )
+                localized_datasets_files.append(
+                    ProjectFile(
+                        {"name": localized_datasets_name},
+                        local_dir=localized_data_path,
+                    )
+                )
+
+        return localized_datasets_files
 
     def get_files(
         self, checkout_filter: Optional[ProjectFileCheckout] = None

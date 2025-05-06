@@ -456,7 +456,7 @@ class CloudTransferrer(QObject):
         if len(self._files_to_upload_for_localized_datasets) == 0:
             self.localized_datasets_upload_progress.emit(1)
             self.localized_datasets_upload_finished.emit()
-            # NOTE check _on_localized_datasets_upload_finished
+            # NOTE the execution logic here continues in the `_on_localized_datasets_upload_finished`, as now we have to upload the regular project files.
             return
 
         self.is_localized_datasets_upload_active = True
@@ -689,7 +689,10 @@ class ThrottledFileTransferrer(QObject):
         self.filenames = [f.name for f in files]
         self.max_parallel_requests = max_parallel_requests
         self.finished_count = 0
-        self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
+        if cloud_project.local_dir:
+            self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
+        else:
+            self.temp_dir = None
         self.transfer_type = transfer_type
 
         for file in self.files:
@@ -699,6 +702,8 @@ class ThrottledFileTransferrer(QObject):
                 destination = self.temp_dir.joinpath(
                     str(self.transfer_type.value), file.name
                 )
+            else:
+                assert False
 
             transfer = FileTransfer(
                 self.network_manager,
