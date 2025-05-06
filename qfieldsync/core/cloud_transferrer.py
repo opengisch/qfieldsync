@@ -68,7 +68,7 @@ class CloudTransferrer(QObject):
         self.cloud_project = cloud_project
         self.localized_datasets_project = localized_datasets_project
         # NOTE these `_files_to_(upload*|download|delete)` uses POSIX path as keys, so beware on M$
-        self._files_to_upload_for_localized_datasets = []
+        self._files_to_upload_for_localized_datasets = {}
         self._files_to_upload = {}
         self._files_to_download: Dict[str, ProjectFile] = {}
         self._files_to_delete = {}
@@ -86,7 +86,7 @@ class CloudTransferrer(QObject):
         self.replies = []
         self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
         self.error_message = None
-        self.throttled_localized_datasets_uploader = None
+        self.throttled_uploader_for_localized_datasets = None
         self.throttled_uploader = None
         self.throttled_downloader = None
         self.throttled_deleter = None
@@ -177,30 +177,27 @@ class CloudTransferrer(QObject):
             FileTransfer.Type.DOWNLOAD,
         )
 
-        self._files_to_upload_for_localized_datasets = (
-            files_to_upload_for_localized_datasets
-        )
+        self._files_to_upload_for_localized_datasets = {}
+        if self.localized_datasets_project:
+            for localized_file in files_to_upload_for_localized_datasets:
+                self._files_to_upload_for_localized_datasets[
+                    str(localized_file.path.as_posix())
+                ] = localized_file
 
-        if (
-            self.localized_datasets_project
-            and self._files_to_upload_for_localized_datasets
-        ):
-            self.throttled_localized_datasets_uploader = ThrottledFileTransferrer(
-                self.network_manager,
-                self.localized_datasets_project,
-                self._files_to_upload_for_localized_datasets,
-                FileTransfer.Type.UPLOAD,
-                use_file_local_dir=True,
-            )
-        else:
-            self.throttled_localized_datasets_uploader = None
+        self.throttled_uploader_for_localized_datasets = ThrottledFileTransferrer(
+            self.network_manager,
+            self.localized_datasets_project,
+            self._files_to_upload_for_localized_datasets.values(),
+            FileTransfer.Type.UPLOAD,
+            use_file_local_dir=True,
+        )
 
         self.transfers_model = TransferFileLogsModel(
             [
                 self.throttled_uploader,
                 self.throttled_deleter,
                 self.throttled_downloader,
-                self.throttled_localized_datasets_uploader,
+                self.throttled_uploader_for_localized_datasets,
             ]
         )
 
@@ -236,7 +233,7 @@ class CloudTransferrer(QObject):
     def _on_throttled_localized_datasets_upload_error(
         self, filename: str, error: str
     ) -> None:
-        self.throttled_localized_datasets_uploader.abort()
+        self.throttled_uploader_for_localized_datasets.abort()
 
     def _on_throttled_localized_datasets_upload_finished(self) -> None:
         self.localized_datasets_upload_progress.emit(1)
@@ -461,16 +458,16 @@ class CloudTransferrer(QObject):
 
         self.is_localized_datasets_upload_active = True
 
-        self.throttled_localized_datasets_uploader.error.connect(
+        self.throttled_uploader_for_localized_datasets.error.connect(
             self._on_throttled_localized_datasets_upload_error
         )
-        self.throttled_localized_datasets_uploader.progress.connect(
+        self.throttled_uploader_for_localized_datasets.progress.connect(
             self._on_throttled_localized_datasets_upload_progress
         )
-        self.throttled_localized_datasets_uploader.finished.connect(
+        self.throttled_uploader_for_localized_datasets.finished.connect(
             self._on_throttled_localized_datasets_upload_finished
         )
-        self.throttled_localized_datasets_uploader.transfer()
+        self.throttled_uploader_for_localized_datasets.transfer()
 
 
 class FileTransfer(QObject):
@@ -789,14 +786,13 @@ class TransferFileLogsModel(QAbstractListModel):
         self.filename_to_index: Dict[str, int] = {}
 
         for transferrer in transferrers:
-            if transferrer:
-                for filename, transfer in transferrer.transfers.items():
-                    self.filename_to_index[filename] = len(self.transfers)
-                    self.transfers.append(transfer)
+            for filename, transfer in transferrer.transfers.items():
+                self.filename_to_index[filename] = len(self.transfers)
+                self.transfers.append(transfer)
 
-                transferrer.file_finished.connect(self._on_updated_transfer)
-                transferrer.error.connect(self._on_updated_transfer)
-                transferrer.progress.connect(self._on_updated_transfer)
+            transferrer.file_finished.connect(self._on_updated_transfer)
+            transferrer.error.connect(self._on_updated_transfer)
+            transferrer.progress.connect(self._on_updated_transfer)
 
     def rowCount(self, parent: QModelIndex) -> int:
         return len(self.transfers)
