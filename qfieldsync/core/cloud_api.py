@@ -33,10 +33,18 @@ from qgis.core import (
     Qgis,
     QgsApplication,
     QgsAuthMethodConfig,
+    QgsMessageLog,
     QgsNetworkAccessManager,
     QgsProject,
 )
-from qgis.PyQt.QtCore import QFileSystemWatcher, QObject, QUrl, QUrlQuery, pyqtSignal
+from qgis.PyQt.QtCore import (
+    QEventLoop,
+    QFileSystemWatcher,
+    QObject,
+    QUrl,
+    QUrlQuery,
+    pyqtSignal,
+)
 from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
@@ -727,6 +735,56 @@ class CloudNetworkAccessManager(QObject):
             )
 
         return error_str
+
+    def get_or_create_localized_datasets_project(self, owner: str) -> Optional[str]:
+        """
+        Retrieve the 'localized_datasets' project ID for a given owner.
+
+        This ensures that the 'localized_datasets' project is retrieved for the specified owner,
+        typically an organization or user that owns the main project. If such a project does not exist,
+        None is returned.
+
+        Args:
+            owner: The username of the project owner (person or organization).
+
+        Returns:
+            The 'localized_datasets' project data if found or successfully created, otherwise None.
+        """
+        try:
+            # Check if the project is already in the projects cache
+            for project in self.projects_cache.projects:
+                if project.name == "localized_datasets" and project.owner == owner:
+                    return project
+
+            # If not, refresh the projects cache and check again
+            self.projects_cache.refresh_not_async()
+            for project in self.projects_cache.projects:
+                if project.name == "localized_datasets" and project.owner == owner:
+                    return project
+
+            # We're finally sure it's not present yet, create one
+            reply = self.create_project(
+                name="localized_datasets",
+                owner=owner,
+                description="Localized datasets",
+                private=True,
+            )
+            loop = QEventLoop()
+            reply.finished.connect(loop.quit)
+            loop.exec()
+
+            self.projects_cache.refresh_not_async()
+            for project in self.projects_cache.projects:
+                if project.name == "localized_datasets" and project.owner == owner:
+                    return project
+
+        except Exception as err:
+            QgsMessageLog.logMessage(
+                "Error:" + str(err),
+                "QFieldSync",
+                Qgis.Critical,
+            )
+            return None
 
     def _clear_cloud_cookies(self, url: QUrl) -> None:
         """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
