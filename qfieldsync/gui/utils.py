@@ -21,6 +21,8 @@
  ***************************************************************************/
 """
 
+from typing import Literal
+
 from qgis.core import QgsApplication
 from qgis.PyQt.QtGui import QPalette
 from qgis.PyQt.QtWidgets import QWidget
