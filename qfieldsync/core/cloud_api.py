@@ -546,7 +546,10 @@ class CloudNetworkAccessManager(QObject):
 
     def set_token(self, token: str, update_auth: bool = False) -> None:
         """Sets QFieldCloud authentication token to be used by all the following requests. Set to empty string to disable token authentication."""
-        if update_auth and self.auth_method == CloudAuthMethod.CREDENTIALS:
+        if self.auth_method != CloudAuthMethod.CREDENTIALS:
+            raise ValueError("Auth should be configured with credentials method")
+
+        if update_auth:
             self.set_auth(self.url, token=token)
 
         if self._token == token:
