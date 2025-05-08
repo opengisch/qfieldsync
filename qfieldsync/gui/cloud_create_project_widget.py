@@ -250,7 +250,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.cloud_transferrer.finished.connect(
                 lambda: self.on_transferrer_finished()
             )
-            self.cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [])
+            self.cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [], [])
 
     def after_project_creation_action(self, project_id: str):
         QApplication.restoreOverrideCursor()
