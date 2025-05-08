@@ -413,6 +413,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.uploadLocalizedDatasetsCheck.setVisible(
             len(self.localized_datasets_files) != 0
         )
+        self.uploadLocalizedDatasetsCheck.setToolTip(
+            self.tr("Localized datasets files to upload: {}").format(
+                ", ".join([f.name for f in self.localized_datasets_files])
+            )
+        )
+
         self.project_transfer = CloudTransferrer(
             self.network_manager,
             self.cloud_project,
