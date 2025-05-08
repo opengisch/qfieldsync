@@ -363,23 +363,20 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             localized_datasets_project_files = (
                 self.localized_datasets_project.get_files()
             )
-            localized_datasets_project_names = []
+            filenames_to_exclude: List[str] = []
             for localized_datasets_project_file in localized_datasets_project_files:
                 # If the file is already on the cloud, add to names to exclude
                 if bool(
                     localized_datasets_project_file.checkout & ProjectFileCheckout.Cloud
                 ):
-                    localized_datasets_project_names.append(
-                        localized_datasets_project_file.name
-                    )
+                    filenames_to_exclude.append(localized_datasets_project_file.name)
             for localized_data_path in localized_data_paths:
                 for localized_datasets_file in self.localized_datasets_files[:]:
                     if (
                         localized_datasets_file.local_dir.startswith(
                             localized_data_path
                         )
-                        and localized_datasets_file.name
-                        in localized_datasets_project_names
+                        and localized_datasets_file.name in filenames_to_exclude
                     ):
                         self.localized_datasets_files.remove(localized_datasets_file)
 
