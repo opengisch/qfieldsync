@@ -736,9 +736,11 @@ class CloudNetworkAccessManager(QObject):
 
         return error_str
 
-    def get_or_create_localized_datasets_project(self, owner: str) -> Optional[str]:
+    def get_or_create_localized_datasets_project(
+        self, owner: str
+    ) -> Optional[CloudProject]:
         """
-        Retrieve the 'localized_datasets' project ID for a given owner.
+        Retrieve the 'localized_datasets' project for a given owner.
 
         This ensures that the 'localized_datasets' project is retrieved for the specified owner,
         typically an organization or user that owns the main project. If such a project does not exist,
