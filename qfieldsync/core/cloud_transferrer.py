@@ -686,7 +686,7 @@ class ThrottledFileTransferrer(QObject):
         self.filenames = [f.name for f in files]
         self.max_parallel_requests = max_parallel_requests
         self.finished_count = 0
-        if cloud_project.local_dir:
+        if cloud_project and cloud_project.local_dir:
             self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
         else:
             self.temp_dir = None
