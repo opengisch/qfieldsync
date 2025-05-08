@@ -59,7 +59,7 @@ class CloudTransferrer(QObject):
         self,
         network_manager: CloudNetworkAccessManager,
         cloud_project: CloudProject,
-        localized_datasets_project: CloudProject = None,
+        localized_datasets_project: Optional[CloudProject] = None,
     ) -> None:
         super(CloudTransferrer, self).__init__(parent=None)
         assert cloud_project.local_dir
@@ -68,10 +68,10 @@ class CloudTransferrer(QObject):
         self.cloud_project = cloud_project
         self.localized_datasets_project = localized_datasets_project
         # NOTE these `_files_to_(upload*|download|delete)` uses POSIX path as keys, so beware on M$
-        self._files_to_upload_for_localized_datasets = {}
-        self._files_to_upload = {}
+        self._files_to_upload_for_localized_datasets: Dict[str, ProjectFile] = {}
+        self._files_to_upload: Dict[str, ProjectFile] = {}
         self._files_to_download: Dict[str, ProjectFile] = {}
-        self._files_to_delete = {}
+        self._files_to_delete: Dict[str, ProjectFile] = {}
         self.total_upload_bytes = 0
         self.total_download_bytes = 0
         self.delete_files_finished = 0
