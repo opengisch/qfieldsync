@@ -418,7 +418,7 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def login_with_sso(self) -> Optional[QNetworkReply]:
+    def login_with_sso(self) -> QNetworkReply:
         """
         Login to QFieldCloud with social provider (e.g. Google).
         This basically sends a GET user info request to QFC.
@@ -426,12 +426,12 @@ class CloudNetworkAccessManager(QObject):
         """
         return self._get_cloud_user_info()
 
-    def _get_cloud_user_info(self) -> Optional[QNetworkReply]:
+    def _get_cloud_user_info(self) -> QNetworkReply:
         """Get current user info with a request.
         This is typically called as a first request
 
         Returns:
-            Optional[QNetworkReply]: QNetworkReply from the QFieldCloud server.
+            QNetworkReply: QNetworkReply from the QFieldCloud server.
         """
 
         reply = self.cloud_get("auth/user/")
