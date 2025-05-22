@@ -382,7 +382,7 @@ class CloudNetworkAccessManager(QObject):
         reply = self.cloud_get("auth/providers/")
         return reply
 
-    def auto_login_attempt(self):
+    def auto_login_attempt(self) -> None:
         if self.auth_method == CloudAuthMethod.CREDENTIALS:
             cfg = self.auth()
 
