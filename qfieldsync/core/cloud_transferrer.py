@@ -187,7 +187,7 @@ class CloudTransferrer(QObject):
         self.throttled_uploader_for_localized_datasets = ThrottledFileTransferrer(
             self.network_manager,
             self.localized_datasets_project,
-            self._files_to_upload_for_localized_datasets.values(),
+            list(self._files_to_upload_for_localized_datasets.values()),
             FileTransfer.Type.UPLOAD,
             use_file_local_dir=True,
         )
