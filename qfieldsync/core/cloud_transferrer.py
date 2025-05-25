@@ -602,8 +602,11 @@ class FileTransfer(QObject):
                 )
         except Exception as err:
             self.error = err
-            if self.fs_filename.is_file():
-                self.fs_filename.unlink()
+
+            # remove partially downloaded files
+            if self.type == FileTransfer.Type.DOWNLOAD:
+                if self.fs_filename.is_file():
+                    self.fs_filename.unlink()
 
         self.finished.emit()
 
