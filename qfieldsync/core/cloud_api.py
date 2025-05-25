@@ -56,6 +56,8 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qt_utils import strip_html
 
+LOCALIZED_DATASETS_PROJECT_NAME = "shared_datasets"
+
 
 class CloudException(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
@@ -755,20 +757,26 @@ class CloudNetworkAccessManager(QObject):
         try:
             # Check if the project is already in the projects cache
             for project in self.projects_cache.projects:
-                if project.name == "localized_datasets" and project.owner == owner:
+                if (
+                    project.name == LOCALIZED_DATASETS_PROJECT_NAME
+                    and project.owner == owner
+                ):
                     return project
 
             # If not, refresh the projects cache and check again
             self.projects_cache.refresh_not_async()
             for project in self.projects_cache.projects:
-                if project.name == "localized_datasets" and project.owner == owner:
+                if (
+                    project.name == LOCALIZED_DATASETS_PROJECT_NAME
+                    and project.owner == owner
+                ):
                     return project
 
             # We're finally sure it's not present yet, create one
             reply = self.create_project(
-                name="localized_datasets",
+                name=LOCALIZED_DATASETS_PROJECT_NAME,
                 owner=owner,
-                description="Localized datasets",
+                description="",
                 private=True,
             )
             loop = QEventLoop()
@@ -777,7 +785,10 @@ class CloudNetworkAccessManager(QObject):
 
             self.projects_cache.refresh_not_async()
             for project in self.projects_cache.projects:
-                if project.name == "localized_datasets" and project.owner == owner:
+                if (
+                    project.name == LOCALIZED_DATASETS_PROJECT_NAME
+                    and project.owner == owner
+                ):
                     return project
 
         except Exception as err:

@@ -187,7 +187,7 @@ class CloudTransferrer(QObject):
         self.throttled_uploader_for_localized_datasets = ThrottledFileTransferrer(
             self.network_manager,
             self.localized_datasets_project,
-            self._files_to_upload_for_localized_datasets.values(),
+            list(self._files_to_upload_for_localized_datasets.values()),
             FileTransfer.Type.UPLOAD,
             use_file_local_dir=True,
         )
@@ -602,8 +602,11 @@ class FileTransfer(QObject):
                 )
         except Exception as err:
             self.error = err
-            if self.fs_filename.is_file():
-                self.fs_filename.unlink()
+
+            # remove partially downloaded files
+            if self.type == FileTransfer.Type.DOWNLOAD:
+                if self.fs_filename.is_file():
+                    self.fs_filename.unlink()
 
         self.finished.emit()
 
