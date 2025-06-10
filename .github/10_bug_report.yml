@@ -1,0 +1,95 @@
+name: Report a bug for QFieldSync
+description: |
+  Create a bug report to help us improve QFieldSync.
+  Do not report issues related to other QField ecosystem products.
+
+labels:
+  - 'Bug'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report correctly.
+
+        Please report only issues related to the QFieldSync QGIS plugin.
+        Do not report issues related to other QField ecosystem products.
+        Note that feature requests should not be requested here.
+
+        You can go one step back and choose the right place to put your report.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What is the bug or the crash? What were your expectations and what actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce the issue
+      description: |
+        Steps and sample QGIS project as a `.zip` to reproduce the behavior.
+        Screen recordings or screenshots are more than welcome, you can drag&drop them in the textbox.
+
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+
+        If you get a new dialog window titled "An error has occurred while executing Python code", please copy the full text of the error and attach it to the issue wrapped in three backticks ( ` ).
+
+    validations:
+      required: true
+
+  - type: input
+    id: qfieldsync-version
+    attributes:
+      label: Version
+      description: |
+        Check your QFieldSync version by going to "Plugins | Manage and Install Plugins…" QGIS menu, then click on "Installed", click on QField and copy the value next to "Installed version".
+        Do not make a screenshot.
+
+    validations:
+      required: true
+
+  - type: dropdown
+    id: qfieldsync-os-name
+    attributes:
+      label: Operating system name
+      description: |
+        What is your operating system name?
+      options:
+        - Windows
+        - MacOs
+        - Linux
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: input
+    id: qfieldsync-os-version
+    attributes:
+      label: Operating system version
+      description: |
+        What is your operating system name and version? E.g. Ubuntu 22.04, Windows 11.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: cleaned-data
+    attributes:
+      label: Reinstall QFieldSync
+      description: |
+        Have you tried uninstalling and upgrading to the latest QFieldSync version, or tried to replicate the issue with another project?
+      options:
+        - label: I have a fresh install of the latest QFieldSync version on a new QGIS profile, but the problem persists.
+        - label: Problem can be reliably reproduced, doesn't happen randomly.
+        - label: Problem happens with all files and projects, not only some files or projects.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: |
+        Add any other context about the problem here.
