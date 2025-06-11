@@ -10,12 +10,8 @@ on:
       - '**'
   release:
     types: ['prereleased', 'released']
+
   workflow_dispatch:
-    inputs:
-      ref:
-        description: Branch or SHA to checkout
-        required: true
-        default: 'master'
 
 jobs:
   code_check:
@@ -118,13 +114,9 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
-      GITHUB_REF: ${{ github.ref }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          ref: ${{ github.event.inputs.ref }}
 
       - name: Install dependencies
         run: |
@@ -133,13 +125,24 @@ jobs:
 
       - name: Release
         run: |
-          qgis-plugin-ci package ${{ github.event.inputs.ref }} --transifex-token ${TX_TOKEN}
+          qgis-plugin-ci --no-validation package ${{ github.sha }}
+
+      - name: Unzip
+        run: |
+          unzip qfieldsync.${{ github.sha }}.zip -d qfieldsync.${{ github.sha }}
 
       - name: Upload release assets
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: qfieldsync.${{ github.event.inputs.ref }}.zip
-          path: ./qfieldsync.${{ github.event.inputs.ref }}.zip
+          name: qfieldsync.${{ github.sha }}
+          path: ./qfieldsync.${{ github.sha }}
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 30
+        with:
+          limit-access-to-actor: true
 
   translations:
     runs-on: ubuntu-24.04
