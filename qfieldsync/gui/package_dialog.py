@@ -81,21 +81,23 @@ class PackageDialog(QDialog, DialogUi):
         self.qfield_preferences = Preferences()
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.__project_configuration = ProjectConfiguration(self.project)
-        self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Create"))
-        self.button_box.button(QDialogButtonBox.Save).clicked.connect(
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).setText(
+            self.tr("Create")
+        )
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).clicked.connect(
             self.package_project
         )
-        self.button_box.button(QDialogButtonBox.Reset).setText(
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).setText(
             self.tr("Configure current project...")
         )
-        self.button_box.button(QDialogButtonBox.Reset).setIcon(
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).setIcon(
             QIcon(
                 os.path.join(
                     os.path.dirname(__file__), "../resources/project_properties.svg"
                 )
             )
         )
-        self.button_box.button(QDialogButtonBox.Reset).clicked.connect(
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).clicked.connect(
             self.show_settings
         )
 
@@ -208,7 +210,7 @@ class PackageDialog(QDialog, DialogUi):
         )
 
     def package_project(self):
-        self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
 
         packaged_project_file = Path(self.packagedProjectFileWidget.filePath())
         area_of_interest = (

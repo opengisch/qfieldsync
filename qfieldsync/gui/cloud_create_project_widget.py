@@ -108,7 +108,9 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.on_use_current_project_directory_action_triggered
         )
         self.localDirButton.setMenu(QMenu())
-        self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
+        self.localDirButton.setPopupMode(
+            QToolButton.ToolButtonPopupMode.MenuButtonPopup
+        )
         self.localDirButton.menu().addAction(self.use_current_project_directory_action)
 
         self.localDirOpenButton.clicked.connect(self.on_local_dir_open_button_clicked)

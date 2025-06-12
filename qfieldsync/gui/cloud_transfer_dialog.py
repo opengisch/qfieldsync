@@ -124,11 +124,19 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.localized_datasets_project = None
         self.localized_datasets_files = []
 
-        self.filesTree.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.filesTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.filesTree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.filesTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        self.filesTree.header().setSectionResizeMode(4, QHeaderView.Stretch)
+        self.filesTree.header().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.filesTree.header().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.filesTree.header().setSectionResizeMode(
+            2, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.filesTree.header().setSectionResizeMode(
+            3, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.filesTree.header().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         self.filesTree.expandAll()
 
         self.filesTree.model().setHeaderData(
@@ -148,17 +156,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.errorLabel.setVisible(False)
 
-        self.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).clicked.connect(
             lambda: self.on_project_ok_clicked()
         )
-        self.buttonBox.button(QDialogButtonBox.Abort).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Abort).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(
             lambda: self.on_project_apply_clicked()
         )
-        self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Help).clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl("https://docs.qfield.org/"))
         )
 
@@ -174,7 +182,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         )
 
     def showEvent(self, event: QShowEvent) -> None:
-        self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setVisible(True)
 
         super().showEvent(event)
 
@@ -204,8 +212,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.is_project_download = True
 
         self.stackedWidget.setCurrentWidget(self.projectLocalDirPage)
-        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
-        self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Next"))
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setText(
+            self.tr("Next")
+        )
 
         export_dirname = Path(self.preferences.value("cloudDirectory"))
         export_dirname = export_dirname.joinpath(
@@ -235,9 +245,15 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 feedback_table = CheckerFeedbackTable(feedback)
                 self.feedbackTableWrapperLayout.addWidget(feedback_table)
                 self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
-                self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
-                self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(not has_errors)
-                self.buttonBox.button(QDialogButtonBox.Apply).setText(self.tr("Next"))
+                self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(
+                    True
+                )
+                self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setEnabled(
+                    not has_errors
+                )
+                self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setText(
+                    self.tr("Next")
+                )
             else:
                 self.show_project_files_fetching_page()
 
@@ -245,7 +261,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
     def show_project_files_fetching_page(self):
         self.stackedWidget.setCurrentWidget(self.getProjectFilesPage)
-        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(False)
         self.projectFilesLabel.setVisible(True)
         self.projectFilesProgressBar.setVisible(True)
 
@@ -303,12 +319,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             else self.tr("Re-open project after closing this dialog")
         )
 
-        self.buttonBox.button(QDialogButtonBox.Abort).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
-        self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(True)
-        self.buttonBox.button(QDialogButtonBox.Cancel).setEnabled(True)
-        self.buttonBox.button(QDialogButtonBox.Ok).setVisible(True)
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Abort).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setVisible(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setEnabled(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setVisible(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
 
         self.detailedLogEndPageGroupBox.setVisible(False)
         if logs_model:
@@ -446,7 +462,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.preferCloudButton.setVisible(False)
 
         self.stackedWidget.setCurrentWidget(self.filesPage)
-        self.buttonBox.button(QDialogButtonBox.Apply).setVisible(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(True)
         self.explanationLabel.setVisible(True)
 
         self.cloudProjectNameValueLabel.setOpenExternalLinks(True)
@@ -460,15 +476,15 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.projectLocalDirValueLineEdit.setText(
             self.cloud_project.local_dir,
         )
-        self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(True)
-        self.buttonBox.button(QDialogButtonBox.Apply).setText(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setEnabled(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setText(
             self.tr("Perform Actions")
             if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0
             else self.tr("Upload Project")
         )
 
         if len(self.cloud_project.get_files(ProjectFileCheckout.Cloud)) > 0:
-            self.buttonBox.button(QDialogButtonBox.Apply).setText(
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setText(
                 self.tr("Perform Actions")
             )
             self.explanationLabel.setText(
@@ -477,7 +493,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
             )
         else:
-            self.buttonBox.button(QDialogButtonBox.Apply).setText(
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setText(
                 self.tr("Upload Files")
             )
             self.explanationLabel.setText(
@@ -603,11 +619,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
             self.show_project_compatibility_page()
         else:
-            self.buttonBox.button(QDialogButtonBox.Ok).setVisible(True)
-            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
-            self.buttonBox.button(QDialogButtonBox.Abort).setVisible(True)
-            self.buttonBox.button(QDialogButtonBox.Apply).setVisible(False)
-            self.buttonBox.button(QDialogButtonBox.Cancel).setVisible(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setVisible(True)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Abort).setVisible(
+                True
+            )
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(
+                False
+            )
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setVisible(
+                False
+            )
 
             files: Dict[str, List[ProjectFile]] = {
                 "to_upload": [],
@@ -731,7 +753,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         )
         local_checkbox_widget = QWidget()
         local_checkbox_layout = QHBoxLayout()
-        local_checkbox_layout.setAlignment(Qt.AlignCenter)
+        local_checkbox_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         local_checkbox_layout.setContentsMargins(0, 0, 0, 0)
         local_checkbox_layout.addWidget(local_checkbox)
         local_checkbox_widget.setLayout(local_checkbox_layout)
@@ -743,14 +765,14 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         )
         cloud_checkbox_widget = QWidget()
         cloud_checkbox_layout = QHBoxLayout()
-        cloud_checkbox_layout.setAlignment(Qt.AlignCenter)
+        cloud_checkbox_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         cloud_checkbox_layout.setContentsMargins(0, 0, 0, 0)
         cloud_checkbox_layout.addWidget(cloud_checkbox)
         cloud_checkbox_widget.setLayout(cloud_checkbox_layout)
 
         arrow_widget = QWidget()
         arrow_layout = QHBoxLayout()
-        arrow_layout.setAlignment(Qt.AlignCenter)
+        arrow_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         arrow_layout.setContentsMargins(0, 0, 0, 0)
         localLabel, arrowLabel, cloudLabel = QLabel(), QLabel(), QLabel()
         localLabel.setObjectName("local")

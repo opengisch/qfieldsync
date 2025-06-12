@@ -58,8 +58,10 @@ class SynchronizeDialog(QDialog, DialogUi):
 
         self.advancedOptionsGroupBox.layout().addWidget(self.dirsToCopyWidget)
 
-        self.button_box.button(QDialogButtonBox.Save).setText(self.tr("Synchronize"))
-        self.button_box.button(QDialogButtonBox.Save).clicked.connect(
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).setText(
+            self.tr("Synchronize")
+        )
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).clicked.connect(
             lambda: self.start_synchronization()
         )
         import_dir = self.preferences.value("importDirectoryProject")
@@ -77,7 +79,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.dirsToCopyWidget.refresh_tree()
 
     def start_synchronization(self):
-        self.button_box.button(QDialogButtonBox.Save).setEnabled(False)
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
         project = QgsProject.instance()
         current_path = Path(project.fileName())
         qfield_project_str_path = self.qfieldDir.text()
