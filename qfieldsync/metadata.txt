@@ -36,6 +36,7 @@ experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
+supportsQt6=True
 
 about=
     This plugin facilitates packaging QGIS projects for QField.<br>

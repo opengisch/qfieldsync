@@ -413,8 +413,8 @@ class QFieldSync(object):
             self.offline_editing,
             self.iface.mainWindow(),
         )
-        self.push_dlg.setAttribute(Qt.WA_DeleteOnClose)
-        self.push_dlg.setWindowFlags(self.push_dlg.windowFlags() | Qt.Tool)
+        self.push_dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.push_dlg.setWindowFlags(self.push_dlg.windowFlags() | Qt.WindowType.Tool)
         self.push_dlg.show()
 
         self.push_dlg.finished.connect(self.push_dialog_finished)

@@ -82,11 +82,13 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.preferences = Preferences()
         self.network_manager = network_manager
 
-        self.buttonBox.button(QDialogButtonBox.Ok).setText(self.tr("Sign In"))
-        self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setText(
+            self.tr("Sign In")
+        )
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).clicked.connect(
             self.on_login_button_clicked
         )
-        self.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).clicked.connect(
             self.on_cancel_button_clicked
         )
 
@@ -105,7 +107,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.network_manager.login_finished.connect(self.on_login_finished)
 
-        self.qfieldCloudIcon.setAlignment(Qt.AlignHCenter)
+        self.qfieldCloudIcon.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.qfieldCloudIcon.setPixmap(
             QPixmap(
                 os.path.join(
@@ -134,7 +136,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.usernameLineEdit.setEnabled(True)
         self.passwordLineEdit.setEnabled(True)
         self.rememberMeCheckBox.setEnabled(True)
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
 
         if self.parent() and not isinstance(self.parent(), QMainWindow):
             self.parent().setEnabled(False)
@@ -146,7 +148,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.usernameLineEdit.setEnabled(False)
             self.passwordLineEdit.setEnabled(False)
             self.rememberMeCheckBox.setEnabled(False)
-            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
 
             self.network_manager.set_url(cfg.uri())
             self.network_manager.set_auth(self.network_manager.url, token="")
@@ -161,7 +163,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     def on_login_button_clicked(self) -> None:
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
 
         server_url = self.serverUrlCmb.currentText()
@@ -187,7 +189,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.usernameLineEdit.setEnabled(True)
             self.passwordLineEdit.setEnabled(True)
             self.rememberMeCheckBox.setEnabled(True)
-            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
             return
 
         self.usernameLineEdit.setEnabled(False)

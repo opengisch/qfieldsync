@@ -112,7 +112,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         with WindowsIconFixWorkDir(Path(__file__).parent.parent.joinpath("ui")):
             self.setupUi(self)
 
-        self.setWindowModality(Qt.WindowModal)
+        self.setWindowModality(Qt.WindowModality.WindowModal)
         self.preferences = Preferences()
         self.network_manager = network_manager
         self._current_cloud_project_id = project.id if project else None
@@ -184,6 +184,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self,
         )
 
+        print("22222")
         self.projectCreatePage.layout().addWidget(self.createProjectWidget)
         self.createProjectWidget.finished.connect(
             lambda project_id: self.on_create_project_finished(project_id)
@@ -206,10 +207,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             lambda: self.on_projects_table_cell_double_clicked()
         )
 
-        self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Close).clicked.connect(
             lambda: self.on_button_box_clicked()
         )
-        self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Help).clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl("https://docs.qfield.org/"))
         )
         self.avatarButton.clicked.connect(lambda: self.on_logout_button_clicked())
@@ -222,7 +223,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.localDirButton.clicked.connect(lambda: self.on_local_dir_button_clicked())
         self.localDirButton.setMenu(QMenu())
-        self.localDirButton.setPopupMode(QToolButton.MenuButtonPopup)
+        self.localDirButton.setPopupMode(
+            QToolButton.ToolButtonPopupMode.MenuButtonPopup
+        )
         self.localDirButton.menu().addAction(self.use_current_project_directory_action)
         self.localDirOpenButton.clicked.connect(
             lambda: self.on_local_dir_open_button_clicked()
@@ -259,18 +262,19 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
         self.projectFilesTree.header().setSectionResizeMode(
-            0, QHeaderView.ResizeToContents
+            0, QHeaderView.ResizeMode.ResizeToContents
         )
         self.projectFilesTree.header().setSectionResizeMode(
-            1, QHeaderView.ResizeToContents
+            1, QHeaderView.ResizeMode.ResizeToContents
         )
         self.projectFilesTree.header().setSectionResizeMode(
-            2, QHeaderView.ResizeToContents
+            2, QHeaderView.ResizeMode.ResizeToContents
         )
         self.projectFilesTree.header().setSectionResizeMode(
-            3, QHeaderView.ResizeToContents
+            3, QHeaderView.ResizeMode.ResizeToContents
         )
 
+        print("1111")
         self.update_ui_state()
 
     @property
@@ -292,7 +296,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.update_project_table_selection()
         self.update_ui_state()
 
-    def set_feedback(self, msg, color: str = Qt.red):
+    def set_feedback(self, msg, color: str = Qt.GlobalColor.red):
         color_hex = QColor(color).name()
         self.feedbackLabel.setStyleSheet(f"QLabel {{ color: {color_hex}; }}")
 
@@ -403,7 +407,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     item.setData(0, Qt.UserRole, project_file)
 
                     item.setText(1, str(project_file.size))
-                    item.setTextAlignment(1, Qt.AlignRight)
+                    item.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
                     item.setText(2, project_file.created_at)
 
                     versions_count = len(project_file.versions)
@@ -417,7 +421,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         )
                         version_item.setText(0, "Version {}".format(version_display))
                         version_item.setText(1, str(version_obj["size"]))
-                        version_item.setTextAlignment(1, Qt.AlignRight)
+                        version_item.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
                         version_item.setText(2, version_obj["last_modified"])
 
                         save_as_btn = QPushButton()
@@ -437,7 +441,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         )
                         save_as_widget = QWidget()
                         save_as_layout = QHBoxLayout()
-                        save_as_layout.setAlignment(Qt.AlignCenter)
+                        save_as_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
                         save_as_layout.setContentsMargins(0, 0, 0, 0)
                         save_as_layout.addWidget(save_as_btn)
                         save_as_widget.setLayout(save_as_layout)

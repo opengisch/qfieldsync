@@ -40,8 +40,7 @@ from qfieldsync.gui.layers_config_widget import LayersConfigWidget
 from qfieldsync.gui.mapthemes_config_widget import MapThemesConfigWidget
 
 WidgetUi, _ = loadUiType(
-    os.path.join(os.path.dirname(__file__), "../ui/project_configuration_widget.ui"),
-    import_from="..",
+    os.path.join(os.path.dirname(__file__), "../ui/project_configuration_widget.ui")
 )
 
 

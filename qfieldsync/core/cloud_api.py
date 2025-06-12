@@ -28,7 +28,6 @@ from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
 import requests
-from PyQt5.QtNetwork import QSslPreSharedKeyAuthenticator
 from qgis.core import (
     Qgis,
     QgsApplication,
@@ -50,6 +49,7 @@ from qgis.PyQt.QtNetwork import (
     QHttpPart,
     QNetworkReply,
     QNetworkRequest,
+    QSslPreSharedKeyAuthenticator,
 )
 
 from qfieldsync.core.cloud_project import CloudProject

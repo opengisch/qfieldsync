@@ -24,7 +24,6 @@ import os
 from typing import Callable
 
 from libqfieldsync.layer import LayerSource, SyncAction
-from PyQt5.QtWidgets import QPushButton
 from qgis.core import Qgis, QgsMapLayerModel, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
@@ -32,6 +31,7 @@ from qgis.PyQt.QtWidgets import (
     QAction,
     QComboBox,
     QMenu,
+    QPushButton,
     QTableWidgetItem,
     QToolButton,
     QWidget,
