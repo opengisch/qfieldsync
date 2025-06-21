@@ -270,28 +270,24 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             layer_source = LayerSource(layer)
             if layer.dataProvider() is not None:
                 if layer_source.is_localized_path:
-                    localizedDataPathLayers.append(
-                        "- {} ({})".format(layer.name(), layer_source.filename)
-                    )
+                    localizedDataPathLayers.append("- {}".format(layer.name()))
 
         if localizedDataPathLayers:
             if len(localizedDataPathLayers) == 1:
                 self.infoLocalizedLayersLabel.setText(
-                    self.tr("The layer stored in a localized data path is:\n{}").format(
-                        "\n".join(localizedDataPathLayers)
-                    )
+                    self.tr(
+                        "The current project relies on datasets stored in localized data paths, make sure to copy the relevant datasets into the localized data path of devices running QField. The layer stored in a localized data path is:\n{}"
+                    ).format("\n".join(localizedDataPathLayers))
                 )
             else:
                 self.infoLocalizedLayersLabel.setText(
                     self.tr(
-                        "The layers stored in a localized data path are:\n{}"
+                        "The current project relies on datasets stored in localized data paths, make sure to copy the relevant datasets into the localized data path of devices running QField. The layers stored in a localized data path are:\n{}"
                     ).format("\n".join(localizedDataPathLayers))
                 )
             self.infoLocalizedLayersLabel.setVisible(True)
-            self.infoLocalizedPresentLabel.setVisible(True)
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
-            self.infoLocalizedPresentLabel.setVisible(False)
         self.infoGroupBox.setVisible(len(localizedDataPathLayers) > 0)
 
     def get_unique_project_name(self, project: QgsProject) -> str:
