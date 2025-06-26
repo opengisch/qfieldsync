@@ -55,7 +55,10 @@ class MapLayerConfigWidgetFactory(QgsMapLayerConfigWidgetFactory):
 
 
 class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
-    PROPERTY_GEOMETRY_LOCKED = 1
+    PROPERTY_FEATURE_ADDITION_LOCKED = 1
+    PROPERTY_GEOMETRY_EDITING_LOCKED = 2
+    PROPERTY_ATTRIBUTE_EDITING_LOCKED = 3
+    PROPERTY_FEATURE_DELETION_LOCKED = 4
 
     def __init__(self, layer, canvas, parent):
         super(MapLayerConfigWidget, self).__init__(layer, canvas, parent)
@@ -102,29 +105,99 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
 
         if layer.type() == QgsMapLayer.VectorLayer:
             prop = QgsProperty.fromExpression(
-                self.layer_source.geometry_locked_expression
+                self.layer_source.feature_addition_locked_expression
             )
-            prop.setActive(self.layer_source.is_geometry_locked_expression_active)
+            prop.setActive(
+                self.layer_source.is_feature_addition_locked_expression_active
+            )
             prop_definition = QgsPropertyDefinition(
-                "is_geometry_locked",
+                "is_feature_addition_locked",
                 QgsPropertyDefinition.DataType.DataTypeBoolean,
-                "Geometry Locked",
+                "Feature Addition Locked",
                 "",
             )
-            self.isGeometryLockedDDButton.init(
-                MapLayerConfigWidget.PROPERTY_GEOMETRY_LOCKED,
+            self.isFeatureAdditionLockedDDButton.init(
+                MapLayerConfigWidget.PROPERTY_FEATURE_ADDITION_LOCKED,
                 prop,
                 prop_definition,
                 None,
                 False,
             )
-            self.isGeometryLockedDDButton.setVectorLayer(layer)
-
-            self.isGeometryLockedCheckBox.setEnabled(
-                self.layer_source.can_lock_geometry
+            self.isFeatureAdditionLockedDDButton.setVectorLayer(layer)
+            self.isFeatureAdditionLockedCheckBox.setChecked(
+                self.layer_source.is_feature_addition_locked
             )
-            self.isGeometryLockedCheckBox.setChecked(
-                self.layer_source.is_geometry_locked
+
+            prop = QgsProperty.fromExpression(
+                self.layer_source.attribute_editing_locked_expression
+            )
+            prop.setActive(
+                self.layer_source.is_attribute_editing_locked_expression_active
+            )
+            prop_definition = QgsPropertyDefinition(
+                "is_attribute_editing_locked",
+                QgsPropertyDefinition.DataType.DataTypeBoolean,
+                "Attribute Editing Locked",
+                "",
+            )
+            self.isAttributeEditingLockedDDButton.init(
+                MapLayerConfigWidget.PROPERTY_ATTRIBUTE_EDITING_LOCKED,
+                prop,
+                prop_definition,
+                None,
+                False,
+            )
+            self.isAttributeEditingLockedDDButton.setVectorLayer(layer)
+            self.isAttributeEditingLockedCheckBox.setChecked(
+                self.layer_source.is_attribute_editing_locked
+            )
+
+            prop = QgsProperty.fromExpression(
+                self.layer_source.geometry_editing_locked_expression
+            )
+            prop.setActive(
+                self.layer_source.is_geometry_editing_locked_expression_active
+            )
+            prop_definition = QgsPropertyDefinition(
+                "is_geometry_editing_locked",
+                QgsPropertyDefinition.DataType.DataTypeBoolean,
+                "Geometry Editing Locked",
+                "",
+            )
+            self.isGeometryEditingLockedDDButton.init(
+                MapLayerConfigWidget.PROPERTY_GEOMETRY_EDITING_LOCKED,
+                prop,
+                prop_definition,
+                None,
+                False,
+            )
+            self.isGeometryEditingLockedDDButton.setVectorLayer(layer)
+            self.isGeometryEditingLockedCheckBox.setChecked(
+                self.layer_source.is_geometry_editing_locked
+            )
+
+            prop = QgsProperty.fromExpression(
+                self.layer_source.feature_deletion_locked_expression
+            )
+            prop.setActive(
+                self.layer_source.is_feature_deletion_locked_expression_active
+            )
+            prop_definition = QgsPropertyDefinition(
+                "is_feature_deletion_locked",
+                QgsPropertyDefinition.DataType.DataTypeBoolean,
+                "Feature Deletion Locked",
+                "",
+            )
+            self.isFeatureDeletionLockedDDButton.init(
+                MapLayerConfigWidget.PROPERTY_FEATURE_DELETION_LOCKED,
+                prop,
+                prop_definition,
+                None,
+                False,
+            )
+            self.isFeatureDeletionLockedDDButton.setVectorLayer(layer)
+            self.isFeatureDeletionLockedCheckBox.setChecked(
+                self.layer_source.is_feature_deletion_locked
             )
 
             self.valueMapButtonInterfaceSpinBox.setValue(
@@ -196,22 +269,40 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.trackingSessionGroupBox.setVisible(False)
 
     def apply(self):
-        self.layer_source.action
-        self.layer_source.cloud_action
-        self.layer_source.is_geometry_locked
-
         self.layer_source.cloud_action = self.cloudLayerActionComboBox.itemData(
             self.cloudLayerActionComboBox.currentIndex()
         )
         self.layer_source.action = self.cableLayerActionComboBox.itemData(
             self.cableLayerActionComboBox.currentIndex()
         )
-        self.layer_source.is_geometry_locked = self.isGeometryLockedCheckBox.isChecked()
-        prop = self.isGeometryLockedDDButton.toProperty()
-        self.layer_source.is_geometry_locked_expression_active = prop.isActive()
-        self.layer_source.geometry_locked_expression = prop.asExpression()
-        print(self.valueMapButtonInterfaceSpinBox.value())
-        print(self.valueMapButtonInterfaceSpinBox.value())
+
+        self.layer_source.is_feature_addition_locked = (
+            self.isFeatureAdditionLockedCheckBox.isChecked()
+        )
+        prop = self.isFeatureAdditionLockedDDButton.toProperty()
+        self.layer_source.is_feature_addition_locked_expression_active = prop.isActive()
+        self.layer_source.feature_addition_locked_expression = prop.asExpression()
+        self.layer_source.is_attribute_editing_locked = (
+            self.isAttributeEditingLockedCheckBox.isChecked()
+        )
+        prop = self.isAttributeEditingLockedDDButton.toProperty()
+        self.layer_source.is_attribute_editing_locked_expression_active = (
+            prop.isActive()
+        )
+        self.layer_source.attribute_editing_locked_expression = prop.asExpression()
+        self.layer_source.is_geometry_editing_locked = (
+            self.isGeometryEditingLockedCheckBox.isChecked()
+        )
+        prop = self.isGeometryEditingLockedDDButton.toProperty()
+        self.layer_source.is_geometry_editing_locked_expression_active = prop.isActive()
+        self.layer_source.geometry_editing_locked_expression = prop.asExpression()
+        self.layer_source.is_feature_deletion_locked = (
+            self.isFeatureDeletionLockedCheckBox.isChecked()
+        )
+        prop = self.isFeatureDeletionLockedDDButton.toProperty()
+        self.layer_source.is_feature_deletion_locked_expression_active = prop.isActive()
+        self.layer_source.feature_deletion_locked_expression = prop.asExpression()
+
         self.layer_source.value_map_button_interface_threshold = (
             self.valueMapButtonInterfaceSpinBox.value()
         )
