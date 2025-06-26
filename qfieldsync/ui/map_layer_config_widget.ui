@@ -47,7 +47,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="lockLabel">
         <property name="text">
-         <string>Permission lock</string>
+         <string>Permissions</string>
         </property>
        </widget>
       </item>
@@ -56,10 +56,10 @@
         <item row="0" column="0">
          <widget class="QCheckBox" name="isFeatureAdditionLockedCheckBox">
           <property name="toolTip">
-           <string>When enabled, this option disables adding features onto the layer.</string>
+           <string>When enabled, this option prevents the addition of new features into the layer.</string>
           </property>
           <property name="text">
-           <string>Feature addition</string>
+           <string>Disable feature addition</string>
           </property>
          </widget>
         </item>
@@ -73,10 +73,10 @@
         <item row="0" column="2">
          <widget class="QCheckBox" name="isFeatureDeletionLockedCheckBox">
           <property name="toolTip">
-           <string>When enabled, this option disables the deletion of features.</string>
+           <string>When enabled, this option prevents the deletion of features from the layer.</string>
           </property>
           <property name="text">
-           <string>Feature deletion</string>
+           <string>Disable feature deletion</string>
           </property>
          </widget>
         </item>
@@ -103,10 +103,10 @@
         <item row="1" column="0">
          <widget class="QCheckBox" name="isAttributeEditingLockedCheckBox">
           <property name="toolTip">
-           <string>When enabled, this option disables modifying attributes of existing features.</string>
+           <string>When enabled, this option disables editing of attributes of existing features.</string>
           </property>
           <property name="text">
-           <string>Attribute editing</string>
+           <string>Disable attribute editing</string>
           </property>
          </widget>
         </item>
@@ -120,10 +120,10 @@
         <item row="1" column="2">
          <widget class="QCheckBox" name="isGeometryEditingLockedCheckBox">
           <property name="toolTip">
-           <string>When enabled, this option disables modifying geometries of existing features.</string>
+           <string>When enabled, this option disables editing of geometries of existing features.</string>
           </property>
           <property name="text">
-           <string>Geometry editing</string>
+           <string>Disable geometry editing</string>
           </property>
          </widget>
         </item>
