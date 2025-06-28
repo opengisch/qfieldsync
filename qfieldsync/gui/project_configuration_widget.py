@@ -265,7 +265,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         )
 
         self.directoriesConfigurationWidget.reload(
-            {"attachment_dirs": [*self.preferences.value("attachmentDirs")]}
+            {
+                "attachment_dirs": [*self.preferences.value("attachmentDirs")],
+                "data_dirs": [*self.preferences.value("dataDirs")],
+            }
         )
 
         if self.unsupportedLayersList:
@@ -387,6 +390,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
         configuration = self.directoriesConfigurationWidget.createConfiguration()
         self.preferences.set_value("attachmentDirs", configuration["attachment_dirs"])
+        self.preferences.set_value("dataDirs", configuration["data_dirs"])
 
         self.__project_configuration.map_themes_active_layer = (
             self.mapThemesConfigWidget.createConfiguration()

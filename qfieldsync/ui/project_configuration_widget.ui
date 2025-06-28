@@ -498,10 +498,10 @@
           <item row="4" column="0">
            <widget class="QLabel" name="attachmentDirsLabel">
             <property name="toolTip">
-             <string>A list of directories and files to be treated as attachments. Usually the directories that store images and/or SVG are here.</string>
+             <string>A list of directories and files to be treated as attachments or data. Usually the directories that store images and/or SVG are here.</string>
             </property>
             <property name="text">
-             <string>Attachment directories</string>
+             <string>Directories</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

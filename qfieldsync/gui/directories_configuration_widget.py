@@ -76,45 +76,45 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
 
         self.directoriesTable.setRowCount(0)
         if "attachment_dirs" in configuration:
-            print(configuration["attachment_dirs"])
             for attachment_dir in configuration["attachment_dirs"]:
-                count = self.directoriesTable.rowCount()
-                self.directoriesTable.insertRow(count)
-
-                item = QTableWidgetItem(attachment_dir)
-                item.setData(Qt.EditRole, attachment_dir)
-                self.directoriesTable.setItem(count, 0, item)
-
-                cmb = QComboBox()
-                cmb.addItem(self.tr("Attachments"))
-                cmb.setCurrentIndex(0)
-                self.directoriesTable.setCellWidget(count, 1, cmb)
+                self.addDirectoryRow(attachment_dir, 0)
+        if "data_dirs" in configuration:
+            for data_dir in configuration["data_dirs"]:
+                self.addDirectoryRow(data_dir, 1)
 
     def createConfiguration(self):
-        configuration = {"attachment_dirs": []}
+        configuration = {"attachment_dirs": [], "data_dirs": []}
 
         for i in range(self.directoriesTable.rowCount()):
             item = self.directoriesTable.item(i, 0)
             cmb = self.directoriesTable.cellWidget(i, 1)
-            if cmb.currentIndex() == 0 and item.data(Qt.EditRole) != "":
-                configuration["attachment_dirs"].append(item.data(Qt.EditRole))
+            if item.data(Qt.EditRole) != "":
+                if cmb.currentIndex() == 0:
+                    configuration["attachment_dirs"].append(item.data(Qt.EditRole))
+                elif cmb.currentIndex() == 1:
+                    configuration["data_dirs"].append(item.data(Qt.EditRole))
 
         return configuration
 
-    def addDirectory(self):
-        self.directoriesTable.setFocus()
+    def addDirectoryRow(self, name="", typeIndex=0, editRow=False):
         count = self.directoriesTable.rowCount()
         self.directoriesTable.insertRow(count)
 
-        item = QTableWidgetItem("")
-        item.setData(Qt.EditRole, "")
+        item = QTableWidgetItem(name)
+        item.setData(Qt.EditRole, name)
         self.directoriesTable.setItem(count, 0, item)
 
         cmb = QComboBox()
         cmb.addItem(self.tr("Attachments"))
-        cmb.setCurrentIndex(0)
+        cmb.addItem(self.tr("Data"))
+        cmb.setCurrentIndex(typeIndex)
         self.directoriesTable.setCellWidget(count, 1, cmb)
-        self.directoriesTable.editItem(item)
+        if editRow:
+            self.directoriesTable.editItem(item)
+
+    def addDirectory(self):
+        self.directoriesTable.setFocus()
+        self.addDirectoryRow("", 0, True)
 
     def removeDirectory(self):
         if self.directoriesTable.selectedItems():
