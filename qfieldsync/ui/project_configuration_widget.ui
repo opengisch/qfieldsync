@@ -508,9 +508,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QListWidget" name="attachmentDirsListWidget"/>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelDigitizingLogsLayer">
             <property name="text">
@@ -651,7 +648,6 @@
   <tabstop>digitizingLogsLayerComboBox</tabstop>
   <tabstop>onlyOfflineCopyFeaturesInAoi</tabstop>
   <tabstop>maximumImageWidthHeight</tabstop>
-  <tabstop>attachmentDirsListWidget</tabstop>
   <tabstop>layerComboBox</tabstop>
  </tabstops>
  <resources/>

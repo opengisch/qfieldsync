@@ -29,13 +29,16 @@ from qgis.core import (
     QgsProject,
 )
 from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget, QgsSpinBox
-from qgis.PyQt.QtCore import QEvent, QLibraryInfo, QObject, Qt
+from qgis.PyQt.QtCore import QEvent, QObject, Qt
 from qgis.PyQt.QtGui import QIcon, QKeySequence
-from qgis.PyQt.QtWidgets import QLabel, QListWidgetItem
+from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.gui.directories_configuration_widget import (
+    DirectoriesConfigurationWidget,
+)
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
 from qfieldsync.gui.mapthemes_config_widget import MapThemesConfigWidget
 
@@ -107,10 +110,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
 
         self.forceAutoPush.clicked.connect(self.onForceAutoPushClicked)
 
-        self.attachmentDirsListWidget.setMinimumHeight(140)
-        self.attachmentDirsListWidget.itemChanged.connect(self.onItemChanged)
-        self.event_eater = EventEater()
-        self.attachmentDirsListWidget.installEventFilter(self.event_eater)
+        self.directoriesConfigurationWidget = DirectoriesConfigurationWidget(self)
+        self.advancedSettingsGroupBox.layout().addWidget(
+            self.directoriesConfigurationWidget, 4, 1
+        )
 
         self.geofencingBehaviorComboBox.addItem(
             self.tr("Alert users when inside an area"),
@@ -261,14 +264,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.__project_configuration.force_auto_push_interval_mins
         )
 
-        attachment_dirs = [*self.preferences.value("attachmentDirs")]
-        attachment_dirs.append("")
-
-        for attachment_dir in attachment_dirs:
-            item = QListWidgetItem()
-            item.setText(attachment_dir)
-            item.setFlags(item.flags() | Qt.ItemIsEditable)
-            self.attachmentDirsListWidget.addItem(item)
+        self.directoriesConfigurationWidget.reload(
+            {"attachment_dirs": [*self.preferences.value("attachmentDirs")]}
+        )
 
         if self.unsupportedLayersList:
             self.unsupportedLayersLabel.setVisible(True)
@@ -387,16 +385,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.forceAutoPushInterval.value()
         )
 
-        v = QLibraryInfo.version()
-        match_flag = (
-            Qt.MatchRegularExpression
-            if v.majorVersion() > 5 and v.minorVersion() >= 15
-            else Qt.MatchRegExp
-        )
-        keys = {}
-        for item in self.attachmentDirsListWidget.findItems("^\\S+$", match_flag):
-            keys[item.text()] = 1
-        self.preferences.set_value("attachmentDirs", list(keys.keys()))
+        configuration = self.directoriesConfigurationWidget.createConfiguration()
+        self.preferences.set_value("attachmentDirs", configuration["attachment_dirs"])
 
         self.__project_configuration.map_themes_active_layer = (
             self.mapThemesConfigWidget.createConfiguration()
@@ -421,43 +411,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             idx, _cloud_action = layer_source.preferred_cloud_action(prefer_online)
             cmb.setCurrentIndex(idx)
             layer_source.cloud_action = cmb.itemData(cmb.currentIndex())
-
-    def onItemChanged(self, item):
-        current_idx = self.attachmentDirsListWidget.indexFromItem(item)
-        text = item.text()
-
-        v = QLibraryInfo.version()
-        match_flag = (
-            Qt.MatchRegularExpression
-            if v.majorVersion() > 5 and v.minorVersion() >= 15
-            else Qt.MatchRegExp
-        )
-        empty_items = self.attachmentDirsListWidget.findItems("^\\s*$", match_flag)
-
-        # remove all empty items
-        for empty_item in empty_items:
-            idx = self.attachmentDirsListWidget.indexFromItem(empty_item)
-            self.attachmentDirsListWidget.takeItem(idx.row())
-
-        # add new empty item in the end
-        item = QListWidgetItem()
-        item.setFlags(item.flags() | Qt.ItemIsEditable)
-        self.attachmentDirsListWidget.addItem(item)
-
-        idx_correction = 0 if text.strip() == "" else 1
-
-        # set current item to the next element in the list and trigger editing
-        self.attachmentDirsListWidget.setCurrentRow(
-            min(
-                self.attachmentDirsListWidget.count(),
-                current_idx.row() + idx_correction,
-            )
-        )
-
-        if text != "":
-            self.attachmentDirsListWidget.editItem(
-                self.attachmentDirsListWidget.currentItem()
-            )
 
     def baseMapTypeChanged(self):
         if self.singleLayerRadioButton.isChecked():
