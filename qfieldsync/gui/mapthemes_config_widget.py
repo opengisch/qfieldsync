@@ -34,6 +34,8 @@ class MapThemesConfigWidget(QTableWidget):
 
         self.project = project
 
+        self.setAlternatingRowColors(True)
+        self.verticalHeader().setVisible(False)
         self.setMinimumHeight(200)
         self.setColumnCount(2)
         self.setHorizontalHeaderLabels(

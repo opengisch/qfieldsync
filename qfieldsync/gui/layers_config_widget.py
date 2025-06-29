@@ -24,14 +24,14 @@ import os
 from typing import Callable
 
 from libqfieldsync.layer import LayerSource, SyncAction
-from qgis.core import Qgis, QgsMapLayerModel, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsMapLayerModel, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
     QAction,
     QComboBox,
+    QHeaderView,
     QMenu,
-    QPushButton,
     QTableWidgetItem,
     QToolButton,
     QWidget,
@@ -56,6 +56,14 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.project = project
         self.use_cloud_actions = use_cloud_actions
         self.layer_sources = layer_sources
+
+        self.layersTable.setAlternatingRowColors(True)
+        self.layersTable.verticalHeader().setVisible(False)
+        self.layersTable.setColumnCount(3)
+        self.layersTable.setHorizontalHeaderLabels(
+            [self.tr("Layer"), self.tr("Action"), ""]
+        )
+        self.layersTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
         self.multipleToggleButton.setIcon(
             QIcon(
@@ -169,8 +177,11 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 cmb, available_actions, self.get_layer_action(layer_source)
             )
 
-            properties_btn = QPushButton()
-            properties_btn.setText(self.tr("Properties"))
+            properties_btn = QToolButton()
+            properties_btn.setIcon(
+                QgsApplication.getThemeIcon("/propertyicons/settings.svg")
+            )
+            properties_btn.setAutoRaise(True)
             properties_btn.clicked.connect(self.propertiesBtn_clicked(layer_source))
 
             self.layersTable.setCellWidget(count, 1, cmb)
