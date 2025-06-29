@@ -498,18 +498,15 @@
           <item row="4" column="0">
            <widget class="QLabel" name="attachmentDirsLabel">
             <property name="toolTip">
-             <string>A list of directories and files to be treated as attachments. Usually the directories that store images and/or SVG are here.</string>
+             <string>A list of directories and files to be treated as attachments or data. Usually the directories that store images and/or SVG are here.</string>
             </property>
             <property name="text">
-             <string>Attachment directories</string>
+             <string>Directories</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QListWidget" name="attachmentDirsListWidget"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelDigitizingLogsLayer">
@@ -651,7 +648,6 @@
   <tabstop>digitizingLogsLayerComboBox</tabstop>
   <tabstop>onlyOfflineCopyFeaturesInAoi</tabstop>
   <tabstop>maximumImageWidthHeight</tabstop>
-  <tabstop>attachmentDirsListWidget</tabstop>
   <tabstop>layerComboBox</tabstop>
  </tabstops>
  <resources/>
