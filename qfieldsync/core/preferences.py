@@ -31,6 +31,7 @@ class Preferences(SettingManager):
                 "attachmentDirs", Scope.Project, ["DCIM", "audio", "video", "files"]
             )
         )
+        self.add_setting(Stringlist("dataDirs", Scope.Project, []))
         self.add_setting(Dictionary("qfieldCloudProjectLocalDirs", Scope.Global, {}))
         self.add_setting(Dictionary("qfieldCloudLastProjectFiles", Scope.Global, {}))
         self.add_setting(String("qfieldCloudServerUrl", Scope.Global, ""))
