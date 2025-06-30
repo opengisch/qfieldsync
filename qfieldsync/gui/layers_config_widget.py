@@ -61,7 +61,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.layersTable.verticalHeader().setVisible(False)
         self.layersTable.setColumnCount(3)
         self.layersTable.setHorizontalHeaderLabels(
-            [self.tr("Layer"), self.tr("Action"), ""]
+            [self.tr("Layer"), self.tr("Packaging Action"), ""]
         )
         self.layersTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
