@@ -39,6 +39,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
+from qfieldsync.utils.file_utils import mkdir
 
 
 class CloudTransferrer(QObject):
@@ -95,10 +96,10 @@ class CloudTransferrer(QObject):
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
-        self.temp_dir.mkdir()
-        self.temp_dir.joinpath("backup").mkdir()
-        self.temp_dir.joinpath(FileTransfer.Type.UPLOAD.value).mkdir()
-        self.temp_dir.joinpath(FileTransfer.Type.DOWNLOAD.value).mkdir()
+        mkdir(self.temp_dir)
+        mkdir(self.temp_dir.joinpath("backup"))
+        mkdir(self.temp_dir.joinpath(FileTransfer.Type.UPLOAD.value))
+        mkdir(self.temp_dir.joinpath(FileTransfer.Type.DOWNLOAD.value))
 
         self.localized_datasets_upload_finished.connect(
             self._on_localized_datasets_upload_finished
