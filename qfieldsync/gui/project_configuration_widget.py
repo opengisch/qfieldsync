@@ -236,8 +236,11 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.__project_configuration.maximum_image_width_height
         )
 
-        self.mapUnitsPerPixel.setValue(self.__project_configuration.base_map_mupp)
-        self.tileSize.setValue(self.__project_configuration.base_map_tile_size)
+        tiles_size_index = self.baseMapTileSizeComboBox.findText(
+            str(self.__project_configuration.base_map_tile_size)
+        )
+        if tiles_size_index >= 0:
+            self.baseMapTileSizeComboBox.setCurrentIndex(tiles_size_index)
 
         self.baseMapTilesMinZoomLevelSpinBox.setValue(
             self.__project_configuration.base_map_tiles_min_zoom_level
@@ -349,10 +352,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         except AttributeError:
             pass
 
-        self.__project_configuration.base_map_mupp = float(
-            self.mapUnitsPerPixel.value()
+        self.__project_configuration.base_map_tile_size = int(
+            self.baseMapTileSizeComboBox.currentText()
         )
-        self.__project_configuration.base_map_tile_size = self.tileSize.value()
 
         self.__project_configuration.base_map_tiles_min_zoom_level = (
             self.baseMapTilesMinZoomLevelSpinBox.value()
