@@ -318,7 +318,7 @@
           <item row="4" column="0" colspan="2">
            <widget class="QgsCollapsibleGroupBox" name="createBaseMapGroupBox">
             <property name="title">
-             <string>Generate base map</string>
+             <string>Base Map</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
