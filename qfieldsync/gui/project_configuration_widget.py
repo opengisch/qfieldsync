@@ -184,6 +184,13 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         else:
             self.mapThemeRadioButton.setChecked(True)
 
+        self.baseMapLayerLabel.setVisible(self.singleLayerRadioButton.isChecked())
+        self.layerComboBox.setVisible(self.singleLayerRadioButton.isChecked())
+        self.baseMapMapThemeLabel.setVisible(
+            not self.singleLayerRadioButton.isChecked()
+        )
+        self.mapThemeComboBox.setVisible(not self.singleLayerRadioButton.isChecked())
+
         self.mapThemeComboBox.setCurrentIndex(
             self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme)
         )
@@ -407,7 +414,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             layer_source.cloud_action = cmb.itemData(cmb.currentIndex())
 
     def baseMapTypeChanged(self):
-        if self.singleLayerRadioButton.isChecked():
-            self.baseMapTypeStack.setCurrentWidget(self.singleLayerPage)
-        else:
-            self.baseMapTypeStack.setCurrentWidget(self.mapThemePage)
+        self.baseMapLayerLabel.setVisible(self.singleLayerRadioButton.isChecked())
+        self.layerComboBox.setVisible(self.singleLayerRadioButton.isChecked())
+        self.baseMapMapThemeLabel.setVisible(
+            not self.singleLayerRadioButton.isChecked()
+        )
+        self.mapThemeComboBox.setVisible(not self.singleLayerRadioButton.isChecked())

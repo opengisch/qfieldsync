@@ -75,7 +75,7 @@
            <item row="0" column="0" colspan="2">
             <widget class="QLabel" name="cloudExportLabel">
              <property name="text">
-              <string>The map layers settings below are used by QFieldCloud when packaging your project for QField to download and synchronize. To push feature editing and addition changes of vector layers back to QFieldCloud, insure that their action is set to ‘offline editing’.</string>
+              <string>The map layers settings are used by QFieldCloud when packaging your project for QField. To allow editing while offline and synchronize changes to features  back to QFieldCloud, set the action to ‘offline editing’.</string>
              </property>
              <property name="font">
               <font>
@@ -189,7 +189,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="cableExportLabel">
              <property name="text">
-              <string>The map layers settings below are used when packaging your project intented for manually copying the generated project onto your devices manually via USB cable of other import mechanisms supported by devices' operating system.</string>
+              <string>The map layers settings are used when packaging your project intended for manually copying the generated project onto your devices manually via USB cable or other file sharing  mechanisms.</string>
              </property>
              <property name="font">
               <font>
@@ -211,7 +211,7 @@
            <item row="0" column="0" colspan="2">
             <widget class="QLabel" name="attachmentsDirectoriesLabel">
              <property name="text">
-              <string>When packaging a project, attachment and data directories are used to recursively copy files into the generated output. Attachment diretories should be tied to feature forms' attachment editor widgets while data directories are used to package assets such as print layout and decoration images and QField project plugin files.</string>
+              <string>When packaging a project, attachment and data directories are copied into the QField project. &lt;b&gt;Attachment&lt;/b&gt; directories should be tied to feature form attachment editor widgets while &lt;b&gt;data&lt;/b&gt; directories are used to package assets such as print layout,decoration images or QField project plugin files.</string>
              </property>
              <property name="font">
               <font>
@@ -274,7 +274,7 @@
           <item row="0" column="0" colspan="2">
            <widget class="QLabel" name="areaOfInterestLabel">
             <property name="text">
-             <string>By default, the project’s full extent will be treated as the area of interest and can be customized using the extent widget below. The area of interest can be used to filter features from vector layers above where their packaging action is set to ‘offline editing’.</string>
+             <string>The area of interest defines the part of a project that should be made available for offline use. By default the full project extent is used unless a custom area of interest extent is provided.</string>
             </property>
             <property name="font">
              <font>
@@ -304,21 +304,6 @@
            </widget>
           </item>
           <item row="3" column="0" colspan="2">
-           <widget class="QLabel" name="baseMapLabel">
-            <property name="text">
-             <string>A raster base map can be generated upon triggering a cable packaging process. The generated raster will cover the project’s full extent or the customized area of interest defined above.</string>
-            </property>
-            <property name="font">
-             <font>
-              <italic>true</italic>
-             </font>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" colspan="2">
            <widget class="QgsCollapsibleGroupBox" name="createBaseMapGroupBox">
             <property name="title">
              <string>Base Map</string>
@@ -333,17 +318,22 @@
              <bool>true</bool>
             </property>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="1">
-              <widget class="QRadioButton" name="mapThemeRadioButton">
+             <item row="0" column="0" colspan="2">
+              <widget class="QLabel" name="baseMapLabel">
                <property name="text">
-                <string>Map theme</string>
+                <string>A raster base map can be generated when triggering a cable packaging process. The generated raster will cover the project’s full extent or the customized area of interest defined above.</string>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup</string>
-               </attribute>
+               <property name="font">
+                <font>
+                 <italic>true</italic>
+                </font>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="9" column="1">
               <widget class="QgsSpinBox" name="baseMapTilesMaxZoomLevelSpinBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -362,7 +352,7 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="5" column="0">
               <widget class="QLabel" name="tileSizeLabel">
                <property name="text">
                 <string>Tile size</string>
@@ -372,7 +362,7 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="7" column="1">
               <widget class="QgsSpinBox" name="baseMapTilesMinZoomLevelSpinBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -391,119 +381,57 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="0">
-              <widget class="QRadioButton" name="singleLayerRadioButton">
+             <item row="1" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_1">
+               <item>
+                <widget class="QRadioButton" name="singleLayerRadioButton">
+                 <property name="text">
+                  <string>Single layer</string>
+                 </property>
+                 <attribute name="buttonGroup">
+                  <string notr="true">buttonGroup</string>
+                 </attribute>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="mapThemeRadioButton">
+                 <property name="text">
+                  <string>Map theme</string>
+                 </property>
+                 <attribute name="buttonGroup">
+                  <string notr="true">buttonGroup</string>
+                 </attribute>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="baseMapMapThemeLabel">
                <property name="text">
-                <string>Single layer</string>
+                <string>Map Theme</string>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup</string>
-               </attribute>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="mapThemeComboBox"/>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="baseMapLayerLabel">
+               <property name="text">
+                <string>Layer</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QgsDoubleSpinBox" name="mapUnitsPerPixel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="toolTip">
-                <string>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</string>
-               </property>
-               <property name="suffix">
-                <string> mupp</string>
-               </property>
-               <property name="value">
-                <double>99.989999999999995</double>
-               </property>
-              </widget>
+              <widget class="QgsMapLayerComboBox" name="layerComboBox"/>
              </item>
-             <item row="1" column="0" colspan="2">
-              <widget class="QStackedWidget" name="baseMapTypeStack">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="inputMethodHints">
-                <set>Qt::ImhDialableCharactersOnly</set>
-               </property>
-               <widget class="QWidget" name="mapThemePage">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,3">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="baseMapMapThemeLabel">
-                   <property name="text">
-                    <string>Map Theme</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QComboBox" name="mapThemeComboBox"/>
-                 </item>
-                </layout>
-               </widget>
-               <widget class="QWidget" name="singleLayerPage">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_5" columnstretch="1,3">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="baseMapLayerLabel">
-                   <property name="text">
-                    <string>Layer</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QgsMapLayerComboBox" name="layerComboBox"/>
-                 </item>
-                </layout>
-               </widget>
-              </widget>
-             </item>
-             <item row="4" column="0">
+             <item row="7" column="0">
               <widget class="QLabel" name="baseMapTilesMinZoomLevelLabel">
                <property name="text">
                 <string>Tiles min zoom level</string>
@@ -513,7 +441,7 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="5" column="1">
               <widget class="QgsSpinBox" name="tileSize">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -538,7 +466,7 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="mapUnitsPerPixelLabel">
                <property name="text">
                 <string>Map units per pixel</string>
@@ -548,7 +476,26 @@
                </property>
               </widget>
              </item>
-             <item row="6" column="0">
+             <item row="6" column="1">
+              <widget class="QgsDoubleSpinBox" name="mapUnitsPerPixel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>This determines the spatial resolution of the resulting map image. It depends on the CRS of the map canvas. For map units in [m], a value of 1 means each pixel covers an area of 1x1 m, a value of 1000 means 1 pixel per square kilometer.</string>
+               </property>
+               <property name="suffix">
+                <string> mupp</string>
+               </property>
+               <property name="value">
+                <double>99.989999999999995</double>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
               <widget class="QLabel" name="baseMapTilesMaxZoomLevelLabel">
                <property name="text">
                 <string>Tiles max zoom level</string>
