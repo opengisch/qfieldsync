@@ -96,7 +96,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
                 self.areaOfInterestExtentWidget.outputCrs(),
             )
 
-        self.advancedSettingsGroupBox.layout().addWidget(
+        self.areaOfInterestBaseMapLayout.layout().addWidget(
             self.areaOfInterestExtentWidget, 1, 1
         )
 
@@ -111,8 +111,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.forceAutoPush.clicked.connect(self.onForceAutoPushClicked)
 
         self.directoriesConfigurationWidget = DirectoriesConfigurationWidget(self)
-        self.advancedSettingsGroupBox.layout().addWidget(
-            self.directoriesConfigurationWidget, 4, 1
+        self.attachmentsDirectoriesTab.layout().addWidget(
+            self.directoriesConfigurationWidget, 1, 0, 1, 2
         )
 
         self.geofencingBehaviorComboBox.addItem(
