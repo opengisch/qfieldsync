@@ -71,11 +71,11 @@
           <attribute name="title">
            <string>QFieldCloud Packaging</string>
           </attribute>
-          <layout class="QGridLayout" name="cloudExportLayout" columnstretch="1,0,0">
+          <layout class="QGridLayout" name="cloudExportLayout" columnstretch="1,0">
            <item row="0" column="0" colspan="2">
             <widget class="QLabel" name="cloudExportLabel">
              <property name="text">
-              <string>The map layers settings below are used by QFieldCloud when packaging your project for QField to download and synchronize.</string>
+              <string>The map layers settings below are used by QFieldCloud when packaging your project for QField to download and synchronize. To push feature editing and addition changes of vector layers back to QFieldCloud, insure that their action is set to ‘offline editing’.</string>
              </property>
              <property name="font">
               <font>
@@ -97,7 +97,7 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="3">
+           <item row="3" column="0" colspan="2">
             <widget class="QgsCollapsibleGroupBox" name="cloudAdvancedSettings">
              <property name="title">
               <string>Individual Layers Settings</string>

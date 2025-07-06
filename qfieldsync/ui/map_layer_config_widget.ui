@@ -31,16 +31,16 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="cloudLayerActionLabel">
+       <widget class="QLabel" name="cloudPackagingActionLabel">
         <property name="text">
-         <string>Cloud layer action</string>
+         <string>QFieldCloud packaging action</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="cableLayerActionLabel">
+       <widget class="QLabel" name="cablePackagingActionLabel">
         <property name="text">
-         <string>Cable layer action</string>
+         <string>Cable packaging action</string>
         </property>
        </widget>
       </item>
@@ -147,7 +147,7 @@
      <property name="title">
       <string>Feature Form, Attachments and Relationships Settings</string>
      </property>
-     <layout class="QFormLayout" name="attachmentsRelationsLayout">
+     <layout class="QGridLayout" name="attachmentsRelationsLayout">
       <item row="0" column="0" colspan="2">
        <layout class="QHBoxLayout" name="valueMapButtonInterfaceLayout">
         <item>
@@ -196,6 +196,36 @@
         </item>
        </layout>
       </item>
+      <item row="1" column ="0" colspan="2">
+       <widget class="QLabel" name="attachmentsTipLabel">
+        <property name="text">
+         <string>Use the table below to configure the relative filename of your attachments editor widgets. In your expressions, use {filename} and {extension} tags to refer to the default filenames and extensions.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <italic>true</italic>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column ="0" colspan="2">
+       <widget class="QLabel" name="relationsTipLabel">
+        <property name="text">
+         <string>Use the table below to configure relation editor widgets behavior. Note that to improve the overall user experience with QFieldCloud, it is recommended that all vector layers use UUID as primary keys.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <italic>true</italic>
+         </font>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -217,10 +247,15 @@
        <item>
         <widget class="QLabel" name="trackingSessionLabel">
          <property name="text">
-          <string>When enabled, QField will automatically start a tracking session upon successfully loading the project.</string>
+          <string>When enabled, QField will automatically start a tracking session upon successfully loading the project using the settings provided below.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
+         </property>
+         <property name="font">
+          <font>
+           <italic>true</italic>
+          </font>
          </property>
         </widget>
        </item>

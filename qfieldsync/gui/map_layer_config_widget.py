@@ -25,7 +25,6 @@ import os
 from libqfieldsync.layer import LayerSource
 from qgis.core import QgsMapLayer, QgsProject, QgsProperty, QgsPropertyDefinition
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory, QgsSpinBox
-from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.message_bus import message_bus
@@ -206,25 +205,16 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.valueMapButtonInterfaceSpinBox.setVisible(True)
 
             # append the attachment naming table to the layout
-            self.attachmentsRelationsLayout.insertRow(
-                -1, self.tr("Attachment\nnaming"), self.attachmentNamingTable
+            self.attachmentsRelationsLayout.addWidget(
+                self.attachmentNamingTable, 2, 0, 1, 2
             )
-            tip = QLabel(
-                self.tr(
-                    "In your expressions, use {filename} and {extension} tags to refer to attachment filenames and extensions."
-                )
-            )
-            tip.setWordWrap(True)
-            self.attachmentsRelationsLayout.insertRow(-1, "", tip)
             self.attachmentNamingTable.setEnabled(
                 self.attachmentNamingTable.rowCount() > 0
             )
 
             # append the relationship configuration table to the layout
-            self.attachmentsRelationsLayout.insertRow(
-                -1,
-                self.tr("Relationship\nconfiguration"),
-                self.relationshipConfigurationTable,
+            self.attachmentsRelationsLayout.addWidget(
+                self.relationshipConfigurationTable, 4, 0, 1, 2
             )
             self.relationshipConfigurationTable.setEnabled(
                 self.relationshipConfigurationTable.rowCount() > 0

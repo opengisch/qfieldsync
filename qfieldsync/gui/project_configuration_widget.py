@@ -30,8 +30,7 @@ from qgis.core import (
 )
 from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget, QgsSpinBox
 from qgis.PyQt.QtCore import QEvent, QObject, Qt
-from qgis.PyQt.QtGui import QIcon, QKeySequence
-from qgis.PyQt.QtWidgets import QLabel
+from qgis.PyQt.QtGui import QKeySequence
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
@@ -136,14 +135,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         """
         self.unsupportedLayersList = list()
 
-        infoLabel = QLabel()
-        infoLabel.setPixmap(QIcon.fromTheme("info").pixmap(16, 16))
-        infoLabel.setToolTip(
-            self.tr(
-                "To improve the overall user experience with QFieldCloud, it is recommended that all vector layers use UUID as primary key."
-            )
-        )
-
         layer_sources = [
             LayerSource(layer) for layer in QgsProject.instance().mapLayers().values()
         ]
@@ -154,7 +145,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.project, False, layer_sources
         )
         self.cloudAdvancedSettings.layout().addWidget(self.cloudLayersConfigWidget)
-        self.cloudExportTab.layout().addWidget(infoLabel, 0, 2)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
 
         # Map Themes configuration widgets
