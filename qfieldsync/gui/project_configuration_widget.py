@@ -31,6 +31,7 @@ from qgis.core import (
 from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget, QgsSpinBox
 from qgis.PyQt.QtCore import QEvent, QObject, Qt
 from qgis.PyQt.QtGui import QKeySequence
+from qgis.PyQt.QtWidgets import QLineEdit
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
@@ -70,10 +71,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.project = QgsProject.instance()
         self.preferences = Preferences()
         self.__project_configuration = ProjectConfiguration(self.project)
+
         self.areaOfInterestExtentWidget = QgsExtentWidget(self)
         self.areaOfInterestExtentWidget.setToolTip(
-            self.tr("Leave null to use the current project zoom extent.")
+            self.tr("Leave empty to use the full project extent")
         )
+        # A bit of a hack to deliver a nice instructive placeholder text to users
+        line_edits = self.areaOfInterestExtentWidget.findChildren(QLineEdit)
+        for line_edit in line_edits:
+            line_edit.setPlaceholderText(
+                self.tr("Leave empty to use the full project extent")
+            )
         self.areaOfInterestExtentWidget.setNullValueAllowed(True)
 
         if iface:

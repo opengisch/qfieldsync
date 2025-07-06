@@ -274,7 +274,7 @@
           <item row="0" column="0" colspan="2">
            <widget class="QLabel" name="areaOfInterestLabel">
             <property name="text">
-             <string>The area of interest defines the part of a project that should be made available for offline use. By default the full project extent is used unless a custom area of interest extent is provided.</string>
+             <string>The area of interest defines the part of a project that should be made available for offline use.</string>
             </property>
             <property name="font">
              <font>
@@ -289,7 +289,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="customAreaOfInterestLabel">
             <property name="text">
-             <string>Custom area of interest</string>
+             <string>Area of interest</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
