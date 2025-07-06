@@ -205,23 +205,32 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.valueMapButtonInterfaceSpinBox.setVisible(True)
 
             # append the attachment naming table to the layout
-            self.attachmentsRelationsLayout.addWidget(
-                self.attachmentNamingTable, 2, 0, 1, 2
+            self.attachmentsGroupBox.layout().addWidget(
+                self.attachmentNamingTable, 1, 0
             )
             self.attachmentNamingTable.setEnabled(
                 self.attachmentNamingTable.rowCount() > 0
             )
+            self.attachmentsGroupBox.setCollapsed(
+                self.attachmentNamingTable.rowCount() == 0
+            )
 
             # append the relationship configuration table to the layout
-            self.attachmentsRelationsLayout.addWidget(
-                self.relationshipConfigurationTable, 4, 0, 1, 2
+            self.relationsGroupBox.layout().addWidget(
+                self.relationshipConfigurationTable, 1, 0
             )
             self.relationshipConfigurationTable.setEnabled(
                 self.relationshipConfigurationTable.rowCount() > 0
             )
+            self.relationsGroupBox.setCollapsed(
+                self.relationshipConfigurationTable.rowCount() == 0
+            )
 
             self.trackingSessionGroupBox.setChecked(
                 self.layer_source.tracking_session_active
+            )
+            self.trackingSessionGroupBox.setCollapsed(
+                not self.layer_source.tracking_session_active
             )
             self.timeRequirementCheckBox.setChecked(
                 self.layer_source.tracking_time_requirement_active
