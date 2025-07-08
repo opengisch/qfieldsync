@@ -18,6 +18,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import stat
 from enum import Enum
 from pathlib import Path
 from typing import List, TypedDict, Union
@@ -61,3 +62,34 @@ def path_to_dict(path: PathLike, dirs_only: bool = False) -> DirectoryTreeDict:
     node["content"].sort(key=lambda node: node["path"].name)
 
     return node
+
+
+def mkdir(
+    path: Union[str, Path],
+    mode: int = 0o777,
+    parents: bool = False,
+    exist_ok: bool = False,
+) -> None:
+    """Create a directory at a given path and explicitly assign write permissions to make Windows happy.
+
+    This function mimics the API of `Path.mkdir`.
+
+    Apparently the passed `mode` value on `os.mkdir` and `Path.mkdir` is not respected by Windows prior to 3.13.
+    What is more, in 3.13 Windows will handle only 0o700, the rest of the values will be ignored.
+
+    See: https://docs.python.org/3/library/os.html#os.mkdir
+
+    Args:
+        path: the path to be created
+        mode: The mode to be applied on the directory at the time of creation. Defaults to 0o777.
+        parents: Whether to create directories recursively if missing. Defaults to False.
+        exist_ok: Whether to not throw if the directory already exists. Defaults to False.
+    """
+    path = Path(path)
+    # calling `mkdir` might trigger a `PermissionError` and other. The caller must handle the error.
+    path.mkdir(mode)
+
+    current_permission = stat.S_IMODE(path.stat().st_mode)
+    WRITE = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+    # calling `chmod` might trigger a `PermissionError`. The parent must handle the error.
+    path.chmod(current_permission | WRITE)
