@@ -64,6 +64,8 @@ HTTP_HEADER_CSRF_TOKEN = b"X-CSRFToken"
 HTTP_HEADER_REFERER = b"Referer"
 HTTP_HEADER_IDP_ID = b"X-QFC-IDP-ID"
 
+CSRF_TOKEN_COOKIE = "csrftoken"
+
 
 class CloudException(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
