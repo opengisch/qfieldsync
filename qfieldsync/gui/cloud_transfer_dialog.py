@@ -26,6 +26,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Callable, Dict, List
 
+from libqfieldsync.layer import LayerSource, SyncAction
 from libqfieldsync.offline_converter import ExportType
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import get_unique_empty_dirname
@@ -516,6 +517,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # ##########
         stack = []
 
+        offline_layers_paths = []
+        if self.cloud_project and self.cloud_project.is_current_qgis_project:
+            project_layers = list(QgsProject.instance().mapLayers().values())
+            for project_layer in project_layers:
+                layer_source = LayerSource(project_layer)
+                if (
+                    layer_source.cloud_action == SyncAction.OFFLINE
+                    and layer_source.filename
+                ):
+                    offline_layers_paths.append(layer_source.filename)
+
         for project_file in self.project_transfer.cloud_project.files_to_sync:
             parts = tuple(project_file.path.parts)
             for part_idx, part in enumerate(parts):
@@ -538,7 +550,12 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 # the length of the stack and the parts is equal for file entries
                 if len(stack) == len(parts):
                     item.setData(0, Qt.UserRole, project_file)
-                    self.add_file_checkbox_buttons(item, project_file)
+                    self.add_file_checkbox_buttons(
+                        item,
+                        project_file,
+                        project_file.local_path_exists
+                        and str(project_file.local_path) in offline_layers_paths,
+                    )
                 else:
                     # TODO make a fancy button that marks all the child items as checked or not
                     pass
@@ -727,7 +744,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.traverse_tree_item(item.child(child_idx), files)
 
     def add_file_checkbox_buttons(
-        self, item: QTreeWidgetItem, project_file: ProjectFile
+        self, item: QTreeWidgetItem, project_file: ProjectFile, is_offline_layer: bool
     ) -> None:
         assert self.cloud_project
 
@@ -747,7 +764,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         local_checkbox = QCheckBox()
         local_checkbox.setEnabled(is_local_enabled)
-        local_checkbox.setChecked(is_local_checked)
+        local_checkbox.setChecked(
+            is_local_checked and (not is_cloud_enabled or not is_offline_layer)
+        )
         local_checkbox.toggled.connect(
             lambda _is_checked: self.on_local_checkbox_toggled(item)
         )
