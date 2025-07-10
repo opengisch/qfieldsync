@@ -31,7 +31,7 @@ from libqfieldsync.offline_converter import ExportType
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import get_unique_empty_dirname
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qgis.core import QgsApplication, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
 from qgis.PyQt.QtCore import QDir, Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QShowEvent
 from qgis.PyQt.QtWidgets import (
@@ -527,6 +527,25 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     and layer_source.filename
                 ):
                     offline_layers_paths.append(layer_source.filename)
+        elif self.cloud_project and len(self.cloud_project.root_project_files) == 1:
+            project = QgsProject()
+
+            read_flags = QgsProject.ReadFlags()
+            read_flags |= QgsProject.FlagDontResolveLayers
+            read_flags |= QgsProject.FlagDontLoadLayouts
+            if Qgis.versionInt() >= 32600:
+                read_flags |= QgsProject.FlagDontLoad3DViews
+
+            project.read(str(self.cloud_project.root_project_files[0]), read_flags)
+
+            project_layers = list(project.mapLayers().values())
+            for project_layer in project_layers:
+                provider_metadata = QgsProviderRegistry.instance().providerMetadata(
+                    project_layer.providerType()
+                )
+                metadata = provider_metadata.decodeUri(project_layer.source())
+                if metadata.get("path", "") != "":
+                    offline_layers_paths.append(metadata.get("path"))
 
         for project_file in self.project_transfer.cloud_project.files_to_sync:
             parts = tuple(project_file.path.parts)
