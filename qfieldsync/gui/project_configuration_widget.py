@@ -30,8 +30,8 @@ from qgis.core import (
 )
 from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget, QgsSpinBox
 from qgis.PyQt.QtCore import QEvent, QObject, Qt
-from qgis.PyQt.QtGui import QIcon, QKeySequence
-from qgis.PyQt.QtWidgets import QLabel
+from qgis.PyQt.QtGui import QKeySequence
+from qgis.PyQt.QtWidgets import QLineEdit
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
@@ -71,10 +71,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.project = QgsProject.instance()
         self.preferences = Preferences()
         self.__project_configuration = ProjectConfiguration(self.project)
+
         self.areaOfInterestExtentWidget = QgsExtentWidget(self)
         self.areaOfInterestExtentWidget.setToolTip(
-            self.tr("Leave null to use the current project zoom extent.")
+            self.tr("Leave empty to use the full project extent")
         )
+        # A bit of a hack to deliver a nice instructive placeholder text to users
+        line_edits = self.areaOfInterestExtentWidget.findChildren(QLineEdit)
+        for line_edit in line_edits:
+            line_edit.setPlaceholderText(
+                self.tr("Leave empty to use the full project extent")
+            )
         self.areaOfInterestExtentWidget.setNullValueAllowed(True)
 
         if iface:
@@ -96,7 +103,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
                 self.areaOfInterestExtentWidget.outputCrs(),
             )
 
-        self.advancedSettingsGroupBox.layout().addWidget(
+        self.areaOfInterestBaseMapLayout.layout().addWidget(
             self.areaOfInterestExtentWidget, 1, 1
         )
 
@@ -111,8 +118,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.forceAutoPush.clicked.connect(self.onForceAutoPushClicked)
 
         self.directoriesConfigurationWidget = DirectoriesConfigurationWidget(self)
-        self.advancedSettingsGroupBox.layout().addWidget(
-            self.directoriesConfigurationWidget, 4, 1
+        self.attachmentsDirectoriesTab.layout().addWidget(
+            self.directoriesConfigurationWidget, 1, 0, 1, 2
         )
 
         self.geofencingBehaviorComboBox.addItem(
@@ -136,14 +143,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         """
         self.unsupportedLayersList = list()
 
-        infoLabel = QLabel()
-        infoLabel.setPixmap(QIcon.fromTheme("info").pixmap(16, 16))
-        infoLabel.setToolTip(
-            self.tr(
-                "To improve the overall user experience with QFieldCloud, it is recommended that all vector layers use UUID as primary key."
-            )
-        )
-
         layer_sources = [
             LayerSource(layer) for layer in QgsProject.instance().mapLayers().values()
         ]
@@ -154,7 +153,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.project, False, layer_sources
         )
         self.cloudAdvancedSettings.layout().addWidget(self.cloudLayersConfigWidget)
-        self.cloudExportTab.layout().addWidget(infoLabel, 0, 2)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
 
         # Map Themes configuration widgets
@@ -193,6 +191,13 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             self.singleLayerRadioButton.setChecked(True)
         else:
             self.mapThemeRadioButton.setChecked(True)
+
+        self.baseMapLayerLabel.setVisible(self.singleLayerRadioButton.isChecked())
+        self.layerComboBox.setVisible(self.singleLayerRadioButton.isChecked())
+        self.baseMapMapThemeLabel.setVisible(
+            not self.singleLayerRadioButton.isChecked()
+        )
+        self.mapThemeComboBox.setVisible(not self.singleLayerRadioButton.isChecked())
 
         self.mapThemeComboBox.setCurrentIndex(
             self.mapThemeComboBox.findText(self.__project_configuration.base_map_theme)
@@ -417,7 +422,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
             layer_source.cloud_action = cmb.itemData(cmb.currentIndex())
 
     def baseMapTypeChanged(self):
-        if self.singleLayerRadioButton.isChecked():
-            self.baseMapTypeStack.setCurrentWidget(self.singleLayerPage)
-        else:
-            self.baseMapTypeStack.setCurrentWidget(self.mapThemePage)
+        self.baseMapLayerLabel.setVisible(self.singleLayerRadioButton.isChecked())
+        self.layerComboBox.setVisible(self.singleLayerRadioButton.isChecked())
+        self.baseMapMapThemeLabel.setVisible(
+            not self.singleLayerRadioButton.isChecked()
+        )
+        self.mapThemeComboBox.setVisible(not self.singleLayerRadioButton.isChecked())

@@ -25,7 +25,6 @@ import os
 from libqfieldsync.layer import LayerSource
 from qgis.core import QgsMapLayer, QgsProject, QgsProperty, QgsPropertyDefinition
 from qgis.gui import QgsMapLayerConfigWidget, QgsMapLayerConfigWidgetFactory, QgsSpinBox
-from qgis.PyQt.QtWidgets import QLabel
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.message_bus import message_bus
@@ -206,32 +205,32 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.valueMapButtonInterfaceSpinBox.setVisible(True)
 
             # append the attachment naming table to the layout
-            self.attachmentsRelationsLayout.insertRow(
-                -1, self.tr("Attachment\nnaming"), self.attachmentNamingTable
+            self.attachmentsGroupBox.layout().addWidget(
+                self.attachmentNamingTable, 1, 0
             )
-            tip = QLabel(
-                self.tr(
-                    "In your expressions, use {filename} and {extension} tags to refer to attachment filenames and extensions."
-                )
-            )
-            tip.setWordWrap(True)
-            self.attachmentsRelationsLayout.insertRow(-1, "", tip)
             self.attachmentNamingTable.setEnabled(
                 self.attachmentNamingTable.rowCount() > 0
             )
+            self.attachmentsGroupBox.setCollapsed(
+                self.attachmentNamingTable.rowCount() == 0
+            )
 
             # append the relationship configuration table to the layout
-            self.attachmentsRelationsLayout.insertRow(
-                -1,
-                self.tr("Relationship\nconfiguration"),
-                self.relationshipConfigurationTable,
+            self.relationsGroupBox.layout().addWidget(
+                self.relationshipConfigurationTable, 1, 0
             )
             self.relationshipConfigurationTable.setEnabled(
                 self.relationshipConfigurationTable.rowCount() > 0
             )
+            self.relationsGroupBox.setCollapsed(
+                self.relationshipConfigurationTable.rowCount() == 0
+            )
 
             self.trackingSessionGroupBox.setChecked(
                 self.layer_source.tracking_session_active
+            )
+            self.trackingSessionGroupBox.setCollapsed(
+                not self.layer_source.tracking_session_active
             )
             self.timeRequirementCheckBox.setChecked(
                 self.layer_source.tracking_time_requirement_active
