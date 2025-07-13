@@ -31,16 +31,16 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="cloudLayerActionLabel">
+       <widget class="QLabel" name="cloudPackagingActionLabel">
         <property name="text">
-         <string>Cloud layer action</string>
+         <string>QFieldCloud packaging action</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="cableLayerActionLabel">
+       <widget class="QLabel" name="cablePackagingActionLabel">
         <property name="text">
-         <string>Cable layer action</string>
+         <string>Cable packaging action</string>
         </property>
        </widget>
       </item>
@@ -143,12 +143,12 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="attachmentsRelationsGroupBox">
+    <widget class="QGroupBox" name="featureFormGroupBox">
      <property name="title">
-      <string>Feature Form, Attachments and Relationships Settings</string>
+      <string>Feature Form Settings</string>
      </property>
-     <layout class="QFormLayout" name="attachmentsRelationsLayout">
-      <item row="0" column="0" colspan="2">
+     <layout class="QGridLayout" name="featureFormLayout">
+      <item row="0" column="0">
        <layout class="QHBoxLayout" name="valueMapButtonInterfaceLayout">
         <item>
          <widget class="QLabel" name="valueMapButtonInterfaceLabel">
@@ -200,6 +200,60 @@
     </widget>
    </item>
    <item>
+    <widget class="QgsCollapsibleGroupBox" name="attachmentsGroupBox">
+     <property name="title">
+      <string>Attachments Settings</string>
+     </property>
+     <property name="saveCollapsedState">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="attachmentsLayout">
+      <item row="0" column ="0">
+       <widget class="QLabel" name="attachmentsTipLabel">
+        <property name="text">
+         <string>Configure the relative filename of your attachments editor widgets. In your expressions, use {filename} and {extension} tags to refer to the default filenames and extensions.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <italic>true</italic>
+         </font>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QgsCollapsibleGroupBox" name="relationsGroupBox">
+     <property name="title">
+      <string>Relationships Settings</string>
+     </property>
+     <property name="saveCollapsedState">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="relationsLayout">
+      <item row="0" column ="0">
+       <widget class="QLabel" name="relationsTipLabel">
+        <property name="text">
+         <string>Configure relation editor widgets behavior. To improve the overall user experience with QFieldCloud, it is recommended that all vector layers use expression-generated &lt;b&gt;UUIDs for primary keys&lt;/b&gt;.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <italic>true</italic>
+         </font>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QgsCollapsibleGroupBox" name="trackingSessionGroupBox">
      <property name="title">
       <string>Tracking Session</string>
@@ -210,17 +264,22 @@
      <property name="checked">
       <bool>false</bool>
      </property>
-     <property name="collapsed" stdset="0">
-      <bool>true</bool>
+     <property name="saveCollapsedState">
+      <bool>false</bool>
      </property>
      <layout class="QVBoxLayout" name="trackingSessionLayout">
        <item>
         <widget class="QLabel" name="trackingSessionLabel">
          <property name="text">
-          <string>When enabled, QField will automatically start a tracking session upon successfully loading the project.</string>
+          <string>When enabled, QField will automatically start a tracking session upon successfully loading the project using the settings provided below.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
+         </property>
+         <property name="font">
+          <font>
+           <italic>true</italic>
+          </font>
          </property>
         </widget>
        </item>
@@ -386,6 +445,22 @@
        </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::MinimumExpanding</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
