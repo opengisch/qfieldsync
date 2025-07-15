@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QField</class>
- <widget class="QWidget" name="QField">
+ <class>ProjectConfigurationWidgetBase</class>
+ <widget class="QWidget" name="ProjectConfigurationWidgetBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -15,9 +15,6 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
-  </property>
-  <property name="windowTitle">
-   <string>Configure Project for QField Synchronisation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -255,6 +252,20 @@
             <widget class="QLabel" name="maximumImageWidthHeightLabel">
              <property name="text">
               <string>Maximum allowed width or height (in pixels) of image attachments</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="customizeImageStampingLabel">
+             <property name="text">
+              <string>Customize image stamping details</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QPushButton" name="customizeImageStampingButton">
+             <property name="text">
+              <string>Settings</string>
              </property>
             </widget>
            </item>

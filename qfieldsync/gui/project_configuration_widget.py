@@ -28,16 +28,25 @@ from qgis.core import (
     QgsPolygon,
     QgsProject,
 )
-from qgis.gui import QgsExtentWidget, QgsOptionsPageWidget, QgsSpinBox
+from qgis.gui import (
+    QgsExtentWidget,
+    QgsOptionsPageWidget,
+    QgsPanelWidget,
+    QgsPanelWidgetStack,
+    QgsSpinBox,
+)
 from qgis.PyQt.QtCore import QEvent, QObject, Qt
 from qgis.PyQt.QtGui import QKeySequence
-from qgis.PyQt.QtWidgets import QLineEdit
+from qgis.PyQt.QtWidgets import QLineEdit, QVBoxLayout
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.directories_configuration_widget import (
     DirectoriesConfigurationWidget,
+)
+from qfieldsync.gui.image_stamping_configuration_widget import (
+    ImageStampingConfigurationWidget,
 )
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
 from qfieldsync.gui.mapthemes_config_widget import MapThemesConfigWidget
@@ -58,7 +67,29 @@ class EventEater(QObject):
         return super().eventFilter(widget, event)
 
 
-class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
+class ProjectConfigurationStackWidget(QgsOptionsPageWidget):
+    """
+    Configuration widget for QFieldSync on a particular project.
+    """
+
+    def __init__(self, parent=None):
+        """Constructor."""
+        super().__init__(parent)
+
+        self.panel_stack = QgsPanelWidgetStack(self)
+        self.project_configuration_widget = ProjectConfigurationWidget(self)
+        self.panel_stack.setMainPanel(self.project_configuration_widget)
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.panel_stack)
+        self.setLayout(self.layout)
+
+    def apply(self):
+        self.panel_stack.acceptAllPanels()
+        self.project_configuration_widget.apply()
+
+
+class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
     """
     Configuration widget for QFieldSync on a particular project.
     """
@@ -68,9 +99,34 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         super().__init__(parent)
         self.setupUi(self)
 
+        self.setDockMode(True)
+
         self.project = QgsProject.instance()
         self.preferences = Preferences()
         self.__project_configuration = ProjectConfiguration(self.project)
+
+        self.stamping_font_style = self.__project_configuration.stamping_font_style
+        self.stamping_horizontal_alignment = (
+            self.__project_configuration.stamping_horizontal_alignment
+        )
+        self.stamping_image_decoration = (
+            self.__project_configuration.stamping_image_decoration
+        )
+        if self.__project_configuration.stamping_image_decoration:
+            self.stamping_image_decoration = (
+                QgsProject.instance()
+                .pathResolver()
+                .readPath(self.__project_configuration.stamping_image_decoration)
+            )
+        else:
+            self.stamping_image_decoration = ""
+        self.stamping_details_expression = (
+            self.__project_configuration.stamping_details_expression
+        )
+        self.force_stamping = self.__project_configuration.force_stamping
+        self.customizeImageStampingButton.clicked.connect(
+            self.show_image_stamping_settings
+        )
 
         self.areaOfInterestExtentWidget = QgsExtentWidget(self)
         self.areaOfInterestExtentWidget.setToolTip(
@@ -400,6 +456,51 @@ class ProjectConfigurationWidget(WidgetUi, QgsOptionsPageWidget):
         self.__project_configuration.map_themes_active_layer = (
             self.mapThemesConfigWidget.createConfiguration()
         )
+
+        self.__project_configuration.stamping_font_style = self.stamping_font_style
+        self.__project_configuration.stamping_horizontal_alignment = (
+            self.stamping_horizontal_alignment
+        )
+        if self.stamping_image_decoration:
+            self.__project_configuration.stamping_image_decoration = (
+                QgsProject.instance()
+                .pathResolver()
+                .writePath(self.stamping_image_decoration)
+            )
+        else:
+            self.__project_configuration.stamping_image_decoration = ""
+        self.__project_configuration.stamping_details_expression = (
+            self.stamping_details_expression
+        )
+        self.__project_configuration.force_stamping = self.force_stamping
+
+    def show_image_stamping_settings(self):
+        self.image_stamping_panel = ImageStampingConfigurationWidget(self)
+        self.image_stamping_panel.set_font_style(self.stamping_font_style)
+        self.image_stamping_panel.set_horizontal_alignment(
+            self.stamping_horizontal_alignment
+        )
+        self.image_stamping_panel.set_image_decoration(self.stamping_image_decoration)
+        self.image_stamping_panel.set_details_expression(
+            self.stamping_details_expression
+        )
+        self.image_stamping_panel.set_force_stamping(self.force_stamping)
+        self.image_stamping_panel.panelAccepted.connect(
+            self.apply_image_stamping_settings
+        )
+        self.openPanel(self.image_stamping_panel)
+
+    def apply_image_stamping_settings(self, panel):
+        self.stamping_font_style = self.image_stamping_panel.font_style()
+        self.stamping_horizontal_alignment = (
+            self.image_stamping_panel.horizontal_alignment()
+        )
+        self.stamping_image_decoration = self.image_stamping_panel.image_decoration()
+        self.stamping_details_expression = (
+            self.image_stamping_panel.details_expression()
+        )
+        self.force_stamping = self.image_stamping_panel.force_stamping()
+        self.image_stamping_panel = None
 
     def onForceAutoPushClicked(self, checked):
         self.forceAutoPushInterval.setEnabled(checked)
