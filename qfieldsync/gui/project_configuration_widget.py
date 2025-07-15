@@ -297,7 +297,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.__project_configuration.maximum_image_width_height
         )
 
-        self.mapUnitsPerPixel.setValue(self.__project_configuration.base_map_mupp)
         self.tileSize.setValue(self.__project_configuration.base_map_tile_size)
 
         self.baseMapTilesMinZoomLevelSpinBox.setValue(
@@ -410,9 +409,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         except AttributeError:
             pass
 
-        self.__project_configuration.base_map_mupp = float(
-            self.mapUnitsPerPixel.value()
-        )
         self.__project_configuration.base_map_tile_size = self.tileSize.value()
 
         self.__project_configuration.base_map_tiles_min_zoom_level = (
