@@ -2,9 +2,9 @@
 """
 /***************************************************************************
                               -------------------
-        begin                : 21.11.2016
+        begin                : 15.07.2025
         git sha              : :%H$
-        copyright            : (C) 2016 by OPENGIS.ch
+        copyright            : (C) 2025 by OPENGIS.ch
         email                : info@opengis.ch
  ***************************************************************************/
 
@@ -46,6 +46,10 @@ class ImageStampingConfigurationWidget(WidgetUi, QgsPanelWidget):
     """
     Configuration widget for QFieldSync on a particular project.
     """
+
+    DEFAULT_DETAILS_TEMPLATE = """[% format_date(now(), 'yyyy-MM-dd @ HH:mm') %]
+Latitude [% coalesce(format_number(y(@gnss_coordinate), 7), 'N/A') %] | Longitude [% coalesce(format_number(x(@gnss_coordinate), 7), 'N/A') %] | Altitude [% coalesce(format_number(z(@gnss_coordinate), 3) || ' m', 'N/A') %]
+Speed [% if(@gnss_ground_speed != 'nan', format_number(@gnss_ground_speed, 3) || ' m/s', 'N/A') %] | Orientation [% if(@gnss_orientation != 'nan', format_number(@gnss_orientation, 1) || ' °', 'N/A') %]"""
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -276,11 +280,15 @@ class ImageStampingConfigurationWidget(WidgetUi, QgsPanelWidget):
     def set_image_decoration(self, file_path):
         self.customImageDecorationFile.setFilePath(file_path)
 
-    def details_expression(self):
-        return self.customDetailsTextEdit.toPlainText()
+    def details_template(self):
+        details = self.customDetailsTextEdit.toPlainText().strip()
+        return details if details != self.DEFAULT_DETAILS_TEMPLATE else ""
 
-    def set_details_expression(self, details_expression):
-        self.customDetailsTextEdit.setPlainText(details_expression)
+    def set_details_template(self, details_template):
+        details = details_template.strip()
+        self.customDetailsTextEdit.setPlainText(
+            details if details != "" else self.DEFAULT_DETAILS_TEMPLATE
+        )
 
     def force_stamping(self):
         return self.forceStampingCheckBox.isChecked()

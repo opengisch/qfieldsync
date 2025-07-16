@@ -20,25 +20,7 @@
    <item>
     <widget class="QGroupBox" name="stampingSettingsGroupBox">
      <property name="title">
-      <string>Settings</string>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>50</width>
-       <height>120</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>300</height>
-      </size>
+      <string>Styling Settings</string>
      </property>
      <layout class="QGridLayout" name="stampingSettingsLayout">
       <item row="0" column="0">
@@ -61,7 +43,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="customAlignmentLabel">
         <property name="text">
-         <string>Text horizontal alignment</string>
+         <string>Horizontal alignment</string>
         </property>
        </widget>
       </item>
@@ -79,27 +61,6 @@
        <widget class="QgsFileWidget" name="customImageDecorationFile" native="true"/>
       </item>
       <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="customDetailsLabel">
-        <property name="text">
-         <string>Details expression</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QPlainTextEdit" name="customDetailsTextEdit">
-        <property name="placeholderText">
-         <string>Leave empty to use the default details string</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QPushButton" name="insertExpressionButton">
-        <property name="text">
-         <string>Insert/Edit Expression...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="2">
        <widget class="QCheckBox" name="forceStampingCheckBox">
         <property name="text">
          <string>Always stamp images taken using the QField camera</string>
@@ -110,11 +71,50 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="previewGroupBox">
+    <widget class="QGroupBox" name="customDetailsGroupBox">
      <property name="title">
-      <string>Preview</string>
+      <string>Details Template Settings</string>
      </property>
      <layout class="QVBoxLayout" name="previewLayout">
+      <item>
+       <widget class="QLabel" name="customDetailsLabel">
+        <property name="text">
+         <string>Details template</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="customDetailsTextEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>120</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>300</height>
+         </size>
+        </property>
+        <property name="placeholderText">
+         <string>Leave empty to use the default details string</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="insertExpressionButton">
+        <property name="text">
+         <string>Insert/Edit Expression...</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="previewLabel">
         <property name="wordWrap">

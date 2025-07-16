@@ -120,8 +120,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             )
         else:
             self.stamping_image_decoration = ""
-        self.stamping_details_expression = (
-            self.__project_configuration.stamping_details_expression
+        self.stamping_details_template = (
+            self.__project_configuration.stamping_details_template
         )
         self.force_stamping = self.__project_configuration.force_stamping
         self.customizeImageStampingButton.clicked.connect(
@@ -465,8 +465,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             )
         else:
             self.__project_configuration.stamping_image_decoration = ""
-        self.__project_configuration.stamping_details_expression = (
-            self.stamping_details_expression
+        self.__project_configuration.stamping_details_template = (
+            self.stamping_details_template
         )
         self.__project_configuration.force_stamping = self.force_stamping
 
@@ -477,9 +477,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.stamping_horizontal_alignment
         )
         self.image_stamping_panel.set_image_decoration(self.stamping_image_decoration)
-        self.image_stamping_panel.set_details_expression(
-            self.stamping_details_expression
-        )
+        self.image_stamping_panel.set_details_template(self.stamping_details_template)
         self.image_stamping_panel.set_force_stamping(self.force_stamping)
         self.image_stamping_panel.panelAccepted.connect(
             self.apply_image_stamping_settings
@@ -492,9 +490,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.image_stamping_panel.horizontal_alignment()
         )
         self.stamping_image_decoration = self.image_stamping_panel.image_decoration()
-        self.stamping_details_expression = (
-            self.image_stamping_panel.details_expression()
-        )
+        self.stamping_details_template = self.image_stamping_panel.details_template()
         self.force_stamping = self.image_stamping_panel.force_stamping()
         self.image_stamping_panel = None
 
