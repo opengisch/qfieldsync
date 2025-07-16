@@ -280,7 +280,7 @@
          <item>
           <widget class="QLabel" name="localizedDatasetsUploadLabel">
            <property name="text">
-            <string>Uploading localized datasets</string>
+            <string>Uploading shared datasets</string>
            </property>
           </widget>
          </item>
@@ -470,7 +470,7 @@
        <item>
         <widget class="QCheckBox" name="uploadLocalizedDatasetsCheck">
          <property name="text">
-          <string>Upload missing localized dataset(s)</string>
+          <string>Upload missing shared dataset(s)</string>
          </property>
          <property name="checked">
           <bool>false</bool>

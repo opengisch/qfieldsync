@@ -303,18 +303,14 @@ class PackageDialog(QDialog, DialogUi):
                 localizedDataPathLayers.append("- {}".format(layer.name()))
 
         if localizedDataPathLayers:
-            if len(localizedDataPathLayers) == 1:
-                self.infoLocalizedLayersLabel.setText(
-                    self.tr(
-                        "The current project relies on datasets stored in localized data paths, make sure to copy the relevant datasets into the localized data path of devices running QField. The layer stored in a localized data path is:\n{}"
-                    ).format("\n".join(localizedDataPathLayers))
-                )
-            else:
-                self.infoLocalizedLayersLabel.setText(
-                    self.tr(
-                        "The current project relies on datasets stored in localized data paths, make sure to copy the relevant datasets into the localized data path of devices running QField. The layers stored in a localized data path are:\n{}"
-                    ).format("\n".join(localizedDataPathLayers))
-                )
+            self.infoLocalizedLayersLabel.setText(
+                self.tr(
+                    "The current project relies on %n shared dataset(s), make sure to copy them into the shared datasets path of devices running QField. The layer(s) stored in a shared dataset(s) are:\n{}",
+                    "",
+                    len(localizedDataPathLayers),
+                ).format("\n".join(localizedDataPathLayers))
+            )
+
             self.infoLocalizedLayersLabel.setVisible(True)
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
