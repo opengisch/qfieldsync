@@ -517,6 +517,42 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # ##########
         stack = []
 
+        offline_layers_paths = self._get_offline_layers()
+
+        for project_file in self.project_transfer.cloud_project.files_to_sync:
+            parts = tuple(project_file.path.parts)
+            for part_idx, part in enumerate(parts):
+                if len(stack) > part_idx and stack[part_idx][0] == part:
+                    continue
+                else:
+                    stack = stack[0:part_idx]
+
+                item = QTreeWidgetItem()
+                item.setText(0, part)
+                item.setExpanded(True)
+
+                stack.append((part, item))
+
+                if len(stack) == 1:
+                    self.filesTree.addTopLevelItem(item)
+                else:
+                    stack[-2][1].addChild(stack[-1][1])
+
+                # the length of the stack and the parts is equal for file entries
+                if len(stack) == len(parts):
+                    item.setData(0, Qt.UserRole, project_file)
+                    is_offline_layer = (
+                        project_file.local_path_exists
+                        and str(project_file.local_path) in offline_layers_paths
+                    )
+                    self.add_file_checkbox_buttons(item, project_file, is_offline_layer)
+                else:
+                    # TODO make a fancy button that marks all the child items as checked or not
+                    pass
+        self.filesTree.expandAll()
+        # NOTE END algorithmic part
+
+    def _get_offline_layers(self):
         offline_layers_paths = []
         if self.cloud_project and self.cloud_project.is_current_qgis_project:
             project_layers = list(QgsProject.instance().mapLayers().values())
@@ -544,42 +580,14 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     project_layer.providerType()
                 )
                 metadata = provider_metadata.decodeUri(project_layer.source())
-                if metadata.get("path", "") != "":
+                if (
+                    metadata.get("path", "") != ""
+                    and project_layer.customProperty("QFieldSync/cloud_action")
+                    == "offline"
+                ):
                     offline_layers_paths.append(metadata.get("path"))
 
-        for project_file in self.project_transfer.cloud_project.files_to_sync:
-            parts = tuple(project_file.path.parts)
-            for part_idx, part in enumerate(parts):
-                if len(stack) > part_idx and stack[part_idx][0] == part:
-                    continue
-                else:
-                    stack = stack[0:part_idx]
-
-                item = QTreeWidgetItem()
-                item.setText(0, part)
-                item.setExpanded(True)
-
-                stack.append((part, item))
-
-                if len(stack) == 1:
-                    self.filesTree.addTopLevelItem(item)
-                else:
-                    stack[-2][1].addChild(stack[-1][1])
-
-                # the length of the stack and the parts is equal for file entries
-                if len(stack) == len(parts):
-                    item.setData(0, Qt.UserRole, project_file)
-                    self.add_file_checkbox_buttons(
-                        item,
-                        project_file,
-                        project_file.local_path_exists
-                        and str(project_file.local_path) in offline_layers_paths,
-                    )
-                else:
-                    # TODO make a fancy button that marks all the child items as checked or not
-                    pass
-        self.filesTree.expandAll()
-        # NOTE END algorithmic part
+        return offline_layers_paths
 
     def _update_window_title(self):
         if self.cloud_project:
