@@ -89,7 +89,7 @@ class CloudConverter(QObject):
                     continue
 
                 if layer.dataProvider() is not None:
-                    # layer stored in localized data path, skip
+                    # layer stored in shared dataset path, skip
                     if layer_source.is_localized_path:
                         continue
 

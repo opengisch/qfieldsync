@@ -428,7 +428,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             len(self.localized_datasets_files) != 0
         )
         self.uploadLocalizedDatasetsCheck.setToolTip(
-            self.tr("Localized datasets files to upload: {}").format(
+            self.tr("Shared datasets files to upload: {}").format(
                 ", ".join([f.name for f in self.localized_datasets_files])
             )
         )
@@ -1045,16 +1045,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         localized_datasets_upload_message = ""
         if localized_datasets_upload_count:
-            if localized_datasets_upload_count > 1:
-                localized_datasets_upload_message += self.tr(
-                    "{} localized datasets to copy to QFieldCloud.".format(
-                        localized_datasets_upload_count
-                    )
-                )
-            elif localized_datasets_upload_count == 1:
-                localized_datasets_upload_message += self.tr(
-                    "1 localized dataset to copy to QFieldCloud."
-                )
+            localized_datasets_upload_message += self.tr(
+                "%n shared dataset(s) to copy to QFieldCloud.",
+                "",
+                localized_datasets_upload_count,
+            )
 
             self.localizedDatasetsUploadProgressBar.setValue(0)
             self.localizedDatasetsUploadProgressBar.setEnabled(True)
@@ -1062,6 +1057,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.localizedDatasetsUploadProgressBar.setValue(100)
             self.localizedDatasetsUploadProgressBar.setEnabled(False)
             localized_datasets_upload_message = self.tr("Nothing to do on QFieldCloud.")
+
         self.localizedDatasetsUploadProgressFeedbackLabel.setText(
             localized_datasets_upload_message
         )
