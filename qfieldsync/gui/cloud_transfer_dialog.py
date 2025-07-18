@@ -552,7 +552,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.filesTree.expandAll()
         # NOTE END algorithmic part
 
-    def _get_offline_layers(self):
+    def _get_offline_layers(self) -> List[str]:
         """
         Returns a list of paths for project layers which have been configured for offline editing.
         """
