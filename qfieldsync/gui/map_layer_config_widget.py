@@ -260,11 +260,19 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
                 self.layer_source.tracking_measurement_type
             )
         else:
-            self.isGeometryLockedDDButton.setVisible(False)
-            self.isGeometryLockedCheckBox.setVisible(False)
+            self.lockLabel.setVisible(False)
+            self.isFeatureAdditionLockedDDButton.setVisible(False)
+            self.isFeatureAdditionLockedCheckBox.setVisible(False)
+            self.isAttributeEditingLockedDDButton.setVisible(False)
+            self.isAttributeEditingLockedCheckBox.setVisible(False)
+            self.isGeometryEditingLockedDDButton.setVisible(False)
+            self.isGeometryEditingLockedCheckBox.setVisible(False)
+            self.isFeatureDeletionLockedDDButton.setVisible(False)
+            self.isFeatureDeletionLockedCheckBox.setVisible(False)
 
-            self.valueMapButtonInterfaceSpinBox.setVisible(False)
-            self.attachmentsRelationsGroupBox.setVisible(False)
+            self.featureFormGroupBox.setVisible(False)
+            self.attachmentsGroupBox.setVisible(False)
+            self.relationsGroupBox.setVisible(False)
             self.trackingSessionGroupBox.setVisible(False)
 
     def apply(self):
