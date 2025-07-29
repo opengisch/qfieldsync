@@ -43,9 +43,20 @@ body:
       required: true
 
   - type: input
+    id: qgis-version
+    attributes:
+      label: QGIS version
+      description: |
+        Check your QGIS version by going to "Help | About" QGIS menu and copy the value next to "QGIS version".
+        Do not make a screenshot.
+
+    validations:
+      required: true
+
+  - type: input
     id: qfieldsync-version
     attributes:
-      label: Version
+      label: QFieldSync Version
       description: |
         Check your QFieldSync version by going to "Plugins | Manage and Install Plugins…" QGIS menu, then click on "Installed", click on QField and copy the value next to "Installed version".
         Do not make a screenshot.
