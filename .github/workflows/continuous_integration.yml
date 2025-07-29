@@ -156,7 +156,9 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        run: sudo pip install qgis-plugin-ci --break-system-packages
+        # run: sudo pip install qgis-plugin-ci --break-system-packages
+        # TODO: install the stable release once https://github.com/opengisch/qgis-plugin-ci/pull/334 is merged and released
+        run: sudo pip install --break-system-packages git+https://github.com/opengisch/qgis-plugin-ci.git@b391050c6f9cabf887dfb232f90f346a834b8f80
 
       - name: 🌍 Push translations
         run: |
