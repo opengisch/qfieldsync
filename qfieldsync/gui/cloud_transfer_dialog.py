@@ -79,10 +79,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     @staticmethod
     def show_transfer_dialog(
         network_manager: CloudNetworkAccessManager,
-        cloud_project: CloudProject = None,
-        accepted_cb: Callable = None,
-        rejected_cb: Callable = None,
-        parent: QWidget = None,
+        cloud_project: CloudProject | None = None,
+        accepted_cb: Callable | None = None,
+        rejected_cb: Callable | None = None,
+        parent: QWidget | None = None,
     ):
         if CloudTransferDialog.instance:
             CloudTransferDialog.instance.show()
