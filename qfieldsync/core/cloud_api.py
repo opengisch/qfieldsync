@@ -392,6 +392,7 @@ class CloudNetworkAccessManager(QObject):
         uri: Union[str, List[str], QUrl],
         params: Dict[str, Any] = {},
         local_filename: str = None,
+        skip_cache: bool = False,
     ) -> QNetworkReply:
         """Issues a GET HTTP request"""
         url = self._prepare_uri(uri)
@@ -415,6 +416,12 @@ class CloudNetworkAccessManager(QObject):
             QNetworkRequest.RedirectPolicyAttribute,
             QNetworkRequest.NoLessSafeRedirectPolicy,
         )
+
+        if skip_cache:
+            request.setAttribute(
+                QNetworkRequest.CacheLoadControlAttribute, QNetworkRequest.AlwaysNetwork
+            )
+
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
 
         if self._token:
@@ -437,12 +444,19 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def get(self, url: QUrl, local_filename: str = None) -> QNetworkReply:
+    def get(
+        self, url: QUrl, local_filename: str = None, skip_cache: bool = False
+    ) -> QNetworkReply:
         request = QNetworkRequest(url)
         request.setAttribute(
             QNetworkRequest.RedirectPolicyAttribute,
             QNetworkRequest.UserVerifiedRedirectPolicy,
         )
+
+        if skip_cache:
+            request.setAttribute(
+                QNetworkRequest.CacheLoadControlAttribute, QNetworkRequest.AlwaysNetwork
+            )
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.get(request)

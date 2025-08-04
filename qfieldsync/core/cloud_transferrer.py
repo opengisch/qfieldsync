@@ -529,7 +529,7 @@ class FileTransfer(QObject):
         if self.type == FileTransfer.Type.DOWNLOAD:
             if self.is_redirect:
                 reply = self.network_manager.get(
-                    self.last_redirect_url, str(self.fs_filename)
+                    self.last_redirect_url, str(self.fs_filename), True
                 )
             else:
                 params = {"version": self.version} if self.version else {}
@@ -537,6 +537,7 @@ class FileTransfer(QObject):
                     f"files/{self.cloud_project.id}/{self.filename}/",
                     local_filename=str(self.fs_filename),
                     params=params,
+                    skip_cache=True,
                 )
         elif self.type == FileTransfer.Type.UPLOAD:
             reply = self.network_manager.cloud_upload_files(
