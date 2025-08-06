@@ -75,10 +75,10 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         self.network_manager = network_manager
         self.error = None
 
-        self.network_manager.login_finished.connect(lambda: self.update_icon())
-        self.network_manager.token_changed.connect(lambda: self.update_icon())
+        self.network_manager.login_finished.connect(self._on_login_finished)
+        self.network_manager.token_changed.connect(self._on_token_changed)
         self.network_manager.projects_cache.projects_updated.connect(
-            lambda: self.refreshing_cloud_projects()
+            self._on_projects_updated
         )
 
     def capabilities2(self):
@@ -131,6 +131,18 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
                     )
                 )
             )
+
+    def _on_login_finished(self) -> None:
+        """Handle login finished signal"""
+        self.update_icon()
+
+    def _on_token_changed(self) -> None:
+        """Handle token changed signal"""
+        self.update_icon()
+
+    def _on_projects_updated(self) -> None:
+        """Handle projects updated signal"""
+        self.refreshing_cloud_projects()
 
 
 class QFieldCloudGroupItem(QgsDataCollectionItem):
@@ -207,30 +219,27 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             project = self.network_manager.projects_cache.find_project(item.project_id)
             if project and project.local_dir:
                 open_action = menu.addAction(QObject().tr("Open Project"))
-                open_action.triggered.connect(lambda: self.open_project(item))
+                open_action.triggered.connect(self._on_open_project_action_triggered)
 
             sync_action = menu.addAction(
                 QIcon(os.path.join(os.path.dirname(__file__), "../resources/sync.svg")),
                 QObject().tr("Synchronize Project"),
             )
-            sync_action.triggered.connect(
-                lambda: self.show_cloud_synchronize_dialog(item)
-            )
+            sync_action.triggered.connect(self._on_synchronize_project_action_triggered)
 
             properties_action = menu.addAction(QObject().tr("Project Properties"))
-            properties_action.triggered.connect(
-                lambda: self._create_projects_dialog(item).show_project_form()
-            )
+            properties_action.triggered.connect(self._on_project_properties_action)
+
+            # Store item reference for callbacks
+            self._current_item = item
+
         elif type(item) is QFieldCloudGroupItem:
             create_action = menu.addAction(
                 QIcon(os.path.join(os.path.dirname(__file__), "../resources/edit.svg")),
                 QObject().tr("Create New Project"),
             )
-            create_action.triggered.connect(
-                lambda: CloudProjectsDialog(
-                    self.network_manager, iface.mainWindow()
-                ).show_create_project()
-            )
+            create_action.triggered.connect(self._on_create_project_action_triggered)
+
         elif type(item) is QFieldCloudRootItem:
             projects_overview_action = menu.addAction(
                 QIcon(
@@ -239,9 +248,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
                 QObject().tr("Projects Overview"),
             )
             projects_overview_action.triggered.connect(
-                lambda: CloudProjectsDialog(
-                    self.network_manager, iface.mainWindow()
-                ).show()
+                self._on_projects_overview_action_triggered
             )
 
             refresh_action = menu.addAction(
@@ -250,7 +257,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
                 ),
                 QObject().tr("Refresh Projects"),
             )
-            refresh_action.triggered.connect(lambda: self.refresh_cloud_projects())
+            refresh_action.triggered.connect(self._on_refresh_projects_action_triggered)
 
     def handleDoubleClick(self, item, context):
         if type(item) is QFieldCloudProjectItem:
@@ -285,7 +292,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def refresh_cloud_projects(self):
         if not self.network_manager.has_token():
             CloudLoginDialog.show_auth_dialog(
-                self.network_manager, lambda: self.refresh_cloud_projects()
+                self.network_manager, self._on_refresh_after_login
             )
             return
 
@@ -293,3 +300,33 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             return
 
         self.network_manager.projects_cache.refresh()
+
+    def _on_open_project_action_triggered(self):
+        """Handle open project action"""
+        self.open_project(self._current_item)
+
+    def _on_synchronize_project_action_triggered(self):
+        """Handle synchronize project action"""
+        self.show_cloud_synchronize_dialog(self._current_item)
+
+    def _on_project_properties_action(self):
+        """Handle project properties action"""
+        self._create_projects_dialog(self._current_item).show_project_form()
+
+    def _on_create_project_action_triggered(self):
+        """Handle create project action"""
+        CloudProjectsDialog(
+            self.network_manager, iface.mainWindow()
+        ).show_create_project()
+
+    def _on_projects_overview_action_triggered(self):
+        """Handle projects overview action"""
+        CloudProjectsDialog(self.network_manager, iface.mainWindow()).show()
+
+    def _on_refresh_projects_action_triggered(self):
+        """Handle refresh projects action"""
+        self.refresh_cloud_projects()
+
+    def _on_refresh_after_login(self):
+        """Handle refresh after login callback"""
+        self.refresh_cloud_projects()
