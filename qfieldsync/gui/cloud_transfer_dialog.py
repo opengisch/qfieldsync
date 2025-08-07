@@ -24,7 +24,7 @@ import os
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from libqfieldsync.layer import LayerSource, SyncAction
 from libqfieldsync.offline_converter import ExportType
@@ -79,10 +79,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     @staticmethod
     def show_transfer_dialog(
         network_manager: CloudNetworkAccessManager,
-        cloud_project: CloudProject | None = None,
-        accepted_cb: Callable | None = None,
-        rejected_cb: Callable | None = None,
-        parent: QWidget | None = None,
+        cloud_project: Optional[CloudProject] = None,
+        accepted_cb: Optional[Callable] = None,
+        rejected_cb: Optional[Callable] = None,
+        parent: Optional[QWidget] = None,
     ):
         if CloudTransferDialog.instance:
             CloudTransferDialog.instance.show()
@@ -108,8 +108,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def __init__(
         self,
         network_manager: CloudNetworkAccessManager,
-        cloud_project: CloudProject = None,
-        parent: QWidget = None,
+        cloud_project: Optional[CloudProject] = None,
+        parent: Optional[QWidget] = None,
     ) -> None:
         """Constructor."""
         super(CloudTransferDialog, self).__init__(parent=parent)
