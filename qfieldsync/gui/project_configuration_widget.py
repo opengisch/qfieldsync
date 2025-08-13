@@ -19,7 +19,7 @@
 """
 import os
 
-from libqfieldsync.layer import LayerSource, SyncAction
+from libqfieldsync.layer import LayerSource
 from libqfieldsync.project import ProjectConfiguration, ProjectProperties
 from qgis.core import (
     Qgis,
@@ -35,7 +35,7 @@ from qgis.gui import (
     QgsPanelWidgetStack,
     QgsSpinBox,
 )
-from qgis.PyQt.QtCore import QEvent, QObject, Qt
+from qgis.PyQt.QtCore import QEvent, QObject
 from qgis.PyQt.QtGui import QKeySequence
 from qgis.PyQt.QtWidgets import QLineEdit, QVBoxLayout
 from qgis.PyQt.uic import loadUiType
@@ -163,12 +163,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.areaOfInterestExtentWidget, 1, 1
         )
 
-        self.preferOnlineLayersRadioButton.clicked.connect(
-            self.onLayerActionPreferenceChanged
-        )
-        self.preferOfflineLayersRadioButton.clicked.connect(
-            self.onLayerActionPreferenceChanged
-        )
         self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
 
         self.forceAutoPush.clicked.connect(self.onForceAutoPushClicked)
@@ -208,7 +202,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.cableLayersConfigWidget = LayersConfigWidget(
             self.project, False, layer_sources
         )
-        self.cloudAdvancedSettings.layout().addWidget(self.cloudLayersConfigWidget)
+
+        self.cloudExportTab.layout().addWidget(self.cloudLayersConfigWidget, 2, 0, 1, 2)
         self.cableExportTab.layout().addWidget(self.cableLayersConfigWidget)
 
         # Map Themes configuration widgets
@@ -312,12 +307,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
         self.onlyOfflineCopyFeaturesInAoi.setChecked(
             self.__project_configuration.offline_copy_only_aoi
-        )
-        self.preferOnlineLayersRadioButton.setChecked(
-            self.__project_configuration.layer_action_preference == "online"
-        )
-        self.preferOfflineLayersRadioButton.setChecked(
-            self.__project_configuration.layer_action_preference == "offline"
         )
 
         self.forceAutoPush.setChecked(self.__project_configuration.force_auto_push)
@@ -442,10 +431,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.__project_configuration.area_of_interest = ""
             self.__project_configuration.area_of_interest_crs = ""
 
-        self.__project_configuration.layer_action_preference = (
-            "online" if self.preferOnlineLayersRadioButton.isChecked() else "offline"
-        )
-
         self.__project_configuration.force_auto_push = self.forceAutoPush.isChecked()
         self.__project_configuration.force_auto_push_interval_mins = (
             self.forceAutoPushInterval.value()
@@ -502,23 +487,6 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
     def onForceAutoPushClicked(self, checked):
         self.forceAutoPushInterval.setEnabled(checked)
-
-    def onLayerActionPreferenceChanged(self):
-        """Triggered when prefer online or offline radio buttons have been changed"""
-        prefer_online = self.preferOnlineLayersRadioButton.isChecked()
-
-        for i in range(self.cloudLayersConfigWidget.layersTable.rowCount()):
-            item = self.cloudLayersConfigWidget.layersTable.item(i, 0)
-            layer_source = item.data(Qt.UserRole)
-            cmb = self.cloudLayersConfigWidget.layersTable.cellWidget(i, 1)
-
-            # it would be annoying to change the action on removed layers
-            if cmb.itemData(cmb.currentIndex()) == SyncAction.REMOVE:
-                continue
-
-            idx, _cloud_action = layer_source.preferred_cloud_action(prefer_online)
-            cmb.setCurrentIndex(idx)
-            layer_source.cloud_action = cmb.itemData(cmb.currentIndex())
 
     def baseMapTypeChanged(self):
         self.baseMapLayerLabel.setVisible(self.singleLayerRadioButton.isChecked())
