@@ -196,6 +196,13 @@
         </item>
        </layout>
       </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="allowValueRelationFeatureAddition">
+        <property name="text">
+         <string>Allow adding new features to value relation editor widgets</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

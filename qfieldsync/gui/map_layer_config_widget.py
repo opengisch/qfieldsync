@@ -225,7 +225,10 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.relationsGroupBox.setCollapsed(
                 self.relationshipConfigurationTable.rowCount() == 0
             )
-
+            
+            self.allowValueRelationFeatureAddition.setChecked(
+                self.layer_source.allow_value_relation_feature_addition
+            )
             self.trackingSessionGroupBox.setChecked(
                 self.layer_source.tracking_session_active
             )
@@ -316,6 +319,9 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.attachmentNamingTable.syncLayerSourceValues()
         self.relationshipConfigurationTable.syncLayerSourceValues()
 
+        self.layer_source.allow_value_relation_feature_addition = (
+            self.allowValueRelationFeatureAddition.isChecked()
+        )
         self.layer_source.tracking_session_active = (
             self.trackingSessionGroupBox.isChecked()
         )
