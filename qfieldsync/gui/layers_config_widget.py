@@ -95,6 +95,31 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.multipleToggleButton.setAutoRaise(True)
         self.multipleToggleButton.setPopupMode(QToolButton.InstantPopup)
         self.toggleMenu.triggered.connect(self.toggleMenu_triggered)
+
+        self.settingsPackagingButton.setVisible(False)
+        if self.use_cloud_actions:
+            self.settingsPackagingButton.setVisible(True)
+            self.settingsPackagingButton.setIcon(
+                QgsApplication.getThemeIcon("/propertyicons/settings.svg")
+            )
+            self.settingsPackagingMenu = QMenu(self)
+            self.preferOnlineAction = QAction(
+                self.tr("Prefer Online layers"), self.settingsPackagingButton
+            )
+            self.preferOfflineAction = QAction(
+                self.tr("Prefer Offline layers"), self.settingsPackagingButton
+            )
+            self.settingsPackagingMenu.addAction(self.preferOnlineAction)
+            self.settingsPackagingMenu.addAction(self.preferOfflineAction)
+
+            self.settingsPackagingButton.setMenu(self.settingsPackagingMenu)
+
+            self.settingsPackagingMenu.triggered.connect(
+                self.onLayerActionPreferenceChanged
+            )
+
+            self.horizontalLayout.addWidget(self.settingsPackagingButton)
+
         self.unsupportedLayersList = list()
 
         self._on_message_bus_messaged_wrapper = (
@@ -217,6 +242,22 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 iface.showLayerProperties(layer_source.layer)
 
         return clicked_callback
+
+    def onLayerActionPreferenceChanged(self, action: QAction):
+        """Toggle when prefer online or offline menu actions have been triggered."""
+        prefer_online = action == self.preferOnlineAction
+
+        for i in range(self.layersTable.rowCount()):
+            item = self.layersTable.item(i, 0)
+            layer_source = item.data(Qt.UserRole)
+            cmb = self.layersTable.cellWidget(i, 1)
+
+            # It would be annoying to change the action on removed layers.
+            if cmb.itemData(cmb.currentIndex()) == SyncAction.REMOVE:
+                continue
+
+            idx, _cloud_action = layer_source.preferred_cloud_action(prefer_online)
+            cmb.setCurrentIndex(idx)
 
     def toggleMenu_triggered(self, action):
         """
