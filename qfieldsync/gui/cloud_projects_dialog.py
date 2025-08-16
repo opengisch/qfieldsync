@@ -142,6 +142,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsType.setCurrentIndex(0)
         self.projectsType.currentIndexChanged.connect(lambda: self.show_projects())
 
+        self.projectsSearch.textChanged.connect(self.filter_projects_search)
+
         self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() * 0.75))
         self.projectsTable.setColumnWidth(1, int(self.projectsTable.width() * 0.2))
 
@@ -557,6 +559,20 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_refresh_button_clicked(self) -> None:
         self.network_manager.projects_cache.refresh()
 
+    def filter_projects_search(self) -> None:
+        filter_text = self.projectsSearch.text().lower()
+        for row in range(self.projectsTable.rowCount()):
+            if filter_text:
+                item = self.projectsTable.item(row, 0)
+                cloud_project = item.data(Qt.UserRole)
+                cloud_project_is_visible = (
+                    filter_text in cloud_project.name.lower()
+                    or filter_text in cloud_project.owner.lower()
+                )
+                self.projectsTable.setRowHidden(row, not cloud_project_is_visible)
+            else:
+                self.projectsTable.setRowHidden(row, False)
+
     def show_projects(self) -> None:
         self.set_feedback(None)
 
@@ -646,6 +662,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsTable.sortByColumn(1, Qt.SortOrder.AscendingOrder)
         self.projectsTable.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self.projectsTable.setSortingEnabled(True)
+        self.filter_projects_search()
         self.update_project_table_selection()
 
         if self._suggest_upload_files:

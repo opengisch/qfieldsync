@@ -129,6 +129,16 @@
         <widget class="QComboBox" name="projectsType"/>
        </item>
        <item>
+        <widget class="QgsFilterLineEdit" name="projectsSearch">
+         <property name="showSearchIcon">
+          <bool>true</bool>
+         </property>
+         <property name="placeholderText">
+          <string>Search for project…</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QTableWidget" name="projectsTable">
          <property name="enabled">
           <bool>false</bool>
@@ -703,6 +713,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsFilterLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qgsfilterlineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
