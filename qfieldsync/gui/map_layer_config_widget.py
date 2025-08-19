@@ -225,7 +225,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
             self.relationsGroupBox.setCollapsed(
                 self.relationshipConfigurationTable.rowCount() == 0
             )
-            
+
             self.allowValueRelationFeatureAddition.setChecked(
                 self.layer_source.allow_value_relation_feature_addition
             )
