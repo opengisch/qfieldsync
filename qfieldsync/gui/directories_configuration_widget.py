@@ -48,7 +48,7 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         )
         self.directoriesTable.setColumnWidth(1, 160)
         self.directoriesTable.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.Stretch
+            0, QHeaderView.ResizeMode.Stretch
         )
         self.directoriesTable.verticalHeader().setVisible(False)
         self.directoriesTable.setAlternatingRowColors(True)
