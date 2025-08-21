@@ -226,10 +226,10 @@ class PackageDialog(QDialog, DialogUi):
                     "Please choose a different folder for the packaged project."
                 ),
             )
-            return
             self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(
                 False
             )
+            return
         else:
             self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(
                 True
