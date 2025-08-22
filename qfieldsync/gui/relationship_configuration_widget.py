@@ -57,14 +57,14 @@ class RelationshipConfigurationTableWidget(QTableWidget):
             row = self.rowCount()
             self.insertRow(row)
             layer_name_item = QTableWidgetItem(layer.name())
-            layer_name_item.setData(Qt.UserRole, layer_source)
-            layer_name_item.setFlags(Qt.ItemIsEnabled)
+            layer_name_item.setData(Qt.ItemDataRole.UserRole, layer_source)
+            layer_name_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             self.setItem(row, 0, layer_name_item)
             relation_id_item = QTableWidgetItem(relation.id())
-            relation_id_item.setFlags(Qt.ItemIsEnabled)
+            relation_id_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             self.setItem(row, 1, relation_id_item)
             relation_name_item = QTableWidgetItem(relation.name())
-            relation_name_item.setFlags(Qt.ItemIsEnabled)
+            relation_name_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             self.setItem(row, 2, relation_name_item)
             spin_item = QgsSpinBox()
             spin_item.setMinimum(0)
@@ -83,7 +83,7 @@ class RelationshipConfigurationTableWidget(QTableWidget):
 
     def syncLayerSourceValues(self, should_apply=False):
         for i in range(self.rowCount()):
-            layer_source = self.item(i, 0).data(Qt.UserRole)
+            layer_source = self.item(i, 0).data(Qt.ItemDataRole.UserRole)
             relation_id = self.item(i, 1).text()
             relationship_maximum_visible = self.cellWidget(i, 3).value()
             layer_source.set_relationship_maximum_visible(

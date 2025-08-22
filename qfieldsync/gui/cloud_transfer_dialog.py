@@ -141,17 +141,29 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.filesTree.expandAll()
 
         self.filesTree.model().setHeaderData(
-            1, Qt.Horizontal, make_icon("computer.svg"), Qt.DecorationRole
+            1,
+            Qt.Orientation.Horizontal,
+            make_icon("computer.svg"),
+            Qt.ItemDataRole.DecorationRole,
         )
         self.filesTree.model().setHeaderData(
-            3, Qt.Horizontal, make_icon("cloud.svg"), Qt.DecorationRole
+            3,
+            Qt.Orientation.Horizontal,
+            make_icon("cloud.svg"),
+            Qt.ItemDataRole.DecorationRole,
         )
-        self.filesTree.model().setHeaderData(1, Qt.Horizontal, "", Qt.DisplayRole)
-        self.filesTree.model().setHeaderData(2, Qt.Horizontal, "", Qt.DisplayRole)
-        self.filesTree.model().setHeaderData(3, Qt.Horizontal, "", Qt.DisplayRole)
+        self.filesTree.model().setHeaderData(
+            1, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole
+        )
+        self.filesTree.model().setHeaderData(
+            2, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole
+        )
+        self.filesTree.model().setHeaderData(
+            3, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole
+        )
         # The following does not change the icon alignment:
-        # self.filesTree.model().setHeaderData(1, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
-        # self.filesTree.model().setHeaderData(3, Qt.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
+        # self.filesTree.model().setHeaderData(1, Qt.Orientation.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
+        # self.filesTree.model().setHeaderData(3, Qt.Orientation.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
 
         self._update_window_title()
 
@@ -540,7 +552,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
                 # the length of the stack and the parts is equal for file entries
                 if len(stack) == len(parts):
-                    item.setData(0, Qt.UserRole, project_file)
+                    item.setData(0, Qt.ItemDataRole.UserRole, project_file)
                     is_offline_layer = (
                         project_file.local_path_exists
                         and str(project_file.local_path) in offline_layers_paths
@@ -741,7 +753,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def traverse_tree_item(
         self, item: QTreeWidgetItem, files: Dict[str, List[ProjectFile]]
     ) -> None:
-        project_file = item.data(0, Qt.UserRole)
+        project_file = item.data(0, Qt.ItemDataRole.UserRole)
 
         if project_file:
             assert item.childCount() == 0
@@ -859,7 +871,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.project_synchronized.emit()
 
     def on_local_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
-        project_file = item.data(0, Qt.UserRole)
+        project_file = item.data(0, Qt.ItemDataRole.UserRole)
         project_file.checkout & ProjectFileCheckout.Cloud
 
         local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
@@ -871,7 +883,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.update_detail(item)
 
     def on_cloud_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
-        project_file = item.data(0, Qt.UserRole)
+        project_file = item.data(0, Qt.ItemDataRole.UserRole)
         project_file.local_path_exists
 
         local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
@@ -883,7 +895,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.update_detail(item)
 
     def project_file_action(self, item: QTreeWidgetItem) -> ProjectFileAction:
-        project_file = item.data(0, Qt.UserRole)
+        project_file = item.data(0, Qt.ItemDataRole.UserRole)
         is_local_enabled = project_file.local_path_exists
         is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
         local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
@@ -911,7 +923,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def update_detail(self, item: QTreeWidgetItem) -> None:
         project_file_action = self.project_file_action(item)
 
-        project_file = item.data(0, Qt.UserRole)
+        project_file = item.data(0, Qt.ItemDataRole.UserRole)
         has_local = project_file.local_path_exists
         has_cloud = project_file.checkout & ProjectFileCheckout.Cloud
 
@@ -1002,7 +1014,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     def _file_tree_set_checkboxes_recursive(
         self, item: QTreeWidgetItem, checkout: ProjectFileCheckout
     ) -> None:
-        project_file = item.data(0, Qt.UserRole)
+        project_file = item.data(0, Qt.ItemDataRole.UserRole)
 
         if project_file:
             assert item.childCount() == 0

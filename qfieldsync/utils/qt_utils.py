@@ -56,12 +56,11 @@ def rounded_pixmap(img_path: str, diameter: int) -> QPixmap:
     size = QSize(height, width)
 
     target_pixmap = QPixmap(size)
-    target_pixmap.fill(Qt.transparent)
+    target_pixmap.fill(Qt.GlobalColor.transparent)
 
     painter = QPainter(target_pixmap)
-    painter.setRenderHint(QPainter.Antialiasing, True)
-    painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
-    painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+    painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
     path = QPainterPath()
     path.addRoundedRect(
@@ -85,8 +84,8 @@ def rounded_pixmap(img_path: str, diameter: int) -> QPixmap:
         pixmap = pixmap.scaled(
             width,
             height,
-            Qt.KeepAspectRatioByExpanding,
-            Qt.SmoothTransformation,
+            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+            Qt.TransformationMode.SmoothTransformation,
         )
 
         painter.drawPixmap(0, 0, pixmap)

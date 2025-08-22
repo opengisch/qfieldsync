@@ -58,9 +58,9 @@ WidgetUi, _ = loadUiType(
 
 class EventEater(QObject):
     def eventFilter(self, widget, event):
-        if event.type() == QEvent.KeyPress:
-            if event.matches(QKeySequence.Backspace) or event.matches(
-                QKeySequence.Delete
+        if event.type() == QEvent.Type.KeyPress:
+            if event.matches(QKeySequence.StandardKey.Backspace) or event.matches(
+                QKeySequence.StandardKey.Delete
             ):
                 widget.takeItem(widget.currentRow())
 

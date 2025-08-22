@@ -54,11 +54,11 @@ class AttachmentNamingTableWidget(QTableWidget):
 
             self.insertRow(row)
             item = QTableWidgetItem(layer.name())
-            item.setData(Qt.UserRole, layer_source)
-            item.setFlags(Qt.ItemIsEnabled)
+            item.setData(Qt.ItemDataRole.UserRole, layer_source)
+            item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             self.setItem(row, 0, item)
             item = QTableWidgetItem(field_name)
-            item.setFlags(Qt.ItemIsEnabled)
+            item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             self.setItem(row, 1, item)
             ew = QgsFieldExpressionWidget()
             ew.setLayer(layer)
@@ -72,7 +72,7 @@ class AttachmentNamingTableWidget(QTableWidget):
 
     def syncLayerSourceValues(self, should_apply=False):
         for i in range(self.rowCount()):
-            layer_source = self.item(i, 0).data(Qt.UserRole)
+            layer_source = self.item(i, 0).data(Qt.ItemDataRole.UserRole)
             field_name = self.item(i, 1).text()
             new_expression = self.cellWidget(i, 2).currentText()
             layer_source.set_attachment_naming(field_name, new_expression)

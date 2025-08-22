@@ -64,7 +64,9 @@ class CloudException(Exception):
         super(CloudException, self).__init__(exception)
         self.reply = reply
         self.parent = exception
-        self.httpCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        self.httpCode = reply.attribute(
+            QNetworkRequest.Attribute.HttpStatusCodeAttribute
+        )
 
 
 class disable_nam_timeout:
@@ -86,14 +88,14 @@ class disable_nam_timeout:
 
 
 def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
-    if reply.error() == QNetworkReply.NoError:
+    if reply.error() == QNetworkReply.NetworkError.NoError:
         return None
 
     message = ""
     try:
         payload = reply.readAll().data()
         # workaround to https://github.com/qgis/QGIS/issues/49687
-        content_length = reply.header(QNetworkRequest.ContentLengthHeader)
+        content_length = reply.header(QNetworkRequest.KnownHeaders.ContentLengthHeader)
         payload = payload[:content_length].decode()
 
         try:
@@ -114,7 +116,7 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
     if not message:
         status_str = ""
 
-        http_status = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        http_status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
         if http_status is not None:
             status_str += f"HTTP-{http_status}/"
 
@@ -413,16 +415,19 @@ class CloudNetworkAccessManager(QObject):
 
         request = QNetworkRequest(url)
         request.setAttribute(
-            QNetworkRequest.RedirectPolicyAttribute,
-            QNetworkRequest.NoLessSafeRedirectPolicy,
+            QNetworkRequest.Attribute.RedirectPolicyAttribute,
+            QNetworkRequest.RedirectPolicy.NoLessSafeRedirectPolicy,
         )
 
         if skip_cache:
             request.setAttribute(
-                QNetworkRequest.CacheLoadControlAttribute, QNetworkRequest.AlwaysNetwork
+                QNetworkRequest.Attribute.CacheLoadControlAttribute,
+                QNetworkRequest.CacheLoadControl.AlwaysNetwork,
             )
 
-        request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -449,13 +454,14 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         request = QNetworkRequest(url)
         request.setAttribute(
-            QNetworkRequest.RedirectPolicyAttribute,
-            QNetworkRequest.UserVerifiedRedirectPolicy,
+            QNetworkRequest.Attribute.RedirectPolicyAttribute,
+            QNetworkRequest.RedirectPolicy.UserVerifiedRedirectPolicy,
         )
 
         if skip_cache:
             request.setAttribute(
-                QNetworkRequest.CacheLoadControlAttribute, QNetworkRequest.AlwaysNetwork
+                QNetworkRequest.Attribute.CacheLoadControlAttribute,
+                QNetworkRequest.CacheLoadControl.AlwaysNetwork,
             )
 
         with disable_nam_timeout(self._nam):
@@ -476,7 +482,7 @@ class CloudNetworkAccessManager(QObject):
     def _on_cloud_get_download_finished(
         self, reply: QNetworkReply, local_filename: str
     ) -> None:
-        http_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        http_code = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
         if http_code is not None and http_code >= 301 and http_code <= 308:
             # redirects should not be saved as files, just ignore them
             return
@@ -494,8 +500,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
-        request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -520,8 +527,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
-        request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -546,8 +554,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
-        request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -570,8 +579,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
-        request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -594,7 +604,6 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
 
         if self._token:
             request.setRawHeader(
@@ -611,9 +620,12 @@ class CloudNetworkAccessManager(QObject):
         if payload is not None:
             json_part = QHttpPart()
 
-            json_part.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
             json_part.setHeader(
-                QNetworkRequest.ContentDispositionHeader, 'form-data; name="json"'
+                QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+            )
+            json_part.setHeader(
+                QNetworkRequest.KnownHeaders.ContentDispositionHeader,
+                'form-data; name="json"',
             )
             json_part.setBody(json.dumps(payload).encode("utf-8"))
 
@@ -626,7 +638,7 @@ class CloudNetworkAccessManager(QObject):
                 file_part = QHttpPart()
                 file_part.setBody(file.read())
                 file_part.setHeader(
-                    QNetworkRequest.ContentDispositionHeader,
+                    QNetworkRequest.KnownHeaders.ContentDispositionHeader,
                     'form-data; name="file"; filename="{}"'.format(filename),
                 )
 
@@ -722,9 +734,9 @@ class CloudNetworkAccessManager(QObject):
             reply = self._login_error.reply
 
             if (
-                reply.error() == QNetworkReply.HostNotFoundError
+                reply.error() == QNetworkReply.NetworkError.HostNotFoundError
                 # network unreachable goes here
-                or reply.error() == QNetworkReply.UnknownNetworkError
+                or reply.error() == QNetworkReply.NetworkError.UnknownNetworkError
             ):
                 error_str = self.tr(
                     "Failed to connect to {}. Check your internet connection.".format(
@@ -1012,7 +1024,7 @@ class CloudProjectsCache(QObject):
                 self._fs_watcher.addPath(project.local_dir)
 
     def _on_get_projects_reply_finished(self, reply: QNetworkReply) -> None:
-        if reply.error() == QNetworkReply.OperationCanceledError:
+        if reply.error() == QNetworkReply.NetworkError.OperationCanceledError:
             return
 
         self._projects_reply = None

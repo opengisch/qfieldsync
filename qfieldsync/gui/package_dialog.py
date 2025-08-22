@@ -249,7 +249,7 @@ class PackageDialog(QDialog, DialogUi):
         )
 
         try:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
             self._offline_convertor.convert()
             self.do_post_offline_convert_action(True)
         except PackagingCanceledException:

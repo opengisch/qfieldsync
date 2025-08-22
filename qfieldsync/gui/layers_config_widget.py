@@ -63,7 +63,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.layersTable.setHorizontalHeaderLabels(
             [self.tr("Layer"), self.tr("Packaging Action"), ""]
         )
-        self.layersTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.layersTable.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Stretch
+        )
 
         self.multipleToggleButton.setIcon(
             QIcon(
@@ -93,7 +95,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.toggleMenu.addAction(self.addVisibleOfflineAction)
         self.multipleToggleButton.setMenu(self.toggleMenu)
         self.multipleToggleButton.setAutoRaise(True)
-        self.multipleToggleButton.setPopupMode(QToolButton.InstantPopup)
+        self.multipleToggleButton.setPopupMode(
+            QToolButton.ToolButtonPopupMode.InstantPopup
+        )
         self.toggleMenu.triggered.connect(self.toggleMenu_triggered)
 
         self.settingsPackagingButton.setVisible(False)
@@ -191,8 +195,8 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             count = self.layersTable.rowCount()
             self.layersTable.insertRow(count)
             item = QTableWidgetItem(layer_source.layer.name())
-            item.setData(Qt.UserRole, layer_source)
-            item.setData(Qt.EditRole, layer_source.layer.name())
+            item.setData(Qt.ItemDataRole.UserRole, layer_source)
+            item.setData(Qt.ItemDataRole.EditRole, layer_source.layer.name())
             item.setIcon(QgsMapLayerModel.iconForLayer(layer_source.layer))
             self.layersTable.setItem(count, 0, item)
 
@@ -214,12 +218,12 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
             if not layer_source.is_supported:
                 self.unsupportedLayersList.append(layer_source)
-                self.layersTable.item(count, 0).setFlags(Qt.NoItemFlags)
+                self.layersTable.item(count, 0).setFlags(Qt.ItemFlag.NoItemFlags)
                 self.layersTable.cellWidget(count, 1).setEnabled(False)
                 cmb.setCurrentIndex(cmb.findData(SyncAction.REMOVE))
 
         self.layersTable.resizeColumnsToContents()
-        self.layersTable.sortByColumn(0, Qt.AscendingOrder)
+        self.layersTable.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self.layersTable.setSortingEnabled(True)
 
         if self.unsupportedLayersList:
@@ -249,7 +253,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         for i in range(self.layersTable.rowCount()):
             item = self.layersTable.item(i, 0)
-            layer_source = item.data(Qt.UserRole)
+            layer_source = item.data(Qt.ItemDataRole.UserRole)
             cmb = self.layersTable.cellWidget(i, 1)
 
             # It would be annoying to change the action on removed layers.
@@ -279,7 +283,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         ):
             for i in range(self.layersTable.rowCount()):
                 item = self.layersTable.item(i, 0)
-                layer_source = item.data(Qt.UserRole)
+                layer_source = item.data(Qt.ItemDataRole.UserRole)
                 old_action = self.get_layer_action(layer_source)
                 available_actions, _ = zip(*self.get_available_actions(layer_source))
                 layer_sync_action = (
@@ -331,7 +335,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         for i in range(self.layersTable.rowCount()):
             item = self.layersTable.item(i, 0)
-            layer_source = item.data(Qt.UserRole)
+            layer_source = item.data(Qt.ItemDataRole.UserRole)
             cmb = self.layersTable.cellWidget(i, 1)
 
             self.set_layer_action(layer_source, cmb.itemData(cmb.currentIndex()))
