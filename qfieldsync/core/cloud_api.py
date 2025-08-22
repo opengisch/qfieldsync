@@ -422,7 +422,7 @@ class CloudNetworkAccessManager(QObject):
         if skip_cache:
             request.setAttribute(
                 QNetworkRequest.Attribute.CacheLoadControlAttribute,
-                QNetworkRequest.CacheLoadControl.AlwaysNetwork
+                QNetworkRequest.CacheLoadControl.AlwaysNetwork,
             )
 
         request.setHeader(
