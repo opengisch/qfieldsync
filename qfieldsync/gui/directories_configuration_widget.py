@@ -90,9 +90,13 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
             cmb = self.directoriesTable.cellWidget(i, 1)
             if item.data(Qt.ItemDataRole.EditRole) != "":
                 if cmb.currentIndex() == 0:
-                    configuration["attachment_dirs"].append(item.data(Qt.ItemDataRole.EditRole))
+                    configuration["attachment_dirs"].append(
+                        item.data(Qt.ItemDataRole.EditRole)
+                    )
                 elif cmb.currentIndex() == 1:
-                    configuration["data_dirs"].append(item.data(Qt.ItemDataRole.EditRole))
+                    configuration["data_dirs"].append(
+                        item.data(Qt.ItemDataRole.EditRole)
+                    )
 
         return configuration
 

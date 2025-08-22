@@ -64,7 +64,9 @@ class CloudException(Exception):
         super(CloudException, self).__init__(exception)
         self.reply = reply
         self.parent = exception
-        self.httpCode = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
+        self.httpCode = reply.attribute(
+            QNetworkRequest.Attribute.HttpStatusCodeAttribute
+        )
 
 
 class disable_nam_timeout:
@@ -419,10 +421,13 @@ class CloudNetworkAccessManager(QObject):
 
         if skip_cache:
             request.setAttribute(
-                QNetworkRequest.Attribute.CacheLoadControlAttribute, QNetworkRequest.CacheLoadControl.AlwaysNetwork
+                QNetworkRequest.Attribute.CacheLoadControlAttribute,
+                QNetworkRequest.CacheLoadControl.AlwaysNetwork
             )
 
-        request.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -455,7 +460,8 @@ class CloudNetworkAccessManager(QObject):
 
         if skip_cache:
             request.setAttribute(
-                QNetworkRequest.Attribute.CacheLoadControlAttribute, QNetworkRequest.CacheLoadControl.AlwaysNetwork
+                QNetworkRequest.Attribute.CacheLoadControlAttribute,
+                QNetworkRequest.CacheLoadControl.AlwaysNetwork,
             )
 
         with disable_nam_timeout(self._nam):
@@ -494,7 +500,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -519,7 +527,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -544,7 +554,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -567,7 +579,9 @@ class CloudNetworkAccessManager(QObject):
         self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
-        request.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json")
+        request.setHeader(
+            QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+        )
 
         if self._token:
             request.setRawHeader(
@@ -606,9 +620,12 @@ class CloudNetworkAccessManager(QObject):
         if payload is not None:
             json_part = QHttpPart()
 
-            json_part.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json")
             json_part.setHeader(
-                QNetworkRequest.KnownHeaders.ContentDispositionHeader, 'form-data; name="json"'
+                QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
+            )
+            json_part.setHeader(
+                QNetworkRequest.KnownHeaders.ContentDispositionHeader,
+                'form-data; name="json"',
             )
             json_part.setBody(json.dumps(payload).encode("utf-8"))
 

@@ -186,7 +186,9 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
                 critical_message = self.tr(
                     "The project could not be converted into the export directory."
                 )
-                self.iface.messageBar().pushMessage(critical_message, Qgis.MessageLevel.Critical, 0)
+                self.iface.messageBar().pushMessage(
+                    critical_message, Qgis.MessageLevel.Critical, 0
+                )
                 self.close()
                 return
 

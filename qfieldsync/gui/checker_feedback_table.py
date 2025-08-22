@@ -38,7 +38,9 @@ class CheckerFeedbackTable(QTableWidget):
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.setMinimumHeight(100)
-        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        self.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding
+        )
 
         for layer_id in checker_feedback.feedbacks.keys():
             for feedback in checker_feedback.feedbacks[layer_id]:

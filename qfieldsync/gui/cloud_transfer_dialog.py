@@ -141,14 +141,26 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.filesTree.expandAll()
 
         self.filesTree.model().setHeaderData(
-            1, Qt.Orientation.Horizontal, make_icon("computer.svg"), Qt.ItemDataRole.DecorationRole
+            1,
+            Qt.Orientation.Horizontal,
+            make_icon("computer.svg"),
+            Qt.ItemDataRole.DecorationRole,
         )
         self.filesTree.model().setHeaderData(
-            3, Qt.Orientation.Horizontal, make_icon("cloud.svg"), Qt.ItemDataRole.DecorationRole
+            3,
+            Qt.Orientation.Horizontal,
+            make_icon("cloud.svg"),
+            Qt.ItemDataRole.DecorationRole,
         )
-        self.filesTree.model().setHeaderData(1, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole)
-        self.filesTree.model().setHeaderData(2, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole)
-        self.filesTree.model().setHeaderData(3, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole)
+        self.filesTree.model().setHeaderData(
+            1, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole
+        )
+        self.filesTree.model().setHeaderData(
+            2, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole
+        )
+        self.filesTree.model().setHeaderData(
+            3, Qt.Orientation.Horizontal, "", Qt.ItemDataRole.DisplayRole
+        )
         # The following does not change the icon alignment:
         # self.filesTree.model().setHeaderData(1, Qt.Orientation.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)
         # self.filesTree.model().setHeaderData(3, Qt.Orientation.Horizontal, Qt.AlignCenter, Qt.TextAlignmentRole)

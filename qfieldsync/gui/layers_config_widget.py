@@ -63,7 +63,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.layersTable.setHorizontalHeaderLabels(
             [self.tr("Layer"), self.tr("Packaging Action"), ""]
         )
-        self.layersTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.layersTable.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Stretch
+        )
 
         self.multipleToggleButton.setIcon(
             QIcon(
@@ -93,7 +95,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.toggleMenu.addAction(self.addVisibleOfflineAction)
         self.multipleToggleButton.setMenu(self.toggleMenu)
         self.multipleToggleButton.setAutoRaise(True)
-        self.multipleToggleButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.multipleToggleButton.setPopupMode(
+            QToolButton.ToolButtonPopupMode.InstantPopup
+        )
         self.toggleMenu.triggered.connect(self.toggleMenu_triggered)
 
         self.settingsPackagingButton.setVisible(False)

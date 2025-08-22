@@ -662,7 +662,8 @@ class FileTransfer(QObject):
             return False
 
         return self.last_reply.isFinished() and (
-            self.error is not None or self.last_reply.error() != QNetworkReply.NetworkError.NoError
+            self.error is not None
+            or self.last_reply.error() != QNetworkReply.NetworkError.NoError
         )
 
 

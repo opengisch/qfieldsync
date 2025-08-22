@@ -315,7 +315,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
         self.set_feedback(
-            self.tr("Loading projects list…"), self.palette().color(QPalette.ColorRole.WindowText)
+            self.tr("Loading projects list…"),
+            self.palette().color(QPalette.ColorRole.WindowText),
         )
 
     def on_projects_cached_projects_error(self, error: str) -> None:
@@ -344,8 +345,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
 
     def on_project_files_toggle_expand_button_clicked(self) -> None:
-        should_expand = not self.projectFilesTree.topLevelItem(0).data(1, Qt.ItemDataRole.UserRole)
-        self.projectFilesTree.topLevelItem(0).setData(1, Qt.ItemDataRole.UserRole, should_expand)
+        should_expand = not self.projectFilesTree.topLevelItem(0).data(
+            1, Qt.ItemDataRole.UserRole
+        )
+        self.projectFilesTree.topLevelItem(0).setData(
+            1, Qt.ItemDataRole.UserRole, should_expand
+        )
 
         for idx in range(self.projectFilesTree.topLevelItemCount()):
             self.expand_state(self.projectFilesTree.topLevelItem(idx), should_expand)
@@ -1051,7 +1056,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 index = self.projectsTable.model().index(row_idx, 0)
                 self.projectsTable.setCurrentIndex(index)
                 self.projectsTable.selectionModel().select(
-                    index, QItemSelectionModel.SelectionFlag.ClearAndSelect | QItemSelectionModel.SelectionFlag.Rows
+                    index,
+                    QItemSelectionModel.SelectionFlag.ClearAndSelect
+                    | QItemSelectionModel.SelectionFlag.Rows,
                 )
                 self.projectsTable.scrollToItem(
                     self.projectsTable.item(row_idx, 0),
