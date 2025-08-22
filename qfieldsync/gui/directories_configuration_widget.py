@@ -88,11 +88,11 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         for i in range(self.directoriesTable.rowCount()):
             item = self.directoriesTable.item(i, 0)
             cmb = self.directoriesTable.cellWidget(i, 1)
-            if item.data(Qt.EditRole) != "":
+            if item.data(Qt.ItemDataRole.EditRole) != "":
                 if cmb.currentIndex() == 0:
-                    configuration["attachment_dirs"].append(item.data(Qt.EditRole))
+                    configuration["attachment_dirs"].append(item.data(Qt.ItemDataRole.EditRole))
                 elif cmb.currentIndex() == 1:
-                    configuration["data_dirs"].append(item.data(Qt.EditRole))
+                    configuration["data_dirs"].append(item.data(Qt.ItemDataRole.EditRole))
 
         return configuration
 
@@ -101,7 +101,7 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         self.directoriesTable.insertRow(count)
 
         item = QTableWidgetItem(name)
-        item.setData(Qt.EditRole, name)
+        item.setData(Qt.ItemDataRole.EditRole, name)
         self.directoriesTable.setItem(count, 0, item)
 
         cmb = QComboBox()

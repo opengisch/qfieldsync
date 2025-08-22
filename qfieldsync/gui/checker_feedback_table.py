@@ -38,7 +38,7 @@ class CheckerFeedbackTable(QTableWidget):
         self.horizontalHeader().setStretchLastSection(True)
         self.setRowCount(0)
         self.setMinimumHeight(100)
-        self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
 
         for layer_id in checker_feedback.feedbacks.keys():
             for feedback in checker_feedback.feedbacks[layer_id]:
@@ -55,7 +55,7 @@ class CheckerFeedbackTable(QTableWidget):
                     level_text = self.tr("Error")
 
                 item = QTableWidgetItem(level_icon, "")
-                item.setFlags(Qt.ItemIsEnabled)
+                item.setFlags(Qt.ItemFlag.ItemIsEnabled)
                 item.setToolTip(level_text)
                 self.setItem(row, 0, item)
 
@@ -66,7 +66,7 @@ class CheckerFeedbackTable(QTableWidget):
                     source = self.tr("Project")
 
                 item = QTableWidgetItem()
-                item.setFlags(Qt.ItemIsEnabled)
+                item.setFlags(Qt.ItemFlag.ItemIsEnabled)
                 item.setToolTip(level_text)
                 self.setItem(row, 1, item)
 
@@ -74,12 +74,12 @@ class CheckerFeedbackTable(QTableWidget):
                 label = QLabel("**{}**\n\n{}".format(source, feedback.message))
                 label.setWordWrap(True)
                 label.setMargin(5)
-                label.setTextFormat(Qt.MarkdownText)
+                label.setTextFormat(Qt.TextFormat.MarkdownText)
                 label.setTextInteractionFlags(
-                    Qt.TextSelectableByMouse
-                    | Qt.TextSelectableByKeyboard
-                    | Qt.LinksAccessibleByMouse
-                    | Qt.LinksAccessibleByKeyboard
+                    Qt.TextInteractionFlag.TextSelectableByMouse
+                    | Qt.TextInteractionFlag.TextSelectableByKeyboard
+                    | Qt.TextInteractionFlag.LinksAccessibleByMouse
+                    | Qt.TextInteractionFlag.LinksAccessibleByKeyboard
                 )
                 label.setOpenExternalLinks(True)
                 self.setCellWidget(row, 1, label)

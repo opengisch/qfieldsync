@@ -662,7 +662,7 @@ class FileTransfer(QObject):
             return False
 
         return self.last_reply.isFinished() and (
-            self.error is not None or self.last_reply.error() != QNetworkReply.NoError
+            self.error is not None or self.last_reply.error() != QNetworkReply.NetworkError.NoError
         )
 
 
@@ -806,7 +806,7 @@ class TransferFileLogsModel(QAbstractListModel):
         if index.row() < 0 or index.row() >= self.rowCount(QModelIndex()):
             return None
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return self._data_string(self.transfers[index.row()])
 
         return None
@@ -919,4 +919,4 @@ class TransferFileLogsModel(QAbstractListModel):
         row = self.filename_to_index[filename]
         index = self.createIndex(row, 0)
 
-        self.dataChanged.emit(index, index, [Qt.DisplayRole])
+        self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])

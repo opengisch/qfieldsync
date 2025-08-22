@@ -161,7 +161,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.activateWindow()
 
     def on_login_button_clicked(self) -> None:
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
         self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)

@@ -86,18 +86,18 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
             #     return False
 
             check_state = (
-                Qt.Checked if dirs_to_copy.get(str_path, True) else Qt.Unchecked
+                Qt.CheckState.Checked if dirs_to_copy.get(str_path, True) else Qt.CheckState.Unchecked
             )
 
             item.setCheckState(0, check_state)
             item.setExpanded(True)
-            item.setData(0, Qt.UserRole, str_path)
+            item.setData(0, Qt.ItemDataRole.UserRole, str_path)
             item.setToolTip(0, str(node["path"].absolute()))
             item.setFlags(
                 item.flags()
-                | Qt.ItemIsUserCheckable
-                | Qt.ItemIsSelectable
-                | Qt.ItemIsAutoTristate
+                | Qt.ItemFlag.ItemIsUserCheckable
+                | Qt.ItemFlag.ItemIsSelectable
+                | Qt.ItemFlag.ItemIsAutoTristate
             )
 
         root_item = self.dirsTreeWidget.invisibleRootItem()
@@ -116,8 +116,8 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
             data = {}
             for i in range(root_item.childCount()):
                 item = root_item.child(i)
-                relative_path = item.data(0, Qt.UserRole)
-                is_checked = item.checkState(0) == Qt.Checked
+                relative_path = item.data(0, Qt.ItemDataRole.UserRole)
+                is_checked = item.checkState(0) == Qt.CheckState.Checked
                 data[relative_path] = is_checked
 
                 if item.childCount() > 0:
@@ -146,7 +146,7 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
 
     def _set_checked_state_recursively(self, checked: bool) -> None:
         def set_checked_state(item: QTreeWidgetItem) -> None:
-            checked_state = Qt.Checked if checked else Qt.Unchecked
+            checked_state = Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
             item.setCheckState(0, checked_state)
 
             for i in range(item.childCount()):
