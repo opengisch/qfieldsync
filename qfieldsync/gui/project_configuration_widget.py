@@ -55,17 +55,6 @@ WidgetUi, _ = loadUiType(
 )
 
 
-class EventEater(QObject):
-    def eventFilter(self, widget, event):
-        if event.type() == QEvent.Type.KeyPress:
-            if event.matches(QKeySequence.StandardKey.Backspace) or event.matches(
-                QKeySequence.StandardKey.Delete
-            ):
-                widget.takeItem(widget.currentRow())
-
-        return super().eventFilter(widget, event)
-
-
 class ProjectConfigurationStackWidget(QgsOptionsPageWidget):
     """Configuration widget for QFieldSync on a particular project."""
 
