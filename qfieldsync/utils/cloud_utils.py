@@ -30,7 +30,7 @@ from qgis.PyQt.QtCore import QObject
 
 class LocalDirFeedback(Enum):
     Error = "error"
-    Warning = "warning"
+    Warning = "warning"  # noqa: A003
     Success = "success"
 
 

@@ -281,7 +281,7 @@ class CloudProject:
         return None
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         return self._data["id"]
 
     @property
