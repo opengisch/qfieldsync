@@ -89,6 +89,6 @@ def mkdir(
     path.mkdir(mode)
 
     current_permission = stat.S_IMODE(path.stat().st_mode)
-    WRITE = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+    write_flags = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
     # calling `chmod` might trigger a `PermissionError`. The parent must handle the error.
-    path.chmod(current_permission | WRITE)
+    path.chmod(current_permission | write_flags)

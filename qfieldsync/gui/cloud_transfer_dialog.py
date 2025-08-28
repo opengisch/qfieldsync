@@ -700,28 +700,28 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             if self.uploadLocalizedDatasetsCheck.isChecked():
                 files["localized_datasets_to_upload"] = self.localized_datasets_files
 
-            hasLocalizedDatasetsUploads = len(files["localized_datasets_to_upload"])
-            self.localizedDatasetsUploadLabel.setVisible(hasLocalizedDatasetsUploads)
+            has_localized_datasets_uploads = len(files["localized_datasets_to_upload"])
+            self.localizedDatasetsUploadLabel.setVisible(has_localized_datasets_uploads)
             self.localizedDatasetsUploadProgressBar.setVisible(
-                hasLocalizedDatasetsUploads
+                has_localized_datasets_uploads
             )
             self.localizedDatasetsUploadProgressFeedbackLabel.setVisible(
-                hasLocalizedDatasetsUploads
+                has_localized_datasets_uploads
             )
 
-            hasUploads = len(files["to_upload"]) > 0
-            self.uploadLabel.setVisible(hasUploads)
-            self.uploadProgressBar.setVisible(hasUploads)
-            self.uploadProgressFeedbackLabel.setVisible(hasUploads)
+            has_uploads = len(files["to_upload"]) > 0
+            self.uploadLabel.setVisible(has_uploads)
+            self.uploadProgressBar.setVisible(has_uploads)
+            self.uploadProgressFeedbackLabel.setVisible(has_uploads)
 
-            hasDownloads = len(files["to_download"]) > 0
-            self.downloadLabel.setVisible(hasDownloads)
-            self.downloadProgressBar.setVisible(hasDownloads)
-            self.downloadProgressFeedbackLabel.setVisible(hasDownloads)
+            has_downloads = len(files["to_download"]) > 0
+            self.downloadLabel.setVisible(has_downloads)
+            self.downloadProgressBar.setVisible(has_downloads)
+            self.downloadProgressFeedbackLabel.setVisible(has_downloads)
 
             # if the cloud project being synchronize matches the currently open project, don't offer to open if nothing is being downloaded
             if (
-                not hasDownloads
+                not has_downloads
                 and self.network_manager.projects_cache.currently_open_project
                 and self.cloud_project.id
                 == self.network_manager.projects_cache.currently_open_project.id
@@ -832,13 +832,13 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         arrow_layout = QHBoxLayout()
         arrow_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         arrow_layout.setContentsMargins(0, 0, 0, 0)
-        localLabel, arrowLabel, cloudLabel = QLabel(), QLabel(), QLabel()
-        localLabel.setObjectName("local")
-        arrowLabel.setObjectName("arrow")
-        cloudLabel.setObjectName("cloud")
-        arrow_layout.addWidget(localLabel)
-        arrow_layout.addWidget(arrowLabel)
-        arrow_layout.addWidget(cloudLabel)
+        local_label, arrow_label, cloud_label = QLabel(), QLabel(), QLabel()
+        local_label.setObjectName("local")
+        arrow_label.setObjectName("arrow")
+        cloud_label.setObjectName("cloud")
+        arrow_layout.addWidget(local_label)
+        arrow_layout.addWidget(arrow_label)
+        arrow_layout.addWidget(cloud_label)
         arrow_widget.setLayout(arrow_layout)
 
         self.filesTree.setItemWidget(item, 1, local_checkbox_widget)

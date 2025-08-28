@@ -264,26 +264,26 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
     def update_info_visibility(self):
         """Show the info label if there are unconfigured layers"""
-        localizedDataPathLayers = []
+        localized_data_path_layers = []
         for layer in list(self.project.mapLayers().values()):
             layer_source = LayerSource(layer)
             if layer.dataProvider() is not None:
                 if layer_source.is_localized_path:
-                    localizedDataPathLayers.append("- {}".format(layer.name()))
+                    localized_data_path_layers.append("- {}".format(layer.name()))
 
-        if localizedDataPathLayers:
+        if localized_data_path_layers:
             self.infoLocalizedLayersLabel.setText(
                 self.tr(
                     "The current project relies on %n shared dataset(s), make sure to copy them into the shared datasets path of devices running QField. The layer(s) stored in a shared dataset(s) are:\n{}",
                     "",
-                    len(localizedDataPathLayers),
-                ).format("\n".join(localizedDataPathLayers))
+                    len(localized_data_path_layers),
+                ).format("\n".join(localized_data_path_layers))
             )
 
             self.infoLocalizedLayersLabel.setVisible(True)
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
-        self.infoGroupBox.setVisible(len(localizedDataPathLayers) > 0)
+        self.infoGroupBox.setVisible(len(localized_data_path_layers) > 0)
 
     def get_unique_project_name(self, project: QgsProject) -> str:
         project_name = QgsProject.instance().title()

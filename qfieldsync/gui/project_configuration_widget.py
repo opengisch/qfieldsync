@@ -244,10 +244,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.__project_configuration.geofencing_is_active
         )
 
-        geofencingLayer = QgsProject.instance().mapLayer(
+        geofencing_layer = QgsProject.instance().mapLayer(
             self.__project_configuration.geofencing_layer
         )
-        self.geofencingLayerComboBox.setLayer(geofencingLayer)
+        self.geofencingLayerComboBox.setLayer(geofencing_layer)
 
         self.geofencingBehaviorComboBox.setCurrentIndex(
             self.geofencingBehaviorComboBox.findData(
@@ -260,10 +260,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
 
         # Advanced settings
-        digitizingLogsLayer = QgsProject.instance().mapLayer(
+        digitizing_logs_layer = QgsProject.instance().mapLayer(
             self.__project_configuration.digitizing_logs_layer
         )
-        self.digitizingLogsLayerComboBox.setLayer(digitizingLogsLayer)
+        self.digitizingLogsLayerComboBox.setLayer(digitizing_logs_layer)
 
         self.maximumImageWidthHeight.setClearValueMode(
             QgsSpinBox.CustomValue, self.tr("No restriction")

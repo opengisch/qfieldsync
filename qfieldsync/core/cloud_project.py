@@ -32,6 +32,8 @@ from qgis.PyQt.QtCore import QDir
 
 from qfieldsync.core.preferences import Preferences
 
+ETAG_BLOCKSIZE = 65536
+
 
 class ProjectFileCheckout(IntFlag):
     Deleted = 0
@@ -59,14 +61,13 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
         file_size = os.fstat(f.fileno()).st_size
 
         if file_size <= part_size:
-            BLOCKSIZE = 65536
             # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
             hasher = hashlib.md5()  # noqa: S324
 
-            buf = f.read(BLOCKSIZE)
+            buf = f.read(ETAG_BLOCKSIZE)
             while len(buf) > 0:
                 hasher.update(buf)
-                buf = f.read(BLOCKSIZE)
+                buf = f.read(ETAG_BLOCKSIZE)
 
             return hasher.hexdigest()
         else:
