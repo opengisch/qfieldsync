@@ -420,7 +420,7 @@ class CloudProject:
         layers = temporary_project.mapLayers()
 
         localized_datasets_files = []
-        for layer_id, layer in layers.items():
+        for layer in layers.values():
             if not layer.dataProvider():
                 continue
 
