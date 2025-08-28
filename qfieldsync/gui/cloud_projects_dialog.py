@@ -185,7 +185,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self,
         )
 
-        print("22222")
         self.projectCreatePage.layout().addWidget(self.createProjectWidget)
         self.createProjectWidget.finished.connect(
             lambda project_id: self.on_create_project_finished(project_id)
@@ -275,7 +274,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             3, QHeaderView.ResizeMode.ResizeToContents
         )
 
-        print("1111")
         self.update_ui_state()
 
     @property
