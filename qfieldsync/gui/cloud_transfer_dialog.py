@@ -355,10 +355,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             if (
                 localized_datasets_project
                 and localized_datasets_project.id != self.cloud_project.id
-                and (
-                    localized_datasets_project.user_role == "admin"
-                    or localized_datasets_project.user_role == "manager"
-                )
+                and (localized_datasets_project.user_role in ("admin", "manager"))
             ):
                 self.localized_datasets_project = localized_datasets_project
                 self.localized_datasets_files = localized_datasets_files
@@ -757,19 +754,19 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
             project_file_action = self.project_file_action(item)
 
-            if (
-                project_file_action == ProjectFileAction.DeleteLocal
-                or project_file_action == ProjectFileAction.DeleteCloud
+            if project_file_action in (
+                ProjectFileAction.DeleteLocal,
+                ProjectFileAction.DeleteCloud,
             ):
                 files["to_delete"].append(project_file)
-            elif (
-                project_file_action == ProjectFileAction.DownloadAndCreate
-                or project_file_action == ProjectFileAction.DownloadAndReplace
+            elif project_file_action in (
+                ProjectFileAction.DownloadAndCreate,
+                ProjectFileAction.DownloadAndReplace,
             ):
                 files["to_download"].append(project_file)
-            elif (
-                project_file_action == ProjectFileAction.UploadAndCreate
-                or project_file_action == ProjectFileAction.UploadAndReplace
+            elif project_file_action in (
+                ProjectFileAction.UploadAndCreate,
+                ProjectFileAction.UploadAndReplace,
             ):
                 files["to_upload"].append(project_file)
             elif project_file_action == ProjectFileAction.NoAction:

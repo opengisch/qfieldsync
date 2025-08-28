@@ -238,7 +238,6 @@ class CloudTransferrer(QObject):
     def _on_throttled_localized_datasets_upload_finished(self) -> None:
         self.localized_datasets_upload_progress.emit(1)
         self.localized_datasets_upload_finished.emit()
-        return
 
     def _on_throttled_upload_progress(
         self, filename: str, bytes_transferred: int, _bytes_total: int
@@ -252,7 +251,6 @@ class CloudTransferrer(QObject):
     def _on_throttled_upload_finished(self) -> None:
         self.upload_progress.emit(1)
         self.upload_finished.emit()
-        return
 
     def _delete(self) -> None:
         assert not self.is_upload_active, "Upload in progress"
@@ -312,7 +310,6 @@ class CloudTransferrer(QObject):
     def _on_throttled_download_finished(self) -> None:
         self.download_progress.emit(1)
         self.download_finished.emit()
-        return
 
     def _on_localized_datasets_upload_finished(self) -> None:
         self.is_localized_datasets_upload_active = False
