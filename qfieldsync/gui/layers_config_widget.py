@@ -237,10 +237,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
     def propertiesBtn_clicked(self, layer_source: LayerSource) -> Callable:
         def clicked_callback() -> None:
-            if Qgis.QGIS_VERSION_INT >= 31900:
-                iface.showLayerProperties(layer_source.layer, "QFieldLayerSettingsPage")
-            else:
-                iface.showLayerProperties(layer_source.layer)
+            iface.showLayerProperties(layer_source.layer, "QFieldLayerSettingsPage")
 
         return clicked_callback
 
