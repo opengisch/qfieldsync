@@ -48,7 +48,7 @@ def closure(cb):
     return wrapper
 
 
-def local_dir_feedback(  # noqa: PLR0913
+def local_dir_feedback(  # noqa: PLR0913, PLR0911
     local_dir: str,
     no_path_status: LocalDirFeedback = LocalDirFeedback.Error,
     not_dir_status: LocalDirFeedback = LocalDirFeedback.Error,

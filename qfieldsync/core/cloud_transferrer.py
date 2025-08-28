@@ -811,7 +811,7 @@ class TransferFileLogsModel(QAbstractListModel):
     def index(self, row: int, col: int, _index: QModelIndex) -> QModelIndex:
         return self.createIndex(row, col)
 
-    def _data_string(self, transfer: FileTransfer) -> str:
+    def _data_string(self, transfer: FileTransfer) -> str:  # noqa: PLR0911
         error_msg = ""
         if transfer.is_failed:
             error_msg = (

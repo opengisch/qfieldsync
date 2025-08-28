@@ -891,7 +891,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.update_detail(item)
 
-    def project_file_action(self, item: QTreeWidgetItem) -> ProjectFileAction:
+    def project_file_action(self, item: QTreeWidgetItem) -> ProjectFileAction:  # noqa: PLR0911
         project_file = item.data(0, Qt.ItemDataRole.UserRole)
         is_local_enabled = project_file.local_path_exists
         is_cloud_enabled = project_file.checkout & ProjectFileCheckout.Cloud
