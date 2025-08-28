@@ -74,7 +74,7 @@ class QFieldSyncOptionsFactory(QgsOptionsWidgetFactory):
         return PreferencesWidget(self.qfieldSync, parent)
 
 
-class QFieldSync(object):
+class QFieldSync:
     """QGIS Plugin Implementation."""
 
     QFIELD_SCOPE = "QFieldSync"

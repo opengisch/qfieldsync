@@ -82,7 +82,7 @@ CloudProjectsDialogUi, _ = loadUiType(
 )
 
 
-class WindowsIconFixWorkDir(object):
+class WindowsIconFixWorkDir:
     """Workaround for older QT (M$ QGIS <3.16.5) to make the custom icons load with relative path."""
 
     def __init__(self, path):
