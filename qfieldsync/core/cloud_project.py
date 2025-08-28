@@ -41,7 +41,8 @@ class ProjectFileCheckout(IntFlag):
 
 
 def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> str:
-    """Calculate ETag as in Object Storage (S3) of a local file.
+    """
+    Calculate ETag as in Object Storage (S3) of a local file.
 
     ETag is a MD5. But for the multipart uploaded files, the MD5 is computed from the concatenation of the MD5s of each uploaded part.
 

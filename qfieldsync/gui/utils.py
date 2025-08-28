@@ -22,7 +22,8 @@
 
 
 def set_available_actions(combobox, actions, default_action):
-    """Sets available actions on a checkbox and selects the current one.
+    """
+    Sets available actions on a checkbox and selects the current one.
 
     Args:
         combobox (QComboBox): target combobox

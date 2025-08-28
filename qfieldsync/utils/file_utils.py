@@ -68,7 +68,8 @@ def mkdir(
     parents: bool = False,
     exist_ok: bool = False,
 ) -> None:
-    """Create a directory at a given path and explicitly assign write permissions to make Windows happy.
+    """
+    Create a directory at a given path and explicitly assign write permissions to make Windows happy.
 
     This function mimics the API of `Path.mkdir`.
 

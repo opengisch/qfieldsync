@@ -82,7 +82,8 @@ class QFieldSync:
     push_dlg = None
 
     def __init__(self, iface):
-        """Constructor.
+        """
+        Constructor.
 
         :param iface: An interface instance that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
@@ -153,7 +154,8 @@ class QFieldSync:
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
-        """Get the translation for a string using Qt translation API.
+        """
+        Get the translation for a string using Qt translation API.
 
         We implement this ourselves since we do not inherit QObject.
 
@@ -179,7 +181,8 @@ class QFieldSync:
         parent=None,
         separator_before: bool = False,
     ):
-        """Add a toolbar icon to the toolbar.
+        """
+        Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
             path (e.g. ':/plugins/foo/bar.png') or a normal file system path.

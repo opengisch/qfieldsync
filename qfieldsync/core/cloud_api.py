@@ -885,7 +885,8 @@ class CloudProjectsCache(QObject):
 
     @property
     def is_currently_open_project_cloud_local(self) -> bool:
-        """Checks whether the currently opened QGIS project is a configured cloud project.
+        """
+        Checks whether the currently opened QGIS project is a configured cloud project.
 
         NOTE there is a difference with `currently_opened_project()`, as this method does not
         depend on downloaded project list.
@@ -909,7 +910,8 @@ class CloudProjectsCache(QObject):
 
     @property
     def currently_open_project(self) -> Optional[CloudProject]:
-        """Returns the associated `CloudProject` instance of the currently opened QGIS project.
+        """
+        Returns the associated `CloudProject` instance of the currently opened QGIS project.
         If the cloud project list is not present, or the current project has no
         associated cloud project, return `None`.
 
@@ -963,7 +965,8 @@ class CloudProjectsCache(QObject):
         return self._projects_reply
 
     def refresh_not_async(self) -> None:
-        """Projects are requested in synchronous manner.
+        """
+        Projects are requested in synchronous manner.
         The function name is cumbersome to discourage it's potential user.
         Better use `refresh()`
         """

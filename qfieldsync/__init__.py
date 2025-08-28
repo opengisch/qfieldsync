@@ -48,7 +48,8 @@ for module_name in module_names:
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
-    """Load QFieldSync class from file QFieldSync.
+    """
+    Load QFieldSync class from file QFieldSync.
 
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
