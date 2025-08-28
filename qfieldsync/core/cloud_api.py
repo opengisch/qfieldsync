@@ -76,11 +76,8 @@ class disable_nam_timeout:  # noqa: N801
 
     def __enter__(self):
         self.timeout = self.nam.timeout()
-        if Qgis.QGIS_VERSION_INT >= 31800:
-            self.nam.setTimeout(0)
-        else:
-            # Set it to ridiculously big timeout of 24h.
-            self.nam.setTimeout(60 * 60 * 24)
+        # disable timeouts
+        self.nam.setTimeout(0)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.nam.setTimeout(self.timeout)
