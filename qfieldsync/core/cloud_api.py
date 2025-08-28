@@ -57,6 +57,13 @@ from qfieldsync.utils.qt_utils import strip_html
 
 LOCALIZED_DATASETS_PROJECT_NAME = "shared_datasets"
 
+MAX_CHARS_TO_SHOW_HTTP_ERROR = 500
+HTTP_301 = 301
+HTTP_308 = 308
+HTTP_400 = 400
+HTTP_401 = 401
+HTTP_500 = 500
+
 
 class QfcError(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
@@ -104,7 +111,7 @@ def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
             if payload:
                 message = payload[:500]
 
-                if len(payload) > 500:
+                if len(payload) > MAX_CHARS_TO_SHOW_HTTP_ERROR:
                     message += "…"
     except Exception as err:
         QgsMessageLog.logMessage(
@@ -158,7 +165,7 @@ class CloudNetworkAccessManager(QObject):
 
         error = from_reply(reply)
         if error:
-            if error.httpCode == 401 and not self.is_login_active:
+            if error.httpCode == HTTP_401 and not self.is_login_active:
                 self.set_token("", True)
                 self.logout_success.emit()
             raise error
@@ -476,7 +483,7 @@ class CloudNetworkAccessManager(QObject):
         self, reply: QNetworkReply, local_filename: str
     ) -> None:
         http_code = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
-        if http_code is not None and http_code >= 301 and http_code <= 308:
+        if http_code is not None and http_code >= HTTP_301 and http_code <= HTTP_308:
             # redirects should not be saved as files, just ignore them
             return
 
@@ -740,9 +747,11 @@ class CloudNetworkAccessManager(QObject):
             else:
                 http_code = self._login_error.httpCode
 
-                if http_code and http_code >= 500:
+                if http_code and http_code >= HTTP_500:
                     error_str = self.tr("Server error {}").format(http_code)
-                elif http_code is None or (http_code >= 400 and http_code < 500):
+                elif http_code is None or (
+                    http_code >= HTTP_400 and http_code < HTTP_500
+                ):
                     error_str = str(self._login_error)
 
         error_str = strip_html(error_str).strip()
