@@ -291,7 +291,6 @@ class CloudNetworkAccessManager(QObject):
 
     def logout(self) -> QNetworkReply:
         """Logout to QFieldCloud"""
-
         reply = self.cloud_post("auth/logout/")
         reply.finished.connect(lambda: self._on_logout_finished(reply))
 
@@ -320,7 +319,6 @@ class CloudNetworkAccessManager(QObject):
         self, name: str, owner: str, description: str, private: bool
     ) -> QNetworkReply:
         """Create a new QFieldCloud project"""
-
         return self.cloud_post(
             "projects/",
             {
@@ -335,7 +333,6 @@ class CloudNetworkAccessManager(QObject):
         self, project_id: str, name: str, description: str
     ) -> QNetworkReply:
         """Update an existing QFieldCloud project"""
-
         return self.cloud_patch(
             ["projects", project_id],
             {
@@ -346,17 +343,14 @@ class CloudNetworkAccessManager(QObject):
 
     def delete_project(self, project_id: str) -> QNetworkReply:
         """Delete an existing QFieldCloud project"""
-
         return self.cloud_delete(["projects", project_id])
 
     def get_user_organizations(self, username: str) -> QNetworkReply:
         """Gets the available projects for the owner dropdown menu"""
-
         return self.cloud_get(["users", username, "organizations"])
 
     def get_files(self, project_id: str, client: str = "qgis") -> QNetworkReply:
         """Get project files and their versions"""
-
         return self.cloud_get(
             ["files", project_id],
             {
@@ -367,7 +361,6 @@ class CloudNetworkAccessManager(QObject):
 
     def get_file(self, url: QUrl, local_filename: str) -> QNetworkReply:
         """Download file from external URL"""
-
         return self.cloud_get(url, local_filename=local_filename)
 
     def delete_file(self, filename: str) -> QNetworkReply:

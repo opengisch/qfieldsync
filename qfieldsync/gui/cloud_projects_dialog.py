@@ -737,7 +737,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             ask should that project be opened
         ```
         """
-
         local_dir = None
         initial_path = (
             self.localDirLineEdit.text()

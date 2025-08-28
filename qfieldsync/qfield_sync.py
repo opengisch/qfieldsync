@@ -222,7 +222,6 @@ class QFieldSync:
             added to self.actions list.
         :rtype: QAction
         """
-
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -250,7 +249,6 @@ class QFieldSync:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
         self.cloud_projects_overview_action = self.add_action(
             os.path.join(os.path.dirname(__file__), "./resources/cloud.svg"),
             text=self.tr("QFieldCloud Projects Overview"),

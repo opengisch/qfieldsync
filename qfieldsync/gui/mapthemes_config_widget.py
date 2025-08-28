@@ -45,7 +45,6 @@ class MapThemesConfigWidget(QTableWidget):
 
     def reload(self, configuration):
         """Load map themes into table."""
-
         self.setRowCount(0)
         self.setSortingEnabled(False)
         map_themes = self.project.mapThemeCollection().mapThemes()

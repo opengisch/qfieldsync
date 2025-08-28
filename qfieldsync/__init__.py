@@ -54,7 +54,6 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-
     from qfieldsync.qfield_sync import QFieldSync
 
     return QFieldSync(iface)

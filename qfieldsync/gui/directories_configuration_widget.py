@@ -70,7 +70,6 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
 
     def reload(self, configuration):
         """Load directories into table."""
-
         self.directoriesTable.setRowCount(0)
         if "attachment_dirs" in configuration:
             for attachment_dir in configuration["attachment_dirs"]:

@@ -52,7 +52,6 @@ class CloudConverter(QObject):
 
     def convert(self) -> None:  # noqa: C901
         """Convert the project to a cloud project."""
-
         original_project_path = self.project.fileName()
         project_path = self.export_dirname.joinpath(
             f"{self.project.baseName()}_cloud.qgs"
