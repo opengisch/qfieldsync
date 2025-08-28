@@ -755,7 +755,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 )
 
                 if local_dir == "":
-                    return
+                    return None
 
                 feedback, feedback_msg = local_dir_feedback(
                     local_dir, no_project_status=LocalDirFeedback.Warning
@@ -787,7 +787,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 )
 
                 if local_dir == "":
-                    return
+                    return None
 
                 # when the dir is empty, all is good. But if not there are some file, we need to ask the user to confirm what to do
                 if list(Path(local_dir).iterdir()):

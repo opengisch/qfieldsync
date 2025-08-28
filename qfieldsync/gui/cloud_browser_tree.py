@@ -58,7 +58,7 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
             root_item = QFieldCloudRootItem(self.network_manager)
             return root_item
         else:
-            return
+            return None
 
 
 class QFieldCloudRootItem(QgsDataCollectionItem):

@@ -104,14 +104,14 @@ class ProjectFile:
     @property
     def created_at(self) -> Optional[str]:
         if not self.versions:
-            return
+            return None
 
         return self.versions[-1].get("last_modified")
 
     @property
     def updated_at(self) -> Optional[str]:
         if not self.versions:
-            return
+            return None
 
         return self.versions[0].get("last_modified")
 
@@ -148,7 +148,7 @@ class ProjectFile:
     @property
     def local_size(self) -> Optional[int]:
         if not self.local_path_exists:
-            return
+            return None
 
         assert self.local_path
 
@@ -161,7 +161,7 @@ class ProjectFile:
     @property
     def local_path(self) -> Optional[Path]:
         if not self._local_dir:
-            return
+            return None
 
         return Path(self._local_dir + "/" + self.name)
 
@@ -175,7 +175,7 @@ class ProjectFile:
     @property
     def local_sha256(self) -> Optional[str]:
         if not self.local_path_exists:
-            return
+            return None
 
         assert self.local_path
         assert self.local_path.is_file()
@@ -186,7 +186,7 @@ class ProjectFile:
     @property
     def local_etag(self) -> Optional[str]:
         if not self.local_path_exists:
-            return
+            return None
 
         assert self.local_path
         assert self.local_path.is_file()

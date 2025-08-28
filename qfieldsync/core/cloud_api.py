@@ -270,7 +270,7 @@ class CloudNetworkAccessManager(QObject):
         """Login to QFieldCloud"""
         # don't login multiple times
         if self.is_login_active:
-            return
+            return None
 
         self.is_login_active = True
 
@@ -914,7 +914,7 @@ class CloudProjectsCache(QObject):
         project_dir = QgsProject.instance().homePath()
 
         if not self.projects:
-            return
+            return None
 
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
@@ -988,7 +988,7 @@ class CloudProjectsCache(QObject):
 
     def find_project(self, project_id: str) -> Optional[CloudProject]:
         if not self._projects or not project_id:
-            return
+            return None
 
         for project in self._projects:
             if project.id == project_id:
