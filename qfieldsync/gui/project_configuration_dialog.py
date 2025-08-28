@@ -28,7 +28,7 @@ class ProjectConfigurationDialog(QDialog):
 
     def __init__(self, parent=None):
         """Constructor."""
-        super(ProjectConfigurationDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.setMinimumWidth(500)
         QgsGui.instance().enableAutoGeometryRestore(self)

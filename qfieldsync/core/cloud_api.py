@@ -60,7 +60,7 @@ LOCALIZED_DATASETS_PROJECT_NAME = "shared_datasets"
 
 class CloudException(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
-        super(CloudException, self).__init__(exception)
+        super().__init__(exception)
         self.reply = reply
         self.parent = exception
         self.httpCode = reply.attribute(
@@ -134,7 +134,7 @@ class CloudNetworkAccessManager(QObject):
 
     def __init__(self, parent=None) -> None:
         """Constructor."""
-        super(CloudNetworkAccessManager, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.preferences = Preferences()
         self.url = ""
@@ -859,7 +859,7 @@ class CloudProjectsCache(QObject):
     project_files_error = pyqtSignal(str, str)
 
     def __init__(self, network_manager: CloudNetworkAccessManager, parent=None) -> None:
-        super(CloudProjectsCache, self).__init__(parent)
+        super().__init__(parent)
 
         self.preferences = Preferences()
         self.network_manager = network_manager

@@ -71,7 +71,7 @@ class PackageDialog(QDialog, DialogUi):
 
     def __init__(self, iface, project, offline_editing, parent=None):
         """Constructor."""
-        super(PackageDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
 
         self.iface = iface

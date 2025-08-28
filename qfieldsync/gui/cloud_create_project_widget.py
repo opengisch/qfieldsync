@@ -71,7 +71,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         parent: QWidget,
     ) -> None:
         """Constructor."""
-        super(CloudCreateProjectWidget, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
 
         self.cloud_projects_dialog = parent

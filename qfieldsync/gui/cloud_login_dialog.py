@@ -76,7 +76,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self, network_manager: CloudNetworkAccessManager, parent: QWidget = None
     ) -> None:
         """Constructor."""
-        super(CloudLoginDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
         self.preferences = Preferences()
         self.network_manager = network_manager

@@ -61,7 +61,7 @@ class CloudTransferrer(QObject):
         cloud_project: CloudProject,
         localized_datasets_project: Optional[CloudProject] = None,
     ) -> None:
-        super(CloudTransferrer, self).__init__(parent=None)
+        super().__init__(parent=None)
         assert cloud_project.local_dir
 
         self.network_manager = network_manager
@@ -786,7 +786,7 @@ class TransferFileLogsModel(QAbstractListModel):
     def __init__(
         self, transferrers: List[ThrottledFileTransferrer], parent: QObject = None
     ):
-        super(TransferFileLogsModel, self).__init__()
+        super().__init__()
         self.transfers: List[FileTransfer] = []
         self.filename_to_index: Dict[str, int] = {}
 

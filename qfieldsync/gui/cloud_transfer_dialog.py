@@ -111,7 +111,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         parent: Optional[QWidget] = None,
     ) -> None:
         """Constructor."""
-        super(CloudTransferDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
 
         self.preferences = Preferences()

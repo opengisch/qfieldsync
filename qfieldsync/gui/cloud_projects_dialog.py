@@ -106,7 +106,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         project: CloudProject = None,
     ) -> None:
         """Constructor."""
-        super(CloudProjectsDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         with WindowsIconFixWorkDir(Path(__file__).parent.parent.joinpath("ui")):
             self.setupUi(self)

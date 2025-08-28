@@ -28,7 +28,7 @@ from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
 
 class AttachmentNamingTableWidget(QTableWidget):
     def __init__(self):
-        super(AttachmentNamingTableWidget, self).__init__()
+        super().__init__()
 
         self.setColumnCount(3)
         self.setHorizontalHeaderLabels(

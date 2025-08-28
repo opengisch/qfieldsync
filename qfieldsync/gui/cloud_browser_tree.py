@@ -148,7 +148,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
     """QFieldCloud group data item."""
 
     def __init__(self, parent, name, project_type, icon, order):
-        super(QFieldCloudGroupItem, self).__init__(parent, name, "/QFieldCloud/" + name)
+        super().__init__(parent, name, "/QFieldCloud/" + name)
 
         self.network_manager = parent.network_manager
         self.project_type = project_type
@@ -184,7 +184,7 @@ class QFieldCloudProjectItem(QgsDataItem):
     """QFieldCloud project item."""
 
     def __init__(self, parent, project):
-        super(QFieldCloudProjectItem, self).__init__(
+        super().__init__(
             QgsDataItem.Collection,
             parent,
             project.name,

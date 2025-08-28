@@ -49,7 +49,7 @@ LayersConfigWidgetUi, _ = loadUiType(
 class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
     def __init__(self, project, use_cloud_actions, layer_sources, parent=None):
         """Constructor."""
-        super(LayersConfigWidget, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
 
         self.project = project

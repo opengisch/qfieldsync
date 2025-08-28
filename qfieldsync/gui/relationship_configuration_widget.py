@@ -28,7 +28,7 @@ from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
 
 class RelationshipConfigurationTableWidget(QTableWidget):
     def __init__(self):
-        super(RelationshipConfigurationTableWidget, self).__init__()
+        super().__init__()
 
         self.setColumnCount(4)
         self.setHorizontalHeaderLabels(

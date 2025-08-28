@@ -40,7 +40,7 @@ WidgetUi, _ = loadUiType(
 
 class MapLayerConfigWidgetFactory(QgsMapLayerConfigWidgetFactory):
     def __init__(self, title, icon):
-        super(MapLayerConfigWidgetFactory, self).__init__(title, icon)
+        super().__init__(title, icon)
 
     def createWidget(self, layer, canvas, dock_widget, parent):
         return MapLayerConfigWidget(layer, canvas, parent)
@@ -59,7 +59,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
     PROPERTY_FEATURE_DELETION_LOCKED = 4
 
     def __init__(self, layer, canvas, parent):
-        super(MapLayerConfigWidget, self).__init__(layer, canvas, parent)
+        super().__init__(layer, canvas, parent)
         self.setupUi(self)
         self.layer_source = LayerSource(layer)
         self.project = QgsProject.instance()
