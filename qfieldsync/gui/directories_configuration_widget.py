@@ -96,7 +96,7 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
 
         return configuration
 
-    def _add_directory_row(self, name="", typeIndex=0, editRow=False):
+    def _add_directory_row(self, name="", type_index=0, can_edit_row=False):
         count = self.directoriesTable.rowCount()
         self.directoriesTable.insertRow(count)
 
@@ -107,9 +107,9 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         cmb = QComboBox()
         cmb.addItem(self.tr("Attachments"))
         cmb.addItem(self.tr("Data"))
-        cmb.setCurrentIndex(typeIndex)
+        cmb.setCurrentIndex(type_index)
         self.directoriesTable.setCellWidget(count, 1, cmb)
-        if editRow:
+        if can_edit_row:
             self.directoriesTable.editItem(item)
 
     def _on_add_button_clicked(self):

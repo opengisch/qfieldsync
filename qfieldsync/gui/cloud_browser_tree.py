@@ -53,8 +53,8 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
     def capabilities(self):
         return QgsDataProvider.Net
 
-    def createDataItem(self, _path, parentItem):  # noqa: N802
-        if not parentItem:
+    def createDataItem(self, _path, parent):  # noqa: N802
+        if not parent:
             root_item = QFieldCloudRootItem(self.network_manager)
             return root_item
         else:
@@ -213,7 +213,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def name(self):
         return "QFieldCloudItemGuiProvider"
 
-    def populateContextMenu(self, item, menu, _selectedItems, _context):  # noqa: N802
+    def populateContextMenu(self, item, menu, _selected_items, _context):  # noqa: N802
         if type(item) is QFieldCloudProjectItem:
             project = self.network_manager.projects_cache.find_project(item.project_id)
             if project and project.local_dir:

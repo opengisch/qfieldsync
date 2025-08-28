@@ -437,7 +437,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.get(request)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         if local_filename is not None:
@@ -467,7 +467,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.get(request)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         if local_filename is not None:
@@ -514,7 +514,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, payload_bytes)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
@@ -541,7 +541,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.put(request, payload_bytes)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
@@ -568,7 +568,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.sendCustomRequest(request, b"PATCH", payload_bytes)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
@@ -591,7 +591,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.deleteResource(request)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
@@ -650,7 +650,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, multi_part)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
         multi_part.setParent(reply)
 
