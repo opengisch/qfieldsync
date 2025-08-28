@@ -184,7 +184,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
     def reloadProject(self):
         """Load all layers from the map layer registry into the table."""
-        self.unsupportedLayersList = list()
+        self.unsupportedLayersList = []
 
         layer_sources = [
             LayerSource(layer) for layer in QgsProject.instance().mapLayers().values()

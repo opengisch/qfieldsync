@@ -43,7 +43,7 @@ class CloudConverter(QObject):
     ):
         super(CloudConverter, self).__init__(parent=None)
         self.project = project
-        self.__layers = list()
+        self.__layers = []
 
         # elipsis workaround
         self.trUtf8 = self.tr
@@ -125,7 +125,7 @@ class CloudConverter(QObject):
                             self.project.removeMapLayer(layer)
                             continue
                 else:
-                    layer_source.copy(self.export_dirname, list())
+                    layer_source.copy(self.export_dirname, [])
                 layer.setCustomProperty(
                     "QFieldSync/cloud_action", layer_source.default_cloud_action
                 )

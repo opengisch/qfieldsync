@@ -123,7 +123,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
             self.horizontalLayout.addWidget(self.settingsPackagingButton)
 
-        self.unsupportedLayersList = list()
+        self.unsupportedLayersList = []
 
         self._on_message_bus_messaged_wrapper = (
             lambda msg: self._on_message_bus_messaged(msg)
@@ -161,7 +161,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
     def reloadProject(self):
         """Load all layers from the map layer registry into the table."""
-        self.unsupportedLayersList = list()
+        self.unsupportedLayersList = []
 
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
