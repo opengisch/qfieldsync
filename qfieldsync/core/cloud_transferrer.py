@@ -483,7 +483,7 @@ class FileTransfer(QObject):
         type: Type,
         file: ProjectFile,
         destination: Path,
-        version: str = None,
+        version: Optional[str] = None,
     ) -> None:
         super(QObject, self).__init__()
 

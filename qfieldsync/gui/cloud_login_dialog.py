@@ -20,7 +20,7 @@
  ***************************************************************************/
 """
 import os
-from typing import Callable
+from typing import Callable, Optional
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
@@ -47,8 +47,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     @staticmethod
     def show_auth_dialog(
         network_manager: CloudNetworkAccessManager,
-        accepted_cb: Callable = None,
-        rejected_cb: Callable = None,
+        accepted_cb: Optional[Callable] = None,
+        rejected_cb: Optional[Callable] = None,
         parent: QWidget = None,
     ):
         if CloudLoginDialog.instance:

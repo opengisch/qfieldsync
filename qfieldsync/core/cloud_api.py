@@ -393,7 +393,7 @@ class CloudNetworkAccessManager(QObject):
         self,
         uri: Union[str, List[str], QUrl],
         params: Dict[str, Any] = {},
-        local_filename: str = None,
+        local_filename: Optional[str] = None,
         skip_cache: bool = False,
     ) -> QNetworkReply:
         """Issues a GET HTTP request"""
@@ -450,7 +450,7 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def get(
-        self, url: QUrl, local_filename: str = None, skip_cache: bool = False
+        self, url: QUrl, local_filename: Optional[str] = None, skip_cache: bool = False
     ) -> QNetworkReply:
         request = QNetworkRequest(url)
         request.setAttribute(
@@ -493,7 +493,7 @@ class CloudNetworkAccessManager(QObject):
             ), 'Error while writing to file "{}"'.format(local_filename)
 
     def cloud_post(
-        self, uri: Union[str, List[str]], payload: Dict = None
+        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -520,7 +520,7 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def cloud_put(
-        self, uri: Union[str, List[str]], payload: Dict = None
+        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -547,7 +547,7 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def cloud_patch(
-        self, uri: Union[str, List[str]], payload: Dict = None
+        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -597,7 +597,10 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def cloud_upload_files(
-        self, uri: Union[str, List[str]], filenames: List[str], payload: Dict = None
+        self,
+        uri: Union[str, List[str]],
+        filenames: List[str],
+        payload: Optional[Dict] = None,
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -1029,7 +1032,7 @@ class CloudProjectsCache(QObject):
         self.projects_updated.emit()
 
     def _on_get_project_files_reply_finished(
-        self, reply: QNetworkReply, project_id: str = None
+        self, reply: QNetworkReply, project_id: Optional[str] = None
     ) -> None:
         assert project_id
 
