@@ -57,7 +57,7 @@ class MapThemesConfigWidget(QTableWidget):
 
             cmb = QgsMapLayerComboBox()
             cmb.setAllowEmptyLayer(True)
-            if Qgis.QGIS_VERSION_INT >= 32400:
+            if Qgis.versionInt() >= 32400:
                 cmb.setProject(self.project)
             cmb.setFilters(QgsMapLayerProxyModel.VectorLayer)
             if map_theme in configuration:

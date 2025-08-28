@@ -211,7 +211,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.digitizingLogsLayerComboBox.setFilters(QgsMapLayerProxyModel.PointLayer)
         self.digitizingLogsLayerComboBox.setAllowEmptyLayer(True)
 
-        if Qgis.QGIS_VERSION_INT >= 32400:
+        if Qgis.versionInt() >= 32400:
             self.layerComboBox.setProject(self.project)
             self.geofencingLayerComboBox.setProject(self.project)
             self.digitizingLogsLayerComboBox.setProject(self.project)
