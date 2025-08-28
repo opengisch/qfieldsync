@@ -386,7 +386,7 @@ class QFieldSync:
         else:
             self.show_cloud_synchronize_dialog()
 
-    def show_cloud_synchronize_dialog(self, firstTry=True):
+    def show_cloud_synchronize_dialog(self, _firstTry=True):
         """Synchornize cloud project."""
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.transfer_dialog = CloudTransferDialog.show_transfer_dialog(

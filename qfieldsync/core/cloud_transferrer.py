@@ -225,13 +225,13 @@ class CloudTransferrer(QObject):
         self.throttled_uploader.transfer()
 
     def _on_throttled_localized_datasets_upload_progress(
-        self, filename: str, bytes_transferred: int, _bytes_total: int
+        self, _filename: str, bytes_transferred: int, _bytes_total: int
     ) -> None:
         fraction = min(bytes_transferred / max(self.total_upload_bytes, 1), 1)
         self.localized_datasets_upload_progress.emit(fraction)
 
     def _on_throttled_localized_datasets_upload_error(
-        self, filename: str, error: str
+        self, _filename: str, _error: str
     ) -> None:
         self.throttled_uploader_for_localized_datasets.abort()
 
@@ -240,12 +240,12 @@ class CloudTransferrer(QObject):
         self.localized_datasets_upload_finished.emit()
 
     def _on_throttled_upload_progress(
-        self, filename: str, bytes_transferred: int, _bytes_total: int
+        self, _filename: str, bytes_transferred: int, _bytes_total: int
     ) -> None:
         fraction = min(bytes_transferred / max(self.total_upload_bytes, 1), 1)
         self.upload_progress.emit(fraction)
 
-    def _on_throttled_upload_error(self, filename: str, error: str) -> None:
+    def _on_throttled_upload_error(self, _filename: str, _error: str) -> None:
         self.throttled_uploader.abort()
 
     def _on_throttled_upload_finished(self) -> None:
@@ -273,7 +273,7 @@ class CloudTransferrer(QObject):
         if self.delete_files_finished == len(self._files_to_delete):
             self.delete_finished.emit()
 
-    def _on_throttled_delete_error(self, filename: str, error: str) -> None:
+    def _on_throttled_delete_error(self, _filename: str, _error: str) -> None:
         self.throttled_deleter.abort()
 
     def _on_throttled_delete_finished(self) -> None:
@@ -299,12 +299,12 @@ class CloudTransferrer(QObject):
         self.throttled_downloader.transfer()
 
     def _on_throttled_download_progress(
-        self, filename: str, bytes_transferred: int, _bytes_total: int
+        self, _filename: str, bytes_transferred: int, _bytes_total: int
     ) -> None:
         fraction = min(bytes_transferred / max(self.total_download_bytes, 1), 1)
         self.download_progress.emit(fraction)
 
-    def _on_throttled_download_error(self, filename: str, error: str) -> None:
+    def _on_throttled_download_error(self, _filename: str, _error: str) -> None:
         self.throttled_downloader.abort()
 
     def _on_throttled_download_finished(self) -> None:
@@ -744,7 +744,7 @@ class ThrottledFileTransferrer(QObject):
 
         self.aborted.emit()
 
-    def _on_transfer_progress(self, transfer, bytes_received: int, bytes_total: int):
+    def _on_transfer_progress(self, transfer, _bytes_received: int, _bytes_total: int):
         bytes_received_sum = sum([t.bytes_transferred for t in self.transfers.values()])
         bytes_total_sum = sum([t.bytes_total for t in self.transfers.values()])
         self.progress.emit(transfer.filename, bytes_received_sum, bytes_total_sum)
@@ -783,7 +783,7 @@ class TransferFileLogsModel(QAbstractListModel):
     def __init__(
         self, transferrers: List[ThrottledFileTransferrer], parent: QObject = None
     ):
-        super().__init__()
+        super().__init__(parent)
         self.transfers: List[FileTransfer] = []
         self.filename_to_index: Dict[str, int] = {}
 
@@ -796,7 +796,7 @@ class TransferFileLogsModel(QAbstractListModel):
             transferrer.error.connect(self._on_updated_transfer)
             transferrer.progress.connect(self._on_updated_transfer)
 
-    def rowCount(self, parent: QModelIndex) -> int:
+    def rowCount(self, parent: QModelIndex) -> int:  # noqa: ARG002
         return len(self.transfers)
 
     def data(self, index: QModelIndex, role: int) -> Any:
@@ -912,7 +912,7 @@ class TransferFileLogsModel(QAbstractListModel):
         else:
             raise NotImplementedError("Unknown transfer type")
 
-    def _on_updated_transfer(self, filename, *args) -> None:
+    def _on_updated_transfer(self, filename, *_args) -> None:
         row = self.filename_to_index[filename]
         index = self.createIndex(row, 0)
 

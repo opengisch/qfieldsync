@@ -363,7 +363,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.projectOwnerComboBox.setEnabled(True)
         self.projectOwnerRefreshButton.setEnabled(True)
 
-    def on_update_total_progressbar(self, current, layer_count, message):
+    def on_update_total_progressbar(self, current, layer_count, _message):
         self.convertProgressBar.setMaximum(layer_count)
         self.convertProgressBar.setValue(current)
 
@@ -435,7 +435,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.set_dirname(dirname)
             self.localDirLineEdit.setText(str(Path(dirname)))
 
-    def on_dirname_line_edit_text_changed(self, text: str):
+    def on_dirname_line_edit_text_changed(self, _text: str):
         local_dir = self.localDirLineEdit.text()
         self.localDirOpenButton.setEnabled(bool(local_dir) and Path(local_dir).exists())
         self.set_dirname(local_dir)

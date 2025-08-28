@@ -53,7 +53,7 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
     def capabilities(self):
         return QgsDataProvider.Net
 
-    def createDataItem(self, path, parentItem):
+    def createDataItem(self, _path, parentItem):
         if not parentItem:
             root_item = QFieldCloudRootItem(self.network_manager)
             return root_item
@@ -213,7 +213,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def name(self):
         return "QFieldCloudItemGuiProvider"
 
-    def populateContextMenu(self, item, menu, selectedItems, context):
+    def populateContextMenu(self, item, menu, _selectedItems, _context):
         if type(item) is QFieldCloudProjectItem:
             project = self.network_manager.projects_cache.find_project(item.project_id)
             if project and project.local_dir:
@@ -258,7 +258,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             )
             refresh_action.triggered.connect(self._on_refresh_projects_action_triggered)
 
-    def handleDoubleClick(self, item, context):
+    def handleDoubleClick(self, item, context):  # noqa: ARG002
         if type(item) is QFieldCloudProjectItem:
             if not self.open_project(item):
                 self.show_cloud_synchronize_dialog(item)

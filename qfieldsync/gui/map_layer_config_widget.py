@@ -42,7 +42,7 @@ class MapLayerConfigWidgetFactory(QgsMapLayerConfigWidgetFactory):
     def __init__(self, title, icon):
         super().__init__(title, icon)
 
-    def createWidget(self, layer, canvas, dock_widget, parent):
+    def createWidget(self, layer, canvas, _dock_widget, parent):
         return MapLayerConfigWidget(layer, canvas, parent)
 
     def supportsLayer(self, layer):

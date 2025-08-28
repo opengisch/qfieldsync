@@ -466,7 +466,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
         self.openPanel(self.image_stamping_panel)
 
-    def apply_image_stamping_settings(self, panel):
+    def apply_image_stamping_settings(self, _panel):
         self.stamping_font_style = self.image_stamping_panel.font_style()
         self.stamping_horizontal_alignment = (
             self.image_stamping_panel.horizontal_alignment()

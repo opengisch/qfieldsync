@@ -329,7 +329,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projects_refreshed.emit()
         self.show_projects()
 
-    def on_projects_cached_project_files_started(self, project_id: str) -> None:
+    def on_projects_cached_project_files_started(self, _project_id: str) -> None:
         self.projectFilesTab.setEnabled(False)
         self.set_feedback(None)
 

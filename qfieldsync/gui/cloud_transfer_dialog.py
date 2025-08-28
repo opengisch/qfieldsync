@@ -844,7 +844,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.update_detail(item)
 
-    def on_error(self, descr: str, error: Exception = None) -> None:
+    def on_error(self, descr: str, _error: Exception = None) -> None:
         self.errorLabel.setVisible(True)
         self.errorLabel.setText(self.errorLabel.text() + "\n" + descr)
 
