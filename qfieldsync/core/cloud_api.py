@@ -833,25 +833,6 @@ class CloudNetworkAccessManager(QObject):
             self._nam.cookieJar().deleteCookie(cookie)
 
 
-class CloudReply:
-    finished = pyqtSignal()
-    sslErrors = pyqtSignal()
-    projects_error = pyqtSignal(str)
-    downloadProgress = pyqtSignal(int, int)
-    encrypted = pyqtSignal()
-    errorOccurred = pyqtSignal(QNetworkReply.NetworkError)
-    finished = pyqtSignal()
-    metaDataChanged = pyqtSignal()
-    preSharedKeyAuthenticationRequired = pyqtSignal(QSslPreSharedKeyAuthenticator)
-    redirectAllowed = pyqtSignal()
-    redirected = pyqtSignal(QUrl)
-    sslErrors = pyqtSignal(list)
-    uploadProgress = pyqtSignal(int, int)
-
-    def __init__(self, reply: QNetworkReply):
-        self.rawReply: QNetworkReply = reply
-
-
 class CloudProjectsCache(QObject):
     projects_started = pyqtSignal()
     projects_updated = pyqtSignal()
