@@ -48,7 +48,6 @@ from qgis.PyQt.QtNetwork import (
     QHttpPart,
     QNetworkReply,
     QNetworkRequest,
-    QSslPreSharedKeyAuthenticator,
 )
 
 from qfieldsync.core.cloud_project import CloudProject

@@ -22,7 +22,7 @@
 
 import os
 
-from qgis.core import Qgis, QgsApplication, QgsOfflineEditing, QgsProject
+from qgis.core import QgsApplication, QgsOfflineEditing, QgsProject
 from qgis.gui import QgsGui, QgsOptionsWidgetFactory
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QSettings, Qt, QTranslator
 from qgis.PyQt.QtGui import QIcon
@@ -40,7 +40,6 @@ from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 from qfieldsync.gui.package_dialog import PackageDialog
 from qfieldsync.gui.preferences_widget import PreferencesWidget
-from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.gui.project_configuration_widget import ProjectConfigurationStackWidget
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 

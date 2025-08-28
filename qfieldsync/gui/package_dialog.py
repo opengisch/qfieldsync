@@ -57,7 +57,6 @@ from qgis.PyQt.uic import loadUiType
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
-from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 
 MAX_LENGTH_CHARS_FILEPATH = 200
 

@@ -23,7 +23,7 @@ import os
 from typing import Callable
 
 from libqfieldsync.layer import LayerSource, SyncAction
-from qgis.core import Qgis, QgsApplication, QgsMapLayerModel, QgsProject
+from qgis.core import QgsApplication, QgsMapLayerModel, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
