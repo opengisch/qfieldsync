@@ -46,9 +46,7 @@ from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 
 
 class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
-    """
-    Factory class for QFieldSync project properties widget
-    """
+    """Factory class for QFieldSync project properties widget"""
 
     def __init__(self):
         super().__init__()
@@ -373,9 +371,7 @@ class QFieldSync(object):
         )
 
     def show_synchronize_dialog(self):
-        """
-        Synchronize from QField
-        """
+        """Synchronize from QField"""
         dlg = SynchronizeDialog(
             self.iface, self.offline_editing, self.iface.mainWindow()
         )
@@ -390,9 +386,7 @@ class QFieldSync(object):
             self.show_cloud_synchronize_dialog()
 
     def show_cloud_synchronize_dialog(self, firstTry=True):
-        """
-        Synchornize cloud project.
-        """
+        """Synchornize cloud project."""
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.transfer_dialog = CloudTransferDialog.show_transfer_dialog(
                 self.network_manager,
@@ -403,9 +397,7 @@ class QFieldSync(object):
             )
 
     def show_package_dialog(self):
-        """
-        Package to QField
-        """
+        """Package to QField"""
         self.push_dlg = PackageDialog(
             self.iface,
             QgsProject.instance(),
@@ -420,9 +412,7 @@ class QFieldSync(object):
         self.update_action_enabled_status()
 
     def show_project_configuration_dialog(self):
-        """
-        Show the project configuration dialog.
-        """
+        """Show the project configuration dialog."""
         if Qgis.QGIS_VERSION_INT >= 31500:
             self.iface.showProjectPropertiesDialog("QField")
         else:
@@ -430,16 +420,12 @@ class QFieldSync(object):
             dlg.show()
 
     def show_cloud_overview_dialog(self):
-        """
-        Show the QFieldCloud overview dialog.
-        """
+        """Show the QFieldCloud overview dialog."""
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow())
         dlg.show()
 
     def show_cloud_project_details_dialog(self):
-        """
-        Show the QFieldCloud project details dialog.
-        """
+        """Show the QFieldCloud project details dialog."""
         currently_open_project = (
             self.network_manager.projects_cache.currently_open_project
         )
@@ -483,9 +469,7 @@ class QFieldSync(object):
         self.update_action_enabled_status()
 
     def update_button_visibility(self):
-        """
-        Will update the plugin toolbar buttons according to open dialog and project properties.
-        """
+        """Will update the plugin toolbar buttons according to open dialog and project properties."""
         self.push_action_toolbar.setVisible(
             self.preferences.value("showPackagingActions")
         )
@@ -494,9 +478,7 @@ class QFieldSync(object):
         )
 
     def update_action_enabled_status(self):
-        """
-        Will update the plugin actions according to open dialog and project properties.
-        """
+        """Will update the plugin actions according to open dialog and project properties."""
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.cloud_synchronize_action.setEnabled(True)
         else:

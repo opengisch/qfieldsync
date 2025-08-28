@@ -69,9 +69,7 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         self.removeButton.clicked.connect(self.removeDirectory)
 
     def reload(self, configuration):
-        """
-        Load directories into table.
-        """
+        """Load directories into table."""
 
         self.directoriesTable.setRowCount(0)
         if "attachment_dirs" in configuration:

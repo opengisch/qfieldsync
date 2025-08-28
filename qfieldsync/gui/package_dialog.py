@@ -291,9 +291,7 @@ class PackageDialog(QDialog, DialogUi):
         self.iface.messageBar().pushMessage(result_message, status, 0)
 
     def update_info_visibility(self):
-        """
-        Show the info label if there are unconfigured layers
-        """
+        """Show the info label if there are unconfigured layers"""
         localizedDataPathLayers = []
         for layer in list(self.project.mapLayers().values()):
             layer_source = LayerSource(layer)

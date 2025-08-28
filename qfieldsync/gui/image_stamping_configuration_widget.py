@@ -42,9 +42,7 @@ WidgetUi, _ = loadUiType(
 
 
 class ImageStampingConfigurationWidget(WidgetUi, QgsPanelWidget):
-    """
-    Configuration widget for QFieldSync on a particular project.
-    """
+    """Configuration widget for QFieldSync on a particular project."""
 
     DEFAULT_DETAILS_TEMPLATE = """[% format_date(now(), 'yyyy-MM-dd @ HH:mm') %]
 Latitude [% coalesce(format_number(y(@gnss_coordinate), 7), 'N/A') %] | Longitude [% coalesce(format_number(x(@gnss_coordinate), 7), 'N/A') %] | Altitude [% coalesce(format_number(z(@gnss_coordinate), 3) || ' m', 'N/A') %]

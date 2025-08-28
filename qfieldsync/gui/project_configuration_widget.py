@@ -67,9 +67,7 @@ class EventEater(QObject):
 
 
 class ProjectConfigurationStackWidget(QgsOptionsPageWidget):
-    """
-    Configuration widget for QFieldSync on a particular project.
-    """
+    """Configuration widget for QFieldSync on a particular project."""
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -89,9 +87,7 @@ class ProjectConfigurationStackWidget(QgsOptionsPageWidget):
 
 
 class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
-    """
-    Configuration widget for QFieldSync on a particular project.
-    """
+    """Configuration widget for QFieldSync on a particular project."""
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -187,9 +183,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.reloadProject()
 
     def reloadProject(self):
-        """
-        Load all layers from the map layer registry into the table.
-        """
+        """Load all layers from the map layer registry into the table."""
         self.unsupportedLayersList = list()
 
         layer_sources = [
@@ -336,9 +330,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.unsupportedLayersLabel.setText(unsupported_layers_text)
 
     def apply(self):
-        """
-        Update layer configuration in project
-        """
+        """Update layer configuration in project"""
         self.cloudLayersConfigWidget.apply()
         self.cableLayersConfigWidget.apply()
 

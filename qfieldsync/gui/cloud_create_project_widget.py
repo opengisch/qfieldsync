@@ -263,9 +263,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.finished.emit(project_id)
 
     def update_info_visibility(self):
-        """
-        Show the info label if there are unconfigured layers
-        """
+        """Show the info label if there are unconfigured layers"""
         localizedDataPathLayers = []
         for layer in list(self.project.mapLayers().values()):
             layer_source = LayerSource(layer)

@@ -24,9 +24,7 @@ from qfieldsync.gui.project_configuration_widget import ProjectConfigurationStac
 
 
 class ProjectConfigurationDialog(QDialog):
-    """
-    Configuration dialog for QFieldSync on a particular project.
-    """
+    """Configuration dialog for QFieldSync on a particular project."""
 
     def __init__(self, parent=None):
         """Constructor."""

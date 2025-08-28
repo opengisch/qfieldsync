@@ -564,9 +564,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         # NOTE END algorithmic part
 
     def _get_offline_layers(self) -> List[str]:
-        """
-        Returns a list of paths for project layers which have been configured for offline editing.
-        """
+        """Returns a list of paths for project layers which have been configured for offline editing."""
         offline_layers_paths = []
         if self.cloud_project and self.cloud_project.is_current_qgis_project:
             project_layers = list(QgsProject.instance().mapLayers().values())

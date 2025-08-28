@@ -160,9 +160,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             return layer_source.default_action
 
     def reloadProject(self):
-        """
-        Load all layers from the map layer registry into the table.
-        """
+        """Load all layers from the map layer registry into the table."""
         self.unsupportedLayersList = list()
 
         self.layersTable.setRowCount(0)
