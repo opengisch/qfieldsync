@@ -20,6 +20,7 @@
  ***************************************************************************/
 """
 
+import contextlib
 import os
 
 from qgis.core import QgsApplication, QgsOfflineEditing, QgsProject
@@ -455,10 +456,8 @@ class QFieldSync:
         When the push dialog is closed, make sure it's no longer
         enabled before entering update_action_enabled_status()
         """
-        try:
+        with contextlib.suppress(RuntimeError):
             self.push_dlg.setEnabled(False)
-        except RuntimeError:
-            pass
         self.update_action_enabled_status()
 
     def update_button_visibility(self):

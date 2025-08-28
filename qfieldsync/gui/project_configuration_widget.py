@@ -16,6 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import contextlib
 import os
 
 from libqfieldsync.layer import LayerSource
@@ -341,26 +342,22 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
         # try/pass layer ID fetching because the save button is global for all
         # project settings, not only QField
-        try:
+        with contextlib.suppress(AttributeError):
             self.__project_configuration.base_map_layer = (
                 self.layerComboBox.currentLayer().id()
             )
-        except AttributeError:
-            pass
 
         # Geofencing settings
         self.__project_configuration.geofencing_is_active = (
             self.geofencingGroupBox.isChecked()
         )
 
-        try:
+        with contextlib.suppress(AttributeError):
             self.__project_configuration.geofencing_layer = (
                 self.geofencingLayerComboBox.currentLayer().id()
                 if self.geofencingLayerComboBox.currentLayer()
                 else ""
             )
-        except AttributeError:
-            pass
 
         self.__project_configuration.geofencing_behavior = (
             self.geofencingBehaviorComboBox.currentData()
@@ -371,14 +368,12 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
 
         # Advanced settings
-        try:
+        with contextlib.suppress(AttributeError):
             self.__project_configuration.digitizing_logs_layer = (
                 self.digitizingLogsLayerComboBox.currentLayer().id()
                 if self.digitizingLogsLayerComboBox.currentLayer()
                 else ""
             )
-        except AttributeError:
-            pass
 
         self.__project_configuration.base_map_tile_size = int(
             self.baseMapTileSizeComboBox.currentText()
