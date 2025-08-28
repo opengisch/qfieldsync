@@ -60,7 +60,8 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
 
         if file_size <= part_size:
             BLOCKSIZE = 65536
-            hasher = hashlib.md5()
+            # TODO: Python 3.9, pass `usedforsecurity=False`
+            hasher = hashlib.md5()  # noqa: S324
 
             buf = f.read(BLOCKSIZE)
             while len(buf) > 0:
@@ -76,9 +77,11 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
             # When that's done, add a hyphen and the number of parts to get the ETag.
             md5sums = []
             for data in iter(lambda: f.read(part_size), b""):
-                md5sums.append(hashlib.md5(data).digest())
+                # TODO: Python 3.9, pass `usedforsecurity=False`
+                md5sums.append(hashlib.md5(data).digest())  # noqa: S324
 
-            final_md5sum = hashlib.md5(b"".join(md5sums))
+            # TODO: Python 3.9, pass `usedforsecurity=False`
+            final_md5sum = hashlib.md5(b"".join(md5sums))  # noqa: S324
 
             return "{}-{}".format(final_md5sum.hexdigest(), len(md5sums))
 
