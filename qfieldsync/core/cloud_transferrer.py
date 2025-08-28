@@ -476,7 +476,7 @@ class FileTransfer(QObject):
         UPLOAD = "upload"
         DELETE = "delete"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         network_manager: CloudNetworkAccessManager,
         cloud_project: CloudProject,
@@ -670,7 +670,7 @@ class ThrottledFileTransferrer(QObject):
     file_finished = pyqtSignal(str)
     progress = pyqtSignal(str, int, int)
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         network_manager,
         cloud_project,

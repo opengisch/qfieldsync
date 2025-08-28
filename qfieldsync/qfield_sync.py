@@ -166,7 +166,7 @@ class QFieldSync:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate("QFieldSync", message)
 
-    def add_action(
+    def add_action(  # noqa: PLR0913
         self,
         icon_path,
         text,
