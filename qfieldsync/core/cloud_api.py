@@ -839,8 +839,7 @@ class CloudReply:
     uploadProgress = pyqtSignal(int, int)
 
     def __init__(self, reply: QNetworkReply):
-        self.rawReply = QNetworkReply
-        # self.redi
+        self.rawReply: QNetworkReply = reply
 
 
 class CloudProjectsCache(QObject):
