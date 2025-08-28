@@ -121,8 +121,5 @@ class OfflineConverterTest(unittest.TestCase):
         exported_project = self.load_project(
             self.target_dir.joinpath("project_qfield.qgs")
         )
-        if Qgis.QGIS_VERSION_INT < 31601:
-            layer = exported_project.mapLayersByName("somedata (offline)")[0]
-        else:
-            layer = exported_project.mapLayersByName("somedata")[0]
+        layer = exported_project.mapLayersByName("somedata")[0]
         self.assertEqual(layer.customProperty("QFieldSync/sourceDataPrimaryKeys"), "pk")
