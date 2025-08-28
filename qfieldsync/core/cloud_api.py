@@ -58,7 +58,7 @@ from qfieldsync.utils.qt_utils import strip_html
 LOCALIZED_DATASETS_PROJECT_NAME = "shared_datasets"
 
 
-class CloudException(Exception):
+class QfcError(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
         super().__init__(exception)
         self.reply = reply
@@ -86,7 +86,7 @@ class disable_nam_timeout:  # noqa: N801
         self.nam.setTimeout(self.timeout)
 
 
-def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
+def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
     if reply.error() == QNetworkReply.NetworkError.NoError:
         return None
 
@@ -122,7 +122,7 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
         status_str += f"QT-{reply.error()}"
         message = f"[{status_str}] {reply.errorString()}"
 
-    return CloudException(reply, Exception(message))
+    return QfcError(reply, Exception(message))
 
 
 class CloudNetworkAccessManager(QObject):
@@ -169,7 +169,7 @@ class CloudNetworkAccessManager(QObject):
             payload_str = str(reply.readAll().data(), encoding="utf-8")
             return json.loads(payload_str)
         except Exception as error:
-            raise CloudException(reply, error) from error
+            raise QfcError(reply, error) from error
 
     def json_object(self, reply: QNetworkReply) -> Dict[str, Any]:
         payload = self.handle_response(reply, True)
@@ -673,7 +673,7 @@ class CloudNetworkAccessManager(QObject):
             auth_manager.clearCachedConfig(authcfg)
             auth_manager.removeAuthenticationConfig(authcfg)
             self.logout_success.emit()
-        except CloudException as err:
+        except QfcError as err:
             self.logout_failed.emit(str(err))
             return
 
@@ -682,7 +682,7 @@ class CloudNetworkAccessManager(QObject):
 
         try:
             payload = self.json_object(reply)
-        except CloudException as err:
+        except QfcError as err:
             self._login_error = err
             self.login_finished.emit()
             self.preferences.set_value("qfieldCloudRememberMe", False)

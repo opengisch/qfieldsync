@@ -67,7 +67,7 @@ from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
 from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import FileTransfer
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
@@ -862,7 +862,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         try:
             self.network_manager.handle_response(reply, False)
-        except CloudException as err:
+        except QfcError as err:
             self.set_feedback(self.tr("Project delete failed: {}").format(str(err)))
             return
 
@@ -1087,7 +1087,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         try:
             self.network_manager.json_object(reply)
-        except CloudException as err:
+        except QfcError as err:
             self.set_feedback("Project update failed: {}".format(str(err)))
             return
 

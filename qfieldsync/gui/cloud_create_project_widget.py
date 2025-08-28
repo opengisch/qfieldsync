@@ -41,7 +41,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
 from qfieldsync.core.cloud_converter import CloudConverter
 from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
@@ -227,7 +227,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
     def on_create_project_finished(self, reply):
         try:
             payload = self.network_manager.json_object(reply)
-        except CloudException as err:
+        except QfcError as err:
             QApplication.restoreOverrideCursor()
             critical_message = self.tr(
                 "QFieldCloud rejected project creation:\n{}"
@@ -352,7 +352,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
             for org in payload:
                 items.append(org["username"])
-        except CloudException:
+        except QfcError:
             self.projectOwnerFeedbackLabel.setVisible(True)
             self.projectOwnerFeedbackLabel.setText(
                 self.tr("Failed to obtain the potential project owners.")
