@@ -105,7 +105,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         )
         items.append(my_projects)
 
-        # TODO uncomment when public projects are ready
+        # TODO @suricactus: uncomment when public projects API is ready
         # public_projects = QFieldCloudGroupItem(
         #     self, "Community", "public", "../resources/cloud.svg", 2
         # )
@@ -162,7 +162,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
 
         if projects is None:
             try:
-                # TODO try to be make it Fast Fertile
+                # TODO @suricactus: I do not recall why this was required to be not-async, but otherwise it failed. Revisit why.
                 self.network_manager.projects_cache.refresh_not_async()
             except Exception:
                 return []

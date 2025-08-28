@@ -157,7 +157,7 @@ class CloudConverter(QObject):
             self.project.clear()
             QCoreApplication.processEvents()
 
-            # TODO whatcha gonna do if QgsProject::read()/write() fails
+            # TODO @suricactus: whatcha gonna do if QgsProject::read()/write() fails
             if is_converted:
                 iface.addProject(str(project_path))
             else:

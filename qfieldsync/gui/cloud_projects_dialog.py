@@ -134,7 +134,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             )
         )
 
-        # TODO show when public projects are ready
+        # TODO @suricactus: show when public projects API is ready
         self.projectsType.hide()
         self.projectsType.addItem(self.tr("My projects"))
         self.projectsType.addItem(self.tr("Community"))
@@ -421,7 +421,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         version_item = QTreeWidgetItem()
 
                         version_item.setData(0, Qt.ItemDataRole.UserRole, version_obj)
-                        # TODO remove default value `versions_count - version_idx`, the "display" key is standard for newer QFC releases
+                        # TODO @suricactus: remove default value `versions_count - version_idx`, the "display" key is standard for newer QFC releases
                         version_display = version_obj.get(
                             "display", versions_count - version_idx
                         )
@@ -460,7 +460,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 else:
                     item.setExpanded(True)
 
-                    # TODO make a fancy button that marks all the child items as checked or not
+                    # TODO @suricactus: make a fancy button that marks all the child items as checked or not
         # NOTE END algorithmic part
 
     @closure

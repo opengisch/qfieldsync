@@ -944,7 +944,6 @@ class CloudProjectsCache(QObject):
             i += 1
 
     def refresh(self) -> QNetworkReply:
-        # TODO this abort appears sometimes in the UI, think how to hide it?
         if self._projects_reply:
             self._projects_reply.abort()
 
@@ -994,7 +993,7 @@ class CloudProjectsCache(QObject):
                 return project
 
     def refresh_filesystem_watchers(self, _dirpath: str = "") -> None:
-        # TODO in theory we can update only the _dirpath. There are gothas with links etc, better keep it KISS for now
+        # TODO @suricactus: in theory we can update only the _dirpath. There are gothas with links etc, better keep it KISS for now
         if self._fs_watcher.directories():
             self._fs_watcher.removePaths(self._fs_watcher.directories())
 

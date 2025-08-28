@@ -556,7 +556,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                     )
                     self.add_file_checkbox_buttons(item, project_file, is_offline_layer)
                 else:
-                    # TODO make a fancy button that marks all the child items as checked or not
+                    # TODO @suricactus: make a fancy button that marks all the child items as checked or not
                     pass
         self.filesTree.expandAll()
         # NOTE END algorithmic part

@@ -43,7 +43,6 @@ from qfieldsync.utils.file_utils import mkdir
 
 
 class CloudTransferrer(QObject):
-    # TODO show progress of individual files
     progress = pyqtSignal(float)
     error = pyqtSignal(str, Exception)
     abort = pyqtSignal()

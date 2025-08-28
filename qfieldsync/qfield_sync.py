@@ -110,7 +110,6 @@ class QFieldSync:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr("&QFieldSync")
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(self.tr("QFieldSync Toolbar"))
         self.toolbar.setObjectName("QFieldSync Toolbar")
 

@@ -17,7 +17,7 @@
  ***************************************************************************/
 """
 
-# TODO check if this file should have any contents at all???
+# TODO @suricactus: check if this file should have any contents at all???
 # import qgis libs so that ve set the correct sip api version
 import pkgutil  # pylint: disable=W0611
 

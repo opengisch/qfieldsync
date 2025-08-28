@@ -60,7 +60,7 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
 
         if file_size <= part_size:
             BLOCKSIZE = 65536
-            # TODO: Python 3.9, pass `usedforsecurity=False`
+            # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
             hasher = hashlib.md5()  # noqa: S324
 
             buf = f.read(BLOCKSIZE)
@@ -77,10 +77,10 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
             # When that's done, add a hyphen and the number of parts to get the ETag.
             md5sums = []
             for data in iter(lambda: f.read(part_size), b""):
-                # TODO: Python 3.9, pass `usedforsecurity=False`
+                # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
                 md5sums.append(hashlib.md5(data).digest())  # noqa: S324
 
-            # TODO: Python 3.9, pass `usedforsecurity=False`
+            # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
             final_md5sum = hashlib.md5(b"".join(md5sums))  # noqa: S324
 
             return "{}-{}".format(final_md5sum.hexdigest(), len(md5sums))
@@ -318,7 +318,7 @@ class CloudProject:
 
     @property
     def status(self) -> bool:
-        # TODO remove as soon as all API servers support `status` key
+        # TODO @suricactus: remove as soon as all API servers support `status` key
         return self._data.get("status", "busy")
 
     @property
@@ -342,7 +342,6 @@ class CloudProject:
         else:
             return dirname
 
-    # TODO remove this, use `get_files` instead
     @property
     def cloud_files(self) -> Optional[List]:
         return self._cloud_files
