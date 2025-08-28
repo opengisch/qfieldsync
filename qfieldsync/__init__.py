@@ -47,7 +47,7 @@ for module_name in module_names:
 
 
 # noinspection PyPep8Naming
-def classFactory(iface):  # pylint: disable=invalid-name
+def classFactory(iface):  # pylint: disable=invalid-name # noqa: N802
     """
     Load QFieldSync class from file QFieldSync.
 

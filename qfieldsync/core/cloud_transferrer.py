@@ -796,7 +796,7 @@ class TransferFileLogsModel(QAbstractListModel):
             transferrer.error.connect(self._on_updated_transfer)
             transferrer.progress.connect(self._on_updated_transfer)
 
-    def rowCount(self, parent: QModelIndex) -> int:  # noqa: ARG002
+    def rowCount(self, parent: QModelIndex) -> int:  # noqa: ARG002, N802
         return len(self.transfers)
 
     def data(self, index: QModelIndex, role: int) -> Any:

@@ -56,7 +56,7 @@ class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
             os.path.join(os.path.dirname(__file__), "resources", "qfield_logo.svg")
         )
 
-    def createWidget(self, parent):
+    def createWidget(self, parent):  # noqa: N802
         return ProjectConfigurationStackWidget(parent)
 
 
@@ -70,7 +70,7 @@ class QFieldSyncOptionsFactory(QgsOptionsWidgetFactory):
             os.path.join(os.path.dirname(__file__), "resources", "qfield_logo.svg")
         )
 
-    def createWidget(self, parent):
+    def createWidget(self, parent):  # noqa: N802
         return PreferencesWidget(self.qfieldSync, parent)
 
 
@@ -246,7 +246,7 @@ class QFieldSync:
 
         return action
 
-    def initGui(self):
+    def initGui(self):  # noqa: N802
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
         self.cloud_projects_overview_action = self.add_action(
             os.path.join(os.path.dirname(__file__), "./resources/cloud.svg"),

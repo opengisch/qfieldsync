@@ -38,7 +38,7 @@ class ProjectConfigurationDialog(QDialog):
         self.projectConfigurationStackWidget = ProjectConfigurationStackWidget(self)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.buttonBox.accepted.connect(lambda: self.onAccepted())
+        self.buttonBox.accepted.connect(lambda: self._on_accepted())
         self.buttonBox.rejected.connect(self.reject)
 
         self.layout = QVBoxLayout()
@@ -46,6 +46,6 @@ class ProjectConfigurationDialog(QDialog):
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
-    def onAccepted(self):
+    def _on_accepted(self):
         self.projectConfigurationWidget.apply()
         self.close()

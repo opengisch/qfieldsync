@@ -42,7 +42,7 @@ class AttachmentNamingTableWidget(QTableWidget):
         self.resizeColumnsToContents()
         self.setMinimumHeight(100)
 
-    def addLayerFields(self, layer_source):
+    def add_layer_fields(self, layer_source):
         layer = layer_source.layer
 
         if layer.type() != QgsMapLayer.VectorLayer:
@@ -66,10 +66,10 @@ class AttachmentNamingTableWidget(QTableWidget):
 
         self.resizeColumnsToContents()
 
-    def setLayerColumnHidden(self, is_hidden):
+    def set_layer_column_hidden(self, is_hidden):
         self.setColumnHidden(0, is_hidden)
 
-    def syncLayerSourceValues(self, should_apply=False):
+    def sync_layer_source_values(self, should_apply=False):
         for i in range(self.rowCount()):
             layer_source = self.item(i, 0).data(Qt.ItemDataRole.UserRole)
             field_name = self.item(i, 1).text()

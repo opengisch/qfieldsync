@@ -53,7 +53,7 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
     def capabilities(self):
         return QgsDataProvider.Net
 
-    def createDataItem(self, _path, parentItem):
+    def createDataItem(self, _path, parentItem):  # noqa: N802
         if not parentItem:
             root_item = QFieldCloudRootItem(self.network_manager)
             return root_item
@@ -83,7 +83,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
     def capabilities2(self):
         return QgsDataItem.Fast
 
-    def createChildren(self):
+    def createChildren(self):  # noqa: N802
         items = []
 
         if not self.network_manager.has_token():
@@ -155,7 +155,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
         self.setIcon(QIcon(os.path.join(os.path.dirname(__file__), icon)))
         self.setSortKey(order)
 
-    def createChildren(self):
+    def createChildren(self):  # noqa: N802
         items = []
 
         projects: List[CloudProject] = self.network_manager.projects_cache.projects
@@ -213,7 +213,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def name(self):
         return "QFieldCloudItemGuiProvider"
 
-    def populateContextMenu(self, item, menu, _selectedItems, _context):
+    def populateContextMenu(self, item, menu, _selectedItems, _context):  # noqa: N802
         if type(item) is QFieldCloudProjectItem:
             project = self.network_manager.projects_cache.find_project(item.project_id)
             if project and project.local_dir:
@@ -258,7 +258,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             )
             refresh_action.triggered.connect(self._on_refresh_projects_action_triggered)
 
-    def handleDoubleClick(self, item, context):  # noqa: ARG002
+    def handleDoubleClick(self, item, context):  # noqa: ARG002, N802
         if type(item) is QFieldCloudProjectItem:
             if not self.open_project(item):
                 self.show_cloud_synchronize_dialog(item)

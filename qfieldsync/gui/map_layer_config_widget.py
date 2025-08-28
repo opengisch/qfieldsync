@@ -42,13 +42,13 @@ class MapLayerConfigWidgetFactory(QgsMapLayerConfigWidgetFactory):
     def __init__(self, title, icon):
         super().__init__(title, icon)
 
-    def createWidget(self, layer, canvas, _dock_widget, parent):
+    def createWidget(self, layer, canvas, _dock_widget, parent):  # noqa: N802
         return MapLayerConfigWidget(layer, canvas, parent)
 
-    def supportsLayer(self, layer):
+    def supportsLayer(self, layer):  # noqa: N802
         return LayerSource(layer).is_supported
 
-    def supportLayerPropertiesDialog(self):
+    def supportLayerPropertiesDialog(self):  # noqa: N802
         return True
 
 
@@ -76,12 +76,12 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         )
 
         self.attachmentNamingTable = AttachmentNamingTableWidget()
-        self.attachmentNamingTable.addLayerFields(self.layer_source)
-        self.attachmentNamingTable.setLayerColumnHidden(True)
+        self.attachmentNamingTable.add_layer_fields(self.layer_source)
+        self.attachmentNamingTable.set_layer_column_hidden(True)
 
         self.relationshipConfigurationTable = RelationshipConfigurationTableWidget()
-        self.relationshipConfigurationTable.addLayerFields(self.layer_source)
-        self.relationshipConfigurationTable.setLayerColumnHidden(True)
+        self.relationshipConfigurationTable.add_layer_fields(self.layer_source)
+        self.relationshipConfigurationTable.set_layer_column_hidden(True)
 
         self.valueMapButtonInterfaceSpinBox.setClearValueMode(
             QgsSpinBox.CustomValue, self.tr("Disabled")
@@ -315,8 +315,8 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.layer_source.value_map_button_interface_threshold = (
             self.valueMapButtonInterfaceSpinBox.value()
         )
-        self.attachmentNamingTable.syncLayerSourceValues()
-        self.relationshipConfigurationTable.syncLayerSourceValues()
+        self.attachmentNamingTable.sync_layer_source_values()
+        self.relationshipConfigurationTable.sync_layer_source_values()
 
         self.layer_source.allow_value_relation_feature_addition = (
             self.allowValueRelationFeatureAddition.isChecked()

@@ -34,8 +34,6 @@ from qgis.gui import (
     QgsPanelWidgetStack,
     QgsSpinBox,
 )
-from qgis.PyQt.QtCore import QEvent, QObject
-from qgis.PyQt.QtGui import QKeySequence
 from qgis.PyQt.QtWidgets import QLineEdit, QVBoxLayout
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
@@ -147,9 +145,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.areaOfInterestExtentWidget, 1, 1
         )
 
-        self.singleLayerRadioButton.toggled.connect(self.baseMapTypeChanged)
+        self.singleLayerRadioButton.toggled.connect(self._on_base_map_type_changed)
 
-        self.forceAutoPush.clicked.connect(self.onForceAutoPushClicked)
+        self.forceAutoPush.clicked.connect(self._on_force_auto_push_clicked)
 
         self.directoriesConfigurationWidget = DirectoriesConfigurationWidget(self)
         self.attachmentsDirectoriesTab.layout().addWidget(
@@ -169,9 +167,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             ProjectProperties.GeofencingBehavior.INFORM_ENTER_LEAVE_AREAS,
         )
 
-        self.reloadProject()
+        self._reload_project()
 
-    def reloadProject(self):
+    def _reload_project(self):
         """Load all layers from the map layer registry into the table."""
         self.unsupportedLayersList = []
 
@@ -416,12 +414,12 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.forceAutoPushInterval.value()
         )
 
-        configuration = self.directoriesConfigurationWidget.createConfiguration()
+        configuration = self.directoriesConfigurationWidget.create_configuration()
         self.preferences.set_value("attachmentDirs", configuration["attachment_dirs"])
         self.preferences.set_value("dataDirs", configuration["data_dirs"])
 
         self.__project_configuration.map_themes_active_layer = (
-            self.mapThemesConfigWidget.createConfiguration()
+            self.mapThemesConfigWidget.create_configuration()
         )
 
         self.__project_configuration.stamping_font_style = self.stamping_font_style
@@ -465,10 +463,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.force_stamping = self.image_stamping_panel.force_stamping()
         self.image_stamping_panel = None
 
-    def onForceAutoPushClicked(self, checked):
+    def _on_force_auto_push_clicked(self, checked):
         self.forceAutoPushInterval.setEnabled(checked)
 
-    def baseMapTypeChanged(self):
+    def _on_base_map_type_changed(self):
         self.baseMapLayerLabel.setVisible(self.singleLayerRadioButton.isChecked())
         self.layerComboBox.setVisible(self.singleLayerRadioButton.isChecked())
         self.baseMapMapThemeLabel.setVisible(

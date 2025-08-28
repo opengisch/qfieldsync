@@ -194,7 +194,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             QgsApplication.getThemeIcon("/mActionFileOpen.svg")
         )
 
-    def showEvent(self, event: QShowEvent) -> None:
+    def showEvent(self, event: QShowEvent) -> None:  # noqa: N802
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setVisible(True)
 
         super().showEvent(event)

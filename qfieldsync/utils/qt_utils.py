@@ -29,14 +29,14 @@ from qgis.PyQt.QtWidgets import QTreeWidgetItem
 from .file_utils import DirectoryTreeDict, DirectoryTreeType
 
 
-def selectFolder(line_edit_widget):
+def select_folder(line_edit_widget):
     line_edit_widget.setText(
         QtWidgets.QFileDialog.getExistingDirectory(directory=line_edit_widget.text())
     )
 
 
 def make_folder_selector(widget):
-    return partial(selectFolder, line_edit_widget=widget)
+    return partial(select_folder, line_edit_widget=widget)
 
 
 def make_icon(icon_name):

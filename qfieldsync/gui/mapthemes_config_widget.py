@@ -69,7 +69,7 @@ class MapThemesConfigWidget(QTableWidget):
         self.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self.setSortingEnabled(True)
 
-    def createConfiguration(self):
+    def create_configuration(self):
         configuration = {}
         for i in range(self.rowCount()):
             item = self.item(i, 0)

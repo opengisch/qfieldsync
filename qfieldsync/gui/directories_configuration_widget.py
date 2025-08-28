@@ -62,23 +62,23 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         )
 
         self.addButton.setIcon(QgsApplication.getThemeIcon("/symbologyAdd.svg"))
-        self.addButton.clicked.connect(self.addDirectory)
+        self.addButton.clicked.connect(self._on_add_button_clicked)
 
         self.removeButton.setIcon(QgsApplication.getThemeIcon("/symbologyRemove.svg"))
         self.removeButton.setEnabled(False)
-        self.removeButton.clicked.connect(self.removeDirectory)
+        self.removeButton.clicked.connect(self._on_remove_button_clicked)
 
     def reload(self, configuration):
         """Load directories into table."""
         self.directoriesTable.setRowCount(0)
         if "attachment_dirs" in configuration:
             for attachment_dir in configuration["attachment_dirs"]:
-                self.addDirectoryRow(attachment_dir, 0)
+                self._add_directory_row(attachment_dir, 0)
         if "data_dirs" in configuration:
             for data_dir in configuration["data_dirs"]:
-                self.addDirectoryRow(data_dir, 1)
+                self._add_directory_row(data_dir, 1)
 
-    def createConfiguration(self):
+    def create_configuration(self):
         configuration = {"attachment_dirs": [], "data_dirs": []}
 
         for i in range(self.directoriesTable.rowCount()):
@@ -96,7 +96,7 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
 
         return configuration
 
-    def addDirectoryRow(self, name="", typeIndex=0, editRow=False):
+    def _add_directory_row(self, name="", typeIndex=0, editRow=False):
         count = self.directoriesTable.rowCount()
         self.directoriesTable.insertRow(count)
 
@@ -112,11 +112,11 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         if editRow:
             self.directoriesTable.editItem(item)
 
-    def addDirectory(self):
+    def _on_add_button_clicked(self):
         self.directoriesTable.setFocus()
-        self.addDirectoryRow("", 0, True)
+        self._add_directory_row("", 0, True)
 
-    def removeDirectory(self):
+    def _on_remove_button_clicked(self):
         if self.directoriesTable.selectedItems():
             self.directoriesTable.removeRow(
                 self.directoriesTable.selectedItems()[0].row()
