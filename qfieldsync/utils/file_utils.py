@@ -86,7 +86,7 @@ def mkdir(
     """
     path = Path(path)
     # calling `mkdir` might trigger a `PermissionError` and other. The caller must handle the error.
-    path.mkdir(mode)
+    path.mkdir(mode, parents, exist_ok)
 
     current_permission = stat.S_IMODE(path.stat().st_mode)
     write_flags = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
