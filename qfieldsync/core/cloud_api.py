@@ -68,7 +68,7 @@ class CloudException(Exception):
         )
 
 
-class disable_nam_timeout:
+class disable_nam_timeout:  # noqa: N801
     """By default QGIS has 60 seconds timeout, which is too short for uploading huge files"""
 
     def __init__(self, nam: QgsNetworkAccessManager) -> None:
