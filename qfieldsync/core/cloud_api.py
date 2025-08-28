@@ -109,8 +109,12 @@ def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
 
                 if len(payload) > 500:
                     message += "…"
-    except Exception:
-        pass
+    except Exception as err:
+        QgsMessageLog.logMessage(
+            "Couldn't convert reply to error:" + str(err),
+            "QFieldSync",
+            Qgis.Critical,
+        )
 
     if not message:
         status_str = ""
