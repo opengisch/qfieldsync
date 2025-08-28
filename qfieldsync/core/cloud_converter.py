@@ -27,6 +27,7 @@ from qgis.core import QgsMapLayer, QgsProject, QgsVirtualLayerDefinition
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QUrl, pyqtSignal
 from qgis.utils import iface
 
+from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qgis_utils import open_project
 
@@ -64,7 +65,7 @@ class CloudConverter(QObject):
                 self.export_dirname.mkdir(parents=True, exist_ok=True)
 
             if get_qgis_files_within_dir(self.export_dirname):
-                raise Exception(
+                raise QFieldSyncError(
                     self.tr("The destination folder already contains a project file")
                 )
 
@@ -131,7 +132,7 @@ class CloudConverter(QObject):
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             if not self.project.write(str(project_path)):
-                raise Exception(
+                raise QFieldSyncError(
                     self.tr('Failed to save project to "{}".').format(project_path)
                 )
 

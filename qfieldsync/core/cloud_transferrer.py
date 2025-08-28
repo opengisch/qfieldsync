@@ -38,6 +38,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
+from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.utils.file_utils import mkdir
 
 
@@ -387,7 +388,7 @@ class CloudTransferrer(QObject):
         subdir_path = self.temp_dir.joinpath(subdir)
 
         if not subdir_path.exists():
-            raise Exception(
+            raise QFieldSyncError(
                 self.tr('Directory "{}" does not exist').format(subdir_path)
             )
 

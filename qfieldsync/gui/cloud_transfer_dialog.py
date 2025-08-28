@@ -50,6 +50,7 @@ from qgis.utils import iface
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
+from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 
@@ -772,7 +773,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             elif project_file_action == ProjectFileAction.NoAction:
                 pass
             else:
-                raise Exception(f"Unknown project file action {project_file_action}")
+                raise QFieldSyncError(
+                    f"Unknown project file action {project_file_action}"
+                )
 
             return
 
@@ -952,7 +955,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             local_icon = "delete-red.svg"
             arrow_icon = "arrow_back-red.svg"
         else:
-            raise Exception(f"Unknown project file action {project_file_action}")
+            raise QFieldSyncError(f"Unknown project file action {project_file_action}")
 
         arrow_widget = self.filesTree.itemWidget(item, 2)
         arrow_widget.findChild(QLabel, "local").setPixmap(make_pixmap(local_icon))
