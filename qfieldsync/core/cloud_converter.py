@@ -33,7 +33,6 @@ from qfieldsync.utils.qgis_utils import open_project
 
 
 class CloudConverter(QObject):
-    progressStopped = pyqtSignal()
     warning = pyqtSignal(str, str)
     total_progress_updated = pyqtSignal(int, int, str)
 
