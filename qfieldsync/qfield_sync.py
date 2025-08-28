@@ -327,12 +327,11 @@ class QFieldSync:
 
         self.iface.registerMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
 
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.project_properties_factory = QFieldSyncProjectPropertiesFactory()
-            self.project_properties_factory.setTitle("QField")
-            self.iface.registerProjectPropertiesWidgetFactory(
-                self.project_properties_factory
-            )
+        self.project_properties_factory = QFieldSyncProjectPropertiesFactory()
+        self.project_properties_factory.setTitle("QField")
+        self.iface.registerProjectPropertiesWidgetFactory(
+            self.project_properties_factory
+        )
         self.options_factory = QFieldSyncOptionsFactory(self)
         self.options_factory.setTitle(self.tr("QField"))
         self.iface.registerOptionsWidgetFactory(self.options_factory)
@@ -359,10 +358,9 @@ class QFieldSync:
             self.mapLayerConfigWidgetFactory
         )
 
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.unregisterProjectPropertiesWidgetFactory(
-                self.project_properties_factory
-            )
+        self.iface.unregisterProjectPropertiesWidgetFactory(
+            self.project_properties_factory
+        )
         self.iface.unregisterOptionsWidgetFactory(self.options_factory)
 
     def show_preferences_dialog(self):
@@ -413,11 +411,7 @@ class QFieldSync:
 
     def show_project_configuration_dialog(self):
         """Show the project configuration dialog."""
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.showProjectPropertiesDialog("QField")
-        else:
-            dlg = ProjectConfigurationDialog(self.iface.mainWindow())
-            dlg.show()
+        self.iface.showProjectPropertiesDialog("QField")
 
     def show_cloud_overview_dialog(self):
         """Show the QFieldCloud overview dialog."""

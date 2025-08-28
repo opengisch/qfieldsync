@@ -314,11 +314,8 @@ class PackageDialog(QDialog, DialogUi):
         self.infoGroupBox.setVisible(len(localizedDataPathLayers) > 0)
 
     def show_settings(self):
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.showProjectPropertiesDialog("QField")
-        else:
-            dlg = ProjectConfigurationDialog(self.iface.mainWindow())
-            dlg.exec_()
+        self.iface.showProjectPropertiesDialog("QField")
+
         self.update_info_visibility()
 
     def update_total(self, current, layer_count, message):
