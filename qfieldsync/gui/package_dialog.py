@@ -253,9 +253,9 @@ class PackageDialog(QDialog, DialogUi):
         except PackagingCanceledError:
             # packaging was canceled by user, we do nothing.
             return
-        except Exception as err:
+        except Exception:
             self.do_post_offline_convert_action(False)
-            raise err
+            raise
         finally:
             QApplication.restoreOverrideCursor()
             self._offline_convertor = None
