@@ -709,10 +709,14 @@ class ThrottledFileTransferrer(QObject):
                 destination,
             )
             transfer.progress.connect(
-                lambda *args: self._on_transfer_progress(transfer, *args)
+                lambda *args, transfer=transfer: self._on_transfer_progress(
+                    transfer, *args
+                )
             )
             transfer.finished.connect(
-                lambda *args: self._on_transfer_finished(transfer, *args)
+                lambda *args, transfer=transfer: self._on_transfer_finished(
+                    transfer, *args
+                )
             )
 
             assert file.name not in self.transfers
