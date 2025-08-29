@@ -20,7 +20,7 @@
 
 import os
 from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import (
@@ -36,10 +36,12 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.utils import iface
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
-from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
+
+if TYPE_CHECKING:
+    from qfieldsync.core.cloud_project import CloudProject
 
 
 class QFieldCloudItemProvider(QgsDataItemProvider):
