@@ -392,7 +392,7 @@ class CloudNetworkAccessManager(QObject):
     def cloud_get(
         self,
         uri: Union[str, List[str], QUrl],
-        params: Dict[str, Any] = {},
+        params: Optional[Dict[str, Any]] = None,
         local_filename: Optional[str] = None,
         skip_cache: bool = False,
     ) -> QNetworkReply:
@@ -402,6 +402,9 @@ class CloudNetworkAccessManager(QObject):
         query = QUrlQuery(url.query())
 
         self._clear_cloud_cookies(url)
+
+        if params is None:
+            params = {}
 
         assert isinstance(params, dict)
 
