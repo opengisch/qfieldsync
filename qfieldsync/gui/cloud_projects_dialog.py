@@ -491,7 +491,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         transfer = FileTransfer(
             self.network_manager,
             self.current_cloud_project,
-            FileTransfer.Type.DOWNLOAD,
+            FileTransfer.TransferType.DOWNLOAD,
             project_file,
             Path(version_dest_filename),
             project_file.versions[version_idx]["version_id"],
