@@ -87,7 +87,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
     def createChildren(self):
         items = []
 
-        if not self.network_manager.has_token():
+        if not self.network_manager.is_authenticated():
             CloudLoginDialog.show_auth_dialog(self.network_manager)
             self.setState(QgsDataItem.Populating)
             return []
@@ -119,7 +119,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         self.refresh()
 
     def update_icon(self):
-        if self.network_manager.has_token():
+        if self.network_manager.is_authenticated():
             self.setIcon(
                 QIcon(os.path.join(os.path.dirname(__file__), "../resources/cloud.svg"))
             )
@@ -290,7 +290,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
         return False
 
     def refresh_cloud_projects(self):
-        if not self.network_manager.has_token():
+        if not self.network_manager.is_authenticated():
             CloudLoginDialog.show_auth_dialog(
                 self.network_manager, self._on_refresh_after_login
             )
