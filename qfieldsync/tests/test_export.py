@@ -24,7 +24,7 @@ from typing import List
 
 from libqfieldsync.offline_converter import ExportType, OfflineConverter
 from libqfieldsync.offliners import QgisCoreOffliner
-from qgis.core import Qgis, QgsOfflineEditing, QgsProject
+from qgis.core import QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 
