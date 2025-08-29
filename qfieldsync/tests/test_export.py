@@ -46,7 +46,7 @@ class OfflineConverterTest(unittest.TestCase):
         shutil.rmtree(self.target_dir)
 
     def _path_contents(self, dir_path: Path) -> List[str]:
-        return list(map(lambda p: str(p.relative_to(dir_path)), dir_path.iterdir()))
+        return [str(p.relative_to(dir_path)) for p in dir_path.iterdir()]
 
     @property
     def data_dir(self) -> Path:
