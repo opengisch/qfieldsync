@@ -50,7 +50,7 @@ class CloudConverter(QObject):
 
         self.export_dirname = Path(export_dirname)
 
-    def convert(self) -> None:
+    def convert(self) -> None:  # noqa: PLR0912, PLR0915
         """Convert the project to a cloud project."""
         original_project_path = self.project.fileName()
         project_path = self.export_dirname.joinpath(

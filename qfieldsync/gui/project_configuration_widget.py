@@ -170,7 +170,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
         self._reload_project()
 
-    def _reload_project(self):
+    def _reload_project(self):  # noqa: PLR0915
         """Load all layers from the map layer registry into the table."""
         self.unsupportedLayersList = []
 

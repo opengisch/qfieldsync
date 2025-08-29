@@ -99,7 +99,7 @@ class WindowsIconFixWorkDir:
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
 
-    def __init__(
+    def __init__(  # noqa: PLR0915
         self,
         network_manager: CloudNetworkAccessManager,
         parent: QWidget = None,
@@ -710,7 +710,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         reply.finished.connect(lambda: self.launch())
 
-    def select_local_dir(self) -> Optional[str]:
+    def select_local_dir(self) -> Optional[str]:  # noqa: PLR0912
         """
         ```
             if there is saved location for this project id #

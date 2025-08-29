@@ -367,7 +367,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.prepare_project_transfer()
 
-    def prepare_project_transfer(self):
+    def prepare_project_transfer(self):  # noqa: PLR0912, PLR0915
         assert self.cloud_project
         assert self.cloud_project.human_local_dir
 
@@ -795,9 +795,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
             cloud_updated_at = 0.0
             if project_file.updated_at:
-                cloud_updated_at = datetime.strptime(
-                    project_file.updated_at, "%d.%m.%Y %H:%M:%S %Z"
-                ).timestamp()
+                cloud_updated_at = datetime.fromisoformat(project_file.updated_at)
             is_local_checked = local_updated_at > cloud_updated_at
 
         local_checkbox = QCheckBox()
@@ -1029,7 +1027,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             # Reserved for a better future
             pass
 
-    def show_progress_page(self, files: Dict[str, List[ProjectFile]]) -> None:
+    def show_progress_page(self, files: Dict[str, List[ProjectFile]]) -> None:  # noqa: PLR0912, PLR0915
         total_delete_count = 0
         local_delete_count = 0
         cloud_delete_count = 0

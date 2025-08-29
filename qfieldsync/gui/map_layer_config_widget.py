@@ -58,7 +58,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
     PROPERTY_ATTRIBUTE_EDITING_LOCKED = 3
     PROPERTY_FEATURE_DELETION_LOCKED = 4
 
-    def __init__(self, layer, canvas, parent):
+    def __init__(self, layer, canvas, parent):  # noqa: PLR0915
         super().__init__(layer, canvas, parent)
         self.setupUi(self)
         self.layer_source = LayerSource(layer)
