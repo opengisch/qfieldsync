@@ -923,6 +923,8 @@ class CloudProjectsCache(QObject):
             if cloud_project is not None:
                 return cloud_project
 
+        return None
+
     def get_unique_name(self, name: str) -> Optional[str]:
         if not self.projects:
             return None
@@ -988,6 +990,8 @@ class CloudProjectsCache(QObject):
         for project in self._projects:
             if project.id == project_id:
                 return project
+
+        return None
 
     def refresh_filesystem_watchers(self, _dirpath: str = "") -> None:
         # TODO @suricactus: in theory we can update only the _dirpath. There are gothas with links etc, better keep it KISS for now
