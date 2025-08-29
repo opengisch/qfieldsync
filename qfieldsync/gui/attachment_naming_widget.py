@@ -48,7 +48,7 @@ class AttachmentNamingTableWidget(QTableWidget):
         if layer.type() != QgsMapLayer.VectorLayer:
             return
 
-        for field_name in layer_source.get_attachment_fields().keys():
+        for field_name in layer_source.get_attachment_fields():
             row = self.rowCount()
 
             self.insertRow(row)

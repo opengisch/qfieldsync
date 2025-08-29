@@ -41,7 +41,7 @@ class CheckerFeedbackTable(QTableWidget):
             QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding
         )
 
-        for layer_id in checker_feedback.feedbacks.keys():
+        for layer_id in checker_feedback.feedbacks:
             for feedback in checker_feedback.feedbacks[layer_id]:
                 row = self.rowCount()
 
