@@ -116,7 +116,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         )
         self.qfieldCloudIcon.setMinimumSize(175, 180)
         self.qfieldCloudIcon.mouseDoubleClickEvent = (
-            lambda event: self.toggle_server_url_visibility()
+            lambda _event: self.toggle_server_url_visibility()
         )
         self.rejected.connect(self.on_rejected)
         self.hide()
