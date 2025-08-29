@@ -533,8 +533,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             for part_idx, part in enumerate(parts):
                 if len(stack) > part_idx and stack[part_idx][0] == part:
                     continue
-                else:
-                    stack = stack[0:part_idx]
+
+                stack = stack[0:part_idx]
 
                 item = QTreeWidgetItem()
                 item.setText(0, part)
