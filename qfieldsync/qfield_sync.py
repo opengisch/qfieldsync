@@ -29,8 +29,8 @@ from qgis.PyQt.QtCore import QCoreApplication, QLocale, QSettings, Qt, QTranslat
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
-from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_browser_tree import (
     QFieldCloudItemGuiProvider,
     QFieldCloudItemProvider,

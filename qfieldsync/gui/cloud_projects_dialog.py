@@ -66,10 +66,10 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
-from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import FileTransfer
+from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
@@ -99,7 +99,7 @@ class WindowsIconFixWorkDir:
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
 
-    def __init__(  # noqa: PLR0915
+    def __init__(
         self,
         network_manager: CloudNetworkAccessManager,
         parent: QWidget = None,

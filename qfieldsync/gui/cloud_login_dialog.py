@@ -33,8 +33,8 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+from qfieldsync.core.preferences import Preferences
 
 CloudLoginDialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_login_dialog.ui")
