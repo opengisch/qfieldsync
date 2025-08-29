@@ -351,7 +351,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         for layer_source in self.layer_sources.copy():
             try:
                 layer_source.read_layer()
-            except RuntimeError:
+            except RuntimeError:  # noqa: PERF203
                 self.layer_sources.remove(layer_source)
 
         # quite ugly workaround, but this method sometimes operates on deleted objects,
