@@ -371,8 +371,8 @@ class CloudTransferrer(QObject):
 
     def _make_backup(self) -> None:
         for project_file in [
-            *list(map(lambda f: f, self._files_to_upload.values())),
-            *list(map(lambda f: f, self._files_to_download.values())),
+            *list(self._files_to_upload.values()),
+            *list(self._files_to_download.values()),
         ]:
             if project_file.local_path and project_file.local_path.exists():
                 dest = self.temp_dir.joinpath("backup", project_file.path)
