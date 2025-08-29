@@ -28,7 +28,7 @@ from libqfieldsync.layer import LayerSource
 from libqfieldsync.offline_converter import (
     ExportType,
     OfflineConverter,
-    PackagingCanceledException,
+    PackagingCanceledError,
 )
 
 # TODO this try/catch was added due to module structure changes in QFS 4.8.0. Remove this as enough time has passed since March 2024.
@@ -252,7 +252,7 @@ class PackageDialog(QDialog, DialogUi):
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
             self._offline_convertor.convert()
             self.do_post_offline_convert_action(True)
-        except PackagingCanceledException:
+        except PackagingCanceledError:
             # packaging was canceled by user, we do nothing.
             return
         except Exception as err:

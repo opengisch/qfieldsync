@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import List
 
 from libqfieldsync.offline_converter import ExportType, OfflineConverter
+from libqfieldsync.offliners import QgisCoreOffliner
 from qgis.core import Qgis, QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
@@ -67,14 +68,14 @@ class OfflineConverterTest(unittest.TestCase):
         project = self.load_project(
             self.source_dir.joinpath("simple_project", "project.qgs")
         )
-        offline_editing = QgsOfflineEditing()
+        offliner = QgisCoreOffliner(offline_editing=QgsOfflineEditing())
         offline_converter = OfflineConverter(
             project,
             self.target_dir.joinpath("project_qfield.qgs"),
             "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
             QgsProject.instance().crs().authid(),
             ["DCIM"],
-            offline_editing,
+            offliner,
             ExportType.Cable,
         )
         offline_converter.convert()
@@ -107,14 +108,14 @@ class OfflineConverterTest(unittest.TestCase):
         project = self.load_project(
             self.source_dir.joinpath("simple_project", "project.qgs")
         )
-        offline_editing = QgsOfflineEditing()
+        offliner = QgisCoreOffliner(offline_editing=QgsOfflineEditing())
         offline_converter = OfflineConverter(
             project,
             self.target_dir.joinpath("project_qfield.qgs"),
             "POLYGON((1 1, 5 0, 5 5, 0 5, 1 1))",
             QgsProject.instance().crs().authid(),
             ["DCIM"],
-            offline_editing,
+            offliner,
             ExportType.Cable,
         )
         offline_converter.convert()
