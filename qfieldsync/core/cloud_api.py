@@ -708,14 +708,16 @@ class CloudNetworkAccessManager(QObject):
         }
         if payload["avatar_url"]:
             suffix = payload["avatar_url"].rsplit(".")[-1]
-            avatar_filename = tempfile.mktemp(suffix=f".{suffix}")
-            reply = self.get_file(
-                QUrl(payload["avatar_url"]),
-                avatar_filename,
-            )
-            reply.finished.connect(
-                lambda: self._on_avatar_download_finished(reply, avatar_filename)
-            )
+            with tempfile.NamedTemporaryFile(
+                suffix=f".{suffix}", delete=False
+            ) as avatar_file:
+                reply = self.get_file(
+                    QUrl(payload["avatar_url"]),
+                    avatar_file.name,
+                )
+                reply.finished.connect(
+                    lambda: self._on_avatar_download_finished(reply, avatar_file.name)
+                )
         self.set_auth(self.url, username=payload["username"])
         self.set_token(
             payload["token"], self.preferences.value("qfieldCloudRememberMe")
