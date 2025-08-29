@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -26,7 +25,7 @@ from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
 
-from ..utils.qt_utils import make_icon
+from qfieldsync.utils.qt_utils import make_icon
 
 
 class CheckerFeedbackTable(QTableWidget):
@@ -42,7 +41,7 @@ class CheckerFeedbackTable(QTableWidget):
             QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding
         )
 
-        for layer_id in checker_feedback.feedbacks.keys():
+        for layer_id in checker_feedback.feedbacks:
             for feedback in checker_feedback.feedbacks[layer_id]:
                 row = self.rowCount()
 

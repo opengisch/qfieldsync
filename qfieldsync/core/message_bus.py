@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -24,7 +23,8 @@ from qgis.PyQt.QtCore import QObject, pyqtSignal
 
 
 class MessageBus(QObject):
-    """Super minimal implementation of a message bus.
+    """
+    Super minimal implementation of a message bus.
 
     Allows communication between unrelated parts of the plugin.
     """

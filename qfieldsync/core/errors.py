@@ -1,0 +1,2 @@
+class QFieldSyncError(Exception):
+    pass

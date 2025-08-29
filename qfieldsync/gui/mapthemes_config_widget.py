@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  MapThemesConfigWidget
@@ -45,10 +44,7 @@ class MapThemesConfigWidget(QTableWidget):
         self.reload(configuration)
 
     def reload(self, configuration):
-        """
-        Load map themes into table.
-        """
-
+        """Load map themes into table."""
         self.setRowCount(0)
         self.setSortingEnabled(False)
         map_themes = self.project.mapThemeCollection().mapThemes()
@@ -61,7 +57,7 @@ class MapThemesConfigWidget(QTableWidget):
 
             cmb = QgsMapLayerComboBox()
             cmb.setAllowEmptyLayer(True)
-            if Qgis.QGIS_VERSION_INT >= 32400:
+            if Qgis.versionInt() >= 32400:  # noqa: PLR2004
                 cmb.setProject(self.project)
             cmb.setFilters(QgsMapLayerProxyModel.VectorLayer)
             if map_theme in configuration:
@@ -73,7 +69,7 @@ class MapThemesConfigWidget(QTableWidget):
         self.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self.setSortingEnabled(True)
 
-    def createConfiguration(self):
+    def create_configuration(self):
         configuration = {}
         for i in range(self.rowCount()):
             item = self.item(i, 0)

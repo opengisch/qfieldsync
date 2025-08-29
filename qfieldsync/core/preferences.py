@@ -9,7 +9,7 @@ from qfieldsync.setting_manager import (
     Stringlist,
 )
 
-pluginName = "QFieldSync"
+pluginName = "QFieldSync"  # noqa: N816
 
 
 class Preferences(SettingManager):

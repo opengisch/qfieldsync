@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  AttachmentNamingTableWidget
@@ -74,8 +73,8 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
             relative_path = node["path"].relative_to(self.path)
             str_path = str(relative_path)
 
-            # TODO decide whether or not to take into account the attachment_dirs into account
-            # attachment_dirs = self.preferences.value("attachmentDirs") # TODO move this in the outer scope
+            # TODO @suricactus: decide whether or not to take into account the attachment_dirs into account
+            # attachment_dirs = self.preferences.value("attachmentDirs") # TODO @suricactus: move this in the outer scope
             # matches = False
 
             # for attachment_dir in attachment_dirs:

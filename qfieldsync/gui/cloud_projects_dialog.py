@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  CloudProjectsDialog
@@ -67,10 +66,10 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
-from qfieldsync.core import Preferences
-from qfieldsync.core.cloud_api import CloudException, CloudNetworkAccessManager
+from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import FileTransfer
+from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
@@ -83,7 +82,7 @@ CloudProjectsDialogUi, _ = loadUiType(
 )
 
 
-class WindowsIconFixWorkDir(object):
+class WindowsIconFixWorkDir:
     """Workaround for older QT (M$ QGIS <3.16.5) to make the custom icons load with relative path."""
 
     def __init__(self, path):
@@ -100,14 +99,14 @@ class WindowsIconFixWorkDir(object):
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
 
-    def __init__(
+    def __init__(  # noqa: PLR0915
         self,
         network_manager: CloudNetworkAccessManager,
-        parent: QWidget = None,
-        project: CloudProject = None,
+        parent: Optional[QWidget] = None,
+        project: Optional[CloudProject] = None,
     ) -> None:
         """Constructor."""
-        super(CloudProjectsDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         with WindowsIconFixWorkDir(Path(__file__).parent.parent.joinpath("ui")):
             self.setupUi(self)
@@ -135,7 +134,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             )
         )
 
-        # TODO show when public projects are ready
+        # TODO @suricactus: show when public projects API is ready
         self.projectsType.hide()
         self.projectsType.addItem(self.tr("My projects"))
         self.projectsType.addItem(self.tr("Community"))
@@ -186,7 +185,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self,
         )
 
-        print("22222")
         self.projectCreatePage.layout().addWidget(self.createProjectWidget)
         self.createProjectWidget.finished.connect(
             lambda project_id: self.on_create_project_finished(project_id)
@@ -276,7 +274,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             3, QHeaderView.ResizeMode.ResizeToContents
         )
 
-        print("1111")
         self.update_ui_state()
 
     @property
@@ -330,7 +327,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projects_refreshed.emit()
         self.show_projects()
 
-    def on_projects_cached_project_files_started(self, project_id: str) -> None:
+    def on_projects_cached_project_files_started(self, _project_id: str) -> None:
         self.projectFilesTab.setEnabled(False)
         self.set_feedback(None)
 
@@ -395,8 +392,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             for part_idx, part in enumerate(parts):
                 if len(stack) > part_idx and stack[part_idx][0] == part:
                     continue
-                else:
-                    stack = stack[0:part_idx]
+                stack = stack[0:part_idx]
 
                 item = QTreeWidgetItem()
                 item.setText(0, part)
@@ -422,7 +418,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                         version_item = QTreeWidgetItem()
 
                         version_item.setData(0, Qt.ItemDataRole.UserRole, version_obj)
-                        # TODO remove default value `versions_count - version_idx`, the "display" key is standard for newer QFC releases
+                        # TODO @suricactus: remove default value `versions_count - version_idx`, the "display" key is standard for newer QFC releases
                         version_display = version_obj.get(
                             "display", versions_count - version_idx
                         )
@@ -461,7 +457,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 else:
                     item.setExpanded(True)
 
-                    # TODO make a fancy button that marks all the child items as checked or not
+                    # TODO @suricactus: make a fancy button that marks all the child items as checked or not
         # NOTE END algorithmic part
 
     @closure
@@ -495,7 +491,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         transfer = FileTransfer(
             self.network_manager,
             self.current_cloud_project,
-            FileTransfer.Type.DOWNLOAD,
+            FileTransfer.TransferType.DOWNLOAD,
             project_file,
             Path(version_dest_filename),
             project_file.versions[version_idx]["version_id"],
@@ -714,7 +710,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         reply.finished.connect(lambda: self.launch())
 
-    def select_local_dir(self) -> Optional[str]:
+    def select_local_dir(self) -> Optional[str]:  # noqa: PLR0912
         """
         ```
             if there is saved location for this project id #
@@ -738,7 +734,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             ask should that project be opened
         ```
         """
-
         local_dir = None
         initial_path = (
             self.localDirLineEdit.text()
@@ -757,7 +752,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 )
 
                 if local_dir == "":
-                    return
+                    return None
 
                 feedback, feedback_msg = local_dir_feedback(
                     local_dir, no_project_status=LocalDirFeedback.Warning
@@ -789,7 +784,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 )
 
                 if local_dir == "":
-                    return
+                    return None
 
                 # when the dir is empty, all is good. But if not there are some file, we need to ask the user to confirm what to do
                 if list(Path(local_dir).iterdir()):
@@ -864,7 +859,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         try:
             self.network_manager.handle_response(reply, False)
-        except CloudException as err:
+        except QfcError as err:
             self.set_feedback(self.tr("Project delete failed: {}").format(str(err)))
             return
 
@@ -1089,7 +1084,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         try:
             self.network_manager.json_object(reply)
-        except CloudException as err:
+        except QfcError as err:
             self.set_feedback("Project update failed: {}".format(str(err)))
             return
 

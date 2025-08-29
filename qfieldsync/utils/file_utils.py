@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 /***************************************************************************
  QFieldSync
@@ -70,7 +68,8 @@ def mkdir(
     parents: bool = False,
     exist_ok: bool = False,
 ) -> None:
-    """Create a directory at a given path and explicitly assign write permissions to make Windows happy.
+    """
+    Create a directory at a given path and explicitly assign write permissions to make Windows happy.
 
     This function mimics the API of `Path.mkdir`.
 
@@ -87,9 +86,9 @@ def mkdir(
     """
     path = Path(path)
     # calling `mkdir` might trigger a `PermissionError` and other. The caller must handle the error.
-    path.mkdir(mode)
+    path.mkdir(mode, parents, exist_ok)
 
     current_permission = stat.S_IMODE(path.stat().st_mode)
-    WRITE = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+    write_flags = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
     # calling `chmod` might trigger a `PermissionError`. The parent must handle the error.
-    path.chmod(current_permission | WRITE)
+    path.chmod(current_permission | write_flags)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -22,7 +21,6 @@
  This script initializes the plugin, making it known to QGIS.
 """
 
-from __future__ import absolute_import
 
 import importlib
 import pathlib
@@ -48,13 +46,13 @@ for module_name in module_names:
 
 
 # noinspection PyPep8Naming
-def classFactory(iface):  # pylint: disable=invalid-name
-    """Load QFieldSync class from file QFieldSync.
+def classFactory(iface):  # pylint: disable=invalid-name # noqa: N802
+    """
+    Load QFieldSync class from file QFieldSync.
 
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-
     from qfieldsync.qfield_sync import QFieldSync
 
     return QFieldSync(iface)

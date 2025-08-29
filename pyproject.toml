@@ -1,0 +1,105 @@
+[tool.ruff]
+# Support Python 3.7+.
+target-version = "py37"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # https://docs.astral.sh/ruff/rules/line-too-long/
+    "E501",
+    # https://docs.astral.sh/ruff/rules/pytest-unittest-assertion/
+    "PT009",
+    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+    "D10",
+    "D203",
+    "D205",
+    "D212",
+    "D400",
+    "D401",
+    "D406",
+    "D407",
+    "D415",
+    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
+    "EM101",
+    "EM102",
+    "EM103",
+    # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
+    "FBT",
+    # https://docs.astral.sh/ruff/rules/collapsible-if/
+    "SIM102",
+    # https://docs.astral.sh/ruff/rules/if-else-block-instead-of-if-exp/
+    "SIM108",
+    # https://docs.astral.sh/ruff/rules/reimplemented-builtin/
+    "SIM110",
+    # https://docs.astral.sh/ruff/rules/assert/
+    "S101",
+    # https://docs.astral.sh/ruff/rules/raise-vanilla-args/
+    "TRY003",
+    # https://docs.astral.sh/ruff/rules/unnecessary-assign
+    "RET504",
+    # https://docs.astral.sh/ruff/rules/superfluous-else-return/
+    "RET505",
+    # https://docs.astral.sh/ruff/rules/multiple-starts-ends-with/
+    "PIE810",
+    # https://docs.astral.sh/ruff/rules/collapsible-else-if/
+    "PLR5501",
+    # https://docs.astral.sh/ruff/rules/unnecessary-paren-on-raise-exception/
+    "RSE102",
+    # https://docs.astral.sh/ruff/rules/line-contains-todo/
+    "FIX002",
+    # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
+    "S603",
+    # https://docs.astral.sh/ruff/rules/start-process-with-partial-path/
+    "S607",
+    # https://docs.astral.sh/ruff/rules/try-consider-else/
+    "TRY300",
+    # https://docs.astral.sh/ruff/rules/raise-within-try/
+    "TRY301",
+    # https://docs.astral.sh/ruff/rules/manual-list-comprehension/
+    "PERF401",
+    # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+    "COM812",
+    # https://docs.astral.sh/ruff/rules/blind-except/
+    "BLE001",
+    # https://docs.astral.sh/ruff/rules/future-rewritable-type-annotation/
+    "FA100",
+    # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+    "PTH",
+    # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+    "ANN",
+    # NOTE: ignored because we heavily use `QObject.tr( "" ).format()`
+    "UP032",
+    # NOTE: we should eventually enable no commented out code
+    "ERA001",
+    # https://docs.astral.sh/ruff/rules/missing-todo-link/
+    # NOTE this should be ideally commented out, having a TODO with a task is a must
+    "TD003",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 30
+
+[tool.ruff.lint.pycodestyle]
+# E501 reports lines that exceed the length of 120.
+max-line-length = 120
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[project]
+name = "qfieldsync"
+description = "QFieldSync is a QGIS plugin that assists the configuration of your QField project with or without QFieldCloud."
+version = "1.0"
+authors = [
+    { name = "OPENGIS.ch", email = "info@opengis.ch" }
+]
+requires-python = ">=3.7"
+
+[project.urls]
+homepage = "https://github.com/opengisch/qfieldsync"
+documentation = "https://docs.qfield.org/get-started/"
+repository = "https://github.com/opengisch/qfieldsync"
+tracker = "https://github.com/opengisch/qfieldsync/issues"
+
+[project.optional-dependencies]
+dev = ["pre-commit"]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -39,11 +38,11 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
+from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.utils.file_utils import mkdir
 
 
 class CloudTransferrer(QObject):
-    # TODO show progress of individual files
     progress = pyqtSignal(float)
     error = pyqtSignal(str, Exception)
     abort = pyqtSignal()
@@ -62,7 +61,7 @@ class CloudTransferrer(QObject):
         cloud_project: CloudProject,
         localized_datasets_project: Optional[CloudProject] = None,
     ) -> None:
-        super(CloudTransferrer, self).__init__(parent=None)
+        super().__init__(parent=None)
         assert cloud_project.local_dir
 
         self.network_manager = network_manager
@@ -98,8 +97,8 @@ class CloudTransferrer(QObject):
 
         mkdir(self.temp_dir)
         mkdir(self.temp_dir.joinpath("backup"))
-        mkdir(self.temp_dir.joinpath(FileTransfer.Type.UPLOAD.value))
-        mkdir(self.temp_dir.joinpath(FileTransfer.Type.DOWNLOAD.value))
+        mkdir(self.temp_dir.joinpath(FileTransfer.TransferType.UPLOAD.value))
+        mkdir(self.temp_dir.joinpath(FileTransfer.TransferType.DOWNLOAD.value))
 
         self.localized_datasets_upload_finished.connect(
             self._on_localized_datasets_upload_finished
@@ -122,13 +121,10 @@ class CloudTransferrer(QObject):
         self.is_started = True
 
         # .qgs/.qgz files should be uploaded the last, since they trigger a new job
-        files_to_upload_sorted = [
-            f
-            for f in sorted(
-                files_to_upload,
-                key=lambda f: f.path.suffix in (".qgs", ".qgz"),
-            )
-        ]
+        files_to_upload_sorted = sorted(
+            files_to_upload,
+            key=lambda f: f.path.suffix in (".qgs", ".qgz"),
+        )
         # prepare the files to be uploaded, copy them in a temporary destination
         for project_file in files_to_upload_sorted:
             assert project_file.local_path
@@ -136,7 +132,7 @@ class CloudTransferrer(QObject):
             project_file.flush()
 
             temp_filename = self.temp_dir.joinpath(
-                FileTransfer.Type.UPLOAD.value, project_file.name
+                FileTransfer.TransferType.UPLOAD.value, project_file.name
             )
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
             copy_multifile(project_file.local_path, temp_filename)
@@ -151,7 +147,7 @@ class CloudTransferrer(QObject):
         # prepare the files to be downloaded, download them in a temporary destination
         for project_file in files_to_download:
             temp_filename = self.temp_dir.joinpath(
-                FileTransfer.Type.DOWNLOAD.value, project_file.name
+                FileTransfer.TransferType.DOWNLOAD.value, project_file.name
             )
             temp_filename.parent.mkdir(parents=True, exist_ok=True)
 
@@ -163,19 +159,19 @@ class CloudTransferrer(QObject):
             self.cloud_project,
             # note the .qgs/.qgz files are sorted in the end
             list(self._files_to_upload.values()),
-            FileTransfer.Type.UPLOAD,
+            FileTransfer.TransferType.UPLOAD,
         )
         self.throttled_deleter = ThrottledFileTransferrer(
             self.network_manager,
             self.cloud_project,
             list(self._files_to_delete.values()),
-            FileTransfer.Type.DELETE,
+            FileTransfer.TransferType.DELETE,
         )
         self.throttled_downloader = ThrottledFileTransferrer(
             self.network_manager,
             self.cloud_project,
             list(self._files_to_download.values()),
-            FileTransfer.Type.DOWNLOAD,
+            FileTransfer.TransferType.DOWNLOAD,
         )
 
         self._files_to_upload_for_localized_datasets = {}
@@ -189,7 +185,7 @@ class CloudTransferrer(QObject):
             self.network_manager,
             self.localized_datasets_project,
             list(self._files_to_upload_for_localized_datasets.values()),
-            FileTransfer.Type.UPLOAD,
+            FileTransfer.TransferType.UPLOAD,
             use_file_local_dir=True,
         )
 
@@ -226,34 +222,32 @@ class CloudTransferrer(QObject):
         self.throttled_uploader.transfer()
 
     def _on_throttled_localized_datasets_upload_progress(
-        self, filename: str, bytes_transferred: int, _bytes_total: int
+        self, _filename: str, bytes_transferred: int, _bytes_total: int
     ) -> None:
         fraction = min(bytes_transferred / max(self.total_upload_bytes, 1), 1)
         self.localized_datasets_upload_progress.emit(fraction)
 
     def _on_throttled_localized_datasets_upload_error(
-        self, filename: str, error: str
+        self, _filename: str, _error: str
     ) -> None:
         self.throttled_uploader_for_localized_datasets.abort()
 
     def _on_throttled_localized_datasets_upload_finished(self) -> None:
         self.localized_datasets_upload_progress.emit(1)
         self.localized_datasets_upload_finished.emit()
-        return
 
     def _on_throttled_upload_progress(
-        self, filename: str, bytes_transferred: int, _bytes_total: int
+        self, _filename: str, bytes_transferred: int, _bytes_total: int
     ) -> None:
         fraction = min(bytes_transferred / max(self.total_upload_bytes, 1), 1)
         self.upload_progress.emit(fraction)
 
-    def _on_throttled_upload_error(self, filename: str, error: str) -> None:
+    def _on_throttled_upload_error(self, _filename: str, _error: str) -> None:
         self.throttled_uploader.abort()
 
     def _on_throttled_upload_finished(self) -> None:
         self.upload_progress.emit(1)
         self.upload_finished.emit()
-        return
 
     def _delete(self) -> None:
         assert not self.is_upload_active, "Upload in progress"
@@ -276,7 +270,7 @@ class CloudTransferrer(QObject):
         if self.delete_files_finished == len(self._files_to_delete):
             self.delete_finished.emit()
 
-    def _on_throttled_delete_error(self, filename: str, error: str) -> None:
+    def _on_throttled_delete_error(self, _filename: str, _error: str) -> None:
         self.throttled_deleter.abort()
 
     def _on_throttled_delete_finished(self) -> None:
@@ -302,18 +296,17 @@ class CloudTransferrer(QObject):
         self.throttled_downloader.transfer()
 
     def _on_throttled_download_progress(
-        self, filename: str, bytes_transferred: int, _bytes_total: int
+        self, _filename: str, bytes_transferred: int, _bytes_total: int
     ) -> None:
         fraction = min(bytes_transferred / max(self.total_download_bytes, 1), 1)
         self.download_progress.emit(fraction)
 
-    def _on_throttled_download_error(self, filename: str, error: str) -> None:
+    def _on_throttled_download_error(self, _filename: str, _error: str) -> None:
         self.throttled_downloader.abort()
 
     def _on_throttled_download_finished(self) -> None:
         self.download_progress.emit(1)
         self.download_finished.emit()
-        return
 
     def _on_localized_datasets_upload_finished(self) -> None:
         self.is_localized_datasets_upload_active = False
@@ -378,8 +371,8 @@ class CloudTransferrer(QObject):
 
     def _make_backup(self) -> None:
         for project_file in [
-            *list(map(lambda f: f, self._files_to_upload.values())),
-            *list(map(lambda f: f, self._files_to_download.values())),
+            *list(self._files_to_upload.values()),
+            *list(self._files_to_download.values()),
         ]:
             if project_file.local_path and project_file.local_path.exists():
                 dest = self.temp_dir.joinpath("backup", project_file.path)
@@ -391,7 +384,7 @@ class CloudTransferrer(QObject):
         subdir_path = self.temp_dir.joinpath(subdir)
 
         if not subdir_path.exists():
-            raise Exception(
+            raise QFieldSyncError(
                 self.tr('Directory "{}" does not exist').format(subdir_path)
             )
 
@@ -422,7 +415,7 @@ class CloudTransferrer(QObject):
     def import_qfield_project(self) -> bool:
         try:
             self._temp_dir2main_dir(
-                str(self.temp_dir.joinpath(FileTransfer.Type.DOWNLOAD.value))
+                str(self.temp_dir.joinpath(FileTransfer.TransferType.DOWNLOAD.value))
             )
             return True
         except Exception as err:
@@ -475,19 +468,19 @@ class FileTransfer(QObject):
     progress = pyqtSignal(int, int)
     finished = pyqtSignal()
 
-    class Type(Enum):
+    class TransferType(Enum):
         DOWNLOAD = "download"
         UPLOAD = "upload"
         DELETE = "delete"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         network_manager: CloudNetworkAccessManager,
         cloud_project: CloudProject,
-        type: Type,
+        transfer_type: TransferType,
         file: ProjectFile,
         destination: Path,
-        version: str = None,
+        version: Optional[str] = None,
     ) -> None:
         super(QObject, self).__init__()
 
@@ -506,7 +499,7 @@ class FileTransfer(QObject):
         self.is_aborted = False
         self.is_local_delete = False
         self.is_local_delete_finished = False
-        self.type = type
+        self.transfer_type = transfer_type
         self.version = version
 
         if self.file.checkout == ProjectFileCheckout.Local or (
@@ -526,7 +519,7 @@ class FileTransfer(QObject):
         self.last_reply.abort()
 
     def transfer(self) -> None:
-        if self.type == FileTransfer.Type.DOWNLOAD:
+        if self.transfer_type == FileTransfer.TransferType.DOWNLOAD:
             if self.is_redirect:
                 reply = self.network_manager.get(
                     self.last_redirect_url, str(self.fs_filename), True
@@ -539,12 +532,12 @@ class FileTransfer(QObject):
                     params=params,
                     skip_cache=True,
                 )
-        elif self.type == FileTransfer.Type.UPLOAD:
+        elif self.transfer_type == FileTransfer.TransferType.UPLOAD:
             reply = self.network_manager.cloud_upload_files(
                 "files/" + self.cloud_project.id + "/" + self.filename,
                 filenames=[str(self.fs_filename)],
             )
-        elif self.type == FileTransfer.Type.DELETE:
+        elif self.transfer_type == FileTransfer.TransferType.DELETE:
             if self.is_local_delete:
                 try:
                     assert self.file.local_path
@@ -586,7 +579,7 @@ class FileTransfer(QObject):
 
     def _on_finished(self) -> None:
         if self.is_redirect:
-            if self.type == FileTransfer.Type.DOWNLOAD:
+            if self.transfer_type == FileTransfer.TransferType.DOWNLOAD:
                 self.transfer()
                 return
             else:
@@ -596,7 +589,7 @@ class FileTransfer(QObject):
             self.network_manager.handle_response(self.last_reply, False)
 
             if (
-                self.type == FileTransfer.Type.DOWNLOAD
+                self.transfer_type == FileTransfer.TransferType.DOWNLOAD
                 and not self.fs_filename.is_file()
             ):
                 self.error = Exception(
@@ -606,7 +599,7 @@ class FileTransfer(QObject):
             self.error = err
 
             # remove partially downloaded files
-            if self.type == FileTransfer.Type.DOWNLOAD:
+            if self.transfer_type == FileTransfer.TransferType.DOWNLOAD:
                 if self.fs_filename.is_file():
                     self.fs_filename.unlink()
 
@@ -674,12 +667,12 @@ class ThrottledFileTransferrer(QObject):
     file_finished = pyqtSignal(str)
     progress = pyqtSignal(str, int, int)
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         network_manager,
         cloud_project,
         files: List[ProjectFile],
-        transfer_type: FileTransfer.Type,
+        transfer_type: FileTransfer.TransferType,
         max_parallel_requests: int = 8,
         use_file_local_dir: bool = False,
     ) -> None:
@@ -706,7 +699,7 @@ class ThrottledFileTransferrer(QObject):
                     str(self.transfer_type.value), file.name
                 )
             else:
-                assert False
+                raise AssertionError("Could not determine the file destination!")
 
             transfer = FileTransfer(
                 self.network_manager,
@@ -716,10 +709,14 @@ class ThrottledFileTransferrer(QObject):
                 destination,
             )
             transfer.progress.connect(
-                lambda *args: self._on_transfer_progress(transfer, *args)
+                lambda *args, transfer=transfer: self._on_transfer_progress(
+                    transfer, *args
+                )
             )
             transfer.finished.connect(
-                lambda *args: self._on_transfer_finished(transfer, *args)
+                lambda *args, transfer=transfer: self._on_transfer_finished(
+                    transfer, *args
+                )
             )
 
             assert file.name not in self.transfers
@@ -748,7 +745,7 @@ class ThrottledFileTransferrer(QObject):
 
         self.aborted.emit()
 
-    def _on_transfer_progress(self, transfer, bytes_received: int, bytes_total: int):
+    def _on_transfer_progress(self, transfer, _bytes_received: int, _bytes_total: int):
         bytes_received_sum = sum([t.bytes_transferred for t in self.transfers.values()])
         bytes_total_sum = sum([t.bytes_total for t in self.transfers.values()])
         self.progress.emit(transfer.filename, bytes_received_sum, bytes_total_sum)
@@ -757,15 +754,15 @@ class ThrottledFileTransferrer(QObject):
         self.transfer()
 
         if transfer.error:
-            if transfer.type == FileTransfer.Type.DOWNLOAD:
+            if transfer.transfer_type == FileTransfer.TransferType.DOWNLOAD:
                 msg = self.tr('Downloading file "{}" failed!').format(
                     transfer.fs_filename
                 )
-            elif transfer.type == FileTransfer.Type.UPLOAD:
+            elif transfer.transfer_type == FileTransfer.TransferType.UPLOAD:
                 msg = self.tr('Uploading file "{}" failed!').format(
                     transfer.fs_filename
                 )
-            elif transfer.type == FileTransfer.Type.DELETE:
+            elif transfer.transfer_type == FileTransfer.TransferType.DELETE:
                 msg = self.tr('Deleting file "{}" failed!').format(transfer.fs_filename)
             else:
                 raise NotImplementedError()
@@ -785,9 +782,11 @@ class ThrottledFileTransferrer(QObject):
 
 class TransferFileLogsModel(QAbstractListModel):
     def __init__(
-        self, transferrers: List[ThrottledFileTransferrer], parent: QObject = None
+        self,
+        transferrers: List[ThrottledFileTransferrer],
+        parent: Optional[QObject] = None,
     ):
-        super(TransferFileLogsModel, self).__init__()
+        super().__init__(parent)
         self.transfers: List[FileTransfer] = []
         self.filename_to_index: Dict[str, int] = {}
 
@@ -800,7 +799,7 @@ class TransferFileLogsModel(QAbstractListModel):
             transferrer.error.connect(self._on_updated_transfer)
             transferrer.progress.connect(self._on_updated_transfer)
 
-    def rowCount(self, parent: QModelIndex) -> int:
+    def rowCount(self, parent: QModelIndex) -> int:  # noqa: ARG002, N802
         return len(self.transfers)
 
     def data(self, index: QModelIndex, role: int) -> Any:
@@ -815,7 +814,7 @@ class TransferFileLogsModel(QAbstractListModel):
     def index(self, row: int, col: int, _index: QModelIndex) -> QModelIndex:
         return self.createIndex(row, col)
 
-    def _data_string(self, transfer: FileTransfer) -> str:
+    def _data_string(self, transfer: FileTransfer) -> str:  # noqa: PLR0911, PLR0912
         error_msg = ""
         if transfer.is_failed:
             error_msg = (
@@ -826,7 +825,7 @@ class TransferFileLogsModel(QAbstractListModel):
                 )
             )
 
-        if transfer.type == FileTransfer.Type.DOWNLOAD:
+        if transfer.transfer_type == FileTransfer.TransferType.DOWNLOAD:
             if transfer.is_aborted:
                 return self.tr('Aborted "{}" download'.format(transfer.filename))
             elif transfer.is_failed:
@@ -848,7 +847,7 @@ class TransferFileLogsModel(QAbstractListModel):
                 )
             else:
                 return self.tr('File to download "{}"'.format(transfer.filename))
-        elif transfer.type == FileTransfer.Type.UPLOAD:
+        elif transfer.transfer_type == FileTransfer.TransferType.UPLOAD:
             if transfer.is_aborted:
                 return self.tr('Aborted "{}" upload'.format(transfer.filename))
             elif transfer.is_failed:
@@ -870,7 +869,7 @@ class TransferFileLogsModel(QAbstractListModel):
                 )
             else:
                 return self.tr('File to upload "{}"'.format(transfer.filename))
-        elif transfer.type == FileTransfer.Type.DELETE:
+        elif transfer.transfer_type == FileTransfer.TransferType.DELETE:
             if transfer.file.checkout & ProjectFileCheckout.Cloud:
                 if transfer.is_aborted:
                     return self.tr(
@@ -916,7 +915,7 @@ class TransferFileLogsModel(QAbstractListModel):
         else:
             raise NotImplementedError("Unknown transfer type")
 
-    def _on_updated_transfer(self, filename, *args) -> None:
+    def _on_updated_transfer(self, filename, *_args) -> None:
         row = self.filename_to_index[filename]
         index = self.createIndex(row, 0)
 
