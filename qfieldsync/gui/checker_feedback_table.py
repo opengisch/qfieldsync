@@ -25,7 +25,7 @@ from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
 
-from ..utils.qt_utils import make_icon
+from qfieldsync.utils.qt_utils import make_icon
 
 
 class CheckerFeedbackTable(QTableWidget):

@@ -53,8 +53,7 @@ from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogs
 from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
-
-from ..utils.qt_utils import make_folder_selector, make_icon, make_pixmap
+from qfieldsync.utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
 CloudTransferDialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_transfer_dialog.ui")
