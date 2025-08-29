@@ -868,9 +868,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.project_synchronized.emit()
 
     def on_local_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
-        project_file = item.data(0, Qt.ItemDataRole.UserRole)
-        project_file.checkout & ProjectFileCheckout.Cloud
-
         local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
         cloud_checkbox = self.filesTree.itemWidget(item, 3).children()[1]
 
@@ -880,9 +877,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.update_detail(item)
 
     def on_cloud_checkbox_toggled(self, item: QTreeWidgetItem) -> None:
-        project_file = item.data(0, Qt.ItemDataRole.UserRole)
-        project_file.local_path_exists
-
         local_checkbox = self.filesTree.itemWidget(item, 1).children()[1]
         cloud_checkbox = self.filesTree.itemWidget(item, 3).children()[1]
 
