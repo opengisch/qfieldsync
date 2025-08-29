@@ -98,7 +98,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         if rejected_cb:
             CloudTransferDialog.instance.rejected.connect(rejected_cb)
 
-        def on_finished(result):
+        def on_finished(_result):
             CloudTransferDialog.instance = None
 
         CloudTransferDialog.instance.finished.connect(on_finished)

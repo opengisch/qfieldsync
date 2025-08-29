@@ -65,7 +65,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         if rejected_cb:
             CloudLoginDialog.instance.rejected.connect(rejected_cb)
 
-        def on_finished(result):
+        def on_finished(_result):
             CloudLoginDialog.instance = None
 
         CloudLoginDialog.instance.finished.connect(on_finished)
