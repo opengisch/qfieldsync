@@ -22,13 +22,7 @@
 
 
 def set_available_actions(combobox, actions, default_action):
-    """
-    Sets available actions on a checkbox and selects the current one.
-
-    Args:
-        combobox (QComboBox): target combobox
-        layer_source (LayerSource): target layer
-    """
+    """Sets available actions on a checkbox and selects the current one."""
     for action, description in actions:
         combobox.addItem(description)
         combobox.setItemData(combobox.count() - 1, action)
