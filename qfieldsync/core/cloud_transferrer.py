@@ -121,13 +121,10 @@ class CloudTransferrer(QObject):
         self.is_started = True
 
         # .qgs/.qgz files should be uploaded the last, since they trigger a new job
-        files_to_upload_sorted = [
-            f
-            for f in sorted(
-                files_to_upload,
-                key=lambda f: f.path.suffix in (".qgs", ".qgz"),
-            )
-        ]
+        files_to_upload_sorted = sorted(
+            files_to_upload,
+            key=lambda f: f.path.suffix in (".qgs", ".qgz"),
+        )
         # prepare the files to be uploaded, copy them in a temporary destination
         for project_file in files_to_upload_sorted:
             assert project_file.local_path
