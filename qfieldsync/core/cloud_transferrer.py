@@ -699,7 +699,7 @@ class ThrottledFileTransferrer(QObject):
                     str(self.transfer_type.value), file.name
                 )
             else:
-                assert False
+                raise AssertionError("Could not determine the file destination!")
 
             transfer = FileTransfer(
                 self.network_manager,
