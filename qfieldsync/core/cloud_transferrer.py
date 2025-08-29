@@ -782,7 +782,9 @@ class ThrottledFileTransferrer(QObject):
 
 class TransferFileLogsModel(QAbstractListModel):
     def __init__(
-        self, transferrers: List[ThrottledFileTransferrer], parent: QObject = None
+        self,
+        transferrers: List[ThrottledFileTransferrer],
+        parent: Optional[QObject] = None,
     ):
         super().__init__(parent)
         self.transfers: List[FileTransfer] = []

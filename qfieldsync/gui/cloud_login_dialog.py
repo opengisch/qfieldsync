@@ -49,7 +49,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         network_manager: CloudNetworkAccessManager,
         accepted_cb: Optional[Callable] = None,
         rejected_cb: Optional[Callable] = None,
-        parent: QWidget = None,
+        parent: Optional[QWidget] = None,
     ):
         if CloudLoginDialog.instance:
             CloudLoginDialog.instance.show()
@@ -73,7 +73,9 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         return CloudLoginDialog.instance
 
     def __init__(
-        self, network_manager: CloudNetworkAccessManager, parent: QWidget = None
+        self,
+        network_manager: CloudNetworkAccessManager,
+        parent: Optional[QWidget] = None,
     ) -> None:
         """Constructor."""
         super().__init__(parent=parent)

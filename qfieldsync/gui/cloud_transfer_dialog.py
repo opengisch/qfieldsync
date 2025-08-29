@@ -294,7 +294,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             reply.finished.connect(lambda: self.check_localized_datasets())
 
     def show_end_page(
-        self, feedback: str = "", logs_model: TransferFileLogsModel = None
+        self, feedback: str = "", logs_model: Optional[TransferFileLogsModel] = None
     ) -> None:
         summary = ""
 

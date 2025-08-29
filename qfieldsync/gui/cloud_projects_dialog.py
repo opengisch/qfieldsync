@@ -99,11 +99,11 @@ class WindowsIconFixWorkDir:
 class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     projects_refreshed = pyqtSignal()
 
-    def __init__(
+    def __init__(  # noqa: PLR0915
         self,
         network_manager: CloudNetworkAccessManager,
-        parent: QWidget = None,
-        project: CloudProject = None,
+        parent: Optional[QWidget] = None,
+        project: Optional[CloudProject] = None,
     ) -> None:
         """Constructor."""
         super().__init__(parent=parent)
