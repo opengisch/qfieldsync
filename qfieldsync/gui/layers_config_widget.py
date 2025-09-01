@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSyncDialog
@@ -24,7 +23,7 @@ import os
 from typing import Callable
 
 from libqfieldsync.layer import LayerSource, SyncAction
-from qgis.core import Qgis, QgsApplication, QgsMapLayerModel, QgsProject
+from qgis.core import QgsApplication, QgsMapLayerModel, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
@@ -50,7 +49,7 @@ LayersConfigWidgetUi, _ = loadUiType(
 class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
     def __init__(self, project, use_cloud_actions, layer_sources, parent=None):
         """Constructor."""
-        super(LayersConfigWidget, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
 
         self.project = project
@@ -98,7 +97,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         self.multipleToggleButton.setPopupMode(
             QToolButton.ToolButtonPopupMode.InstantPopup
         )
-        self.toggleMenu.triggered.connect(self.toggleMenu_triggered)
+        self.toggleMenu.triggered.connect(self._on_toggle_menu_triggered)
 
         self.settingsPackagingButton.setVisible(False)
         if self.use_cloud_actions:
@@ -119,22 +118,22 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             self.settingsPackagingButton.setMenu(self.settingsPackagingMenu)
 
             self.settingsPackagingMenu.triggered.connect(
-                self.onLayerActionPreferenceChanged
+                self._on_layer_action_preference_changed
             )
 
             self.horizontalLayout.addWidget(self.settingsPackagingButton)
 
-        self.unsupportedLayersList = list()
+        self.unsupportedLayersList = []
 
         self._on_message_bus_messaged_wrapper = (
             lambda msg: self._on_message_bus_messaged(msg)
         )
         message_bus.messaged.connect(self._on_message_bus_messaged_wrapper)
 
-        self.showVisibleLayersOnlyCheckbox.stateChanged.connect(self.reloadProject)
-        self.textFilterBox.textChanged.connect(self.reloadProject)
+        self.showVisibleLayersOnlyCheckbox.stateChanged.connect(self._reload_project)
+        self.textFilterBox.textChanged.connect(self._reload_project)
 
-        self.reloadProject()
+        self._reload_project()
 
     def get_available_actions(self, layer_source):
         if self.use_cloud_actions:
@@ -160,11 +159,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         else:
             return layer_source.default_action
 
-    def reloadProject(self):
-        """
-        Load all layers from the map layer registry into the table.
-        """
-        self.unsupportedLayersList = list()
+    def _reload_project(self):
+        """Load all layers from the map layer registry into the table."""
+        self.unsupportedLayersList = []
 
         self.layersTable.setRowCount(0)
         self.layersTable.setSortingEnabled(False)
@@ -211,7 +208,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 QgsApplication.getThemeIcon("/propertyicons/settings.svg")
             )
             properties_btn.setAutoRaise(True)
-            properties_btn.clicked.connect(self.propertiesBtn_clicked(layer_source))
+            properties_btn.clicked.connect(
+                self._on_properties_button_clicked(layer_source)
+            )
 
             self.layersTable.setCellWidget(count, 1, cmb)
             self.layersTable.setCellWidget(count, 2, properties_btn)
@@ -238,16 +237,13 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             )
             self.unsupportedLayersLabel.setText(unsupported_layers_text)
 
-    def propertiesBtn_clicked(self, layer_source: LayerSource) -> Callable:
+    def _on_properties_button_clicked(self, layer_source: LayerSource) -> Callable:
         def clicked_callback() -> None:
-            if Qgis.QGIS_VERSION_INT >= 31900:
-                iface.showLayerProperties(layer_source.layer, "QFieldLayerSettingsPage")
-            else:
-                iface.showLayerProperties(layer_source.layer)
+            iface.showLayerProperties(layer_source.layer, "QFieldLayerSettingsPage")
 
         return clicked_callback
 
-    def onLayerActionPreferenceChanged(self, action: QAction):
+    def _on_layer_action_preference_changed(self, action: QAction):
         """Toggle when prefer online or offline menu actions have been triggered."""
         prefer_online = action == self.preferOnlineAction
 
@@ -263,7 +259,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             idx, _cloud_action = layer_source.preferred_cloud_action(prefer_online)
             cmb.setCurrentIndex(idx)
 
-    def toggleMenu_triggered(self, action):
+    def _on_toggle_menu_triggered(self, action):
         """
         Toggles usage of layers
         :param action: the menu action that triggered this
@@ -328,7 +324,7 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         if is_project_dirty:
             self.project.setDirty(True)
 
-        self.reloadProject()
+        self._reload_project()
 
     def apply(self):
         is_project_dirty = False
@@ -355,12 +351,12 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
         for layer_source in self.layer_sources.copy():
             try:
                 layer_source.read_layer()
-            except RuntimeError:
+            except RuntimeError:  # noqa: PERF203
                 self.layer_sources.remove(layer_source)
 
         # quite ugly workaround, but this method sometimes operates on deleted objects,
         # so we need to make sure we don't get exceptions
         try:
-            self.reloadProject()
+            self._reload_project()
         except Exception:
             message_bus.messaged.disconnect(self._on_message_bus_messaged_wrapper)

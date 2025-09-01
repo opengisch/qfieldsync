@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSyncDialog
@@ -31,7 +30,7 @@ from libqfieldsync.offline_converter import (
     PackagingCanceledError,
 )
 
-# TODO this try/catch was added due to module structure changes in QFS 4.8.0. Remove this as enough time has passed since March 2024.
+# TODO @suricactus: this try/catch was added due to module structure changes in QFS 4.8.0. Remove this as enough time has passed since March 2024.
 try:
     from libqfieldsync.offliners import QgisCoreOffliner
 except ModuleNotFoundError:
@@ -58,7 +57,6 @@ from qgis.PyQt.uic import loadUiType
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
-from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 
 MAX_LENGTH_CHARS_FILEPATH = 200
 
@@ -72,7 +70,7 @@ class PackageDialog(QDialog, DialogUi):
 
     def __init__(self, iface, project, offline_editing, parent=None):
         """Constructor."""
-        super(PackageDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
 
         self.iface = iface
@@ -255,9 +253,9 @@ class PackageDialog(QDialog, DialogUi):
         except PackagingCanceledError:
             # packaging was canceled by user, we do nothing.
             return
-        except Exception as err:
+        except Exception:
             self.do_post_offline_convert_action(False)
-            raise err
+            raise
         finally:
             QApplication.restoreOverrideCursor()
             self._offline_convertor = None
@@ -292,36 +290,31 @@ class PackageDialog(QDialog, DialogUi):
         self.iface.messageBar().pushMessage(result_message, status, 0)
 
     def update_info_visibility(self):
-        """
-        Show the info label if there are unconfigured layers
-        """
-        localizedDataPathLayers = []
+        """Show the info label if there are unconfigured layers"""
+        localized_data_path_layers = []
         for layer in list(self.project.mapLayers().values()):
             layer_source = LayerSource(layer)
 
             if layer_source.is_localized_path:
-                localizedDataPathLayers.append("- {}".format(layer.name()))
+                localized_data_path_layers.append("- {}".format(layer.name()))
 
-        if localizedDataPathLayers:
+        if localized_data_path_layers:
             self.infoLocalizedLayersLabel.setText(
                 self.tr(
                     "The current project relies on %n shared dataset(s), make sure to copy them into the shared datasets path of devices running QField. The layer(s) stored in a shared dataset(s) are:\n{}",
                     "",
-                    len(localizedDataPathLayers),
-                ).format("\n".join(localizedDataPathLayers))
+                    len(localized_data_path_layers),
+                ).format("\n".join(localized_data_path_layers))
             )
 
             self.infoLocalizedLayersLabel.setVisible(True)
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
-        self.infoGroupBox.setVisible(len(localizedDataPathLayers) > 0)
+        self.infoGroupBox.setVisible(len(localized_data_path_layers) > 0)
 
     def show_settings(self):
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.showProjectPropertiesDialog("QField")
-        else:
-            dlg = ProjectConfigurationDialog(self.iface.mainWindow())
-            dlg.exec_()
+        self.iface.showProjectPropertiesDialog("QField")
+
         self.update_info_visibility()
 
     def update_total(self, current, layer_count, message):

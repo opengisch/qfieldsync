@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -28,12 +27,12 @@ from qgis.core import QgsMapLayer, QgsProject, QgsVirtualLayerDefinition
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QUrl, pyqtSignal
 from qgis.utils import iface
 
+from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qgis_utils import open_project
 
 
 class CloudConverter(QObject):
-    progressStopped = pyqtSignal()
     warning = pyqtSignal(str, str)
     total_progress_updated = pyqtSignal(int, int, str)
 
@@ -42,20 +41,17 @@ class CloudConverter(QObject):
         project: QgsProject,
         export_dirname: str,
     ):
-        super(CloudConverter, self).__init__(parent=None)
+        super().__init__(parent=None)
         self.project = project
-        self.__layers = list()
+        self.__layers = []
 
         # elipsis workaround
         self.trUtf8 = self.tr
 
         self.export_dirname = Path(export_dirname)
 
-    def convert(self) -> None:  # noqa: C901
-        """
-        Convert the project to a cloud project.
-        """
-
+    def convert(self) -> None:  # noqa: PLR0912, PLR0915
+        """Convert the project to a cloud project."""
         original_project_path = self.project.fileName()
         project_path = self.export_dirname.joinpath(
             f"{self.project.baseName()}_cloud.qgs"
@@ -68,7 +64,7 @@ class CloudConverter(QObject):
                 self.export_dirname.mkdir(parents=True, exist_ok=True)
 
             if get_qgis_files_within_dir(self.export_dirname):
-                raise Exception(
+                raise QFieldSyncError(
                     self.tr("The destination folder already contains a project file")
                 )
 
@@ -128,14 +124,14 @@ class CloudConverter(QObject):
                             self.project.removeMapLayer(layer)
                             continue
                 else:
-                    layer_source.copy(self.export_dirname, list())
+                    layer_source.copy(self.export_dirname, [])
                 layer.setCustomProperty(
                     "QFieldSync/cloud_action", layer_source.default_cloud_action
                 )
 
             # save the offline project twice so that the offline plugin can "know" that it's a relative path
             if not self.project.write(str(project_path)):
-                raise Exception(
+                raise QFieldSyncError(
                     self.tr('Failed to save project to "{}".').format(project_path)
                 )
 
@@ -160,7 +156,7 @@ class CloudConverter(QObject):
             self.project.clear()
             QCoreApplication.processEvents()
 
-            # TODO whatcha gonna do if QgsProject::read()/write() fails
+            # TODO @suricactus: whatcha gonna do if QgsProject::read()/write() fails
             if is_converted:
                 iface.addProject(str(project_path))
             else:

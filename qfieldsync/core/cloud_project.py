@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -33,6 +32,8 @@ from qgis.PyQt.QtCore import QDir
 
 from qfieldsync.core.preferences import Preferences
 
+ETAG_BLOCKSIZE = 65536
+
 
 class ProjectFileCheckout(IntFlag):
     Deleted = 0
@@ -42,7 +43,8 @@ class ProjectFileCheckout(IntFlag):
 
 
 def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> str:
-    """Calculate ETag as in Object Storage (S3) of a local file.
+    """
+    Calculate ETag as in Object Storage (S3) of a local file.
 
     ETag is a MD5. But for the multipart uploaded files, the MD5 is computed from the concatenation of the MD5s of each uploaded part.
 
@@ -59,13 +61,13 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
         file_size = os.fstat(f.fileno()).st_size
 
         if file_size <= part_size:
-            BLOCKSIZE = 65536
-            hasher = hashlib.md5()
+            # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
+            hasher = hashlib.md5()  # noqa: S324
 
-            buf = f.read(BLOCKSIZE)
+            buf = f.read(ETAG_BLOCKSIZE)
             while len(buf) > 0:
                 hasher.update(buf)
-                buf = f.read(BLOCKSIZE)
+                buf = f.read(ETAG_BLOCKSIZE)
 
             return hasher.hexdigest()
         else:
@@ -76,9 +78,11 @@ def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> s
             # When that's done, add a hyphen and the number of parts to get the ETag.
             md5sums = []
             for data in iter(lambda: f.read(part_size), b""):
-                md5sums.append(hashlib.md5(data).digest())
+                # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
+                md5sums.append(hashlib.md5(data).digest())  # noqa: S324
 
-            final_md5sum = hashlib.md5(b"".join(md5sums))
+            # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
+            final_md5sum = hashlib.md5(b"".join(md5sums))  # noqa: S324
 
             return "{}-{}".format(final_md5sum.hexdigest(), len(md5sums))
 
@@ -104,14 +108,14 @@ class ProjectFile:
     @property
     def created_at(self) -> Optional[str]:
         if not self.versions:
-            return
+            return None
 
         return self.versions[-1].get("last_modified")
 
     @property
     def updated_at(self) -> Optional[str]:
         if not self.versions:
-            return
+            return None
 
         return self.versions[0].get("last_modified")
 
@@ -148,7 +152,7 @@ class ProjectFile:
     @property
     def local_size(self) -> Optional[int]:
         if not self.local_path_exists:
-            return
+            return None
 
         assert self.local_path
 
@@ -161,7 +165,7 @@ class ProjectFile:
     @property
     def local_path(self) -> Optional[Path]:
         if not self._local_dir:
-            return
+            return None
 
         return Path(self._local_dir + "/" + self.name)
 
@@ -175,7 +179,7 @@ class ProjectFile:
     @property
     def local_sha256(self) -> Optional[str]:
         if not self.local_path_exists:
-            return
+            return None
 
         assert self.local_path
         assert self.local_path.is_file()
@@ -186,7 +190,7 @@ class ProjectFile:
     @property
     def local_etag(self) -> Optional[str]:
         if not self.local_path_exists:
-            return
+            return None
 
         assert self.local_path
         assert self.local_path.is_file()
@@ -278,7 +282,7 @@ class CloudProject:
         return None
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         return self._data["id"]
 
     @property
@@ -315,7 +319,7 @@ class CloudProject:
 
     @property
     def status(self) -> bool:
-        # TODO remove as soon as all API servers support `status` key
+        # TODO @suricactus: remove as soon as all API servers support `status` key
         return self._data.get("status", "busy")
 
     @property
@@ -339,7 +343,6 @@ class CloudProject:
         else:
             return dirname
 
-    # TODO remove this, use `get_files` instead
     @property
     def cloud_files(self) -> Optional[List]:
         return self._cloud_files
@@ -409,7 +412,7 @@ class CloudProject:
         read_flags |= QgsProject.FlagDontLoadLayouts
         read_flags |= QgsProject.FlagTrustLayerMetadata
 
-        if Qgis.versionInt() >= 32600:
+        if Qgis.versionInt() >= 32600:  # noqa: PLR2004
             read_flags |= QgsProject.FlagDontLoad3DViews
 
         temporary_project = QgsProject()
@@ -417,7 +420,7 @@ class CloudProject:
         layers = temporary_project.mapLayers()
 
         localized_datasets_files = []
-        for layer_id, layer in layers.items():
+        for layer in layers.values():
             if not layer.dataProvider():
                 continue
 

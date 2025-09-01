@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldCloudDialog
@@ -21,7 +20,7 @@
  ***************************************************************************/
 """
 import os
-from typing import Callable
+from typing import Callable, Optional
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap
@@ -34,8 +33,8 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+from qfieldsync.core.preferences import Preferences
 
 CloudLoginDialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_login_dialog.ui")
@@ -48,9 +47,9 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     @staticmethod
     def show_auth_dialog(
         network_manager: CloudNetworkAccessManager,
-        accepted_cb: Callable = None,
-        rejected_cb: Callable = None,
-        parent: QWidget = None,
+        accepted_cb: Optional[Callable] = None,
+        rejected_cb: Optional[Callable] = None,
+        parent: Optional[QWidget] = None,
     ):
         if CloudLoginDialog.instance:
             CloudLoginDialog.instance.show()
@@ -66,7 +65,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         if rejected_cb:
             CloudLoginDialog.instance.rejected.connect(rejected_cb)
 
-        def on_finished(result):
+        def on_finished(_result):
             CloudLoginDialog.instance = None
 
         CloudLoginDialog.instance.finished.connect(on_finished)
@@ -74,10 +73,12 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         return CloudLoginDialog.instance
 
     def __init__(
-        self, network_manager: CloudNetworkAccessManager, parent: QWidget = None
+        self,
+        network_manager: CloudNetworkAccessManager,
+        parent: Optional[QWidget] = None,
     ) -> None:
         """Constructor."""
-        super(CloudLoginDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
         self.preferences = Preferences()
         self.network_manager = network_manager
@@ -117,7 +118,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         )
         self.qfieldCloudIcon.setMinimumSize(175, 180)
         self.qfieldCloudIcon.mouseDoubleClickEvent = (
-            lambda event: self.toggle_server_url_visibility()
+            lambda _event: self.toggle_server_url_visibility()
         )
         self.rejected.connect(self.on_rejected)
         self.hide()

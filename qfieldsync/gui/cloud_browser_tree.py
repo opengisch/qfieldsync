@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldCloud
@@ -21,7 +20,7 @@
 
 import os
 from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import (
@@ -37,10 +36,12 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.utils import iface
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
-from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_projects_dialog import CloudProjectsDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
+
+if TYPE_CHECKING:
+    from qfieldsync.core.cloud_project import CloudProject
 
 
 class QFieldCloudItemProvider(QgsDataItemProvider):
@@ -54,12 +55,12 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
     def capabilities(self):
         return QgsDataProvider.Net
 
-    def createDataItem(self, path, parentItem):
-        if not parentItem:
+    def createDataItem(self, _path, parent):  # noqa: N802
+        if not parent:
             root_item = QFieldCloudRootItem(self.network_manager)
             return root_item
         else:
-            return
+            return None
 
 
 class QFieldCloudRootItem(QgsDataCollectionItem):
@@ -84,7 +85,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
     def capabilities2(self):
         return QgsDataItem.Fast
 
-    def createChildren(self):
+    def createChildren(self):  # noqa: N802
         items = []
 
         if not self.network_manager.has_token():
@@ -106,7 +107,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         )
         items.append(my_projects)
 
-        # TODO uncomment when public projects are ready
+        # TODO @suricactus: uncomment when public projects API is ready
         # public_projects = QFieldCloudGroupItem(
         #     self, "Community", "public", "../resources/cloud.svg", 2
         # )
@@ -148,22 +149,22 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
 class QFieldCloudGroupItem(QgsDataCollectionItem):
     """QFieldCloud group data item."""
 
-    def __init__(self, parent, name, project_type, icon, order):
-        super(QFieldCloudGroupItem, self).__init__(parent, name, "/QFieldCloud/" + name)
+    def __init__(self, parent, name, project_type, icon, order):  # noqa: PLR0913
+        super().__init__(parent, name, "/QFieldCloud/" + name)
 
         self.network_manager = parent.network_manager
         self.project_type = project_type
         self.setIcon(QIcon(os.path.join(os.path.dirname(__file__), icon)))
         self.setSortKey(order)
 
-    def createChildren(self):
+    def createChildren(self):  # noqa: N802
         items = []
 
         projects: List[CloudProject] = self.network_manager.projects_cache.projects
 
         if projects is None:
             try:
-                # TODO try to be make it Fast Fertile
+                # TODO @suricactus: I do not recall why this was required to be not-async, but otherwise it failed. Revisit why.
                 self.network_manager.projects_cache.refresh_not_async()
             except Exception:
                 return []
@@ -185,7 +186,7 @@ class QFieldCloudProjectItem(QgsDataItem):
     """QFieldCloud project item."""
 
     def __init__(self, parent, project):
-        super(QFieldCloudProjectItem, self).__init__(
+        super().__init__(
             QgsDataItem.Collection,
             parent,
             project.name,
@@ -214,7 +215,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def name(self):
         return "QFieldCloudItemGuiProvider"
 
-    def populateContextMenu(self, item, menu, selectedItems, context):
+    def populateContextMenu(self, item, menu, _selected_items, _context):  # noqa: N802
         if type(item) is QFieldCloudProjectItem:
             project = self.network_manager.projects_cache.find_project(item.project_id)
             if project and project.local_dir:
@@ -259,7 +260,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             )
             refresh_action.triggered.connect(self._on_refresh_projects_action_triggered)
 
-    def handleDoubleClick(self, item, context):
+    def handleDoubleClick(self, item, context):  # noqa: ARG002, N802
         if type(item) is QFieldCloudProjectItem:
             if not self.open_project(item):
                 self.show_cloud_synchronize_dialog(item)

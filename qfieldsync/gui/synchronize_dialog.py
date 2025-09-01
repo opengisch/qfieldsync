@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSyncDialog
@@ -49,7 +48,7 @@ DialogUi, _ = loadUiType(
 class SynchronizeDialog(QDialog, DialogUi):
     def __init__(self, iface, offline_editing, parent=None):
         """Constructor."""
-        super(SynchronizeDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setupUi(self)
         self.iface = iface
         self.preferences = Preferences()
@@ -78,7 +77,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.dirsToCopyWidget.set_path(self.qfieldDir.text())
         self.dirsToCopyWidget.refresh_tree()
 
-    def start_synchronization(self):
+    def start_synchronization(self):  # noqa: PLR0912, PLR0915
         self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
         project = QgsProject.instance()
         current_path = Path(project.fileName())

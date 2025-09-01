@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -49,7 +48,6 @@ from qgis.PyQt.QtNetwork import (
     QHttpPart,
     QNetworkReply,
     QNetworkRequest,
-    QSslPreSharedKeyAuthenticator,
 )
 
 from qfieldsync.core.cloud_project import CloudProject
@@ -58,10 +56,17 @@ from qfieldsync.utils.qt_utils import strip_html
 
 LOCALIZED_DATASETS_PROJECT_NAME = "shared_datasets"
 
+MAX_CHARS_TO_SHOW_HTTP_ERROR = 500
+HTTP_301 = 301
+HTTP_308 = 308
+HTTP_400 = 400
+HTTP_401 = 401
+HTTP_500 = 500
 
-class CloudException(Exception):
+
+class QfcError(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
-        super(CloudException, self).__init__(exception)
+        super().__init__(exception)
         self.reply = reply
         self.parent = exception
         self.httpCode = reply.attribute(
@@ -69,7 +74,7 @@ class CloudException(Exception):
         )
 
 
-class disable_nam_timeout:
+class disable_nam_timeout:  # noqa: N801
     """By default QGIS has 60 seconds timeout, which is too short for uploading huge files"""
 
     def __init__(self, nam: QgsNetworkAccessManager) -> None:
@@ -77,17 +82,14 @@ class disable_nam_timeout:
 
     def __enter__(self):
         self.timeout = self.nam.timeout()
-        if Qgis.QGIS_VERSION_INT >= 31800:
-            self.nam.setTimeout(0)
-        else:
-            # Set it to ridiculously big timeout of 24h.
-            self.nam.setTimeout(60 * 60 * 24)
+        # disable timeouts
+        self.nam.setTimeout(0)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.nam.setTimeout(self.timeout)
 
 
-def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
+def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
     if reply.error() == QNetworkReply.NetworkError.NoError:
         return None
 
@@ -108,10 +110,14 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
             if payload:
                 message = payload[:500]
 
-                if len(payload) > 500:
+                if len(payload) > MAX_CHARS_TO_SHOW_HTTP_ERROR:
                     message += "…"
-    except Exception:
-        pass
+    except Exception as err:
+        QgsMessageLog.logMessage(
+            "Couldn't convert reply to error:" + str(err),
+            "QFieldSync",
+            Qgis.Critical,
+        )
 
     if not message:
         status_str = ""
@@ -123,7 +129,7 @@ def from_reply(reply: QNetworkReply) -> Optional[CloudException]:
         status_str += f"QT-{reply.error()}"
         message = f"[{status_str}] {reply.errorString()}"
 
-    return CloudException(reply, Exception(message))
+    return QfcError(reply, Exception(message))
 
 
 class CloudNetworkAccessManager(QObject):
@@ -135,7 +141,7 @@ class CloudNetworkAccessManager(QObject):
 
     def __init__(self, parent=None) -> None:
         """Constructor."""
-        super(CloudNetworkAccessManager, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.preferences = Preferences()
         self.url = ""
@@ -158,7 +164,7 @@ class CloudNetworkAccessManager(QObject):
 
         error = from_reply(reply)
         if error:
-            if error.httpCode == 401 and not self.is_login_active:
+            if error.httpCode == HTTP_401 and not self.is_login_active:
                 self.set_token("", True)
                 self.logout_success.emit()
             raise error
@@ -170,7 +176,7 @@ class CloudNetworkAccessManager(QObject):
             payload_str = str(reply.readAll().data(), encoding="utf-8")
             return json.loads(payload_str)
         except Exception as error:
-            raise CloudException(reply, error) from error
+            raise QfcError(reply, error) from error
 
     def json_object(self, reply: QNetworkReply) -> Dict[str, Any]:
         payload = self.handle_response(reply, True)
@@ -271,7 +277,7 @@ class CloudNetworkAccessManager(QObject):
         """Login to QFieldCloud"""
         # don't login multiple times
         if self.is_login_active:
-            return
+            return None
 
         self.is_login_active = True
 
@@ -292,7 +298,6 @@ class CloudNetworkAccessManager(QObject):
 
     def logout(self) -> QNetworkReply:
         """Logout to QFieldCloud"""
-
         reply = self.cloud_post("auth/logout/")
         reply.finished.connect(lambda: self._on_logout_finished(reply))
 
@@ -312,6 +317,7 @@ class CloudNetworkAccessManager(QObject):
             self._prepare_uri("projects").toString(),
             headers=headers,
             params=params,
+            timeout=0,
         )
         response.raise_for_status()
 
@@ -321,7 +327,6 @@ class CloudNetworkAccessManager(QObject):
         self, name: str, owner: str, description: str, private: bool
     ) -> QNetworkReply:
         """Create a new QFieldCloud project"""
-
         return self.cloud_post(
             "projects/",
             {
@@ -336,7 +341,6 @@ class CloudNetworkAccessManager(QObject):
         self, project_id: str, name: str, description: str
     ) -> QNetworkReply:
         """Update an existing QFieldCloud project"""
-
         return self.cloud_patch(
             ["projects", project_id],
             {
@@ -347,17 +351,14 @@ class CloudNetworkAccessManager(QObject):
 
     def delete_project(self, project_id: str) -> QNetworkReply:
         """Delete an existing QFieldCloud project"""
-
         return self.cloud_delete(["projects", project_id])
 
     def get_user_organizations(self, username: str) -> QNetworkReply:
         """Gets the available projects for the owner dropdown menu"""
-
         return self.cloud_get(["users", username, "organizations"])
 
     def get_files(self, project_id: str, client: str = "qgis") -> QNetworkReply:
         """Get project files and their versions"""
-
         return self.cloud_get(
             ["files", project_id],
             {
@@ -368,7 +369,6 @@ class CloudNetworkAccessManager(QObject):
 
     def get_file(self, url: QUrl, local_filename: str) -> QNetworkReply:
         """Download file from external URL"""
-
         return self.cloud_get(url, local_filename=local_filename)
 
     def delete_file(self, filename: str) -> QNetworkReply:
@@ -392,8 +392,8 @@ class CloudNetworkAccessManager(QObject):
     def cloud_get(
         self,
         uri: Union[str, List[str], QUrl],
-        params: Dict[str, Any] = {},
-        local_filename: str = None,
+        params: Optional[Dict[str, Any]] = None,
+        local_filename: Optional[str] = None,
         skip_cache: bool = False,
     ) -> QNetworkReply:
         """Issues a GET HTTP request"""
@@ -402,6 +402,9 @@ class CloudNetworkAccessManager(QObject):
         query = QUrlQuery(url.query())
 
         self._clear_cloud_cookies(url)
+
+        if params is None:
+            params = {}
 
         assert isinstance(params, dict)
 
@@ -437,7 +440,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.get(request)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         if local_filename is not None:
@@ -450,7 +453,7 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def get(
-        self, url: QUrl, local_filename: str = None, skip_cache: bool = False
+        self, url: QUrl, local_filename: Optional[str] = None, skip_cache: bool = False
     ) -> QNetworkReply:
         request = QNetworkRequest(url)
         request.setAttribute(
@@ -467,7 +470,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.get(request)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         if local_filename is not None:
@@ -483,7 +486,7 @@ class CloudNetworkAccessManager(QObject):
         self, reply: QNetworkReply, local_filename: str
     ) -> None:
         http_code = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
-        if http_code is not None and http_code >= 301 and http_code <= 308:
+        if http_code is not None and http_code >= HTTP_301 and http_code <= HTTP_308:
             # redirects should not be saved as files, just ignore them
             return
 
@@ -493,7 +496,7 @@ class CloudNetworkAccessManager(QObject):
             ), 'Error while writing to file "{}"'.format(local_filename)
 
     def cloud_post(
-        self, uri: Union[str, List[str]], payload: Dict = None
+        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -514,13 +517,13 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, payload_bytes)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
 
     def cloud_put(
-        self, uri: Union[str, List[str]], payload: Dict = None
+        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -541,13 +544,13 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.put(request, payload_bytes)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
 
     def cloud_patch(
-        self, uri: Union[str, List[str]], payload: Dict = None
+        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -568,7 +571,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.sendCustomRequest(request, b"PATCH", payload_bytes)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
@@ -591,13 +594,16 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.deleteResource(request)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
 
         return reply
 
     def cloud_upload_files(
-        self, uri: Union[str, List[str]], filenames: List[str], payload: Dict = None
+        self,
+        uri: Union[str, List[str]],
+        filenames: List[str],
+        payload: Optional[Dict] = None,
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -647,7 +653,7 @@ class CloudNetworkAccessManager(QObject):
         with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, multi_part)
 
-        reply.sslErrors.connect(lambda sslErrors: reply.ignoreSslErrors(sslErrors))
+        reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
         multi_part.setParent(reply)
 
@@ -681,7 +687,7 @@ class CloudNetworkAccessManager(QObject):
             auth_manager.clearCachedConfig(authcfg)
             auth_manager.removeAuthenticationConfig(authcfg)
             self.logout_success.emit()
-        except CloudException as err:
+        except QfcError as err:
             self.logout_failed.emit(str(err))
             return
 
@@ -690,7 +696,7 @@ class CloudNetworkAccessManager(QObject):
 
         try:
             payload = self.json_object(reply)
-        except CloudException as err:
+        except QfcError as err:
             self._login_error = err
             self.login_finished.emit()
             self.preferences.set_value("qfieldCloudRememberMe", False)
@@ -702,14 +708,16 @@ class CloudNetworkAccessManager(QObject):
         }
         if payload["avatar_url"]:
             suffix = payload["avatar_url"].rsplit(".")[-1]
-            avatar_filename = tempfile.mktemp(suffix=f".{suffix}")
-            reply = self.get_file(
-                QUrl(payload["avatar_url"]),
-                avatar_filename,
-            )
-            reply.finished.connect(
-                lambda: self._on_avatar_download_finished(reply, avatar_filename)
-            )
+            with tempfile.NamedTemporaryFile(
+                suffix=f".{suffix}", delete=False
+            ) as avatar_file:
+                reply = self.get_file(
+                    QUrl(payload["avatar_url"]),
+                    avatar_file.name,
+                )
+                reply.finished.connect(
+                    lambda: self._on_avatar_download_finished(reply, avatar_file.name)
+                )
         self.set_auth(self.url, username=payload["username"])
         self.set_token(
             payload["token"], self.preferences.value("qfieldCloudRememberMe")
@@ -747,9 +755,11 @@ class CloudNetworkAccessManager(QObject):
             else:
                 http_code = self._login_error.httpCode
 
-                if http_code and http_code >= 500:
+                if http_code and http_code >= HTTP_500:
                     error_str = self.tr("Server error {}").format(http_code)
-                elif http_code is None or (http_code >= 400 and http_code < 500):
+                elif http_code is None or (
+                    http_code >= HTTP_400 and http_code < HTTP_500
+                ):
                     error_str = str(self._login_error)
 
         error_str = strip_html(error_str).strip()
@@ -831,26 +841,6 @@ class CloudNetworkAccessManager(QObject):
             self._nam.cookieJar().deleteCookie(cookie)
 
 
-class CloudReply:
-    finished = pyqtSignal()
-    sslErrors = pyqtSignal()
-    projects_error = pyqtSignal(str)
-    downloadProgress = pyqtSignal(int, int)
-    encrypted = pyqtSignal()
-    errorOccurred = pyqtSignal(QNetworkReply.NetworkError)
-    finished = pyqtSignal()
-    metaDataChanged = pyqtSignal()
-    preSharedKeyAuthenticationRequired = pyqtSignal(QSslPreSharedKeyAuthenticator)
-    redirectAllowed = pyqtSignal()
-    redirected = pyqtSignal(QUrl)
-    sslErrors = pyqtSignal(list)
-    uploadProgress = pyqtSignal(int, int)
-
-    def __init__(self, reply: QNetworkReply):
-        self.rawReply = QNetworkReply
-        # self.redi
-
-
 class CloudProjectsCache(QObject):
     projects_started = pyqtSignal()
     projects_updated = pyqtSignal()
@@ -860,7 +850,7 @@ class CloudProjectsCache(QObject):
     project_files_error = pyqtSignal(str, str)
 
     def __init__(self, network_manager: CloudNetworkAccessManager, parent=None) -> None:
-        super(CloudProjectsCache, self).__init__(parent)
+        super().__init__(parent)
 
         self.preferences = Preferences()
         self.network_manager = network_manager
@@ -886,7 +876,8 @@ class CloudProjectsCache(QObject):
 
     @property
     def is_currently_open_project_cloud_local(self) -> bool:
-        """Checks whether the currently opened QGIS project is a configured cloud project.
+        """
+        Checks whether the currently opened QGIS project is a configured cloud project.
 
         NOTE there is a difference with `currently_opened_project()`, as this method does not
         depend on downloaded project list.
@@ -910,7 +901,8 @@ class CloudProjectsCache(QObject):
 
     @property
     def currently_open_project(self) -> Optional[CloudProject]:
-        """Returns the associated `CloudProject` instance of the currently opened QGIS project.
+        """
+        Returns the associated `CloudProject` instance of the currently opened QGIS project.
         If the cloud project list is not present, or the current project has no
         associated cloud project, return `None`.
 
@@ -920,7 +912,7 @@ class CloudProjectsCache(QObject):
         project_dir = QgsProject.instance().homePath()
 
         if not self.projects:
-            return
+            return None
 
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
@@ -932,6 +924,8 @@ class CloudProjectsCache(QObject):
 
             if cloud_project is not None:
                 return cloud_project
+
+        return None
 
     def get_unique_name(self, name: str) -> Optional[str]:
         if not self.projects:
@@ -951,7 +945,6 @@ class CloudProjectsCache(QObject):
             i += 1
 
     def refresh(self) -> QNetworkReply:
-        # TODO this abort appears sometimes in the UI, think how to hide it?
         if self._projects_reply:
             self._projects_reply.abort()
 
@@ -964,7 +957,8 @@ class CloudProjectsCache(QObject):
         return self._projects_reply
 
     def refresh_not_async(self) -> None:
-        """Projects are requested in synchronous manner.
+        """
+        Projects are requested in synchronous manner.
         The function name is cumbersome to discourage it's potential user.
         Better use `refresh()`
         """
@@ -993,14 +987,16 @@ class CloudProjectsCache(QObject):
 
     def find_project(self, project_id: str) -> Optional[CloudProject]:
         if not self._projects or not project_id:
-            return
+            return None
 
         for project in self._projects:
             if project.id == project_id:
                 return project
 
+        return None
+
     def refresh_filesystem_watchers(self, _dirpath: str = "") -> None:
-        # TODO in theory we can update only the _dirpath. There are gothas with links etc, better keep it KISS for now
+        # TODO @suricactus: in theory we can update only the _dirpath. There are gothas with links etc, better keep it KISS for now
         if self._fs_watcher.directories():
             self._fs_watcher.removePaths(self._fs_watcher.directories())
 
@@ -1045,7 +1041,7 @@ class CloudProjectsCache(QObject):
         self.projects_updated.emit()
 
     def _on_get_project_files_reply_finished(
-        self, reply: QNetworkReply, project_id: str = None
+        self, reply: QNetworkReply, project_id: Optional[str] = None
     ) -> None:
         assert project_id
 

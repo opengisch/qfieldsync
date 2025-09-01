@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSync
@@ -21,16 +20,17 @@
  ***************************************************************************/
 """
 
+import contextlib
 import os
 
-from qgis.core import Qgis, QgsApplication, QgsOfflineEditing, QgsProject
+from qgis.core import QgsApplication, QgsOfflineEditing, QgsProject
 from qgis.gui import QgsGui, QgsOptionsWidgetFactory
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QSettings, Qt, QTranslator
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
-from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_browser_tree import (
     QFieldCloudItemGuiProvider,
     QFieldCloudItemProvider,
@@ -41,15 +41,12 @@ from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.gui.map_layer_config_widget import MapLayerConfigWidgetFactory
 from qfieldsync.gui.package_dialog import PackageDialog
 from qfieldsync.gui.preferences_widget import PreferencesWidget
-from qfieldsync.gui.project_configuration_dialog import ProjectConfigurationDialog
 from qfieldsync.gui.project_configuration_widget import ProjectConfigurationStackWidget
 from qfieldsync.gui.synchronize_dialog import SynchronizeDialog
 
 
 class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
-    """
-    Factory class for QFieldSync project properties widget
-    """
+    """Factory class for QFieldSync project properties widget"""
 
     def __init__(self):
         super().__init__()
@@ -59,25 +56,25 @@ class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
             os.path.join(os.path.dirname(__file__), "resources", "qfield_logo.svg")
         )
 
-    def createWidget(self, parent):
+    def createWidget(self, parent):  # noqa: N802
         return ProjectConfigurationStackWidget(parent)
 
 
 class QFieldSyncOptionsFactory(QgsOptionsWidgetFactory):
-    def __init__(self, qfieldSync):
+    def __init__(self, qfieldsync):
         super(QgsOptionsWidgetFactory, self).__init__()
-        self.qfieldSync = qfieldSync
+        self.qfieldSync = qfieldsync
 
     def icon(self):
         return QIcon(
             os.path.join(os.path.dirname(__file__), "resources", "qfield_logo.svg")
         )
 
-    def createWidget(self, parent):
+    def createWidget(self, parent):  # noqa: N802
         return PreferencesWidget(self.qfieldSync, parent)
 
 
-class QFieldSync(object):
+class QFieldSync:
     """QGIS Plugin Implementation."""
 
     QFIELD_SCOPE = "QFieldSync"
@@ -85,7 +82,8 @@ class QFieldSync(object):
     push_dlg = None
 
     def __init__(self, iface):
-        """Constructor.
+        """
+        Constructor.
 
         :param iface: An interface instance that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
@@ -112,7 +110,6 @@ class QFieldSync(object):
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr("&QFieldSync")
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(self.tr("QFieldSync Toolbar"))
         self.toolbar.setObjectName("QFieldSync Toolbar")
 
@@ -156,7 +153,8 @@ class QFieldSync(object):
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
-        """Get the translation for a string using Qt translation API.
+        """
+        Get the translation for a string using Qt translation API.
 
         We implement this ourselves since we do not inherit QObject.
 
@@ -169,7 +167,7 @@ class QFieldSync(object):
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate("QFieldSync", message)
 
-    def add_action(
+    def add_action(  # noqa: PLR0913
         self,
         icon_path,
         text,
@@ -182,7 +180,8 @@ class QFieldSync(object):
         parent=None,
         separator_before: bool = False,
     ):
-        """Add a toolbar icon to the toolbar.
+        """
+        Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
             path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
@@ -222,7 +221,6 @@ class QFieldSync(object):
             added to self.actions list.
         :rtype: QAction
         """
-
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -248,9 +246,8 @@ class QFieldSync(object):
 
         return action
 
-    def initGui(self):
+    def initGui(self):  # noqa: N802
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
         self.cloud_projects_overview_action = self.add_action(
             os.path.join(os.path.dirname(__file__), "./resources/cloud.svg"),
             text=self.tr("QFieldCloud Projects Overview"),
@@ -330,12 +327,11 @@ class QFieldSync(object):
 
         self.iface.registerMapLayerConfigWidgetFactory(self.mapLayerConfigWidgetFactory)
 
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.project_properties_factory = QFieldSyncProjectPropertiesFactory()
-            self.project_properties_factory.setTitle("QField")
-            self.iface.registerProjectPropertiesWidgetFactory(
-                self.project_properties_factory
-            )
+        self.project_properties_factory = QFieldSyncProjectPropertiesFactory()
+        self.project_properties_factory.setTitle("QField")
+        self.iface.registerProjectPropertiesWidgetFactory(
+            self.project_properties_factory
+        )
         self.options_factory = QFieldSyncOptionsFactory(self)
         self.options_factory.setTitle(self.tr("QField"))
         self.iface.registerOptionsWidgetFactory(self.options_factory)
@@ -362,10 +358,9 @@ class QFieldSync(object):
             self.mapLayerConfigWidgetFactory
         )
 
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.unregisterProjectPropertiesWidgetFactory(
-                self.project_properties_factory
-            )
+        self.iface.unregisterProjectPropertiesWidgetFactory(
+            self.project_properties_factory
+        )
         self.iface.unregisterOptionsWidgetFactory(self.options_factory)
 
     def show_preferences_dialog(self):
@@ -374,9 +369,7 @@ class QFieldSync(object):
         )
 
     def show_synchronize_dialog(self):
-        """
-        Synchronize from QField
-        """
+        """Synchronize from QField"""
         dlg = SynchronizeDialog(
             self.iface, self.offline_editing, self.iface.mainWindow()
         )
@@ -390,10 +383,8 @@ class QFieldSync(object):
         else:
             self.show_cloud_synchronize_dialog()
 
-    def show_cloud_synchronize_dialog(self, firstTry=True):
-        """
-        Synchornize cloud project.
-        """
+    def show_cloud_synchronize_dialog(self, _first_try=True):
+        """Synchornize cloud project."""
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.transfer_dialog = CloudTransferDialog.show_transfer_dialog(
                 self.network_manager,
@@ -404,9 +395,7 @@ class QFieldSync(object):
             )
 
     def show_package_dialog(self):
-        """
-        Package to QField
-        """
+        """Package to QField"""
         self.push_dlg = PackageDialog(
             self.iface,
             QgsProject.instance(),
@@ -421,26 +410,16 @@ class QFieldSync(object):
         self.update_action_enabled_status()
 
     def show_project_configuration_dialog(self):
-        """
-        Show the project configuration dialog.
-        """
-        if Qgis.QGIS_VERSION_INT >= 31500:
-            self.iface.showProjectPropertiesDialog("QField")
-        else:
-            dlg = ProjectConfigurationDialog(self.iface.mainWindow())
-            dlg.show()
+        """Show the project configuration dialog."""
+        self.iface.showProjectPropertiesDialog("QField")
 
     def show_cloud_overview_dialog(self):
-        """
-        Show the QFieldCloud overview dialog.
-        """
+        """Show the QFieldCloud overview dialog."""
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow())
         dlg.show()
 
     def show_cloud_project_details_dialog(self):
-        """
-        Show the QFieldCloud project details dialog.
-        """
+        """Show the QFieldCloud project details dialog."""
         currently_open_project = (
             self.network_manager.projects_cache.currently_open_project
         )
@@ -477,16 +456,12 @@ class QFieldSync(object):
         When the push dialog is closed, make sure it's no longer
         enabled before entering update_action_enabled_status()
         """
-        try:
+        with contextlib.suppress(RuntimeError):
             self.push_dlg.setEnabled(False)
-        except RuntimeError:
-            pass
         self.update_action_enabled_status()
 
     def update_button_visibility(self):
-        """
-        Will update the plugin toolbar buttons according to open dialog and project properties.
-        """
+        """Will update the plugin toolbar buttons according to open dialog and project properties."""
         self.push_action_toolbar.setVisible(
             self.preferences.value("showPackagingActions")
         )
@@ -495,9 +470,7 @@ class QFieldSync(object):
         )
 
     def update_action_enabled_status(self):
-        """
-        Will update the plugin actions according to open dialog and project properties.
-        """
+        """Will update the plugin actions according to open dialog and project properties."""
         if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
             self.cloud_synchronize_action.setEnabled(True)
         else:

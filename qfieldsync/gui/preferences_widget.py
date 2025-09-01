@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  QFieldSyncDialog
@@ -35,8 +34,8 @@ WidgetUi, _ = loadUiType(
 
 
 class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
-    def __init__(self, qfieldSync, parent=None):
-        self.qfieldSync = qfieldSync
+    def __init__(self, qfieldsync, parent=None):
+        self.qfieldSync = qfieldsync
         preferences = Preferences()
         SettingDialog.__init__(self, setting_manager=preferences)
         super().__init__(parent, setting_manager=preferences)
