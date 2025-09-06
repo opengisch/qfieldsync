@@ -18,10 +18,10 @@
  ***************************************************************************/
 """
 
-
 import hashlib
 import os
 import sqlite3
+from datetime import datetime, timezone
 from enum import IntFlag
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Union
@@ -113,11 +113,24 @@ class ProjectFile:
         return self.versions[-1].get("last_modified")
 
     @property
-    def updated_at(self) -> Optional[str]:
+    def uploaded_at(self) -> Optional[datetime]:
         if not self.versions:
             return None
 
-        return self.versions[0].get("last_modified")
+        newest_version = self.versions[0]
+        uploaded_at = newest_version.get("uploaded_at")
+        if uploaded_at:
+            return datetime.fromisoformat(uploaded_at)
+
+        # NOTE older QFieldCloud API versions support only the deprecated `last_modified` field instead of the newly supported ISO-like `uploaded_at`
+        last_modified = newest_version.get("last_modified")
+        if last_modified:
+            return datetime.strptime(
+                last_modified,
+                "%d.%m.%Y %H:%M:%S %Z",
+            ).astimezone(timezone.utc)
+
+        return None
 
     @property
     def versions(self) -> Optional[List[Dict[str, str]]]:

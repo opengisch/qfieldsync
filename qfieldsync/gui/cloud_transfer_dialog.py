@@ -20,7 +20,7 @@
  ***************************************************************************/
 """
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
@@ -789,14 +789,21 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         is_local_enabled = self.cloud_project.user_role != "reader"
         is_cloud_enabled = bool(project_file.checkout & ProjectFileCheckout.Cloud)
         is_local_checked = False
+
         if is_local_enabled and project_file.local_path_exists:
-            local_updated_at = os.path.getmtime(
-                os.path.join(self.cloud_project.local_dir, project_file.path)
+            assert self.cloud_project.local_dir
+
+            local_updated_at = datetime.fromtimestamp(
+                os.path.getmtime(
+                    os.path.join(self.cloud_project.local_dir, project_file.path)
+                ),
+                timezone.utc,
             )
-            cloud_updated_at = 0.0
-            if project_file.updated_at:
-                cloud_updated_at = datetime.fromisoformat(project_file.updated_at)
-            is_local_checked = local_updated_at > cloud_updated_at
+
+            if project_file.uploaded_at:
+                is_local_checked = local_updated_at > project_file.uploaded_at
+            else:
+                is_local_checked = True
 
         local_checkbox = QCheckBox()
         local_checkbox.setEnabled(is_local_enabled)
