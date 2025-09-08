@@ -263,11 +263,8 @@
           <item row="2" column="0" colspan="2">
            <widget class="QCheckBox" name="onlyOfflineCopyFeaturesInAoi">
             <property name="text">
-             <string>Map theme</string>
+             <string>When offlining layers, only copy features intersecting the area of interest</string>
             </property>
-            <attribute name="buttonGroup">
-             <string notr="true">buttonGroup</string>
-            </attribute>
            </widget>
           </item>
           <item row="3" column="0" colspan="2">
@@ -356,7 +353,7 @@
                   <string>Single layer</string>
                  </property>
                  <attribute name="buttonGroup">
-                  <string notr="true">buttonGroup</string>
+                  <string notr="true">baseMapButtonGroup</string>
                  </attribute>
                 </widget>
                </item>
@@ -366,7 +363,7 @@
                   <string>Map theme</string>
                  </property>
                  <attribute name="buttonGroup">
-                  <string notr="true">buttonGroup</string>
+                  <string notr="true">baseMapButtonGroup</string>
                  </attribute>
                 </widget>
                </item>
@@ -608,6 +605,6 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
+  <buttongroup name="baseMapButtonGroup"/>
  </buttongroups>
 </ui>
