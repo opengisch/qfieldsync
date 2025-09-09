@@ -21,6 +21,7 @@
 """
 import os
 from pathlib import Path
+from typing import Optional
 
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.utils.exceptions import NoProjectFoundError
@@ -30,9 +31,10 @@ from libqfieldsync.utils.file_utils import (
     import_file_checksum,
 )
 from libqfieldsync.utils.qgis import make_temp_qgis_file, open_project
-from qgis.core import QgsProject
+from qgis.core import QgsOfflineEditing, QgsProject
+from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import QDir
-from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
@@ -46,7 +48,12 @@ DialogUi, _ = loadUiType(
 
 
 class SynchronizeDialog(QDialog, DialogUi):
-    def __init__(self, iface, offline_editing, parent=None):
+    def __init__(
+        self,
+        iface: QgisInterface,
+        offline_editing: QgsOfflineEditing,
+        parent: Optional[QWidget] = None,
+    ) -> None:
         """Constructor."""
         super().__init__(parent=parent)
         self.setupUi(self)
@@ -89,7 +96,7 @@ class SynchronizeDialog(QDialog, DialogUi):
 
         try:
             current_import_file_checksum = import_file_checksum(str(qfield_path))
-            imported_files_checksums = import_checksums_of_project(qfield_path)
+            imported_files_checksums = import_checksums_of_project(str(qfield_path))
 
             if (
                 imported_files_checksums
@@ -103,10 +110,10 @@ class SynchronizeDialog(QDialog, DialogUi):
 
             open_project(get_project_in_folder(str(qfield_path)))
 
-            self.offline_editing.progress_stopped.connect(self.update_done)
-            self.offline_editing.layer_progress_updated.connect(self.update_total)
-            self.offline_editing.progress_mode_set.connect(self.update_mode)
-            self.offline_editing.progress_updated.connect(self.update_value)
+            self.offline_editing.progressStopped.connect(self.update_done)
+            self.offline_editing.layerProgressUpdated.connect(self.update_total)
+            self.offline_editing.progressModeSet.connect(self.update_mode)
+            self.offline_editing.progressUpdated.connect(self.update_value)
 
             try:
                 self.offline_editing.synchronize(True)
@@ -206,10 +213,10 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.layerProgressBar.setValue(0)
 
     def update_done(self):
-        self.offline_editing.progress_stopped.disconnect(self.update_done)
-        self.offline_editing.layer_progress_updated.disconnect(self.update_total)
-        self.offline_editing.progress_mode_set.disconnect(self.update_mode)
-        self.offline_editing.progress_updated.disconnect(self.update_value)
+        self.offline_editing.progressStopped.disconnect(self.update_done)
+        self.offline_editing.layerProgressUpdated.disconnect(self.update_total)
+        self.offline_editing.progressModeSet.disconnect(self.update_mode)
+        self.offline_editing.progressUpdated.disconnect(self.update_value)
         self.offline_editing_done = True
 
     def _on_qfield_dir_text_changed(self):
