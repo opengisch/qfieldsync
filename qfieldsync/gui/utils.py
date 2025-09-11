@@ -26,6 +26,8 @@ from qgis.core import QgsApplication
 from qgis.PyQt.QtGui import QPalette
 from qgis.PyQt.QtWidgets import QWidget
 
+MID_COLOR_SUM_THRESHOLD = 120
+
 
 def set_available_actions(combobox, actions, default_action):
     """Sets available actions on a checkbox and selects the current one."""
@@ -38,7 +40,8 @@ def set_available_actions(combobox, actions, default_action):
 
 
 def extract_theme_from_qgis_settings() -> Literal["light", "dark"]:
-    """Finds if the current QGIS theme should use "light" or "dark" theme.
+    """
+    Finds if the current QGIS theme should use "light" or "dark" theme.
     Return the most accurate possible "dark" or "light" key.
     Typically used for styling SSO logins buttons.
 
@@ -55,7 +58,7 @@ def extract_theme_from_qgis_settings() -> Literal["light", "dark"]:
 
     color = QWidget().palette().color(QPalette.Window)
 
-    if (color.red() + color.green() + color.blue()) / 3 < 120:
+    if (color.red() + color.green() + color.blue()) / 3 < MID_COLOR_SUM_THRESHOLD:
         return "dark"
 
     return "light"
