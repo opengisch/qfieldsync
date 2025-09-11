@@ -40,11 +40,10 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core import Preferences
 from qfieldsync.core.cloud_api import (
     CloudAuthMethod,
-    CloudException,
     CloudNetworkAccessManager,
+    QfcError,
     build_oauth2_auth_config,
 )
 from qfieldsync.core.preferences import Preferences
@@ -63,8 +62,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     # timer used to avoid spamming QFC server,
     # when fetching server's auth providers.
     _fetch_auth_methods_timer: QTimer = QTimer()
-
-    _sso_login_buttons: List[QPushButton] = []
 
     @staticmethod
     def show_auth_dialog(
@@ -162,6 +159,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.rejected.connect(self.on_rejected)
         self.hide()
 
+        self._sso_login_buttons: List[QPushButton] = []
+
         self.fetch_server_auth_capabilities()
 
     def on_rejected(self) -> None:
@@ -186,9 +185,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         group_box.setEnabled(visible)
 
     def fetch_server_auth_capabilities(self) -> None:
-        """
-        Fetches the provided server authentication method capabilities.
-        """
+        """Fetches the provided server authentication method capabilities."""
         self.clear_login_widgets()
         self.network_manager.set_url(self.serverUrlCmb.currentText())
         self.auth_methods_reply = self.network_manager.get_auth_capabilities()
@@ -197,7 +194,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     def on_fetch_auth_methods_finished(self) -> None:
         try:
             auth_methods = self.network_manager.json_array(self.auth_methods_reply)
-        except CloudException:
+        except QfcError:
             self.set_login_groupbox_visibility(self.signInUsernameGroupBox, True)
             return
 
@@ -232,13 +229,13 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     def set_sso_provider_button_style(
         self, style_data: Dict[str, str], button: QPushButton
     ) -> None:
-        """Apply style to a SSO provider login button.
+        """
+        Apply style to a SSO provider login button.
 
         Args:
             style_data: style JSON for the provider, served by QFieldCloud.
             button: button to apply the style to.
         """
-
         theme = style_data.get(extract_theme_from_qgis_settings())
         button.setStyleSheet(
             """

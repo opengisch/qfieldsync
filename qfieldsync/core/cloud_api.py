@@ -62,7 +62,7 @@ HTTP_HEADER_CSRF_TOKEN = b"X-CSRFToken"
 HTTP_HEADER_REFERER = b"Referer"
 HTTP_HEADER_IDP_ID = b"X-QFC-IDP-ID"
 
-CSRF_TOKEN_COOKIE = "csrftoken"
+CSRF_TOKEN_COOKIE = "csrftoken"  # noqa: S105
 
 MAX_CHARS_TO_SHOW_HTTP_ERROR = 500
 HTTP_301 = 301
@@ -70,8 +70,6 @@ HTTP_308 = 308
 HTTP_400 = 400
 HTTP_401 = 401
 HTTP_500 = 500
-
-
 
 
 class QfcError(Exception):
@@ -154,7 +152,8 @@ def build_oauth2_auth_config(
     config_name: str = "qfieldcloud_sso",
     should_persist_token: bool = True,
 ) -> QgsAuthMethodConfig:
-    """Builds a QgsAuthMethodConfig from a method provided by QFieldCloud's auth capabilities.
+    """
+    Builds a QgsAuthMethodConfig from a method provided by QFieldCloud's auth capabilities.
 
     Args:
         auth_data: dict describing an auth method.
@@ -205,7 +204,7 @@ class CloudNetworkAccessManager(QObject):
     logout_failed = pyqtSignal(str)
     avatar_success = pyqtSignal()
 
-    _login_error: Optional[CloudException] = None
+    _login_error: Optional[QfcError] = None
 
     auth_method: CloudAuthMethod = CloudAuthMethod.NONE
     auth_config: Optional[QgsAuthMethodConfig] = None
@@ -436,13 +435,13 @@ class CloudNetworkAccessManager(QObject):
         return self._get_cloud_user_info()
 
     def _get_cloud_user_info(self) -> QNetworkReply:
-        """Get current user info with a request.
+        """
+        Get current user info with a request.
         This is typically called as a first request
 
         Returns:
             QNetworkReply: QNetworkReply from the QFieldCloud server.
         """
-
         reply = self.cloud_get("auth/user/")
         reply.finished.connect(lambda: self._on_get_user_info_finished(reply))
 
@@ -450,7 +449,6 @@ class CloudNetworkAccessManager(QObject):
 
     def logout(self) -> Optional[QNetworkReply]:
         """Logout from QFieldCloud"""
-
         if self.auth_method == CloudAuthMethod.CREDENTIALS:
             reply = self.cloud_post("auth/logout/")
             reply.finished.connect(lambda: self._on_logout_finished(reply))
@@ -471,7 +469,8 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def get_remote_resource(self, resource_url: str) -> QNetworkReply:
-        """Gets a remote resource without any specific header.
+        """
+        Gets a remote resource without any specific header.
         Typically used for fetching static IDP logos.
 
         Args:
@@ -587,7 +586,8 @@ class CloudNetworkAccessManager(QObject):
         return self._token is not None and len(self._token) > 0
 
     def _set_request_auth(self, request: QNetworkRequest) -> None:
-        """Sets the correct authentication for a request, depending on the current auth method used.
+        """
+        Sets the correct authentication for a request, depending on the current auth method used.
 
         Args:
             request (QNetworkRequest): request to update.
@@ -914,7 +914,7 @@ class CloudNetworkAccessManager(QObject):
         if payload["avatar_url"]:
             suffix = payload["avatar_url"].rsplit(".")[-1]
             with tempfile.NamedTemporaryFile(
-                    suffix=f".{suffix}", delete=False
+                suffix=f".{suffix}", delete=False
             ) as avatar_file:
                 reply = self.get_file(
                     QUrl(payload["avatar_url"]),
@@ -935,7 +935,7 @@ class CloudNetworkAccessManager(QObject):
     def _on_get_user_info_finished(self, reply: QNetworkReply) -> None:
         try:
             payload = self.json_object(reply)
-        except CloudException as err:
+        except QfcError as err:
             self._login_error = err
             self.login_finished.emit()
             self.preferences.set_value("qfieldCloudRememberMe", False)
@@ -949,7 +949,7 @@ class CloudNetworkAccessManager(QObject):
         if payload["avatar_url"]:
             suffix = payload["avatar_url"].rsplit(".")[-1]
             with tempfile.NamedTemporaryFile(
-                    suffix=f".{suffix}", delete=False
+                suffix=f".{suffix}", delete=False
             ) as avatar_file:
                 reply = self.get_file(
                     QUrl(payload["avatar_url"]),
