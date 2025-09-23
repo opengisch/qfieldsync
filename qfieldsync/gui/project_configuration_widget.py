@@ -199,10 +199,14 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.digitizingLogsLayerComboBox.setFilters(QgsMapLayerProxyModel.PointLayer)
         self.digitizingLogsLayerComboBox.setAllowEmptyLayer(True)
 
+        self.initialFocusedLayerComboBox.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.initialFocusedLayerComboBox.setAllowEmptyLayer(False)
+
         if Qgis.versionInt() >= 32400:  # noqa: PLR2004
             self.layerComboBox.setProject(self.project)
             self.geofencingLayerComboBox.setProject(self.project)
             self.digitizingLogsLayerComboBox.setProject(self.project)
+            self.initialFocusedLayerComboBox.setProject(self.project)
 
         self.__project_configuration = ProjectConfiguration(self.project)
 
@@ -260,11 +264,22 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.__project_configuration.geofencing_should_prevent_digitizing
         )
 
-        # Advanced settings
+        # General settings
         digitizing_logs_layer = QgsProject.instance().mapLayer(
             self.__project_configuration.digitizing_logs_layer
         )
         self.digitizingLogsLayerComboBox.setLayer(digitizing_logs_layer)
+
+        initial_focused_layer = QgsProject.instance().mapLayer(
+            self.__project_configuration.initial_focused_layer
+        )
+        self.initialFocusedLayerComboBox.setLayer(initial_focused_layer)
+
+        self.initialMapModeComboBox.setCurrentIndex(
+            self.initialMapModeComboBox.findText(
+                self.__project_configuration.initial_map_mode
+            )
+        )
 
         self.maximumImageWidthHeight.setClearValueMode(
             QgsSpinBox.CustomValue, self.tr("No restriction")
@@ -367,13 +382,24 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             self.geofencingShouldPreventDigitizingCheckBox.isChecked()
         )
 
-        # Advanced settings
+        # General settings
         with contextlib.suppress(AttributeError):
             self.__project_configuration.digitizing_logs_layer = (
                 self.digitizingLogsLayerComboBox.currentLayer().id()
                 if self.digitizingLogsLayerComboBox.currentLayer()
                 else ""
             )
+
+        with contextlib.suppress(AttributeError):
+            self.__project_configuration.initial_focused_layer = (
+                self.initialFocusedLayerComboBox.currentLayer().id()
+                if self.initialFocusedLayerComboBox.currentLayer()
+                else ""
+            )
+
+        self.__project_configuration.initial_map_mode = (
+            self.initialMapModeComboBox.currentText()
+        )
 
         self.__project_configuration.base_map_tile_size = int(
             self.baseMapTileSizeComboBox.currentText()
