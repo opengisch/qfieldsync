@@ -250,7 +250,7 @@
             <item>
              <property name="icon">
               <iconset>
-               <normaloff>../resources/map_white.svg</normaloff>../resources/map_white.svg</iconset>
+               <normaloff>../resources/browse_map.svg</normaloff>../resources/browse_map.svg</iconset>
              </property>
              <property name="text">
               <string>browsing</string>
@@ -259,7 +259,7 @@
             <item>
              <property name="icon">
               <iconset>
-               <normaloff>../resources/create_white.svg</normaloff>../resources/create_white.svg</iconset>
+               <normaloff>../resources/create.svg</normaloff>../resources/create.svg</iconset>
              </property>
              <property name="text">
               <string>digitizing</string>
@@ -268,14 +268,14 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="InitialFocusedMapLayer">
+           <widget class="QLabel" name="labelInitialFocusedMapLayer">
             <property name="text">
-             <string>Initial focused map layer</string>
+             <string>Initial focused layer</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QgsMapLayerComboBox" name="intialFocusedMaoLayerComboBox"/>
+           <widget class="QgsMapLayerComboBox" name="initialFocusedLayerComboBox"/>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="labelDigitizingLogsLayer">
@@ -635,6 +635,7 @@
   <tabstop>geofencingLayerComboBox</tabstop>
   <tabstop>geofencingBehaviorComboBox</tabstop>
   <tabstop>geofencingShouldPreventDigitizingCheckBox</tabstop>
+  <tabstop>initialFocusedLayerComboBox</tabstop>
   <tabstop>digitizingLogsLayerComboBox</tabstop>
  </tabstops>
  <resources/>
