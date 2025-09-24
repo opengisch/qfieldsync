@@ -287,11 +287,12 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
         self.initialActiveLayerComboBox.setLayer(initial_active_layer)
 
-        self.initialMapModeComboBox.setCurrentIndex(
-            self.initialMapModeComboBox.findText(
-                self.__project_configuration.initial_map_mode
-            )
+        mode_index = self.initialMapModeComboBox.findText(
+            self.__project_configuration.initial_map_mode
         )
+        if mode_index == -1:
+            mode_index = 0
+        self.initialMapModeComboBox.setCurrentIndex(mode_index)
 
         self.maximumImageWidthHeight.setClearValueMode(
             QgsSpinBox.CustomValue, self.tr("No restriction")
