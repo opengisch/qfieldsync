@@ -35,6 +35,7 @@ from qgis.gui import (
     QgsPanelWidgetStack,
     QgsSpinBox,
 )
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QLineEdit, QVBoxLayout
 from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
@@ -168,6 +169,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             ProjectProperties.GeofencingBehavior.INFORM_ENTER_LEAVE_AREAS,
         )
 
+        self.initialMapModeComboBox.addItem(
+            QIcon(
+                os.path.join(os.path.dirname(__file__), "../resources/browse_map.svg")
+            ),
+            self.tr("Browsing"),
+        )
+        self.initialMapModeComboBox.addItem(
+            QIcon(os.path.join(os.path.dirname(__file__), "../resources/create.svg")),
+            self.tr("Digitizing"),
+        )
+
         self._reload_project()
 
     def _reload_project(self):  # noqa: PLR0915
@@ -199,14 +211,14 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.digitizingLogsLayerComboBox.setFilters(QgsMapLayerProxyModel.PointLayer)
         self.digitizingLogsLayerComboBox.setAllowEmptyLayer(True)
 
-        self.initialFocusedLayerComboBox.setFilters(QgsMapLayerProxyModel.VectorLayer)
-        self.initialFocusedLayerComboBox.setAllowEmptyLayer(False)
+        self.initialActiveLayerComboBox.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.initialActiveLayerComboBox.setAllowEmptyLayer(False)
 
         if Qgis.versionInt() >= 32400:  # noqa: PLR2004
             self.layerComboBox.setProject(self.project)
             self.geofencingLayerComboBox.setProject(self.project)
             self.digitizingLogsLayerComboBox.setProject(self.project)
-            self.initialFocusedLayerComboBox.setProject(self.project)
+            self.initialActiveLayerComboBox.setProject(self.project)
 
         self.__project_configuration = ProjectConfiguration(self.project)
 
@@ -270,10 +282,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
         self.digitizingLogsLayerComboBox.setLayer(digitizing_logs_layer)
 
-        initial_focused_layer = QgsProject.instance().mapLayer(
-            self.__project_configuration.initial_focused_layer
+        initial_active_layer = QgsProject.instance().mapLayer(
+            self.__project_configuration.initial_active_layer
         )
-        self.initialFocusedLayerComboBox.setLayer(initial_focused_layer)
+        self.initialActiveLayerComboBox.setLayer(initial_active_layer)
 
         self.initialMapModeComboBox.setCurrentIndex(
             self.initialMapModeComboBox.findText(
@@ -391,9 +403,9 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             )
 
         with contextlib.suppress(AttributeError):
-            self.__project_configuration.initial_focused_layer = (
-                self.initialFocusedLayerComboBox.currentLayer().id()
-                if self.initialFocusedLayerComboBox.currentLayer()
+            self.__project_configuration.initial_active_layer = (
+                self.initialActiveLayerComboBox.currentLayer().id()
+                if self.initialActiveLayerComboBox.currentLayer()
                 else ""
             )
 
