@@ -171,13 +171,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
         self.initialMapModeComboBox.addItem(
             QIcon(
-                os.path.join(os.path.dirname(__file__), "../resources/browse_map.svg")
+                os.path.join(os.path.dirname(__file__), "../resources/state_browse.svg")
             ),
-            self.tr("Browsing"),
+            self.tr("Browse"),
         )
         self.initialMapModeComboBox.addItem(
-            QIcon(os.path.join(os.path.dirname(__file__), "../resources/create.svg")),
-            self.tr("Digitizing"),
+            QIcon(
+                os.path.join(
+                    os.path.dirname(__file__), "../resources/state_digitize.svg"
+                )
+            ),
+            self.tr("Digitize"),
         )
 
         self._reload_project()
