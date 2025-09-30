@@ -174,6 +174,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
                 os.path.join(os.path.dirname(__file__), "../resources/state_browse.svg")
             ),
             self.tr("Browse"),
+            ProjectProperties.InitialMapMode.BROWSE,
         )
         self.initialMapModeComboBox.addItem(
             QIcon(
@@ -182,6 +183,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
                 )
             ),
             self.tr("Digitize"),
+            ProjectProperties.InitialMapMode.DIGITIZE,
         )
 
         self._reload_project()
@@ -291,7 +293,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
         self.initialActiveLayerComboBox.setLayer(initial_active_layer)
 
-        mode_index = self.initialMapModeComboBox.findText(
+        mode_index = self.initialMapModeComboBox.findData(
             self.__project_configuration.initial_map_mode
         )
         if mode_index == -1:
@@ -415,7 +417,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             )
 
         self.__project_configuration.initial_map_mode = (
-            self.initialMapModeComboBox.currentText()
+            self.initialMapModeComboBox.currentData()
         )
 
         self.__project_configuration.base_map_tile_size = int(
