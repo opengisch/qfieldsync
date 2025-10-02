@@ -165,7 +165,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.show()
 
-        if self.network_manager.has_token():
+        if self.network_manager.is_authenticated():
             self.show_projects()
             self.createButton.setEnabled(True)
         else:
@@ -1000,7 +1000,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.projectsStack.setCurrentWidget(self.projectsListPage)
 
     def update_welcome_label(self) -> None:
-        if self.network_manager.has_token():
+        if self.network_manager.is_authenticated():
             avatar_filename = self.network_manager.user_details.get("avatar_filename")
             self.avatarButton.setVisible(True)
             if not avatar_filename:
@@ -1014,7 +1014,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             self.welcomeLabel.setText(
                 self.tr("Greetings {}.").format(
-                    f'<a href="{self.network_manager.url}">{self.network_manager.auth().config("username")}</a>'
+                    f'<a href="{self.network_manager.url}">{self.network_manager.get_username()}</a>'
                 )
             )
 

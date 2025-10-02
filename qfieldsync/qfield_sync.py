@@ -376,7 +376,7 @@ class QFieldSync:
         dlg.show()
 
     def open_cloud_synchronize_dialog(self):
-        if not self.network_manager.has_token():
+        if not self.network_manager.is_authenticated():
             CloudLoginDialog.show_auth_dialog(
                 self.network_manager, lambda: self.show_cloud_synchronize_dialog()
             )
@@ -434,7 +434,10 @@ class QFieldSync:
             self.network_manager.projects_cache.currently_open_project
         )
 
-        if currently_open_project is None or not self.network_manager.has_token():
+        if (
+            currently_open_project is None
+            or not self.network_manager.is_authenticated()
+        ):
             self.show_cloud_overview_dialog()
             return
 
