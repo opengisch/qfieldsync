@@ -467,22 +467,28 @@ class CloudNetworkAccessManager(QObject):
         """Logout from QFieldCloud"""
         if self.auth_method == CloudAuthMethod.CREDENTIALS:
             reply = self.cloud_post("auth/logout/")
-            reply.finished.connect(lambda: self._on_logout_finished(reply))
+            reply.finished.connect(lambda: self._on_credentials_logout_finished(reply))
         elif self.auth_method == CloudAuthMethod.SSO:
-            authcfg = self.preferences.value("qfieldCloudAuthcfg")
-            auth_manager = QgsApplication.authManager()
-            auth_manager.clearCachedConfig(authcfg)
-            auth_manager.removeAuthenticationConfig(authcfg)
-            self.auth_method = CloudAuthMethod.NONE
-            self.preferences.set_value("qfieldCloudAuthcfg", "")
-            self.auth_config = None
-            self.current_username = None
-            self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
-            self._clear_cloud_cookies(QUrl(self.url))
-            self.logout_success.emit()
-            return None
+            reply = self.cloud_post("auth/logout/")
+            reply.finished.connect(lambda: self._on_sso_logout_finished(reply))
+        elif self.auth_method == CloudAuthMethod.NONE:
+            raise QfcError("Can not logout when no auth method is configured!")
 
         return reply
+
+    def clear_sso_config(self) -> None:
+        assert self.auth_method == CloudAuthMethod.SSO
+
+        authcfg = self.preferences.value("qfieldCloudAuthcfg")
+        auth_manager = QgsApplication.authManager()
+        auth_manager.clearCachedConfig(authcfg)
+        auth_manager.removeAuthenticationConfig(authcfg)
+        self.auth_method = CloudAuthMethod.NONE
+        self.preferences.set_value("qfieldCloudAuthcfg", "")
+        self.auth_config = None
+        self.current_username = None
+        self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
+        self._clear_cloud_cookies(QUrl(self.url))
 
     def get_remote_resource(self, resource_url: str) -> QNetworkReply:
         """
@@ -895,7 +901,7 @@ class CloudNetworkAccessManager(QObject):
 
         return QUrl(self.server_url + encoded_uri)
 
-    def _on_logout_finished(self, reply: QNetworkReply) -> None:
+    def _on_credentials_logout_finished(self, reply: QNetworkReply) -> None:
         try:
             self.json_object(reply)
             self.set_token("", True)
@@ -907,6 +913,15 @@ class CloudNetworkAccessManager(QObject):
             self.preferences.set_value("qfieldCloudAuthcfg", "")
             self.auth_config = None
             self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
+            self.logout_success.emit()
+        except QfcError as err:
+            self.logout_failed.emit(str(err))
+            return
+
+    def _on_sso_logout_finished(self, reply: QNetworkReply) -> None:
+        try:
+            self.json_object(reply)
+            self.clear_sso_config()
             self.logout_success.emit()
         except QfcError as err:
             self.logout_failed.emit(str(err))
