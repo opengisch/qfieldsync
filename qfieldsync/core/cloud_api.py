@@ -65,6 +65,8 @@ IDP_ID_HEADER_KEY = "idp_id_header"
 
 CSRF_TOKEN_COOKIE = "csrftoken"  # noqa: S105
 
+OAUTH2_CONFIG_REQUEST_TIMEOUT_SECONDS = 60
+
 MAX_CHARS_TO_SHOW_HTTP_ERROR = 500
 HTTP_301 = 301
 HTTP_308 = 308
@@ -180,7 +182,7 @@ def build_oauth2_auth_config(
         "redirectPort": auth_data.get("redirect_port"),
         "redirectUrl": auth_data.get("redirect_url"),
         "refreshTokenUrl": auth_data.get("refresh_token_url"),
-        "requestTimeout": 30,
+        "requestTimeout": OAUTH2_CONFIG_REQUEST_TIMEOUT_SECONDS,
         "requestUrl": auth_data.get("request_url"),
         "scope": auth_data.get("scope"),
         "tokenUrl": auth_data.get("token_url"),
@@ -255,6 +257,8 @@ class CloudNetworkAccessManager(QObject):
             if error.httpCode == HTTP_401 and not self.is_login_active:
                 if self.auth_method == CloudAuthMethod.CREDENTIALS:
                     self.set_token("", True)
+                if self.auth_method == CloudAuthMethod.SSO:
+                    self.clear_sso_config()
                 self.auth_method = CloudAuthMethod.NONE
                 self.auth_config = None
                 self.logout_success.emit()
@@ -462,6 +466,10 @@ class CloudNetworkAccessManager(QObject):
         reply.finished.connect(lambda: self._on_get_user_info_finished(reply))
 
         return reply
+
+    def cancel_sso_login(self) -> None:
+        self._nam.abortAuthBrowser()
+        self.logout_success.emit()
 
     def logout(self) -> Optional[QNetworkReply]:
         """Logout from QFieldCloud"""

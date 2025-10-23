@@ -25,7 +25,7 @@ from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlparse
 
 from qgis.PyQt.QtCore import Qt, QTimer
-from qgis.PyQt.QtGui import QCursor, QIcon, QPainter, QPixmap
+from qgis.PyQt.QtGui import QCursor, QIcon, QMovie, QPainter, QPixmap
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtWidgets import (
     QApplication,
@@ -41,6 +41,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.cloud_api import (
+    OAUTH2_CONFIG_REQUEST_TIMEOUT_SECONDS,
     CloudAuthMethod,
     CloudNetworkAccessManager,
     QfcError,
@@ -161,6 +162,23 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self._sso_login_buttons: List[QPushButton] = []
 
+        self.ssoCancelLoginButton.setIcon(
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).icon()
+        )
+        self.ssoCancelLoginButton.clicked.connect(
+            self.on_cancel_sso_login_button_clicked
+        )
+
+        self.sso_timer = QTimer()
+        self.sso_timer.setInterval(1000)
+        self.sso_timer.timeout.connect(self.on_sso_timer_tick)
+
+        self.sso_ongoing_spinner = QMovie(":/images/themes/default/mIconLoading.gif")
+        self.ssoSpinnerLabel.setMovie(self.sso_ongoing_spinner)
+        self.ssoSpinnerLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.ssoLoginOngoingGroupBox.show()
+
         self.fetch_server_auth_capabilities()
 
     def on_rejected(self) -> None:
@@ -202,7 +220,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         # add vertical space before SSO login buttons
         vertical_spacer = QSpacerItem(
-            0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            0, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed
         )
         self.signInUsernameGroupBox.layout().addItem(vertical_spacer)
 
@@ -225,6 +243,9 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             )
             self.signInUsernameGroupBox.layout().addWidget(login_button)
             self._sso_login_buttons.append(login_button)
+
+        self.signInUsernameGroupBox.setEnabled(True)
+        self.ssoLoginOngoingGroupBox.hide()
 
     def set_sso_provider_button_style(
         self, style_data: Dict[str, str], button: QPushButton
@@ -368,10 +389,44 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             server_url,
             should_persist_token=self.rememberMeCheckBox.isChecked(),
         )
+
         self.network_manager.set_url(server_url)
         self.network_manager.set_auth_method(CloudAuthMethod.SSO)
         self.network_manager.set_sso_auth_config(auth_config)
+
+        self.signInUsernameGroupBox.setEnabled(False)
+        self.ssoLoginOngoingGroupBox.show()
+        self.sso_ongoing_spinner.start()
+
+        self.sso_timer_remaining = OAUTH2_CONFIG_REQUEST_TIMEOUT_SECONDS * 1000
+        self.sso_timer.start()
+        self.network_manager.login_finished.connect(self.sso_timer.stop)
+
         self.network_manager.login_with_sso()
+
+    def cancel_sso_login(self) -> None:
+        self.signInUsernameGroupBox.setEnabled(True)
+        self.ssoLoginOngoingGroupBox.hide()
+
+        self.sso_ongoing_spinner.stop()
+
+        self.network_manager.cancel_sso_login()
+
+    def on_cancel_sso_login_button_clicked(self) -> None:
+        self.cancel_sso_login()
+        self.sso_timer.stop()
+
+    def on_sso_timer_tick(self) -> None:
+        self.sso_timer_remaining -= 1000
+        self.ssoCancelLoginButton.setText(
+            self.tr("Cancel Sign In ({seconds})").format(
+                seconds=self.sso_timer_remaining // 1000
+            )
+        )
+
+        if self.sso_timer_remaining < 0:
+            self.cancel_sso_login()
+            self.sso_timer.stop()
 
     def on_cancel_button_clicked(self):
         self.reject()
