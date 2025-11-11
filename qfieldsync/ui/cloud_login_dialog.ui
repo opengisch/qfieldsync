@@ -189,8 +189,8 @@
        <widget class="QLabel" name="ssoSpinnerLabel">
         <property name="maximumSize">
          <size>
-          <width>36</width>
-          <height>36</height>
+          <width>24</width>
+          <height>24</height>
          </size>
         </property>
         <property name="text">
