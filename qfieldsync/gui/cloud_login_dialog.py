@@ -24,6 +24,7 @@ from functools import partial
 from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlparse
 
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtGui import QCursor, QIcon, QMovie, QPainter, QPixmap
 from qgis.PyQt.QtSvg import QSvgRenderer
@@ -39,6 +40,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 from qgis.PyQt.uic import loadUiType
+from qgis.utils import iface
 
 from qfieldsync.core.cloud_api import (
     OAUTH2_CONFIG_REQUEST_TIMEOUT_SECONDS,
@@ -51,6 +53,8 @@ from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.utils import extract_theme_from_qgis_settings
 
 FETCH_AUTH_METHODS_TIMER_INTERVAL = 750
+
+QGIS_MIN_VERSION_FOR_OAUTH2_EXTRA_TOKENS = 34400  # QGIS 3.44
 
 CloudLoginDialogUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/cloud_login_dialog.ui")
@@ -216,6 +220,28 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.set_login_groupbox_visibility(self.signInUsernameGroupBox, True)
             return
 
+        self.signInUsernameGroupBox.setEnabled(True)
+        self.ssoLoginOngoingGroupBox.hide()
+
+        has_oauth2_providers = any(
+            auth_method.get("type") == "oauth2" for auth_method in auth_methods
+        )
+
+        # If QFieldCloud is providing OAuth2 IDPs and QGIS has version < 3.44,
+        # OAuth2 extra_tokens are not supported.
+        if (
+            has_oauth2_providers
+            and Qgis.versionInt() < QGIS_MIN_VERSION_FOR_OAUTH2_EXTRA_TOKENS
+        ):
+            iface.messageBar().pushWarning(
+                "QFieldSync",
+                self.tr(
+                    "QFieldCloud supports SSO login methods which require QGIS 3.44 or newer. Please upgrade QGIS."
+                ),
+            )
+
+            return
+
         self.clear_login_widgets()
 
         # add vertical space before SSO login buttons
@@ -243,9 +269,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             )
             self.signInUsernameGroupBox.layout().addWidget(login_button)
             self._sso_login_buttons.append(login_button)
-
-        self.signInUsernameGroupBox.setEnabled(True)
-        self.ssoLoginOngoingGroupBox.hide()
 
     def set_sso_provider_button_style(
         self, style_data: Dict[str, str], button: QPushButton
