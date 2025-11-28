@@ -526,7 +526,7 @@ class CloudNetworkAccessManager(QObject):
             self._prepare_uri("projects").toString(),
             headers=headers,
             params=params,
-            timeout=0,
+            timeout=120,
         )
         response.raise_for_status()
 
