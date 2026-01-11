@@ -209,15 +209,21 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         for theme in self.project.mapThemeCollection().mapThemes():
             self.mapThemeComboBox.addItem(theme)
 
-        self.layerComboBox.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.layerComboBox.setFilters(QgsMapLayerProxyModel.Filter.RasterLayer)
 
-        self.geofencingLayerComboBox.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.geofencingLayerComboBox.setFilters(
+            QgsMapLayerProxyModel.Filter.PolygonLayer
+        )
         self.geofencingLayerComboBox.setAllowEmptyLayer(True)
 
-        self.digitizingLogsLayerComboBox.setFilters(QgsMapLayerProxyModel.PointLayer)
+        self.digitizingLogsLayerComboBox.setFilters(
+            QgsMapLayerProxyModel.Filter.PointLayer
+        )
         self.digitizingLogsLayerComboBox.setAllowEmptyLayer(True)
 
-        self.initialActiveLayerComboBox.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.initialActiveLayerComboBox.setFilters(
+            QgsMapLayerProxyModel.Filter.VectorLayer
+        )
         self.initialActiveLayerComboBox.setAllowEmptyLayer(False)
 
         if Qgis.versionInt() >= 32400:  # noqa: PLR2004
@@ -301,7 +307,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.initialMapModeComboBox.setCurrentIndex(mode_index)
 
         self.maximumImageWidthHeight.setClearValueMode(
-            QgsSpinBox.CustomValue, self.tr("No restriction")
+            QgsSpinBox.ClearValueMode.CustomValue, self.tr("No restriction")
         )
         self.maximumImageWidthHeight.setValue(
             self.__project_configuration.maximum_image_width_height

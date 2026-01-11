@@ -89,7 +89,7 @@ class CloudConverter(QObject):
                     if layer_source.is_localized_path:
                         continue
 
-                if layer.type() == QgsMapLayer.VectorLayer:
+                if layer.type() == QgsMapLayer.LayerType.VectorLayer:
                     if (
                         layer.dataProvider()
                         and layer.dataProvider().name() == "virtual"

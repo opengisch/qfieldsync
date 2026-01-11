@@ -47,7 +47,7 @@ class RelationshipConfigurationTableWidget(QTableWidget):
     def add_layer_fields(self, layer_source):
         layer = layer_source.layer
 
-        if layer.type() != QgsMapLayer.VectorLayer:
+        if layer.type() != QgsMapLayer.LayerType.VectorLayer:
             return
 
         for relation in (

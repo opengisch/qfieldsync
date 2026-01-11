@@ -37,7 +37,9 @@ class ProjectConfigurationDialog(QDialog):
 
         self.projectConfigurationStackWidget = ProjectConfigurationStackWidget(self)
 
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
         self.buttonBox.accepted.connect(lambda: self._on_accepted())
         self.buttonBox.rejected.connect(self.reject)
 

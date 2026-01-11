@@ -127,7 +127,7 @@ def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
         QgsMessageLog.logMessage(
             "Couldn't convert reply to error:" + str(err),
             "QFieldSync",
-            Qgis.Critical,
+            Qgis.MessageLevel.Critical,
         )
 
     if not message:
@@ -1108,7 +1108,7 @@ class CloudNetworkAccessManager(QObject):
             QgsMessageLog.logMessage(
                 "Error:" + str(err),
                 "QFieldSync",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
             return None
 

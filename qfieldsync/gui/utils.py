@@ -56,7 +56,7 @@ def extract_theme_from_qgis_settings() -> Literal["light", "dark"]:
     if qgis_theme == "Blend of Gray":
         return "light"
 
-    color = QWidget().palette().color(QPalette.Window)
+    color = QWidget().palette().color(QPalette.ColorRole.Window)
 
     if (color.red() + color.green() + color.blue()) / 3 < MID_COLOR_SUM_THRESHOLD:
         return "dark"

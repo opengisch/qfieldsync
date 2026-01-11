@@ -280,12 +280,12 @@ class PackageDialog(QDialog, DialogUi):
                     display_folder=QDir.toNativeSeparators(export_folder),
                 )
             )
-            status = Qgis.Success
+            status = Qgis.MessageLevel.Success
         else:
             result_message = self.tr(
                 "Failed to package project. See message log (Python Error) for more details."
             )
-            status = Qgis.Warning
+            status = Qgis.MessageLevel.Warning
 
         self.iface.messageBar().pushMessage(result_message, status, 0)
 

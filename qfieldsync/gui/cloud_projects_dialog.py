@@ -560,7 +560,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         for row in range(self.projectsTable.rowCount()):
             if filter_text:
                 item = self.projectsTable.item(row, 0)
-                cloud_project = item.data(Qt.UserRole)
+                cloud_project = item.data(Qt.ItemDataRole.UserRole)
                 cloud_project_is_visible = (
                     filter_text in cloud_project.name.lower()
                     or filter_text in cloud_project.owner.lower()
@@ -788,7 +788,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
                 # when the dir is empty, all is good. But if not there are some file, we need to ask the user to confirm what to do
                 if list(Path(local_dir).iterdir()):
-                    buttons = QMessageBox.Ok | QMessageBox.Abort
+                    buttons = (
+                        QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Abort
+                    )
                     feedback, feedback_msg = local_dir_feedback(
                         local_dir, single_project_status=LocalDirFeedback.Warning
                     )
@@ -802,7 +804,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     elif feedback == LocalDirFeedback.Warning:
                         answer = QMessageBox.warning(self, title, feedback_msg, buttons)
 
-                    if answer == QMessageBox.Abort:
+                    if answer == QMessageBox.StandardButton.Abort:
                         local_dir = None
                         continue
 
@@ -948,7 +950,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 self.projectNameLineEdit.validator().validate(
                     cloud_project_data["name"], 0
                 )[0]
-                != QValidator.Acceptable
+                != QValidator.State.Acceptable
             ):
                 QMessageBox.warning(
                     None,
