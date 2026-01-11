@@ -24,6 +24,32 @@ jobs:
 
       - uses: pre-commit/action@v3.0.1
 
+  pyqt6-check:
+    name: PyQt6 compatibility check
+    runs-on: ubuntu-24.04
+    container:
+      image: registry.gitlab.com/oslandia/qgis/pyqgis-4-checker/pyqgis-qt-checker:latest
+      volumes:
+        - /tmp/.X11-unix:/tmp/.X11-unix
+        - ${{ github.workspace }}:/home/pyqgisdev/
+      options: --user root
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v6
+
+      - name: Check PyQt5 to PyQt6 compatibility
+        run: |
+          pyqt5_to_pyqt6.py --dry_run qfieldsync/
+          pyqt5_to_pyqt6.py --logfile pyqt6_checker.log qfieldsync/
+
+      - name: Upload script report if script fails
+        uses: actions/upload-artifact@v6
+        if: ${{ failure() }}
+        with:
+          name: pyqt6-checker-error-report
+          path: pyqt6_checker.log
+          retention-days: 7
+
   # Run unit tests
   test:
     runs-on: ubuntu-24.04
