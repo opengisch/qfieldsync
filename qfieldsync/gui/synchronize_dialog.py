@@ -133,10 +133,10 @@ class SynchronizeDialog(QDialog, DialogUi):
                         original_path,
                         current_path,
                     ),
-                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 )
 
-                if answer == QMessageBox.Ok:
+                if answer == QMessageBox.StandardButton.Ok:
                     project_config.original_project_path = str(current_path)
                     original_path = current_path
                 else:

@@ -84,7 +84,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.relationshipConfigurationTable.set_layer_column_hidden(True)
 
         self.valueMapButtonInterfaceSpinBox.setClearValueMode(
-            QgsSpinBox.CustomValue, self.tr("Disabled")
+            QgsSpinBox.ClearValueMode.CustomValue, self.tr("Disabled")
         )
 
         self.measurementTypeComboBox.addItem(
@@ -101,7 +101,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.measurementTypeComboBox.addItem(self.tr("HDOP"))
         self.measurementTypeComboBox.addItem(self.tr("VDOP"))
 
-        if layer.type() == QgsMapLayer.VectorLayer:
+        if layer.type() == QgsMapLayer.LayerType.VectorLayer:
             prop = QgsProperty.fromExpression(
                 self.layer_source.feature_addition_locked_expression
             )

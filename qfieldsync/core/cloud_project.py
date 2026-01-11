@@ -422,11 +422,11 @@ class CloudProject:
             return []
 
         read_flags = QgsProject.ReadFlags()
-        read_flags |= QgsProject.FlagDontLoadLayouts
-        read_flags |= QgsProject.FlagTrustLayerMetadata
+        read_flags |= QgsProject.ReadFlag.FlagDontLoadLayouts
+        read_flags |= QgsProject.ReadFlag.FlagTrustLayerMetadata
 
         if Qgis.versionInt() >= 32600:  # noqa: PLR2004
-            read_flags |= QgsProject.FlagDontLoad3DViews
+            read_flags |= QgsProject.ReadFlag.FlagDontLoad3DViews
 
         temporary_project = QgsProject()
         temporary_project.read(str(self.local_project_file.local_path), read_flags)

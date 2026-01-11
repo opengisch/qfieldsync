@@ -401,7 +401,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.usernameLineEdit.setEnabled(False)
         self.passwordLineEdit.setEnabled(False)
         self.rememberMeCheckBox.setEnabled(False)
-        self.done(QDialog.Accepted)
+        self.done(QDialog.DialogCode.Accepted)
 
     def on_login_with_sso_provider_button_clicked(
         self, provider_data: Dict[str, Any]

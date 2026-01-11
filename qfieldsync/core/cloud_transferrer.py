@@ -326,7 +326,7 @@ class CloudTransferrer(QObject):
             QgsMessageLog.logMessage(
                 self.tr("Failed to copy project files to the project directory!"),
                 "QFieldSync",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
 
         self.is_download_active = False

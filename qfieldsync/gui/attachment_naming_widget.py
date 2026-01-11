@@ -45,7 +45,7 @@ class AttachmentNamingTableWidget(QTableWidget):
     def add_layer_fields(self, layer_source):
         layer = layer_source.layer
 
-        if layer.type() != QgsMapLayer.VectorLayer:
+        if layer.type() != QgsMapLayer.LayerType.VectorLayer:
             return
 
         for field_name in layer_source.get_attachment_fields():

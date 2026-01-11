@@ -373,12 +373,14 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         result_message = self.tr(
             "Finished uploading the project to QFieldCloud, you are now viewing the locally stored copy."
         )
-        self.iface.messageBar().pushMessage(result_message, Qgis.Success, 0)
+        self.iface.messageBar().pushMessage(
+            result_message, Qgis.MessageLevel.Success, 0
+        )
 
         self.after_project_creation_action(self.cloud_transferrer.cloud_project.id)
 
     def on_show_warning(self, _, message):
-        self.iface.messageBar().pushMessage(message, Qgis.Warning, 0)
+        self.iface.messageBar().pushMessage(message, Qgis.MessageLevel.Warning, 0)
 
     def on_cancel_button_clicked(self):
         self.canceled.emit()

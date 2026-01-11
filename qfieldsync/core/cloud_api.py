@@ -127,7 +127,7 @@ def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
         QgsMessageLog.logMessage(
             "Couldn't convert reply to error:" + str(err),
             "QFieldSync",
-            Qgis.Critical,
+            Qgis.MessageLevel.Critical,
         )
 
     if not message:
@@ -847,7 +847,7 @@ class CloudNetworkAccessManager(QObject):
 
         self._set_request_auth(request)
 
-        multi_part = QHttpMultiPart(QHttpMultiPart.FormDataType)
+        multi_part = QHttpMultiPart(QHttpMultiPart.ContentType.FormDataType)
         multi_part.setParent(self)
         multi_part.setBoundary(
             b"boundary_.oOo.QFieldRoxAndYouKnowItDXMtCoIPQV84CAX3rDyv83393"
@@ -1108,7 +1108,7 @@ class CloudNetworkAccessManager(QObject):
             QgsMessageLog.logMessage(
                 "Error:" + str(err),
                 "QFieldSync",
-                Qgis.Critical,
+                Qgis.MessageLevel.Critical,
             )
             return None
 

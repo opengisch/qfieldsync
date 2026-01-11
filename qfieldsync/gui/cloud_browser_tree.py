@@ -53,7 +53,7 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
         return "QFieldCloudItemProvider"
 
     def capabilities(self):
-        return QgsDataProvider.Net
+        return QgsDataProvider.DataCapability.Net
 
     def createDataItem(self, _path, parent):  # noqa: N802
         if not parent:
@@ -83,17 +83,17 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
         )
 
     def capabilities2(self):
-        return QgsDataItem.Fast
+        return QgsDataItem.Capability.Fast
 
     def createChildren(self):  # noqa: N802
         items = []
 
         if not self.network_manager.is_authenticated():
             CloudLoginDialog.show_auth_dialog(self.network_manager)
-            self.setState(QgsDataItem.Populating)
+            self.setState(QgsDataItem.State.Populating)
             return []
 
-        self.setState(QgsDataItem.Populated)
+        self.setState(QgsDataItem.State.Populated)
 
         if self.error:
             error_item = QgsErrorItem(self, self.error, "/QFieldCloud/error")
@@ -176,7 +176,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
                 self.project_type == "private" and project.is_private
             ):
                 item = QFieldCloudProjectItem(self, project)
-                item.setState(QgsDataItem.Populated)
+                item.setState(QgsDataItem.State.Populated)
                 items.append(item)
 
         return items
@@ -187,7 +187,7 @@ class QFieldCloudProjectItem(QgsDataItem):
 
     def __init__(self, parent, project):
         super().__init__(
-            QgsDataItem.Collection,
+            QgsDataItem.Type.Collection,
             parent,
             project.name,
             "/QFieldCloud/project/" + project.id,

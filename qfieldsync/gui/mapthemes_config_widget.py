@@ -59,7 +59,7 @@ class MapThemesConfigWidget(QTableWidget):
             cmb.setAllowEmptyLayer(True)
             if Qgis.versionInt() >= 32400:  # noqa: PLR2004
                 cmb.setProject(self.project)
-            cmb.setFilters(QgsMapLayerProxyModel.VectorLayer)
+            cmb.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
             if map_theme in configuration:
                 cmb.setLayer(self.project.mapLayer(configuration[map_theme]))
             self.setCellWidget(count, 1, cmb)
