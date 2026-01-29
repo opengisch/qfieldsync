@@ -9,6 +9,8 @@
 [general]
 name=QField Sync
 qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
+supportsQt6=True
 description=Sync your projects to QField
 version=dev
 author=OPENGIS.ch
@@ -36,7 +38,6 @@ experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
-supportsQt6=True
 
 about=
     This plugin facilitates packaging QGIS projects for QField.<br>
