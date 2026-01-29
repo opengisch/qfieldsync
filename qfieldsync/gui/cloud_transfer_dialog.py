@@ -575,10 +575,13 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             project = QgsProject()
 
             read_flags = QgsProject.ReadFlags()
-            read_flags |= QgsProject.ReadFlag.FlagDontResolveLayers
-            read_flags |= QgsProject.ReadFlag.FlagDontLoadLayouts
             if Qgis.versionInt() >= 32600:  # noqa: PLR2004
-                read_flags |= QgsProject.ReadFlag.FlagDontLoad3DViews
+                read_flags |= Qgis.ProjectReadFlag.DontResolveLayers
+                read_flags |= Qgis.ProjectReadFlag.DontLoadLayouts
+                read_flags |= Qgis.ProjectReadFlag.DontLoad3DViews
+            else:
+                read_flags |= QgsProject.ReadFlag.FlagDontResolveLayers
+                read_flags |= QgsProject.ReadFlag.FlagDontLoadLayouts
 
             project.read(str(self.cloud_project.root_project_files[0]), read_flags)
 
