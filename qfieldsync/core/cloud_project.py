@@ -423,11 +423,11 @@ class CloudProject:
 
         read_flags = QgsProject.ReadFlags()
         if Qgis.versionInt() >= 32600:  # noqa: PLR2004
-            read_flags |= Qgis.ProjectReadFlag.DontResolveLayers
+            read_flags |= Qgis.ProjectReadFlag.DontLoadLayouts
             read_flags |= Qgis.ProjectReadFlag.TrustLayerMetadata
             read_flags |= Qgis.ProjectReadFlag.DontLoad3DViews
         else:
-            read_flags |= QgsProject.ReadFlag.FlagDontResolveLayers
+            read_flags |= QgsProject.ReadFlag.FlagDontLoadLayouts
             read_flags |= QgsProject.ReadFlag.FlagTrustLayerMetadata
 
         temporary_project = QgsProject()
