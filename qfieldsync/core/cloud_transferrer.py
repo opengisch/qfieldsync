@@ -400,15 +400,17 @@ class CloudTransferrer(QObject):
             if not dest_path.parent.exists():
                 dest_path.parent.mkdir(parents=True)
 
-            if source_filename.endswith((".gpkg-shm", ".gpkg-wal")):
+            if source_filename.endswith(".gpkg"):
                 for suffix in ("-shm", "-wal"):
-                    source_path = Path(str(self.local_path) + suffix)
+                    source_path = Path(str(filename) + suffix)
                     dest_path = Path(str(dest_filename) + suffix)
 
                     if source_path.exists():
                         shutil.copyfile(source_path, dest_path)
-                    else:
+                    elif dest_path.exists():
                         dest_path.unlink()
+            elif source_filename.endswith((".gpkg-shm", ".gpkg-wal")):
+                continue
 
             shutil.copyfile(filename, dest_filename)
 
