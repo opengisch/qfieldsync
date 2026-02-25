@@ -27,6 +27,7 @@ from urllib.parse import urlparse
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtGui import QCursor, QIcon, QMovie, QPainter, QPixmap
+from qgis.PyQt.QtNetwork import QNetworkReply
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtWidgets import (
     QApplication,
@@ -302,7 +303,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         )
 
     def on_get_svg_logo_reply_finished(self, reply, button: QPushButton) -> None:
-        if reply.error():
+        if reply.error() != QNetworkReply.NetworkError.NoError:
             return
 
         svg_data = reply.readAll()
