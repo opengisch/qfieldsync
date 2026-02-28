@@ -211,6 +211,24 @@ class PackageDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
 
         packaged_project_file = Path(self.packagedProjectFileWidget.filePath())
+        packaged_project_dir = packaged_project_file.parent
+        open_project_path = self.project.fileName()
+        open_project_dir = Path(open_project_path).parent
+
+        if open_project_dir.resolve() == packaged_project_dir.resolve():
+            QMessageBox.critical(
+                self,
+                self.tr("Invalid Export Directory"),
+                self.tr(
+                    "The export directory cannot be the same as the source project directory.\n"
+                    "Please choose a different folder for the packaged project."
+                ),
+            )
+
+            return
+
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
+
         area_of_interest = (
             self.__project_configuration.area_of_interest
             if self.__project_configuration.area_of_interest
