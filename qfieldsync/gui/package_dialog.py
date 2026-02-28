@@ -228,10 +228,8 @@ class PackageDialog(QDialog, DialogUi):
                 False
             )
             return
-        else:
-            self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(
-                True
-            )
+
+        self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
 
         area_of_interest = (
             self.__project_configuration.area_of_interest
