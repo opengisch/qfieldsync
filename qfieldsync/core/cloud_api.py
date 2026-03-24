@@ -396,6 +396,9 @@ class CloudNetworkAccessManager(QObject):
         else:
             self.url = f"{p.scheme or 'https'}://{p.netloc}{p.path}"
 
+        if not self.url.endswith("/"):
+            self.url += "/"
+
         self.preferences.set_value("qfieldCloudServerUrl", server_url)
 
     @property
