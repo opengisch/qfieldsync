@@ -19,7 +19,10 @@
 """
 
 
+import os
 import shutil
+import stat
+import time
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -40,6 +43,51 @@ from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.utils.file_utils import mkdir
+
+
+def _rmtree_onedrive_safe(path: Path, max_retries: int = 3) -> None:
+    """
+    Remove a directory tree with handling for OneDrive-locked files.
+
+    OneDrive Files On-Demand can hold locks on directories and files inside
+    synced folders, causing ``shutil.rmtree`` to fail with PermissionError.
+    This helper retries the removal with increasing delay and clears
+    read-only attributes on individual files when needed.
+    """
+
+    def _onerror(func, fpath, exc_info):
+        """Error handler: clear read-only flag and retry the failed operation."""
+        try:
+            os.chmod(fpath, stat.S_IWRITE)
+            func(fpath)
+        except Exception:
+            pass  # will be retried by the outer loop
+
+    last_error = None
+    for attempt in range(max_retries + 1):
+        try:
+            shutil.rmtree(str(path), onerror=_onerror)
+            return
+        except PermissionError as exc:
+            last_error = exc
+            if attempt < max_retries:
+                delay = 2 * (attempt + 1)
+                QgsMessageLog.logMessage(
+                    f"PermissionError removing '{path}' "
+                    f"(attempt {attempt + 1}/{max_retries + 1}, "
+                    f"possibly locked by OneDrive). "
+                    f"Retrying in {delay}s…",
+                    "QFieldSync",
+                )
+                time.sleep(delay)
+
+    # Final fallback: leave it and log a warning rather than crashing
+    QgsMessageLog.logMessage(
+        f"Could not fully remove '{path}' after {max_retries + 1} attempts: "
+        f"{last_error}. Continuing anyway.",
+        "QFieldSync",
+        Qgis.Warning,
+    )
 
 
 class CloudTransferrer(QObject):
@@ -93,7 +141,7 @@ class CloudTransferrer(QObject):
         self.transfers_model = None
 
         if self.temp_dir.exists():
-            shutil.rmtree(self.temp_dir)
+            _rmtree_onedrive_safe(self.temp_dir)
 
         mkdir(self.temp_dir)
         mkdir(self.temp_dir.joinpath("backup"))
