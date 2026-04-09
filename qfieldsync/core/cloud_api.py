@@ -39,6 +39,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import (
     QByteArray,
     QEventLoop,
+    QFile,
     QFileSystemWatcher,
     QObject,
     QUrl,
@@ -873,16 +874,21 @@ class CloudNetworkAccessManager(QObject):
 
         # now attach each file
         for filename in filenames:
-            # this might be optimized by usung QFile and QHttpPart.setBodyDevice, but didn't work on the first
-            with open(filename, "rb") as file:
-                file_part = QHttpPart()
-                file_part.setBody(file.read())
-                file_part.setHeader(
-                    QNetworkRequest.KnownHeaders.ContentDispositionHeader,
-                    'form-data; name="file"; filename="{}"'.format(filename),
-                )
+            # Use setBodyDevice with QFile to stream the file, avoiding QByteArray's
+            # 32-bit size limit which silently truncates files larger than 2GB.
+            # QFile must be parented to multi_part so it stays open for the full
+            # duration of the request (multi_part itself is parented to reply below).
+            qfile = QFile(filename)
+            qfile.open(QFile.OpenModeFlag.ReadOnly)
+            qfile.setParent(multi_part)
+            file_part = QHttpPart()
+            file_part.setBodyDevice(qfile)
+            file_part.setHeader(
+                QNetworkRequest.KnownHeaders.ContentDispositionHeader,
+                'form-data; name="file"; filename="{}"'.format(filename),
+            )
 
-                multi_part.append(file_part)
+            multi_part.append(file_part)
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, multi_part)
