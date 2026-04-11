@@ -236,7 +236,7 @@ def _open_with_onedrive_retry(
                 "PermissionError opening '%s' (attempt %d/%d, OneDrive placeholder: %s). Retrying in %.1f s…",
                 filename,
                 attempt + 1,
-                max_retries + 1,
+                max_retries,
                 is_onedrive,
                 delay_s,
             )
@@ -281,7 +281,7 @@ def rmtree_onedrive_safe(
                     "PermissionError removing '%s' (attempt %d/%d, possibly locked by OneDrive). Retrying in %.1f s…",
                     path,
                     attempt + 1,
-                    max_retries + 1,
+                    max_retries,
                     delay_s,
                 )
 
@@ -291,6 +291,6 @@ def rmtree_onedrive_safe(
     logger.info(
         "Could not fully remove '%s' after %d attempts: %s. Continuing anyway.",
         path,
-        max_retries + 1,
+        max_retries,
         last_error,
     )
