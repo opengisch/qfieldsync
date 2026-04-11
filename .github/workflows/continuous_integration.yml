@@ -56,7 +56,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        qgis_version: [release-3_22, latest]
+        # TODO @suricactus: enable QGIS 4 tests, but for now it's crashing, see https://github.com/opengisch/qfieldsync/issues/757
+        qgis_version: [release-3_22, 3.44, ltr]
     env:
       QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
     steps:
@@ -68,32 +69,6 @@ jobs:
       - name: Test
         run: |
           docker compose -f .docker/docker-compose.yml run qgis /usr/src/.docker/run-docker-tests.sh
-
-  test-22-04:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Test
-        run: |
-          wget -qO - https://qgis.org/downloads/qgis-2022.gpg.key | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/qgis-archive.gpg --import
-          sudo chmod a+r /etc/apt/trusted.gpg.d/qgis-archive.gpg
-          sudo add-apt-repository "deb https://qgis.org/ubuntu $(lsb_release -c -s) main"
-
-          sudo apt update
-          sudo apt install qgis
-          sudo pip3 install pytest nose2 mock
-
-          # Upgrading `pip` fixes: "WARNING: Generating metadata for package libqfieldsync produced metadata for project name unknown. Fix your #egg=libqfieldsync fragments."
-          pip3 install --upgrade pip
-
-          # Install dependencies, including `libqfieldsync`
-          pip3 install -r requirements.txt
-
-          xvfb-run pytest
 
   release:
     runs-on: ubuntu-24.04

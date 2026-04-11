@@ -2,6 +2,9 @@ ARG QGIS_TEST_VERSION=latest
 FROM  qgis/qgis:${QGIS_TEST_VERSION}
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
+# In older QGIS images (e.g. release_3.22), the base image is no longer supported in the NodeJS repository.
+RUN rm -f /etc/apt/sources.list.d/nodesource.list
+
 RUN apt-get update \
     && apt-get install -y python3-pip \
     && rm -rf /var/lib/apt/lists/*
