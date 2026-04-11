@@ -18,16 +18,11 @@
  ***************************************************************************/
 """
 
-import hashlib
-import logging
-import os
-import platform
 import sqlite3
-import time
 from datetime import datetime, timezone
 from enum import IntFlag
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import (
@@ -40,101 +35,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QDir
 
 from qfieldsync.core.preferences import Preferences
-
-ETAG_BLOCKSIZE = 65536
-
-logger = logging.getLogger(__name__)
-
-# OneDrive Files On-Demand file attributes (Windows)
-_FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
-_FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x00040000
-
-
-def _is_onedrive_cloud_file(filename: Union[str, Path]) -> bool:
-    """
-    Check if a file is a OneDrive cloud-only (dehydrated) placeholder.
-
-    OneDrive Files On-Demand marks files that are not downloaded locally
-    with special file attributes. These files cannot be opened directly
-    and must first be hydrated (downloaded) by OneDrive.
-
-    Returns:
-        True if the file is a cloud-only OneDrive placeholder, False otherwise.
-
-    """
-    if platform.system() != "Windows":
-        return False
-
-    try:
-        import ctypes
-
-        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filename))
-        if attrs == -1:  # INVALID_FILE_ATTRIBUTES
-            return False
-        return bool(
-            attrs
-            & (_FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS | _FILE_ATTRIBUTE_RECALL_ON_OPEN)
-        )
-    except Exception:
-        return False
-
-
-def _open_with_onedrive_retry(
-    filename: Union[str, Path],
-    mode: str = "rb",
-    max_retries: int = 5,
-    retry_delay: float = 2.0,
-):
-    """
-    Open a file with retry logic to handle OneDrive Files On-Demand.
-
-    When files reside in a OneDrive-synced folder, they may be cloud-only
-    (dehydrated) or temporarily locked by the OneDrive sync process.
-    A plain ``open()`` then raises ``PermissionError``.
-
-    This helper detects that situation and retries with increasing delay,
-    giving OneDrive time to hydrate / release the file.
-
-    Args:
-        filename: Path to the file to open.
-        mode: File open mode (default ``"rb"``).
-        max_retries: Number of retries after the first failure.
-        retry_delay: Base delay in seconds between retries (doubles each attempt).
-
-    Returns:
-        An open file object (same as ``open()``).  The caller is responsible
-        for closing it (use ``with`` statement).
-
-    Raises:
-        PermissionError: If all retries are exhausted.
-
-    """
-    last_error: Optional[PermissionError] = None
-
-    for attempt in range(max_retries + 1):
-        try:
-            return open(filename, mode)  # noqa: SIM115
-        except PermissionError as err:  # noqa: PERF203
-            last_error = err
-
-            if attempt >= max_retries:
-                raise
-
-            is_onedrive = _is_onedrive_cloud_file(filename)
-            wait = retry_delay * (2**attempt) if is_onedrive else retry_delay
-            QgsMessageLog.logMessage(
-                f"PermissionError opening '{filename}' "
-                f"(attempt {attempt + 1}/{max_retries + 1}, "
-                f"OneDrive placeholder: {is_onedrive}). "
-                f"Retrying in {wait:.1f}s…",
-                "QFieldSync",
-            )
-            time.sleep(wait)
-
-    assert last_error is not None
-
-    # all retries exhausted, raise the last error
-    raise last_error
+from qfieldsync.utils.file_utils import calc_etag
 
 
 class ProjectFileCheckout(IntFlag):
@@ -142,51 +43,6 @@ class ProjectFileCheckout(IntFlag):
     Local = 1
     Cloud = 2
     LocalAndCloud = 3
-
-
-def calc_etag(filename: Union[str, Path], part_size: int = 8 * 1024 * 1024) -> str:
-    """
-    Calculate ETag as in Object Storage (S3) of a local file.
-
-    ETag is a MD5. But for the multipart uploaded files, the MD5 is computed from the concatenation of the MD5s of each uploaded part.
-
-    See the inspiration of this implementation here: https://stackoverflow.com/a/58239738/1226137
-
-    Args:
-        filename (str): the local filename
-        part_size (int): the size of the Object Storage part. Most Object Storages use 8MB. Defaults to 8*1024*1024.
-
-    Returns:
-        str: the calculated ETag value
-    """
-    with _open_with_onedrive_retry(filename, "rb") as f:
-        file_size = os.fstat(f.fileno()).st_size
-
-        if file_size <= part_size:
-            # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
-            hasher = hashlib.md5()  # noqa: S324
-
-            buf = f.read(ETAG_BLOCKSIZE)
-            while len(buf) > 0:
-                hasher.update(buf)
-                buf = f.read(ETAG_BLOCKSIZE)
-
-            return hasher.hexdigest()
-        else:
-            # Say you uploaded a 14MB file and your part size is 5MB.
-            # Calculate 3 MD5 checksums corresponding to each part, i.e. the checksum of the first 5MB, the second 5MB, and the last 4MB.
-            # Then take the checksum of their concatenation.
-            # Since MD5 checksums are hex representations of binary data, just make sure you take the MD5 of the decoded binary concatenation, not of the ASCII or UTF-8 encoded concatenation.
-            # When that's done, add a hyphen and the number of parts to get the ETag.
-            md5sums = []
-            for data in iter(lambda: f.read(part_size), b""):
-                # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
-                md5sums.append(hashlib.md5(data).digest())  # noqa: S324
-
-            # TODO @suricactus: Python 3.9, pass `usedforsecurity=False`
-            final_md5sum = hashlib.md5(b"".join(md5sums))  # noqa: S324
-
-            return "{}-{}".format(final_md5sum.hexdigest(), len(md5sums))
 
 
 class ProjectFile:
@@ -290,26 +146,6 @@ class ProjectFile:
             return self.local_path.exists()
 
         return False
-
-    @property
-    def local_sha256(self) -> Optional[str]:
-        if not self.local_path_exists:
-            return None
-
-        assert self.local_path
-        assert self.local_path.is_file()
-
-        try:
-            with _open_with_onedrive_retry(self.local_path, "rb") as f:
-                return hashlib.sha256(f.read()).hexdigest()
-        except PermissionError:
-            QgsMessageLog.logMessage(
-                f"Cannot read '{self.local_path}' to compute SHA-256 "
-                f"(file may be locked by OneDrive). "
-                f"Treating as changed.",
-                "QFieldSync",
-            )
-            return None
 
     @property
     def local_etag(self) -> Optional[str]:
