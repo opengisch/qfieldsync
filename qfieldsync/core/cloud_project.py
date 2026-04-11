@@ -50,7 +50,7 @@ _FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
 _FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x00040000
 
 
-def _is_onedrive_cloud_file(filepath: Union[str, Path]) -> bool:
+def _is_onedrive_cloud_file(filename: Union[str, Path]) -> bool:
     """
     Check if a file is a OneDrive cloud-only (dehydrated) placeholder.
 
@@ -60,6 +60,7 @@ def _is_onedrive_cloud_file(filepath: Union[str, Path]) -> bool:
 
     Returns:
         True if the file is a cloud-only OneDrive placeholder, False otherwise.
+
     """
     if platform.system() != "Windows":
         return False
@@ -67,7 +68,7 @@ def _is_onedrive_cloud_file(filepath: Union[str, Path]) -> bool:
     try:
         import ctypes
 
-        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filepath))
+        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filename))
         if attrs == -1:  # INVALID_FILE_ATTRIBUTES
             return False
         return bool(
@@ -79,7 +80,7 @@ def _is_onedrive_cloud_file(filepath: Union[str, Path]) -> bool:
 
 
 def _open_with_onedrive_retry(
-    filepath: Union[str, Path],
+    filename: Union[str, Path],
     mode: str = "rb",
     max_retries: int = 5,
     retry_delay: float = 2.0,
@@ -95,7 +96,7 @@ def _open_with_onedrive_retry(
     giving OneDrive time to hydrate / release the file.
 
     Args:
-        filepath: Path to the file to open.
+        filename: Path to the file to open.
         mode: File open mode (default ``"rb"``).
         max_retries: Number of retries after the first failure.
         retry_delay: Base delay in seconds between retries (doubles each attempt).
@@ -106,28 +107,33 @@ def _open_with_onedrive_retry(
 
     Raises:
         PermissionError: If all retries are exhausted.
+
     """
-    filepath = str(filepath)
     last_error: Optional[PermissionError] = None
 
     for attempt in range(max_retries + 1):
         try:
-            return open(filepath, mode)
-        except PermissionError as exc:
-            last_error = exc
-            if attempt < max_retries:
-                is_onedrive = _is_onedrive_cloud_file(filepath)
-                wait = retry_delay * (2**attempt) if is_onedrive else retry_delay
-                QgsMessageLog.logMessage(
-                    f"PermissionError opening '{filepath}' "
-                    f"(attempt {attempt + 1}/{max_retries + 1}, "
-                    f"OneDrive placeholder: {is_onedrive}). "
-                    f"Retrying in {wait:.1f}s…",
-                    "QFieldSync",
-                )
-                time.sleep(wait)
+            return open(filename, mode)  # noqa: SIM115
+        except PermissionError as err:  # noqa: PERF203
+            last_error = err
+
+            if attempt >= max_retries:
+                raise
+
+            is_onedrive = _is_onedrive_cloud_file(filename)
+            wait = retry_delay * (2**attempt) if is_onedrive else retry_delay
+            QgsMessageLog.logMessage(
+                f"PermissionError opening '{filename}' "
+                f"(attempt {attempt + 1}/{max_retries + 1}, "
+                f"OneDrive placeholder: {is_onedrive}). "
+                f"Retrying in {wait:.1f}s…",
+                "QFieldSync",
+            )
+            time.sleep(wait)
 
     assert last_error is not None
+
+    # all retries exhausted, raise the last error
     raise last_error
 
 

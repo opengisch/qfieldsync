@@ -23,6 +23,7 @@ import os
 import shutil
 import stat
 import time
+from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -50,26 +51,24 @@ def _rmtree_onedrive_safe(path: Path, max_retries: int = 3) -> None:
     Remove a directory tree with handling for OneDrive-locked files.
 
     OneDrive Files On-Demand can hold locks on directories and files inside
-    synced folders, causing ``shutil.rmtree`` to fail with PermissionError.
+    synced folders, causing ``shutil.rmtree` to fail with `PermissionError`.
     This helper retries the removal with increasing delay and clears
     read-only attributes on individual files when needed.
     """
 
-    def _onerror(func, fpath, exc_info):
+    def _onerror(func: Callable, fpath: str, _exc_info) -> None:
         """Error handler: clear read-only flag and retry the failed operation."""
-        try:
-            os.chmod(fpath, stat.S_IWRITE)
-            func(fpath)
-        except Exception:
-            pass  # will be retried by the outer loop
+        os.chmod(fpath, stat.S_IWRITE)
+        func(fpath)
 
     last_error = None
     for attempt in range(max_retries + 1):
         try:
             shutil.rmtree(str(path), onerror=_onerror)
             return
-        except PermissionError as exc:
-            last_error = exc
+        except PermissionError as err:  # noqa: PERF203
+            last_error = err
+
             if attempt < max_retries:
                 delay = 2 * (attempt + 1)
                 QgsMessageLog.logMessage(
