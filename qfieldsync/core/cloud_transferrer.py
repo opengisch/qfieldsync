@@ -39,7 +39,7 @@ from qgis.PyQt.QtNetwork import QNetworkReply
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.errors import QFieldSyncError
-from qfieldsync.utils.file_utils import mkdir
+from qfieldsync.utils.file_utils import mkdir, rmtree_onedrive_safe
 
 
 class CloudTransferrer(QObject):
@@ -93,7 +93,7 @@ class CloudTransferrer(QObject):
         self.transfers_model = None
 
         if self.temp_dir.exists():
-            shutil.rmtree(self.temp_dir)
+            rmtree_onedrive_safe(self.temp_dir)
 
         mkdir(self.temp_dir)
         mkdir(self.temp_dir.joinpath("backup"))
