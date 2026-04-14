@@ -36,8 +36,6 @@ from qgis.PyQt.QtWidgets import (
     QGroupBox,
     QMainWindow,
     QPushButton,
-    QSizePolicy,
-    QSpacerItem,
     QWidget,
 )
 from qgis.PyQt.uic import loadUiType
@@ -197,8 +195,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
     def clear_login_widgets(self) -> None:
         self.set_login_groupbox_visibility(self.signInUsernameGroupBox, False)
+        self.authenticationDivider.setVisible(False)
 
-        # clear sso login buttons
         for push_button in self._sso_login_buttons:
             push_button.deleteLater()
 
@@ -245,22 +243,20 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         self.clear_login_widgets()
 
-        # add vertical space before SSO login buttons
-        vertical_spacer = QSpacerItem(
-            0, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed
-        )
-        self.signInUsernameGroupBox.layout().addItem(vertical_spacer)
+        has_credentials = False
 
         for auth_method in auth_methods:
-            # credentials login: enabled static groupbox.
             if auth_method["id"] == "credentials":
                 self.set_login_groupbox_visibility(self.signInUsernameGroupBox, True)
+                has_credentials = True
                 continue
 
-            # sso provider: dynamically generate button to login.
-            login_button = QPushButton(
-                self.tr("Sign In with {provider}").format(provider=auth_method["name"])
-            )
+            # Mirror the web login page: show an "Or" divider between the credentials
+            # form and the SSO provider buttons only when both are present.
+            if has_credentials and not self._sso_login_buttons:
+                self.authenticationDivider.setVisible(True)
+
+            login_button = QPushButton(auth_method["name"])
             login_button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
             self.set_sso_provider_button_style(auth_method.get("styles"), login_button)
@@ -268,7 +264,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             login_button.clicked.connect(
                 partial(self.on_login_with_sso_provider_button_clicked, auth_method)
             )
-            self.signInUsernameGroupBox.layout().addWidget(login_button)
+            self.signInUsernameGroupBox.layout().addRow(login_button)
             self._sso_login_buttons.append(login_button)
 
     def set_sso_provider_button_style(
