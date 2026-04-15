@@ -507,6 +507,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.stamping_image_decoration = self.image_stamping_panel.image_decoration()
         self.stamping_details_template = self.image_stamping_panel.details_template()
         self.force_stamping = self.image_stamping_panel.force_stamping()
+        self.image_stamping_panel.deleteLater()
         self.image_stamping_panel = None
 
     def _on_force_auto_push_clicked(self, checked):
