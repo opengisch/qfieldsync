@@ -467,7 +467,7 @@ class CloudTransferrer(QObject):
 
 
 class FileTransfer(QObject):
-    progress = pyqtSignal(int, int)
+    progress = pyqtSignal("qint64", "qint64")
     finished = pyqtSignal()
 
     class TransferType(Enum):
@@ -667,7 +667,7 @@ class ThrottledFileTransferrer(QObject):
     finished = pyqtSignal()
     aborted = pyqtSignal()
     file_finished = pyqtSignal(str)
-    progress = pyqtSignal(str, int, int)
+    progress = pyqtSignal(str, "qint64", "qint64")
 
     def __init__(  # noqa: PLR0913
         self,
