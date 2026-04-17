@@ -274,7 +274,9 @@
              <string>Enable QField feature forms' wizard mode</string>
             </property>
             <property name="toolTip">
-             <string>When enabled, QField will display root tabs of a given feature form as a series of pages. This provides users with a linear journey, with constraints guiding the process along.</string>
+             <string>When enabled, QField will display root tabs of feature forms as
+a series of pages. This provides a simpler linear journey for users
+to fill forms, with constraints guiding the process along.</string>
             </property>
            </widget>
           </item>
