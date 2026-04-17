@@ -306,6 +306,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             mode_index = 0
         self.initialMapModeComboBox.setCurrentIndex(mode_index)
 
+        self.featureFormWizardModeCheckBox.setChecked(
+            self.__project_configuration.feature_form_wizard_mode_enabled
+        )
+
         self.maximumImageWidthHeight.setClearValueMode(
             QgsSpinBox.ClearValueMode.CustomValue, self.tr("No restriction")
         )
@@ -424,6 +428,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
         self.__project_configuration.initial_map_mode = (
             self.initialMapModeComboBox.currentData()
+        )
+
+        self.__project_configuration.feature_form_wizard_mode_enabled = (
+            self.featureFormWizardModeCheckBox.isChecked()
         )
 
         self.__project_configuration.base_map_tile_size = int(
