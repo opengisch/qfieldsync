@@ -280,6 +280,20 @@ to fill forms, with constraints guiding the process along.</string>
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="customizeNavigationLabel">
+            <property name="text">
+             <string>Customize navigation indicators</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QPushButton" name="customizeNavigationButton">
+            <property name="text">
+             <string>Settings</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
