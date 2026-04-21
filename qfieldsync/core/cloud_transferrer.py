@@ -95,10 +95,16 @@ class CloudTransferrer(QObject):
         if self.temp_dir.exists():
             rmtree_onedrive_safe(self.temp_dir)
 
-        mkdir(self.temp_dir)
-        mkdir(self.temp_dir.joinpath("backup"))
-        mkdir(self.temp_dir.joinpath(FileTransfer.TransferType.UPLOAD.value))
-        mkdir(self.temp_dir.joinpath(FileTransfer.TransferType.DOWNLOAD.value))
+        mkdir(self.temp_dir, exist_ok=True)
+        mkdir(self.temp_dir.joinpath("backup"), exist_ok=True)
+        mkdir(
+            self.temp_dir.joinpath(FileTransfer.TransferType.UPLOAD.value),
+            exist_ok=True,
+        )
+        mkdir(
+            self.temp_dir.joinpath(FileTransfer.TransferType.DOWNLOAD.value),
+            exist_ok=True,
+        )
 
         self.localized_datasets_upload_finished.connect(
             self._on_localized_datasets_upload_finished
