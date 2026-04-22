@@ -268,6 +268,18 @@
           <item row="2" column="1">
            <widget class="QgsMapLayerComboBox" name="digitizingLogsLayerComboBox"/>
           </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QCheckBox" name="featureFormWizardModeCheckBox">
+            <property name="text">
+             <string>Enable QField feature forms' wizard mode</string>
+            </property>
+            <property name="toolTip">
+             <string>When enabled, QField will display root tabs of feature forms as
+a series of pages. This provides a simpler linear journey for users
+to fill forms, with constraints guiding the process along.</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
