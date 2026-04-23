@@ -128,8 +128,8 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         self.unsupportedLayersList = []
 
-        self._on_message_bus_messaged_wrapper = (
-            lambda msg: self._on_message_bus_messaged(msg)
+        self._on_message_bus_messaged_wrapper = lambda msg: (
+            self._on_message_bus_messaged(msg)
         )
         message_bus.messaged.connect(self._on_message_bus_messaged_wrapper)
 

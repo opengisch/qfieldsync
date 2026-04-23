@@ -47,6 +47,7 @@ def extract_theme_from_qgis_settings() -> Literal["light", "dark"]:
 
     Returns:
         "light" or "dark", based on user's current QGIS settings.
+
     """
     qgis_theme = QgsApplication.instance().themeName()
 

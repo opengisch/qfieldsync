@@ -67,6 +67,9 @@ ignore = [
     "PTH",
     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
     "ANN",
+    # https://docs.astral.sh/ruff/rules/unnecessary-lambda/
+    # NOTE: ignored because we heavily `qobj.connect.signal(lambda arg: self._method(arg))` in the codebase
+    "PLW0108",
     # NOTE: ignored because we heavily use `QObject.tr( "" ).format()`
     "UP032",
     # NOTE: we should eventually enable no commented out code

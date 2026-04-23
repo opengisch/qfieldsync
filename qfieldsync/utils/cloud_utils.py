@@ -18,7 +18,6 @@
  ***************************************************************************/
 """
 
-
 import re
 from enum import Enum
 from pathlib import Path
@@ -34,7 +33,7 @@ if TYPE_CHECKING:
 
 class LocalDirFeedback(Enum):
     Error = "error"
-    Warning = "warning"  # noqa: A003
+    Warning = "warning"
     Success = "success"
 
 

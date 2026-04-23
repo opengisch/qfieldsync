@@ -19,6 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import os
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional
@@ -158,8 +159,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             )
         )
         self.qfieldCloudIcon.setMinimumSize(175, 180)
-        self.qfieldCloudIcon.mouseDoubleClickEvent = (
-            lambda _event: self.toggle_server_url_visibility()
+        self.qfieldCloudIcon.mouseDoubleClickEvent = lambda _event: (
+            self.toggle_server_url_visibility()
         )
         self.rejected.connect(self.on_rejected)
         self.hide()
@@ -277,6 +278,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         Args:
             style_data: style JSON for the provider, served by QFieldCloud.
             button: button to apply the style to.
+
         """
         theme = style_data.get(extract_theme_from_qgis_settings())
         button.setStyleSheet(

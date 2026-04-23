@@ -21,7 +21,6 @@
  This script initializes the plugin, making it known to QGIS.
 """
 
-
 import importlib
 import pathlib
 import re
@@ -53,6 +52,6 @@ def classFactory(iface):  # pylint: disable=invalid-name # noqa: N802
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-    from qfieldsync.qfield_sync import QFieldSync
+    from qfieldsync.qfield_sync import QFieldSync  # noqa: PLC0415
 
     return QFieldSync(iface)

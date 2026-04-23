@@ -19,6 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import os
 from datetime import datetime, timezone
 from enum import Enum
@@ -969,11 +970,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             local_icon = "file_refresh-orange.svg"
             arrow_icon = "arrow_back-orange.svg"
         elif project_file_action == ProjectFileAction.DeleteCloud:
-            detail = detail = self.tr("Delete file on the cloud")
+            detail = self.tr("Delete file on the cloud")
             cloud_icon = "delete-red.svg"
             arrow_icon = "arrow_forward-red.svg"
         elif project_file_action == ProjectFileAction.DeleteLocal:
-            detail = detail = self.tr("Delete local file")
+            detail = self.tr("Delete local file")
             local_icon = "delete-red.svg"
             arrow_icon = "arrow_back-red.svg"
         else:
@@ -1068,7 +1069,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         localized_datasets_upload_count = len(files["localized_datasets_to_upload"])
 
         for f in files["to_delete"]:
-            total_delete_count += 1
+            total_delete_count += 1  # noqa: SIM113
 
             if f.checkout & ProjectFileCheckout.Local:
                 local_delete_count += 1

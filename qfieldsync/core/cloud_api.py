@@ -115,7 +115,7 @@ def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
         try:
             resp = json.loads(payload)
             if resp.get("code"):
-                message = f'[{resp["code"]}] {resp["message"]}'
+                message = f"[{resp['code']}] {resp['message']}"
             else:
                 message = resp["detail"]
         except Exception:
@@ -167,6 +167,7 @@ def build_oauth2_auth_config(
 
     Returns:
         QgsAuthMethodConfig: QGIS auth config for the provided method.
+
     """
     auth_config_dict = {
         "accessMethod": 0,
@@ -469,6 +470,7 @@ class CloudNetworkAccessManager(QObject):
 
         Returns:
             QNetworkReply: QNetworkReply from the QFieldCloud server.
+
         """
         reply = self.cloud_get("auth/user/")
         reply.finished.connect(lambda: self._on_get_user_info_finished(reply))
@@ -516,6 +518,7 @@ class CloudNetworkAccessManager(QObject):
 
         Returns:
             A QNetworkReply for the requested URL.
+
         """
         request = QNetworkRequest(QUrl(resource_url))
         return QgsNetworkAccessManager.instance().get(request)
@@ -636,6 +639,7 @@ class CloudNetworkAccessManager(QObject):
 
         Args:
             request (QNetworkRequest): request to update.
+
         """
         if self.auth_method == CloudAuthMethod.CREDENTIALS and self._token:
             request.setRawHeader(
@@ -747,9 +751,9 @@ class CloudNetworkAccessManager(QObject):
             return
 
         with open(local_filename, "wb") as file:
-            assert (
-                file.write(reply.readAll()) != -1
-            ), 'Error while writing to file "{}"'.format(local_filename)
+            assert file.write(reply.readAll()) != -1, (
+                'Error while writing to file "{}"'.format(local_filename)
+            )
 
     def cloud_post(
         self, uri: Union[str, List[str]], payload: Optional[Dict] = None
@@ -1095,6 +1099,7 @@ class CloudNetworkAccessManager(QObject):
 
         Returns:
             The 'localized_datasets' project data if found or successfully created, otherwise None.
+
         """
         try:
             # Check if the project is already in the projects cache
@@ -1218,6 +1223,7 @@ class CloudProjectsCache(QObject):
 
         Returns:
             bool: opened QGIS project is configured cloud project
+
         """
         project_dir = QgsProject.instance().homePath()
         if self.projects:
@@ -1245,6 +1251,7 @@ class CloudProjectsCache(QObject):
 
         Returns:
             Optional[CloudProject]: associated cloud project
+
         """
         project_dir = QgsProject.instance().homePath()
 

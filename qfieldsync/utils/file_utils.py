@@ -106,6 +106,7 @@ def mkdir(
         mode: The mode to be applied on the directory at the time of creation. Defaults to 0o777.
         parents: Whether to create directories recursively if missing. Defaults to False.
         exist_ok: Whether to not throw if the directory already exists. Defaults to False.
+
     """
     path = Path(path)
     # calling `mkdir` might trigger a `PermissionError` and other. The caller must handle the error.
@@ -179,7 +180,7 @@ def _is_onedrive_cloud_file(filename: PathLike) -> bool:
         return False
 
     try:
-        import ctypes
+        import ctypes  # noqa: PLC0415
 
         attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filename))  # pyright: ignore[reportAttributeAccessIssue]
         if attrs == -1:  # INVALID_FILE_ATTRIBUTES
@@ -227,7 +228,7 @@ def _open_with_onedrive_retry(
 
     for attempt in range(max_retries + 1):
         try:
-            return open(filename, mode)  # noqa: SIM115
+            return open(filename, mode)
         except PermissionError as err:  # noqa: PERF203
             last_error = err
 
