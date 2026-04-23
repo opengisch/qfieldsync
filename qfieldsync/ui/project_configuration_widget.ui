@@ -283,7 +283,7 @@ to fill forms, with constraints guiding the process along.</string>
           <item row="4" column="0">
            <widget class="QLabel" name="customizeNavigationLabel">
             <property name="text">
-             <string>Customize navigation indicators</string>
+             <string>Customize map overlay elements</string>
             </property>
            </widget>
           </item>

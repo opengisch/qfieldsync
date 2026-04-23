@@ -18,13 +18,13 @@ class NavigationConfigurationWidget(WidgetUi, QgsPanelWidget):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.setPanelTitle(self.tr("Navigation Customization"))
+        self.setPanelTitle(self.tr("Map Overlay Elements"))
 
         size_options = [
-            (self.tr("Tiny"), ProjectProperties.NavigationSize.TINY),
-            (self.tr("Normal"), ProjectProperties.NavigationSize.NORMAL),
-            (self.tr("Big"), ProjectProperties.NavigationSize.BIG),
-            (self.tr("Biggest"), ProjectProperties.NavigationSize.BIGGEST),
+            (self.tr("Tiny"), ProjectProperties.QFieldItemSize.TINY),
+            (self.tr("Normal"), ProjectProperties.QFieldItemSize.NORMAL),
+            (self.tr("Big"), ProjectProperties.QFieldItemSize.BIG),
+            (self.tr("Biggest"), ProjectProperties.QFieldItemSize.BIGGEST),
         ]
 
         for label, value in size_options:
@@ -86,7 +86,7 @@ class NavigationConfigurationWidget(WidgetUi, QgsPanelWidget):
         index = self.locationArrowSizeComboBox.findData(size)
         if index == -1:
             index = self.locationArrowSizeComboBox.findData(
-                ProjectProperties.NavigationSize.NORMAL
+                ProjectProperties.QFieldItemSize.NORMAL
             )
         self.locationArrowSizeComboBox.setCurrentIndex(index)
 
@@ -123,6 +123,6 @@ class NavigationConfigurationWidget(WidgetUi, QgsPanelWidget):
         index = self.coordinateCursorSizeComboBox.findData(size)
         if index == -1:
             index = self.coordinateCursorSizeComboBox.findData(
-                ProjectProperties.NavigationSize.NORMAL
+                ProjectProperties.QFieldItemSize.NORMAL
             )
         self.coordinateCursorSizeComboBox.setCurrentIndex(index)
