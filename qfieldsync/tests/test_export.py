@@ -20,7 +20,6 @@
 import shutil
 import tempfile
 from pathlib import Path
-from typing import List
 
 from libqfieldsync.offline_converter import ExportType, OfflineConverter
 from libqfieldsync.offliners import QgisCoreOffliner
@@ -45,7 +44,7 @@ class OfflineConverterTest(unittest.TestCase):
         shutil.rmtree(self.source_dir)
         shutil.rmtree(self.target_dir)
 
-    def _path_contents(self, dir_path: Path) -> List[str]:
+    def _path_contents(self, dir_path: Path) -> list[str]:
         return [str(p.relative_to(dir_path)) for p in dir_path.iterdir()]
 
     @property

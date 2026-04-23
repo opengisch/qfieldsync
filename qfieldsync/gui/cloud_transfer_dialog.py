@@ -24,7 +24,7 @@ import os
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Optional
 
 from libqfieldsync.layer import LayerSource, SyncAction
 from libqfieldsync.offline_converter import ExportType
@@ -397,7 +397,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             localized_datasets_project_files = (
                 self.localized_datasets_project.get_files()
             )
-            filenames_to_exclude: List[str] = []
+            filenames_to_exclude: list[str] = []
             for localized_datasets_project_file in localized_datasets_project_files:
                 # If the file is already on the cloud, add to names to exclude
                 if bool(
@@ -575,7 +575,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.filesTree.expandAll()
         # NOTE END algorithmic part
 
-    def _get_offline_layers(self) -> List[str]:
+    def _get_offline_layers(self) -> list[str]:
         """Returns a list of paths for project layers which have been configured for offline editing."""
         offline_layers_paths = []
         if self.cloud_project and self.cloud_project.is_current_qgis_project:
@@ -702,7 +702,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 False
             )
 
-            files: Dict[str, List[ProjectFile]] = {
+            files: dict[str, list[ProjectFile]] = {
                 "to_upload": [],
                 "to_download": [],
                 "to_delete": [],
@@ -763,7 +763,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.detailedLogListView.setModelColumn(0)
 
     def traverse_tree_item(
-        self, item: QTreeWidgetItem, files: Dict[str, List[ProjectFile]]
+        self, item: QTreeWidgetItem, files: dict[str, list[ProjectFile]]
     ) -> None:
         project_file = item.data(0, Qt.ItemDataRole.UserRole)
 
@@ -1060,7 +1060,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             # Reserved for a better future
             pass
 
-    def show_progress_page(self, files: Dict[str, List[ProjectFile]]) -> None:  # noqa: PLR0912, PLR0915
+    def show_progress_page(self, files: dict[str, list[ProjectFile]]) -> None:  # noqa: PLR0912, PLR0915
         total_delete_count = 0
         local_delete_count = 0
         cloud_delete_count = 0

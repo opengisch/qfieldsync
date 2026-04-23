@@ -20,7 +20,7 @@
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import (
@@ -160,7 +160,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
     def createChildren(self):  # noqa: N802
         items = []
 
-        projects: List[CloudProject] = self.network_manager.projects_cache.projects
+        projects: list[CloudProject] = self.network_manager.projects_cache.projects
 
         if projects is None:
             try:

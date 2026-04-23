@@ -27,7 +27,7 @@ import time
 from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, TypedDict, Union
+from typing import Optional, TypedDict, Union
 
 # OneDrive Files On-Demand file attributes (Windows)
 _FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
@@ -49,7 +49,7 @@ class DirectoryTreeType(str, Enum):
 class DirectoryTreeDict(TypedDict):
     type: DirectoryTreeType
     path: Path
-    content: List["DirectoryTreeDict"]
+    content: list["DirectoryTreeDict"]
 
 
 def path_to_dict(path: PathLike, dirs_only: bool = False) -> DirectoryTreeDict:

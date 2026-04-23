@@ -22,7 +22,7 @@
 
 import os
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
 from qgis.core import Qgis
@@ -165,7 +165,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.rejected.connect(self.on_rejected)
         self.hide()
 
-        self._sso_login_buttons: List[QPushButton] = []
+        self._sso_login_buttons: list[QPushButton] = []
 
         self.ssoCancelLoginButton.setIcon(
             self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).icon()
@@ -270,7 +270,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self._sso_login_buttons.append(login_button)
 
     def set_sso_provider_button_style(
-        self, style_data: Dict[str, str], button: QPushButton
+        self, style_data: dict[str, str], button: QPushButton
     ) -> None:
         """
         Apply style to a SSO provider login button.
@@ -405,7 +405,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.done(QDialog.DialogCode.Accepted)
 
     def on_login_with_sso_provider_button_clicked(
-        self, provider_data: Dict[str, Any]
+        self, provider_data: dict[str, Any]
     ) -> None:
         server_url = self.serverUrlCmb.currentText()
         auth_config = build_oauth2_auth_config(

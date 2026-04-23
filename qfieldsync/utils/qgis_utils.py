@@ -17,15 +17,13 @@
  ***************************************************************************/
 """
 
-from typing import List
-
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.utils.file_utils import get_project_in_folder
 from libqfieldsync.utils.qgis import open_project
 from qgis.core import QgsProject
 
 
-def import_checksums_of_project(dirname: str) -> List[str]:
+def import_checksums_of_project(dirname: str) -> list[str]:
     project = QgsProject.instance()
     qgs_file = get_project_in_folder(dirname)
     open_project(qgs_file)

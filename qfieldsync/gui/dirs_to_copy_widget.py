@@ -22,7 +22,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QTreeWidgetItem, QWidget
@@ -40,7 +40,7 @@ LayersConfigWidgetUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/dirs_to_copy_widget.ui")
 )
 
-DirsToCopySettings = Dict[str, bool]
+DirsToCopySettings = dict[str, bool]
 
 
 class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
@@ -112,7 +112,7 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
                 )
 
     def dirs_to_copy(self) -> DirsToCopySettings:
-        def extract_dirs_data(root_item: QTreeWidgetItem) -> Dict[str, bool]:
+        def extract_dirs_data(root_item: QTreeWidgetItem) -> dict[str, bool]:
             data = {}
             for i in range(root_item.childCount()):
                 item = root_item.child(i)

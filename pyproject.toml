@@ -1,6 +1,6 @@
 [tool.ruff]
-# Support Python 3.7+.
-target-version = "py37"
+# Support Python 3.9+.
+target-version = "py39"
 
 [tool.ruff.lint]
 select = ["ALL"]

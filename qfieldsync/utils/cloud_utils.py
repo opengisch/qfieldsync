@@ -21,7 +21,7 @@
 import re
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.PyQt.QtCore import QObject
@@ -60,7 +60,7 @@ def local_dir_feedback(  # noqa: PLR0913, PLR0911
     single_project_status: LocalDirFeedback = LocalDirFeedback.Success,
     multiple_projects_status: LocalDirFeedback = LocalDirFeedback.Error,
     relative_status: LocalDirFeedback = LocalDirFeedback.Error,
-) -> Tuple[LocalDirFeedback, str]:
+) -> tuple[LocalDirFeedback, str]:
     dummy = QObject()
     if not local_dir:
         return no_path_status, dummy.tr(

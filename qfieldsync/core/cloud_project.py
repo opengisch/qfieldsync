@@ -19,10 +19,11 @@
 """
 
 import sqlite3
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from enum import IntFlag
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Optional
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import (
@@ -46,7 +47,7 @@ class ProjectFileCheckout(IntFlag):
 
 
 class ProjectFile:
-    def __init__(self, data: Dict[str, Any], local_dir: Optional[str] = None) -> None:
+    def __init__(self, data: dict[str, Any], local_dir: Optional[str] = None) -> None:
         self._local_dir = local_dir
         self._temp_dir = None
         self._data = data
@@ -91,7 +92,7 @@ class ProjectFile:
         return None
 
     @property
-    def versions(self) -> Optional[List[Dict[str, str]]]:
+    def versions(self) -> Optional[list[dict[str, str]]]:
         return self._data.get("versions")
 
     @property
@@ -180,7 +181,7 @@ class ProjectFile:
 
 
 class CloudProject:
-    def __init__(self, project_data: Dict[str, Any]) -> None:
+    def __init__(self, project_data: dict[str, Any]) -> None:
         """Constructor."""
         self._preferences = Preferences()
         self._files = {}
@@ -190,7 +191,7 @@ class CloudProject:
 
         self.update_data(project_data)
 
-    def update_data(self, new_data: Dict[str, Any]) -> None:
+    def update_data(self, new_data: dict[str, Any]) -> None:
         self._data = {**self._data, **new_data}
         # make sure empty string is converted to None
 
@@ -240,7 +241,7 @@ class CloudProject:
 
     @staticmethod
     def get_cloud_project_id(path: str) -> Optional[str]:
-        project_local_dirs: Dict[str, str] = Preferences().value(
+        project_local_dirs: dict[str, str] = Preferences().value(
             "qfieldCloudProjectLocalDirs"
         )
 
@@ -313,7 +314,7 @@ class CloudProject:
             return dirname
 
     @property
-    def cloud_files(self) -> Optional[List]:
+    def cloud_files(self) -> Optional[list]:
         return self._cloud_files
 
     @property
@@ -349,7 +350,7 @@ class CloudProject:
         return f"{self.owner}/{self.name}"
 
     @property
-    def root_project_files(self) -> List[Path]:
+    def root_project_files(self) -> list[Path]:
         if self.local_dir:
             return get_qgis_files_within_dir(Path(self.local_dir))
         else:
@@ -366,7 +367,7 @@ class CloudProject:
 
         return None
 
-    def get_localized_dataset_files(self) -> List[ProjectFile]:
+    def get_localized_dataset_files(self) -> list[ProjectFile]:
         localized_data_paths = (
             QgsApplication.instance().localizedDataPathRegistry().paths()
         )
@@ -422,7 +423,7 @@ class CloudProject:
 
     def get_files(
         self, checkout_filter: Optional[ProjectFileCheckout] = None
-    ) -> List[ProjectFile]:
+    ) -> list[ProjectFile]:
         if checkout_filter is None:
             return list(self._files.values())
 
