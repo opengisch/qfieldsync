@@ -6,11 +6,11 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.uic import loadUiType
 
 WidgetUi, _ = loadUiType(
-    os.path.join(os.path.dirname(__file__), "../ui/navigation_configuration_widget.ui")
+    os.path.join(os.path.dirname(__file__), "../ui/map_overlay_configuration_widget.ui")
 )
 
 
-class NavigationConfigurationWidget(WidgetUi, QgsPanelWidget):
+class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
     """Configuration widget for location arrow and coordinate cursor customization."""
 
     def __init__(self, parent=None):
