@@ -258,11 +258,14 @@ class CloudNetworkAccessManager(QObject):
             if error.httpCode == HTTP_401 and not self.is_login_active:
                 if self.auth_method == CloudAuthMethod.CREDENTIALS:
                     self.set_token("", True)
+
                 if self.auth_method == CloudAuthMethod.SSO:
                     self.clear_sso_config()
+
                 self.auth_method = CloudAuthMethod.NONE
                 self.auth_config = None
                 self.logout_success.emit()
+
             raise error
 
         if not should_parse_json:
@@ -424,6 +427,7 @@ class CloudNetworkAccessManager(QObject):
 
             if all([username, password]):
                 self.set_url(server_url)
+
             self.login_with_credentials(username, password)
 
         elif self.auth_method == CloudAuthMethod.SSO:
@@ -518,13 +522,20 @@ class CloudNetworkAccessManager(QObject):
 
     def get_projects(self, should_include_public: bool = False) -> QNetworkReply:
         """Get QFieldCloud projects"""
-        params = {"include-public": "1"} if should_include_public else {}
+        if should_include_public:
+            params = {"include-public": "1"}
+        else:
+            params = {}
+
         return self.cloud_get("projects", params)
 
     def get_projects_not_async(self, should_include_public: bool = False) -> List[Dict]:
         """Get QFieldCloud projects synchronously"""
         headers = {"Authorization": "token {}".format(self._token)}
-        params = {"include-public": "1"} if should_include_public else {}
+        if should_include_public:
+            params = {"include-public": "1"}
+        else:
+            params = {}
 
         response = requests.get(
             self._prepare_uri("projects").toString(),
@@ -755,7 +766,10 @@ class CloudNetworkAccessManager(QObject):
 
         self._set_request_auth(request)
 
-        payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
+        if payload is None:
+            payload_bytes = b""
+        else:
+            payload_bytes = json.dumps(payload).encode("utf-8")
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, payload_bytes)
@@ -780,7 +794,10 @@ class CloudNetworkAccessManager(QObject):
 
         self._set_request_auth(request)
 
-        payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
+        if payload is None:
+            payload_bytes = b""
+        else:
+            payload_bytes = json.dumps(payload).encode("utf-8")
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.put(request, payload_bytes)
@@ -805,7 +822,10 @@ class CloudNetworkAccessManager(QObject):
 
         self._set_request_auth(request)
 
-        payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
+        if payload is None:
+            payload_bytes = b""
+        else:
+            payload_bytes = json.dumps(payload).encode("utf-8")
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.sendCustomRequest(request, b"PATCH", payload_bytes)
@@ -1200,7 +1220,10 @@ class CloudProjectsCache(QObject):
             bool: opened QGIS project is configured cloud project
         """
         project_dir = QgsProject.instance().homePath()
-        project_ids = [p.id for p in self.projects] if self.projects else []
+        if self.projects:
+            project_ids = [p.id for p in self.projects]
+        else:
+            project_ids = []
 
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"

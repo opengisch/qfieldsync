@@ -85,6 +85,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         if accepted_cb:
             CloudLoginDialog.instance.accepted.connect(accepted_cb)
+
         if rejected_cb:
             CloudLoginDialog.instance.rejected.connect(rejected_cb)
 
@@ -360,6 +361,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         if all([result.scheme, result.netloc]):
             if self._fetch_auth_methods_timer.isActive():
                 return
+
             self._fetch_auth_methods_timer.start()
 
     def on_credentials_login_button_clicked(self) -> None:

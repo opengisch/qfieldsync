@@ -533,7 +533,11 @@ class FileTransfer(QObject):
                     self.last_redirect_url, str(self.fs_filename), True
                 )
             else:
-                params = {"version": self.version} if self.version else {}
+                if self.version:
+                    params = {"version": self.version}
+                else:
+                    params = {}
+
                 reply = self.network_manager.cloud_get(
                     f"files/{self.cloud_project.id}/{self.filename}/",
                     local_filename=str(self.fs_filename),
@@ -697,6 +701,7 @@ class ThrottledFileTransferrer(QObject):
             self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
         else:
             self.temp_dir = None
+
         self.transfer_type = transfer_type
 
         for file in self.files:
@@ -825,13 +830,12 @@ class TransferFileLogsModel(QAbstractListModel):
     def _data_string(self, transfer: FileTransfer) -> str:  # noqa: PLR0911, PLR0912
         error_msg = ""
         if transfer.is_failed:
-            error_msg = (
-                str(transfer.error)
-                if transfer.error
-                else "[{}] {}".format(
+            if transfer.error:
+                error_msg = str(transfer.error)
+            else:
+                error_msg = "[{}] {}".format(
                     transfer.last_reply.error(), transfer.last_reply.errorString()
                 )
-            )
 
         if transfer.transfer_type == FileTransfer.TransferType.DOWNLOAD:
             if transfer.is_aborted:
@@ -843,11 +847,11 @@ class TransferFileLogsModel(QAbstractListModel):
             elif transfer.is_finished:
                 return self.tr('Downloaded "{}"'.format(transfer.filename))
             elif transfer.is_started:
-                percentage = (
-                    transfer.bytes_transferred / transfer.bytes_total
-                    if transfer.bytes_total > 0
-                    else 0
-                )
+                if transfer.bytes_total > 0:
+                    percentage = transfer.bytes_transferred / transfer.bytes_total
+                else:
+                    percentage = 0
+
                 return self.tr(
                     'Downloading "{}" {}%'.format(
                         transfer.filename, round(percentage * 100)
@@ -865,11 +869,11 @@ class TransferFileLogsModel(QAbstractListModel):
             elif transfer.is_finished:
                 return self.tr('Uploaded "{}"'.format(transfer.filename))
             elif transfer.is_started:
-                percentage = (
-                    transfer.bytes_transferred / transfer.bytes_total
-                    if transfer.bytes_total > 0
-                    else 0
-                )
+                if transfer.bytes_total > 0:
+                    percentage = transfer.bytes_transferred / transfer.bytes_total
+                else:
+                    percentage = 0
+
                 return self.tr(
                     'Uploading "{}" {}%'.format(
                         transfer.filename, round(percentage * 100)

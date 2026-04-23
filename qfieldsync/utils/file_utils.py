@@ -64,7 +64,11 @@ def path_to_dict(path: PathLike, dirs_only: bool = False) -> DirectoryTreeDict:
     if path.is_dir():
         node["type"] = DirectoryTreeType.DIRECTORY
 
-        glob_pattern = "*/" if dirs_only else "*"
+        if dirs_only:
+            glob_pattern = "*/"
+        else:
+            glob_pattern = "*"
+
         for subpath in path.glob(glob_pattern):
             if dirs_only and not subpath.is_dir():
                 continue
@@ -180,6 +184,7 @@ def _is_onedrive_cloud_file(filename: PathLike) -> bool:
         attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filename))  # pyright: ignore[reportAttributeAccessIssue]
         if attrs == -1:  # INVALID_FILE_ATTRIBUTES
             return False
+
         return bool(
             attrs
             & (_FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS | _FILE_ATTRIBUTE_RECALL_ON_OPEN)

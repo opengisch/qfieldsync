@@ -235,11 +235,13 @@ class QFieldSync:
         if add_to_toolbar:
             if separator_before:
                 self.toolbar.addSeparator()
+
             self.toolbar.addAction(action)
 
         if add_to_menu:
             if separator_before:
                 self.get_qfield_action().menu().addSeparator()
+
             self.iface.addPluginToMenu(self.menu, action)
 
         self.actions.append(action)
@@ -461,6 +463,7 @@ class QFieldSync:
         """
         with contextlib.suppress(RuntimeError):
             self.push_dlg.setEnabled(False)
+
         self.update_action_enabled_status()
 
     def update_button_visibility(self):

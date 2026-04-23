@@ -197,6 +197,7 @@ class SynchronizeDialog(QDialog, DialogUi):
                         )
                     ),
                 )
+
             self.close()
         except NoProjectFoundError as e:
             self.iface.messageBar().pushWarning("QFieldSync", str(e))

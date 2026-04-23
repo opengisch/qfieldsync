@@ -104,6 +104,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             )
         else:
             self.stamping_image_decoration = ""
+
         self.stamping_details_template = (
             self.__project_configuration.stamping_details_template
         )
@@ -122,6 +123,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             line_edit.setPlaceholderText(
                 self.tr("Leave empty to use the full project extent")
             )
+
         self.areaOfInterestExtentWidget.setNullValueAllowed(True)
 
         if iface:
@@ -304,6 +306,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
         if mode_index == -1:
             mode_index = 0
+
         self.initialMapModeComboBox.setCurrentIndex(mode_index)
 
         self.featureFormWizardModeCheckBox.setChecked(
@@ -397,11 +400,12 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
 
         with contextlib.suppress(AttributeError):
-            self.__project_configuration.geofencing_layer = (
-                self.geofencingLayerComboBox.currentLayer().id()
-                if self.geofencingLayerComboBox.currentLayer()
-                else ""
-            )
+            if self.geofencingLayerComboBox.currentLayer():
+                geofencing_layer = self.geofencingLayerComboBox.currentLayer().id()
+            else:
+                geofencing_layer = ""
+
+            self.__project_configuration.geofencing_layer = geofencing_layer
 
         self.__project_configuration.geofencing_behavior = (
             self.geofencingBehaviorComboBox.currentData()
@@ -413,18 +417,24 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
         # General settings
         with contextlib.suppress(AttributeError):
-            self.__project_configuration.digitizing_logs_layer = (
-                self.digitizingLogsLayerComboBox.currentLayer().id()
-                if self.digitizingLogsLayerComboBox.currentLayer()
-                else ""
-            )
+            if self.digitizingLogsLayerComboBox.currentLayer():
+                digitizing_logs_layer = (
+                    self.digitizingLogsLayerComboBox.currentLayer().id()
+                )
+            else:
+                digitizing_logs_layer = ""
+
+            self.__project_configuration.digitizing_logs_layer = digitizing_logs_layer
 
         with contextlib.suppress(AttributeError):
-            self.__project_configuration.initial_active_layer = (
-                self.initialActiveLayerComboBox.currentLayer().id()
-                if self.initialActiveLayerComboBox.currentLayer()
-                else ""
-            )
+            if self.initialActiveLayerComboBox.currentLayer():
+                initial_active_layer = (
+                    self.initialActiveLayerComboBox.currentLayer().id()
+                )
+            else:
+                initial_active_layer = ""
+
+            self.__project_configuration.initial_active_layer = initial_active_layer
 
         self.__project_configuration.initial_map_mode = (
             self.initialMapModeComboBox.currentData()
@@ -488,6 +498,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             )
         else:
             self.__project_configuration.stamping_image_decoration = ""
+
         self.__project_configuration.stamping_details_template = (
             self.stamping_details_template
         )

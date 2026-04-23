@@ -86,6 +86,14 @@ max-line-length = 120
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
 
+[tool.flake8]
+exclude = [
+    ".git",
+    "__pycache__",
+    "**/qfieldsync/libqfieldsync/"
+]
+select = ["CLB100", "IF100"]
+
 [project]
 name = "qfieldsync"
 description = "QFieldSync is a QGIS plugin that assists the configuration of your QField project with or without QFieldCloud."

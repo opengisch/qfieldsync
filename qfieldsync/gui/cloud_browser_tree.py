@@ -194,17 +194,12 @@ class QFieldCloudProjectItem(QgsDataItem):
         )
         self.project_id = project.id
         project = parent.network_manager.projects_cache.find_project(self.project_id)
-        self.setIcon(
-            QIcon(
-                str(
-                    Path(__file__).parent.joinpath(
-                        "../resources/cloud_project.svg"
-                        if project.local_dir
-                        else "../resources/cloud_project_remote.svg"
-                    )
-                )
-            )
-        )
+        if project.local_dir:
+            project_icon = "../resources/cloud_project.svg"
+        else:
+            project_icon = "../resources/cloud_project_remote.svg"
+
+        self.setIcon(QIcon(str(Path(__file__).parent.joinpath(project_icon))))
 
 
 class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
@@ -264,7 +259,9 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
         if type(item) is QFieldCloudProjectItem:
             if not self.open_project(item):
                 self.show_cloud_synchronize_dialog(item)
+
             return True
+
         return False
 
     def _create_projects_dialog(self, item) -> CloudProjectsDialog:

@@ -282,15 +282,16 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 layer_source = item.data(Qt.ItemDataRole.UserRole)
                 old_action = self.get_layer_action(layer_source)
                 available_actions, _ = zip(*self.get_available_actions(layer_source))
-                layer_sync_action = (
-                    self.get_default_action(layer_source)
-                    if sync_action is None
-                    else sync_action
-                )
+                if sync_action is None:
+                    layer_sync_action = self.get_default_action(layer_source)
+                else:
+                    layer_sync_action = sync_action
+
                 if layer_sync_action in available_actions:
                     self.set_layer_action(layer_source, layer_sync_action)
                     if self.get_layer_action(layer_source) != old_action:
                         self.project.setDirty(True)
+
                     layer_source.apply()
                     is_project_dirty |= layer_source.apply()
         # based on visibility
@@ -309,15 +310,16 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                     available_actions, _ = zip(
                         *self.get_available_actions(layer_source)
                     )
-                    layer_sync_action = (
-                        self.get_default_action(layer_source)
-                        if sync_action is None
-                        else sync_action
-                    )
+                    if sync_action is None:
+                        layer_sync_action = self.get_default_action(layer_source)
+                    else:
+                        layer_sync_action = sync_action
+
                     if layer_sync_action in available_actions:
                         self.set_layer_action(layer_source, layer_sync_action)
                         if self.get_layer_action(layer_source) != old_action:
                             self.project.setDirty(True)
+
                         layer_source.apply()
                         is_project_dirty |= layer_source.apply()
 

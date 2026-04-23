@@ -84,11 +84,10 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
             # if not matches:
             #     return False
 
-            check_state = (
-                Qt.CheckState.Checked
-                if dirs_to_copy.get(str_path, True)
-                else Qt.CheckState.Unchecked
-            )
+            if dirs_to_copy.get(str_path, True):
+                check_state = Qt.CheckState.Checked
+            else:
+                check_state = Qt.CheckState.Unchecked
 
             item.setCheckState(0, check_state)
             item.setExpanded(True)
@@ -147,9 +146,11 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
 
     def _set_checked_state_recursively(self, checked: bool) -> None:
         def set_checked_state(item: QTreeWidgetItem) -> None:
-            checked_state = (
-                Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
-            )
+            if checked:
+                checked_state = Qt.CheckState.Checked
+            else:
+                checked_state = Qt.CheckState.Unchecked
+
             item.setCheckState(0, checked_state)
 
             for i in range(item.childCount()):
