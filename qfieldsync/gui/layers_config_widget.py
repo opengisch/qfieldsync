@@ -19,6 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 """
+
+from __future__ import annotations
+
 import os
 from typing import Callable
 
@@ -259,33 +262,61 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
             idx, _cloud_action = layer_source.preferred_cloud_action(prefer_online)
             cmb.setCurrentIndex(idx)
 
-    def _on_toggle_menu_triggered(self, action):
-        """
-        Toggles usage of layers
-        :param action: the menu action that triggered this
-        """
-        sync_action = None
+    def _get_sync_action_from_menu_action(self, action: QAction) -> str | None:
         if action in (self.removeHiddenAction, self.removeAllAction):
-            sync_action = SyncAction.REMOVE
+            return SyncAction.REMOVE
         elif action in (self.addAllOfflineAction, self.addVisibleOfflineAction):
-            sync_action = SyncAction.OFFLINE
+            return SyncAction.OFFLINE
+        else:
+            return None
 
+    def _toggle_menu_action_on_all_layers(self, action: QAction) -> bool:
+        sync_action = self._get_sync_action_from_menu_action(action)
         is_project_dirty = False
-        # all layers
-        if action in (
-            self.removeAllAction,
-            self.addAllCopyAction,
-            self.addAllOfflineAction,
-        ):
-            for i in range(self.layersTable.rowCount()):
-                item = self.layersTable.item(i, 0)
-                layer_source = item.data(Qt.ItemDataRole.UserRole)
+
+        for i in range(self.layersTable.rowCount()):
+            item = self.layersTable.item(i, 0)
+            layer_source = item.data(Qt.ItemDataRole.UserRole)
+            old_action = self.get_layer_action(layer_source)
+            available_actions, _ = zip(*self.get_available_actions(layer_source))
+            if sync_action is None:
+                layer_sync_action = self.get_default_action(layer_source)
+            else:
+                layer_sync_action = sync_action
+
+            if layer_sync_action in available_actions:
+                self.set_layer_action(layer_source, layer_sync_action)
+                if self.get_layer_action(layer_source) != old_action:
+                    self.project.setDirty(True)
+
+                layer_source.apply()
+                is_project_dirty |= layer_source.apply()
+
+        return is_project_dirty
+
+    def _toggle_menu_action_on_subset_layers(self, action: QAction) -> bool:
+        sync_action = self._get_sync_action_from_menu_action(action)
+        is_project_dirty = False
+        is_visible = action != self.removeHiddenAction
+        project = QgsProject.instance()
+
+        assert project
+
+        root_item = project.layerTreeRoot()
+
+        assert root_item
+
+        for layer in project.mapLayers().values():
+            node = root_item.findLayer(layer.id())
+            if node and node.isVisible() == is_visible:
+                layer_source = LayerSource(layer)
                 old_action = self.get_layer_action(layer_source)
                 available_actions, _ = zip(*self.get_available_actions(layer_source))
-                if sync_action is None:
-                    layer_sync_action = self.get_default_action(layer_source)
-                else:
+
+                if sync_action:
                     layer_sync_action = sync_action
+                else:
+                    layer_sync_action = self.get_default_action(layer_source)
 
                 if layer_sync_action in available_actions:
                     self.set_layer_action(layer_source, layer_sync_action)
@@ -294,34 +325,29 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
                     layer_source.apply()
                     is_project_dirty |= layer_source.apply()
+
+        return is_project_dirty
+
+    def _on_toggle_menu_triggered(self, action):
+        """
+        Toggles usage of layers
+        :param action: the menu action that triggered this
+        """
+        is_project_dirty = False
+        # all layers
+        if action in (
+            self.removeAllAction,
+            self.addAllCopyAction,
+            self.addAllOfflineAction,
+        ):
+            is_project_dirty = self._toggle_menu_action_on_all_layers(action)
         # based on visibility
         elif action in (
             self.removeHiddenAction,
             self.addVisibleCopyAction,
             self.addVisibleOfflineAction,
         ):
-            visible = action != self.removeHiddenAction
-            root = QgsProject.instance().layerTreeRoot()
-            for layer in QgsProject.instance().mapLayers().values():
-                node = root.findLayer(layer.id())
-                if node and node.isVisible() == visible:
-                    layer_source = LayerSource(layer)
-                    old_action = self.get_layer_action(layer_source)
-                    available_actions, _ = zip(
-                        *self.get_available_actions(layer_source)
-                    )
-                    if sync_action is None:
-                        layer_sync_action = self.get_default_action(layer_source)
-                    else:
-                        layer_sync_action = sync_action
-
-                    if layer_sync_action in available_actions:
-                        self.set_layer_action(layer_source, layer_sync_action)
-                        if self.get_layer_action(layer_source) != old_action:
-                            self.project.setDirty(True)
-
-                        layer_source.apply()
-                        is_project_dirty |= layer_source.apply()
+            is_project_dirty = self._toggle_menu_action_on_subset_layers(action)
 
         if is_project_dirty:
             self.project.setDirty(True)

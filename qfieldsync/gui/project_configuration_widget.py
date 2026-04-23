@@ -16,6 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import contextlib
 import os
 
@@ -364,7 +365,7 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             )
             self.unsupportedLayersLabel.setText(unsupported_layers_text)
 
-    def apply(self):
+    def apply(self):  # noqa: PLR0915
         """Update layer configuration in project"""
         self.cloudLayersConfigWidget.apply()
         self.cableLayersConfigWidget.apply()

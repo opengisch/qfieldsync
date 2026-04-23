@@ -22,10 +22,14 @@
 import re
 from enum import Enum
 from pathlib import Path
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.PyQt.QtCore import QObject
+from qgis.PyQt.QtGui import QColor
+
+if TYPE_CHECKING:
+    from qfieldsync.core.cloud_project import CloudProject
 
 
 class LocalDirFeedback(Enum):
@@ -97,3 +101,14 @@ def local_dir_feedback(  # noqa: PLR0913, PLR0911
         return multiple_projects_status, dummy.tr(
             "Multiple project files have been found in the directory. Please leave exactly one QGIS project in the root directory."
         )
+
+
+def get_cloud_project_status_color(cloud_project: "CloudProject") -> QColor:
+    if cloud_project.status == "ok":
+        return QColor("#87af87")
+    elif cloud_project.status == "busy":
+        return QColor("#9e6a03")
+    elif cloud_project.status == "failed":
+        return QColor("#dc3545")
+
+    raise NotImplementedError()

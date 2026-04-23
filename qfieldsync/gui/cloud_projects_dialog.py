@@ -73,7 +73,12 @@ from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
-from qfieldsync.utils.cloud_utils import LocalDirFeedback, closure, local_dir_feedback
+from qfieldsync.utils.cloud_utils import (
+    LocalDirFeedback,
+    closure,
+    get_cloud_project_status_color,
+    local_dir_feedback,
+)
 from qfieldsync.utils.permissions import can_delete_project
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
@@ -616,14 +621,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             item = QTableWidgetItem(cloud_project.name)
 
-            if cloud_project.status == "ok":
-                color = QColor("#87af87")
-            elif cloud_project.status == "busy":
-                color = QColor("#9e6a03")
-            elif cloud_project.status == "failed":
-                color = QColor("#dc3545")
-            else:
-                raise NotImplementedError()
+            color = get_cloud_project_status_color(cloud_project)
 
             pm = QPixmap(40, 20)
             pm.fill(Qt.GlobalColor.transparent)
