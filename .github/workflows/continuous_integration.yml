@@ -57,7 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         # TODO @suricactus: enable QGIS 4 tests, but for now it's crashing, see https://github.com/opengisch/qfieldsync/issues/757
-        qgis_version: [release-3_22, 3.44, ltr]
+        qgis_version: ["3.40", "3.42", "3.44", "ltr"]
     env:
       QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
     steps:
