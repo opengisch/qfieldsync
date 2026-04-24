@@ -42,6 +42,7 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QLabel,
     QMessageBox,
+    QSizePolicy,
     QTreeWidgetItem,
     QWidget,
 )
@@ -54,6 +55,8 @@ from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogs
 from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
+from qfieldsync.gui.storage_widget import StorageWidget
+from qfieldsync.utils.file_utils import filesizeformat10
 from qfieldsync.utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
 CloudTransferDialogUi, _ = loadUiType(
@@ -126,6 +129,14 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.localized_datasets_project = None
         self.localized_datasets_files = []
 
+        self.storage_widget = StorageWidget(self.network_manager, self)
+        self.filesLayout.insertWidget(
+            self.filesLayout.count() - 1, self.storage_widget, 1
+        )
+
+        self.filesTree.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
         self.filesTree.header().setSectionResizeMode(
             0, QHeaderView.ResizeMode.ResizeToContents
         )
@@ -211,6 +222,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self._update_window_title()
 
         if self.cloud_project:
+            self.storage_widget.set_owner(self.cloud_project.owner)
+
             if self.cloud_project.local_dir:
                 self.show_project_compatibility_page()
             else:
@@ -292,6 +305,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self._update_window_title()
 
         if self.cloud_project:
+            self.storage_widget.set_owner(self.cloud_project.owner)
             reply = self.network_manager.projects_cache.get_project_files(
                 self.cloud_project.id
             )
@@ -653,6 +667,37 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         if dirname and Path(dirname).exists():
             QDesktopServices.openUrl(QUrl.fromLocalFile(dirname))
 
+    def _out_of_storage_triggered(self, total_upload_size):
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle(self.tr("Warning"))
+        if self.storage_widget.storage_management_hyperlink:
+            message_box.setIcon(QMessageBox.Icon.Question)
+            message_box.setText(
+                self.tr(
+                    "You are trying to upload {} to QFieldCloud which is above the remaining available storage. To proceed, you can upgrade your storage or reduce the upload size."
+                ).format(filesizeformat10(total_upload_size))
+            )
+            message_box.setStandardButtons(
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
+            )
+            message_box.button(QMessageBox.StandardButton.Ok).setText(
+                self.tr("Upgrade storage")
+            )
+            if message_box.exec() == QMessageBox.StandardButton.Ok:
+                QDesktopServices.openUrl(
+                    QUrl(self.storage_widget.storage_management_hyperlink())
+                )
+
+        else:
+            message_box.setIcon(QMessageBox.Icon.Warning)
+            message_box.setText(
+                self.tr(
+                    "You are trying to upload {} to QFieldCloud which is above the remaining available storage. To proceed, you must reduce the upload size."
+                ).format(filesizeformat10(total_upload_size))
+            )
+            message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+            message_box.exec()
+
     def _start_synchronization(self):
         assert self.cloud_project
 
@@ -690,18 +735,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             )
             self.show_project_compatibility_page()
         else:
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setVisible(True)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Abort).setVisible(
-                True
-            )
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(
-                False
-            )
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setVisible(
-                False
-            )
-
             files: dict[str, list[ProjectFile]] = {
                 "to_upload": [],
                 "to_download": [],
@@ -716,6 +749,31 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
             if self.uploadLocalizedDatasetsCheck.isChecked():
                 files["localized_datasets_to_upload"] = self.localized_datasets_files
+
+            total_upload_size = 0
+            for f in files["to_upload"]:
+                total_upload_size += f.local_size
+
+            if (
+                self.storage_widget.active_storage_total_bytes() > 0
+                and total_upload_size
+                > self.storage_widget.active_storage_total_bytes()
+                - self.storage_widget.storage_used_bytes()
+            ):
+                self._out_of_storage_triggered(total_upload_size)
+                return
+
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setVisible(True)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Abort).setVisible(
+                True
+            )
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(
+                False
+            )
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setVisible(
+                False
+            )
 
             has_localized_datasets_uploads = len(files["localized_datasets_to_upload"])
             self.localizedDatasetsUploadLabel.setVisible(has_localized_datasets_uploads)

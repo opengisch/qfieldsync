@@ -584,6 +584,10 @@ class CloudNetworkAccessManager(QObject):
         """Gets the available projects for the owner dropdown menu"""
         return self.cloud_get(["users", username, "organizations"])
 
+    def get_subscription_information(self, username: str) -> QNetworkReply:
+        """Get a username subscription information including storage usage and capacity"""
+        return self.cloud_get(f"subscriptions/{username}/current/")
+
     def get_files(self, project_id: str, client: str = "qgis") -> QNetworkReply:
         """Get project files and their versions"""
         return self.cloud_get(

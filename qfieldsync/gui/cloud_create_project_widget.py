@@ -47,6 +47,7 @@ from qfieldsync.core.cloud_project import CloudProject
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
+from qfieldsync.gui.storage_widget import StorageWidget
 from qfieldsync.utils.cloud_utils import (
     LocalDirFeedback,
     local_dir_feedback,
@@ -123,9 +124,16 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             )
         )
 
+        self.projectOwnerComboBox.currentTextChanged.connect(
+            lambda: self.on_project_owner_changed()
+        )
+
         self.projectOwnerRefreshButton.clicked.connect(
             lambda: self.on_project_owner_refresh_button_click()
         )
+
+        self.storage_widget = StorageWidget(self.network_manager, self)
+        self.projectDetailsLayout.addWidget(self.storage_widget, 3, 1)
 
     def restart(self):
         self.stackedWidget.setCurrentWidget(self.selectTypePage)
@@ -414,6 +422,13 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
                 self.set_dirname(str(Path(self.project.fileName()).parent))
 
         self.update_info_visibility()
+
+    def on_project_owner_changed(self):
+        if not self.projectOwnerComboBox.currentText():
+            return
+
+        if self.storage_widget.owner() != self.projectOwnerComboBox.currentText():
+            self.storage_widget.set_owner(self.projectOwnerComboBox.currentText())
 
     def on_project_owner_refresh_button_click(self):
         self.refresh_project_owners()

@@ -155,7 +155,7 @@
          <property name="title">
           <string>Project Details</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_4">
+         <layout class="QGridLayout" name="projectDetailsLayout">
           <item row="2" column="1">
            <layout class="QHBoxLayout" name="projectOwnerHLayout">
             <item>
