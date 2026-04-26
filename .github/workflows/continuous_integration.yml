@@ -28,11 +28,7 @@ jobs:
     name: PyQt6 compatibility check
     runs-on: ubuntu-24.04
     container:
-      image: registry.gitlab.com/oslandia/qgis/pyqgis-4-checker/pyqgis-qt-checker:latest
-      volumes:
-        - /tmp/.X11-unix:/tmp/.X11-unix
-        - ${{ github.workspace }}:/home/pyqgisdev/
-      options: --user root
+      image: ghcr.io/qgis/pyqgis4-checker:main-ubuntu
     steps:
       - name: Get source code
         uses: actions/checkout@v6
@@ -46,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
-          name: pyqt6-checker-error-report
+          name: pyqgis4-checker-report
           path: pyqt6_checker.log
           retention-days: 7
 
