@@ -134,13 +134,6 @@ jobs:
           name: qfieldsync.${{ github.sha }}
           path: ./qfieldsync.${{ github.sha }}
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 30
-        with:
-          limit-access-to-actor: true
-
   translations:
     runs-on: ubuntu-24.04
     env:
