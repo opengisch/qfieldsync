@@ -18,7 +18,7 @@ jobs:
     name: Code check
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v3
 
@@ -62,7 +62,7 @@ jobs:
       QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -81,7 +81,7 @@ jobs:
       GITHUB_REF: ${{ github.ref }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -117,7 +117,7 @@ jobs:
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
@@ -152,7 +152,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
