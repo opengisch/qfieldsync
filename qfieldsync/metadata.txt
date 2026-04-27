@@ -8,7 +8,7 @@
 
 [general]
 name=QField Sync
-qgisMinimumVersion=3.22
+qgisMinimumVersion=3.40
 qgisMaximumVersion=4.99
 supportsQt6=True
 description=Sync your projects to QField

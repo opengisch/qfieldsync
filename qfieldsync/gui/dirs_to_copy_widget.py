@@ -22,7 +22,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QTreeWidgetItem, QWidget
@@ -40,7 +40,7 @@ LayersConfigWidgetUi, _ = loadUiType(
     os.path.join(os.path.dirname(__file__), "../ui/dirs_to_copy_widget.ui")
 )
 
-DirsToCopySettings = Dict[str, bool]
+DirsToCopySettings = dict[str, bool]
 
 
 class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
@@ -84,11 +84,10 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
             # if not matches:
             #     return False
 
-            check_state = (
-                Qt.CheckState.Checked
-                if dirs_to_copy.get(str_path, True)
-                else Qt.CheckState.Unchecked
-            )
+            if dirs_to_copy.get(str_path, True):
+                check_state = Qt.CheckState.Checked
+            else:
+                check_state = Qt.CheckState.Unchecked
 
             item.setCheckState(0, check_state)
             item.setExpanded(True)
@@ -113,7 +112,7 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
                 )
 
     def dirs_to_copy(self) -> DirsToCopySettings:
-        def extract_dirs_data(root_item: QTreeWidgetItem) -> Dict[str, bool]:
+        def extract_dirs_data(root_item: QTreeWidgetItem) -> dict[str, bool]:
             data = {}
             for i in range(root_item.childCount()):
                 item = root_item.child(i)
@@ -147,9 +146,11 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
 
     def _set_checked_state_recursively(self, checked: bool) -> None:
         def set_checked_state(item: QTreeWidgetItem) -> None:
-            checked_state = (
-                Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
-            )
+            if checked:
+                checked_state = Qt.CheckState.Checked
+            else:
+                checked_state = Qt.CheckState.Unchecked
+
             item.setCheckState(0, checked_state)
 
             for i in range(item.childCount()):

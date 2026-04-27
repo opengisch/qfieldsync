@@ -19,6 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import os
 from pathlib import Path
 from typing import Optional
@@ -44,6 +45,7 @@ except ModuleNotFoundError:
             "QFieldSync", "To finalize the QFieldSync upgrade, please restart QGIS."
         ),
     )
+
 from libqfieldsync.project import ProjectConfiguration
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
@@ -170,6 +172,7 @@ class PackageDialog(QDialog, DialogUi):
                 self.qfield_preferences.value("exportDirectory"),
                 fileparts(QgsProject.instance().fileName())[1],
             )
+
         export_folder = Path(QDir.toNativeSeparators(str(export_dirname)))
         full_project_name_suggestion = export_folder.joinpath(
             f"{self.project.baseName()}_qfield.qgs"
@@ -229,16 +232,15 @@ class PackageDialog(QDialog, DialogUi):
 
         self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
 
-        area_of_interest = (
-            self.__project_configuration.area_of_interest
-            if self.__project_configuration.area_of_interest
-            else self.iface.mapCanvas().extent().asWktPolygon()
-        )
-        area_of_interest_crs = (
-            self.__project_configuration.area_of_interest_crs
-            if self.__project_configuration.area_of_interest_crs
-            else QgsProject.instance().crs().authid()
-        )
+        if self.__project_configuration.area_of_interest:
+            area_of_interest = self.__project_configuration.area_of_interest
+        else:
+            area_of_interest = self.iface.mapCanvas().extent().asWktPolygon()
+
+        if self.__project_configuration.area_of_interest_crs:
+            area_of_interest_crs = self.__project_configuration.area_of_interest_crs
+        else:
+            area_of_interest_crs = QgsProject.instance().crs().authid()
 
         self.qfield_preferences.set_value(
             "exportDirectoryProject", str(packaged_project_file.parent)
@@ -328,6 +330,7 @@ class PackageDialog(QDialog, DialogUi):
             self.infoLocalizedLayersLabel.setVisible(True)
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
+
         self.infoGroupBox.setVisible(len(localized_data_path_layers) > 0)
 
     def show_settings(self):

@@ -1,6 +1,6 @@
 [tool.ruff]
-# Support Python 3.7+.
-target-version = "py37"
+# Support Python 3.9+.
+target-version = "py39"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -67,6 +67,9 @@ ignore = [
     "PTH",
     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
     "ANN",
+    # https://docs.astral.sh/ruff/rules/unnecessary-lambda/
+    # NOTE: ignored because we heavily `qobj.connect.signal(lambda arg: self._method(arg))` in the codebase
+    "PLW0108",
     # NOTE: ignored because we heavily use `QObject.tr( "" ).format()`
     "UP032",
     # NOTE: we should eventually enable no commented out code
@@ -85,6 +88,14 @@ max-line-length = 120
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
+
+[tool.flake8]
+exclude = [
+    ".git",
+    "__pycache__",
+    "**/qfieldsync/libqfieldsync/"
+]
+select = ["CLB100", "IF100"]
 
 [project]
 name = "qfieldsync"

@@ -16,6 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import os
 
 from qgis.core import (
@@ -218,6 +219,7 @@ Speed [% if(@gnss_ground_speed != 'nan', format_number(@gnss_ground_speed, 3) ||
                 self.customDetailsTextEdit.insertPlainText(
                     f"[% {self.expression_builder_dialog.expressionText()} %]"
                 )
+
             self.update_preview()
 
     def update_preview(self):
@@ -279,13 +281,19 @@ Speed [% if(@gnss_ground_speed != 'nan', format_number(@gnss_ground_speed, 3) ||
 
     def details_template(self):
         details = self.customDetailsTextEdit.toPlainText().strip()
-        return details if details != self.DEFAULT_DETAILS_TEMPLATE else ""
+        if details != self.DEFAULT_DETAILS_TEMPLATE:
+            return details
+
+        return ""
 
     def set_details_template(self, details_template):
         details = details_template.strip()
-        self.customDetailsTextEdit.setPlainText(
-            details if details != "" else self.DEFAULT_DETAILS_TEMPLATE
-        )
+        if details != "":
+            details_text = details
+        else:
+            details_text = self.DEFAULT_DETAILS_TEMPLATE
+
+        self.customDetailsTextEdit.setPlainText(details_text)
 
     def force_stamping(self):
         return self.forceStampingCheckBox.isChecked()

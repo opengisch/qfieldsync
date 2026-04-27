@@ -18,11 +18,10 @@
  ***************************************************************************/
 """
 
-
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from libqfieldsync.utils.file_utils import copy_multifile
 from qgis.core import Qgis, QgsMessageLog
@@ -68,10 +67,10 @@ class CloudTransferrer(QObject):
         self.cloud_project = cloud_project
         self.localized_datasets_project = localized_datasets_project
         # NOTE these `_files_to_(upload*|download|delete)` uses POSIX path as keys, so beware on M$
-        self._files_to_upload_for_localized_datasets: Dict[str, ProjectFile] = {}
-        self._files_to_upload: Dict[str, ProjectFile] = {}
-        self._files_to_download: Dict[str, ProjectFile] = {}
-        self._files_to_delete: Dict[str, ProjectFile] = {}
+        self._files_to_upload_for_localized_datasets: dict[str, ProjectFile] = {}
+        self._files_to_upload: dict[str, ProjectFile] = {}
+        self._files_to_download: dict[str, ProjectFile] = {}
+        self._files_to_delete: dict[str, ProjectFile] = {}
         self.total_upload_bytes = 0
         self.total_download_bytes = 0
         self.delete_files_finished = 0
@@ -117,10 +116,10 @@ class CloudTransferrer(QObject):
 
     def sync(
         self,
-        files_to_upload: List[ProjectFile],
-        files_to_download: List[ProjectFile],
-        files_to_delete: List[ProjectFile],
-        files_to_upload_for_localized_datasets: List[ProjectFile],
+        files_to_upload: list[ProjectFile],
+        files_to_download: list[ProjectFile],
+        files_to_delete: list[ProjectFile],
+        files_to_upload_for_localized_datasets: list[ProjectFile],
     ) -> None:
         assert not self.is_started
 
@@ -494,8 +493,8 @@ class FileTransfer(QObject):
 
         self.network_manager = network_manager
         self.cloud_project = cloud_project
-        self.replies: List[QNetworkReply] = []
-        self.redirects: List[QUrl] = []
+        self.replies: list[QNetworkReply] = []
+        self.redirects: list[QUrl] = []
         self.file = file
         self.filename = file.name
         # filesystem filename
@@ -533,7 +532,11 @@ class FileTransfer(QObject):
                     self.last_redirect_url, str(self.fs_filename), True
                 )
             else:
-                params = {"version": self.version} if self.version else {}
+                if self.version:
+                    params = {"version": self.version}
+                else:
+                    params = {}
+
                 reply = self.network_manager.cloud_get(
                     f"files/{self.cloud_project.id}/{self.filename}/",
                     local_filename=str(self.fs_filename),
@@ -679,14 +682,14 @@ class ThrottledFileTransferrer(QObject):
         self,
         network_manager,
         cloud_project,
-        files: List[ProjectFile],
+        files: list[ProjectFile],
         transfer_type: FileTransfer.TransferType,
         max_parallel_requests: int = 8,
         use_file_local_dir: bool = False,
     ) -> None:
         super(QObject, self).__init__()
 
-        self.transfers: Dict[str, FileTransfer] = {}
+        self.transfers: dict[str, FileTransfer] = {}
         self.network_manager = network_manager
         self.cloud_project = cloud_project
         self.files = files
@@ -697,6 +700,7 @@ class ThrottledFileTransferrer(QObject):
             self.temp_dir = Path(cloud_project.local_dir).joinpath(".qfieldsync")
         else:
             self.temp_dir = None
+
         self.transfer_type = transfer_type
 
         for file in self.files:
@@ -791,12 +795,12 @@ class ThrottledFileTransferrer(QObject):
 class TransferFileLogsModel(QAbstractListModel):
     def __init__(
         self,
-        transferrers: List[ThrottledFileTransferrer],
+        transferrers: list[ThrottledFileTransferrer],
         parent: Optional[QObject] = None,
     ):
         super().__init__(parent)
-        self.transfers: List[FileTransfer] = []
-        self.filename_to_index: Dict[str, int] = {}
+        self.transfers: list[FileTransfer] = []
+        self.filename_to_index: dict[str, int] = {}
 
         for transferrer in transferrers:
             for filename, transfer in transferrer.transfers.items():
@@ -825,13 +829,12 @@ class TransferFileLogsModel(QAbstractListModel):
     def _data_string(self, transfer: FileTransfer) -> str:  # noqa: PLR0911, PLR0912
         error_msg = ""
         if transfer.is_failed:
-            error_msg = (
-                str(transfer.error)
-                if transfer.error
-                else "[{}] {}".format(
+            if transfer.error:
+                error_msg = str(transfer.error)
+            else:
+                error_msg = "[{}] {}".format(
                     transfer.last_reply.error(), transfer.last_reply.errorString()
                 )
-            )
 
         if transfer.transfer_type == FileTransfer.TransferType.DOWNLOAD:
             if transfer.is_aborted:
@@ -843,11 +846,11 @@ class TransferFileLogsModel(QAbstractListModel):
             elif transfer.is_finished:
                 return self.tr('Downloaded "{}"'.format(transfer.filename))
             elif transfer.is_started:
-                percentage = (
-                    transfer.bytes_transferred / transfer.bytes_total
-                    if transfer.bytes_total > 0
-                    else 0
-                )
+                if transfer.bytes_total > 0:
+                    percentage = transfer.bytes_transferred / transfer.bytes_total
+                else:
+                    percentage = 0
+
                 return self.tr(
                     'Downloading "{}" {}%'.format(
                         transfer.filename, round(percentage * 100)
@@ -865,11 +868,11 @@ class TransferFileLogsModel(QAbstractListModel):
             elif transfer.is_finished:
                 return self.tr('Uploaded "{}"'.format(transfer.filename))
             elif transfer.is_started:
-                percentage = (
-                    transfer.bytes_transferred / transfer.bytes_total
-                    if transfer.bytes_total > 0
-                    else 0
-                )
+                if transfer.bytes_total > 0:
+                    percentage = transfer.bytes_transferred / transfer.bytes_total
+                else:
+                    percentage = 0
+
                 return self.tr(
                     'Uploading "{}" {}%'.format(
                         transfer.filename, round(percentage * 100)

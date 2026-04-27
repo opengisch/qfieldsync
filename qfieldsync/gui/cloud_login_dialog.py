@@ -19,9 +19,10 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import os
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
 from qgis.core import Qgis
@@ -85,6 +86,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         if accepted_cb:
             CloudLoginDialog.instance.accepted.connect(accepted_cb)
+
         if rejected_cb:
             CloudLoginDialog.instance.rejected.connect(rejected_cb)
 
@@ -157,13 +159,13 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             )
         )
         self.qfieldCloudIcon.setMinimumSize(175, 180)
-        self.qfieldCloudIcon.mouseDoubleClickEvent = (
-            lambda _event: self.toggle_server_url_visibility()
+        self.qfieldCloudIcon.mouseDoubleClickEvent = lambda _event: (
+            self.toggle_server_url_visibility()
         )
         self.rejected.connect(self.on_rejected)
         self.hide()
 
-        self._sso_login_buttons: List[QPushButton] = []
+        self._sso_login_buttons: list[QPushButton] = []
 
         self.ssoCancelLoginButton.setIcon(
             self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).icon()
@@ -268,7 +270,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self._sso_login_buttons.append(login_button)
 
     def set_sso_provider_button_style(
-        self, style_data: Dict[str, str], button: QPushButton
+        self, style_data: dict[str, str], button: QPushButton
     ) -> None:
         """
         Apply style to a SSO provider login button.
@@ -276,6 +278,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         Args:
             style_data: style JSON for the provider, served by QFieldCloud.
             button: button to apply the style to.
+
         """
         theme = style_data.get(extract_theme_from_qgis_settings())
         button.setStyleSheet(
@@ -360,6 +363,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         if all([result.scheme, result.netloc]):
             if self._fetch_auth_methods_timer.isActive():
                 return
+
             self._fetch_auth_methods_timer.start()
 
     def on_credentials_login_button_clicked(self) -> None:
@@ -401,7 +405,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.done(QDialog.DialogCode.Accepted)
 
     def on_login_with_sso_provider_button_clicked(
-        self, provider_data: Dict[str, Any]
+        self, provider_data: dict[str, Any]
     ) -> None:
         server_url = self.serverUrlCmb.currentText()
         auth_config = build_oauth2_auth_config(

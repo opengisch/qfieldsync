@@ -102,6 +102,7 @@ class CloudConverter(QObject):
                                 if not source.isReferenced():
                                     valid = False
                                     break
+
                         if not valid:
                             # virtual layers with non-referenced sources are not supported
                             self.warning.emit(
@@ -125,6 +126,7 @@ class CloudConverter(QObject):
                             continue
                 else:
                     layer_source.copy(self.export_dirname, [])
+
                 layer.setCustomProperty(
                     "QFieldSync/cloud_action", layer_source.default_cloud_action
                 )

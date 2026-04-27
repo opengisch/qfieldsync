@@ -24,7 +24,7 @@ import tempfile
 import urllib.parse
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 from urllib.parse import urlparse
 
 import requests
@@ -115,7 +115,7 @@ def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
         try:
             resp = json.loads(payload)
             if resp.get("code"):
-                message = f'[{resp["code"]}] {resp["message"]}'
+                message = f"[{resp['code']}] {resp['message']}"
             else:
                 message = resp["detail"]
         except Exception:
@@ -151,7 +151,7 @@ class CloudAuthMethod(Enum):
 
 
 def build_oauth2_auth_config(
-    auth_data: Dict[str, Any],
+    auth_data: dict[str, Any],
     related_uri: str,
     config_name: str = "qfieldcloud_sso",
     should_persist_token: bool = True,
@@ -167,6 +167,7 @@ def build_oauth2_auth_config(
 
     Returns:
         QgsAuthMethodConfig: QGIS auth config for the provided method.
+
     """
     auth_config_dict = {
         "accessMethod": 0,
@@ -226,7 +227,7 @@ class CloudNetworkAccessManager(QObject):
         self.preferences = Preferences()
         self.url = ""
         self._token = ""
-        self.user_details: Dict[str, str] = {}
+        self.user_details: dict[str, str] = {}
         self.projects_cache = CloudProjectsCache(self, self)
         self.is_login_active = False
 
@@ -250,7 +251,7 @@ class CloudNetworkAccessManager(QObject):
 
     def handle_response(
         self, reply: QNetworkReply, should_parse_json: bool = True
-    ) -> Optional[Union[List, Dict]]:
+    ) -> Optional[Union[list, dict]]:
         payload_str = ""
 
         error = from_reply(reply)
@@ -258,11 +259,14 @@ class CloudNetworkAccessManager(QObject):
             if error.httpCode == HTTP_401 and not self.is_login_active:
                 if self.auth_method == CloudAuthMethod.CREDENTIALS:
                     self.set_token("", True)
+
                 if self.auth_method == CloudAuthMethod.SSO:
                     self.clear_sso_config()
+
                 self.auth_method = CloudAuthMethod.NONE
                 self.auth_config = None
                 self.logout_success.emit()
+
             raise error
 
         if not should_parse_json:
@@ -274,14 +278,14 @@ class CloudNetworkAccessManager(QObject):
         except Exception as error:
             raise QfcError(reply, error) from error
 
-    def json_object(self, reply: QNetworkReply) -> Dict[str, Any]:
+    def json_object(self, reply: QNetworkReply) -> dict[str, Any]:
         payload = self.handle_response(reply, True)
 
         assert isinstance(payload, dict)
 
         return payload
 
-    def json_array(self, reply: QNetworkReply) -> List[Any]:
+    def json_array(self, reply: QNetworkReply) -> list[Any]:
         payload = self.handle_response(reply, True)
 
         assert isinstance(payload, list)
@@ -289,7 +293,7 @@ class CloudNetworkAccessManager(QObject):
         return payload
 
     @staticmethod
-    def server_urls() -> List[str]:
+    def server_urls() -> list[str]:
         return [
             "https://app.qfield.cloud/",
             "https://dev.qfield.cloud/",
@@ -424,6 +428,7 @@ class CloudNetworkAccessManager(QObject):
 
             if all([username, password]):
                 self.set_url(server_url)
+
             self.login_with_credentials(username, password)
 
         elif self.auth_method == CloudAuthMethod.SSO:
@@ -465,6 +470,7 @@ class CloudNetworkAccessManager(QObject):
 
         Returns:
             QNetworkReply: QNetworkReply from the QFieldCloud server.
+
         """
         reply = self.cloud_get("auth/user/")
         reply.finished.connect(lambda: self._on_get_user_info_finished(reply))
@@ -512,19 +518,27 @@ class CloudNetworkAccessManager(QObject):
 
         Returns:
             A QNetworkReply for the requested URL.
+
         """
         request = QNetworkRequest(QUrl(resource_url))
         return QgsNetworkAccessManager.instance().get(request)
 
     def get_projects(self, should_include_public: bool = False) -> QNetworkReply:
         """Get QFieldCloud projects"""
-        params = {"include-public": "1"} if should_include_public else {}
+        if should_include_public:
+            params = {"include-public": "1"}
+        else:
+            params = {}
+
         return self.cloud_get("projects", params)
 
-    def get_projects_not_async(self, should_include_public: bool = False) -> List[Dict]:
+    def get_projects_not_async(self, should_include_public: bool = False) -> list[dict]:
         """Get QFieldCloud projects synchronously"""
         headers = {"Authorization": "token {}".format(self._token)}
-        params = {"include-public": "1"} if should_include_public else {}
+        if should_include_public:
+            params = {"include-public": "1"}
+        else:
+            params = {}
 
         response = requests.get(
             self._prepare_uri("projects").toString(),
@@ -625,6 +639,7 @@ class CloudNetworkAccessManager(QObject):
 
         Args:
             request (QNetworkRequest): request to update.
+
         """
         if self.auth_method == CloudAuthMethod.CREDENTIALS and self._token:
             request.setRawHeader(
@@ -639,8 +654,8 @@ class CloudNetworkAccessManager(QObject):
 
     def cloud_get(
         self,
-        uri: Union[str, List[str], QUrl],
-        params: Optional[Dict[str, Any]] = None,
+        uri: Union[str, list[str], QUrl],
+        params: Optional[dict[str, Any]] = None,
         local_filename: Optional[str] = None,
         skip_cache: bool = False,
     ) -> QNetworkReply:
@@ -736,12 +751,12 @@ class CloudNetworkAccessManager(QObject):
             return
 
         with open(local_filename, "wb") as file:
-            assert (
-                file.write(reply.readAll()) != -1
-            ), 'Error while writing to file "{}"'.format(local_filename)
+            assert file.write(reply.readAll()) != -1, (
+                'Error while writing to file "{}"'.format(local_filename)
+            )
 
     def cloud_post(
-        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
+        self, uri: Union[str, list[str]], payload: Optional[dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -755,7 +770,10 @@ class CloudNetworkAccessManager(QObject):
 
         self._set_request_auth(request)
 
-        payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
+        if payload is None:
+            payload_bytes = b""
+        else:
+            payload_bytes = json.dumps(payload).encode("utf-8")
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.post(request, payload_bytes)
@@ -766,7 +784,7 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def cloud_put(
-        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
+        self, uri: Union[str, list[str]], payload: Optional[dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -780,7 +798,10 @@ class CloudNetworkAccessManager(QObject):
 
         self._set_request_auth(request)
 
-        payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
+        if payload is None:
+            payload_bytes = b""
+        else:
+            payload_bytes = json.dumps(payload).encode("utf-8")
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.put(request, payload_bytes)
@@ -791,7 +812,7 @@ class CloudNetworkAccessManager(QObject):
         return reply
 
     def cloud_patch(
-        self, uri: Union[str, List[str]], payload: Optional[Dict] = None
+        self, uri: Union[str, list[str]], payload: Optional[dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -805,7 +826,10 @@ class CloudNetworkAccessManager(QObject):
 
         self._set_request_auth(request)
 
-        payload_bytes = b"" if payload is None else json.dumps(payload).encode("utf-8")
+        if payload is None:
+            payload_bytes = b""
+        else:
+            payload_bytes = json.dumps(payload).encode("utf-8")
 
         with disable_nam_timeout(self._nam):
             reply = self._nam.sendCustomRequest(request, b"PATCH", payload_bytes)
@@ -815,7 +839,7 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def cloud_delete(self, uri: Union[str, List[str]]) -> QNetworkReply:
+    def cloud_delete(self, uri: Union[str, list[str]]) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
         if self.auth_method == CloudAuthMethod.CREDENTIALS:
@@ -838,9 +862,9 @@ class CloudNetworkAccessManager(QObject):
 
     def cloud_upload_files(
         self,
-        uri: Union[str, List[str]],
-        filenames: List[str],
-        payload: Optional[Dict] = None,
+        uri: Union[str, list[str]],
+        filenames: list[str],
+        payload: Optional[dict] = None,
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
@@ -899,7 +923,7 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def _prepare_uri(self, uri: Union[str, List[str], QUrl]) -> QUrl:
+    def _prepare_uri(self, uri: Union[str, list[str], QUrl]) -> QUrl:
         if isinstance(uri, QUrl):
             return uri
 
@@ -1075,6 +1099,7 @@ class CloudNetworkAccessManager(QObject):
 
         Returns:
             The 'localized_datasets' project data if found or successfully created, otherwise None.
+
         """
         try:
             # Check if the project is already in the projects cache
@@ -1169,7 +1194,7 @@ class CloudProjectsCache(QObject):
         self.preferences = Preferences()
         self.network_manager = network_manager
         self._error_reason = ""
-        self._projects: Optional[List[CloudProject]] = None
+        self._projects: Optional[list[CloudProject]] = None
         self._projects_reply: Optional[QNetworkReply] = None
         self._fs_watcher = QFileSystemWatcher()
         self._fs_watcher.directoryChanged.connect(self._on_directory_changed)
@@ -1181,7 +1206,7 @@ class CloudProjectsCache(QObject):
             self.refresh()
 
     @property
-    def projects(self) -> Optional[List[CloudProject]]:
+    def projects(self) -> Optional[list[CloudProject]]:
         return self._projects
 
     @property
@@ -1198,9 +1223,13 @@ class CloudProjectsCache(QObject):
 
         Returns:
             bool: opened QGIS project is configured cloud project
+
         """
         project_dir = QgsProject.instance().homePath()
-        project_ids = [p.id for p in self.projects] if self.projects else []
+        if self.projects:
+            project_ids = [p.id for p in self.projects]
+        else:
+            project_ids = []
 
         for project_id, local_dir in self.preferences.value(
             "qfieldCloudProjectLocalDirs"
@@ -1222,6 +1251,7 @@ class CloudProjectsCache(QObject):
 
         Returns:
             Optional[CloudProject]: associated cloud project
+
         """
         project_dir = QgsProject.instance().homePath()
 

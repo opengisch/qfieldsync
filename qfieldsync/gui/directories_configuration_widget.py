@@ -16,6 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import os
 
 from qgis.core import QgsApplication
@@ -74,6 +75,7 @@ class DirectoriesConfigurationWidget(WidgetUi, QWidget):
         if "attachment_dirs" in configuration:
             for attachment_dir in configuration["attachment_dirs"]:
                 self._add_directory_row(attachment_dir, 0)
+
         if "data_dirs" in configuration:
             for data_dir in configuration["data_dirs"]:
                 self._add_directory_row(data_dir, 1)

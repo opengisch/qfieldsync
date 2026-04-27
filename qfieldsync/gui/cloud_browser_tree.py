@@ -20,7 +20,7 @@
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import (
@@ -149,7 +149,7 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
 class QFieldCloudGroupItem(QgsDataCollectionItem):
     """QFieldCloud group data item."""
 
-    def __init__(self, parent, name, project_type, icon, order):  # noqa: PLR0913
+    def __init__(self, parent, name, project_type, icon, order):
         super().__init__(parent, name, "/QFieldCloud/" + name)
 
         self.network_manager = parent.network_manager
@@ -160,7 +160,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
     def createChildren(self):  # noqa: N802
         items = []
 
-        projects: List[CloudProject] = self.network_manager.projects_cache.projects
+        projects: list[CloudProject] = self.network_manager.projects_cache.projects
 
         if projects is None:
             try:
@@ -194,17 +194,12 @@ class QFieldCloudProjectItem(QgsDataItem):
         )
         self.project_id = project.id
         project = parent.network_manager.projects_cache.find_project(self.project_id)
-        self.setIcon(
-            QIcon(
-                str(
-                    Path(__file__).parent.joinpath(
-                        "../resources/cloud_project.svg"
-                        if project.local_dir
-                        else "../resources/cloud_project_remote.svg"
-                    )
-                )
-            )
-        )
+        if project.local_dir:
+            project_icon = "../resources/cloud_project.svg"
+        else:
+            project_icon = "../resources/cloud_project_remote.svg"
+
+        self.setIcon(QIcon(str(Path(__file__).parent.joinpath(project_icon))))
 
 
 class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
@@ -264,7 +259,9 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
         if type(item) is QFieldCloudProjectItem:
             if not self.open_project(item):
                 self.show_cloud_synchronize_dialog(item)
+
             return True
+
         return False
 
     def _create_projects_dialog(self, item) -> CloudProjectsDialog:

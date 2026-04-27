@@ -19,6 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 import os
 from pathlib import Path
 from typing import Optional
@@ -73,7 +74,12 @@ from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
-from qfieldsync.utils.cloud_utils import LocalDirFeedback, closure, local_dir_feedback
+from qfieldsync.utils.cloud_utils import (
+    LocalDirFeedback,
+    closure,
+    get_cloud_project_status_color,
+    local_dir_feedback,
+)
 from qfieldsync.utils.permissions import can_delete_project
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
@@ -114,7 +120,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.setWindowModality(Qt.WindowModality.WindowModal)
         self.preferences = Preferences()
         self.network_manager = network_manager
-        self._current_cloud_project_id = project.id if project else None
+        if project:
+            self._current_cloud_project_id = project.id
+        else:
+            self._current_cloud_project_id = None
+
         self._suggest_upload_files = False
         self.transfer_dialog = None
         self.project_transfer = None
@@ -284,14 +294,16 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     @current_cloud_project.setter
     def current_cloud_project(self, value: Optional[CloudProject]):
-        if (
-            (value is not None and self._current_cloud_project_id == value.id)
-            or value is None
-            and self._current_cloud_project_id is None
+        if (value is not None and self._current_cloud_project_id == value.id) or (
+            value is None and self._current_cloud_project_id is None
         ):
             return
 
-        self._current_cloud_project_id = value.id if value else None
+        if value:
+            self._current_cloud_project_id = value.id
+        else:
+            self._current_cloud_project_id = None
+
         self.update_project_table_selection()
         self.update_ui_state()
 
@@ -393,6 +405,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             for part_idx, part in enumerate(parts):
                 if len(stack) > part_idx and stack[part_idx][0] == part:
                     continue
+
                 stack = stack[0:part_idx]
 
                 item = QTreeWidgetItem()
@@ -509,7 +522,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         bytes_received: int,
         bytes_total: int,
     ) -> None:
-        progress = int((bytes_received / bytes_total) * 100) if bytes_total > 0 else 100
+        if bytes_total > 0:
+            progress = int((bytes_received / bytes_total) * 100)
+        else:
+            progress = 100
 
         self.set_feedback(
             self.tr('Downloading file "{}" at {}%…').format(transfer.filename, progress)
@@ -606,14 +622,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
             item = QTableWidgetItem(cloud_project.name)
 
-            if cloud_project.status == "ok":
-                color = QColor("#87af87")
-            elif cloud_project.status == "busy":
-                color = QColor("#9e6a03")
-            elif cloud_project.status == "failed":
-                color = QColor("#dc3545")
-            else:
-                raise NotImplementedError()
+            color = get_cloud_project_status_color(cloud_project)
 
             pm = QPixmap(40, 20)
             pm.fill(Qt.GlobalColor.transparent)
@@ -621,15 +630,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             painter.setPen(QPen(color, 8, Qt.PenStyle.SolidLine))
             painter.setBrush(QBrush(color, Qt.BrushStyle.SolidPattern))
             painter.drawEllipse(30, 10, 5, 5)
-            icon = QIcon(
-                str(
-                    Path(__file__).parent.joinpath(
-                        "../resources/cloud_project.svg"
-                        if cloud_project.local_dir
-                        else "../resources/cloud_project_remote.svg"
-                    )
-                )
-            )
+            if cloud_project.local_dir:
+                project_icon = "../resources/cloud_project.svg"
+            else:
+                project_icon = "../resources/cloud_project_remote.svg"
+
+            icon = QIcon(str(Path(__file__).parent.joinpath(project_icon)))
             painter.drawPixmap(0, 0, icon.pixmap(pm.size()))
             del painter
 
@@ -851,6 +857,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                 updated_text, updated_ok = ask(f"<p style='color:red'>{error}</p>")
                 if not updated_ok:
                     return
+
                 clean_text = updated_text.strip()
 
             self.projectsStack.setEnabled(False)

@@ -283,6 +283,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.infoLocalizedLayersLabel.setVisible(True)
         else:
             self.infoLocalizedLayersLabel.setVisible(False)
+
         self.infoGroupBox.setVisible(len(localized_data_path_layers) > 0)
 
     def get_unique_project_name(self, project: QgsProject) -> str:
@@ -395,11 +396,11 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.refresh_project_owners()
 
         if self.cloudifyRadioButton.isChecked():
-            project_filename = (
-                project_name.lower()
-                if project_name
-                else fileparts(QgsProject.instance().fileName())[1]
-            )
+            if project_name:
+                project_filename = project_name.lower()
+            else:
+                project_filename = fileparts(QgsProject.instance().fileName())[1]
+
             export_dirname = get_unique_empty_dirname(
                 Path(self.qfield_preferences.value("cloudDirectory")).joinpath(
                     project_filename
