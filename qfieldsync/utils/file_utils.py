@@ -29,6 +29,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, TypedDict, Union
 
+from qgis.PyQt.QtCore import QObject
+
 # OneDrive Files On-Demand file attributes (Windows)
 _FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
 _FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x00040000
@@ -297,3 +299,42 @@ def rmtree_onedrive_safe(
         max_retries,
         last_error,
     )
+
+
+def filesizeformat10(bytes_: int) -> str:
+    """
+    Format the value like a 'human-readable' file size (i.e. 13 KB, 4.1 MB,
+    102 bytes, etc.).
+    """
+    try:
+        bytes_ = int(bytes_)
+    except (TypeError, ValueError, UnicodeDecodeError):
+        return QObject.tr("%n byte(s)", "", 0)
+
+    KB = 10**3  # noqa: N806
+    MB = 10**6  # noqa: N806
+    GB = 10**9  # noqa: N806
+    TB = 10**12  # noqa: N806
+    PB = 10**15  # noqa: N806
+
+    negative = bytes_ < 0
+    if negative:
+        bytes_ = -bytes_  # Allow formatting of negative numbers.
+
+    if bytes_ < KB:
+        value = QObject.tr("%n byte(s)", "", bytes_)
+    elif bytes_ < MB:
+        value = QObject.tr("{} KB").format(round(bytes_ / KB, 1))
+    elif bytes_ < GB:
+        value = QObject.tr("{} MB").format(round(bytes_ / MB, 1))
+    elif bytes_ < TB:
+        value = QObject.tr("{} GB").format(round(bytes_ / GB, 1))
+    elif bytes_ < PB:
+        value = QObject.tr("{} TB").format(round(bytes_ / TB, 1))
+    else:
+        value = QObject.tr("{} PB").format(round(bytes_ / PB, 1))
+
+    if negative:
+        value = "-{}".format(value)
+
+    return value

@@ -377,7 +377,7 @@
       </layout>
      </widget>
      <widget class="QWidget" name="filesPage">
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="filesLayout">
        <property name="leftMargin">
         <number>0</number>
        </property>
