@@ -56,7 +56,7 @@ class QFieldSyncProjectPropertiesFactory(QgsOptionsWidgetFactory):
             os.path.join(os.path.dirname(__file__), "resources", "qfield_logo.svg")
         )
 
-    def createWidget(self, parent):  # noqa: N802
+    def createWidget(self, parent):  # noqa: N802  # dead: disable
         return ProjectConfigurationStackWidget(parent)
 
 
@@ -70,14 +70,12 @@ class QFieldSyncOptionsFactory(QgsOptionsWidgetFactory):
             os.path.join(os.path.dirname(__file__), "resources", "qfield_logo.svg")
         )
 
-    def createWidget(self, parent):  # noqa: N802
+    def createWidget(self, parent):  # noqa: N802  # dead: disable
         return PreferencesWidget(self.qfieldSync, parent)
 
 
 class QFieldSync:
     """QGIS Plugin Implementation."""
-
-    QFIELD_SCOPE = "QFieldSync"
 
     push_dlg = None
 
@@ -248,9 +246,9 @@ class QFieldSync:
 
         return action
 
-    def initGui(self):  # noqa: N802
+    def initGui(self):  # noqa: N802  # dead: disable
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        self.cloud_projects_overview_action = self.add_action(
+        self.add_action(
             os.path.join(os.path.dirname(__file__), "./resources/cloud.svg"),
             text=self.tr("QFieldCloud Projects Overview"),
             callback=self.show_cloud_overview_dialog,
@@ -341,7 +339,7 @@ class QFieldSync:
         self.update_button_visibility()
         self.update_action_enabled_status()
 
-    def unload(self):
+    def unload(self):  # dead: disable
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(self.menu, action)
@@ -419,42 +417,6 @@ class QFieldSync:
         """Show the QFieldCloud overview dialog."""
         dlg = CloudProjectsDialog(self.network_manager, self.iface.mainWindow())
         dlg.show()
-
-    def show_cloud_project_details_dialog(self):
-        """Show the QFieldCloud project details dialog."""
-        currently_open_project = (
-            self.network_manager.projects_cache.currently_open_project
-        )
-        dlg = CloudProjectsDialog(
-            self.network_manager, self.iface.mainWindow(), currently_open_project
-        )
-        dlg.show_project_form()
-
-    def sync_qfieldcloud_project(self):
-        """Synchronize the current QFieldCloud project"""
-        currently_open_project = (
-            self.network_manager.projects_cache.currently_open_project
-        )
-
-        if (
-            currently_open_project is None
-            or not self.network_manager.is_authenticated()
-        ):
-            self.show_cloud_overview_dialog()
-            return
-
-        dlg = CloudProjectsDialog(
-            self.network_manager,
-            self.iface.mainWindow(),
-            project=currently_open_project,
-        )
-        dlg.sync()
-
-    def action_start(self):
-        self.clear_last_action_warnings()
-
-    def clear_last_action_warnings(self):
-        self.last_action_warnings = []
 
     def push_dialog_finished(self):
         """
