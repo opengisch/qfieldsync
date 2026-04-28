@@ -541,9 +541,6 @@
              <layout class="QHBoxLayout" name="localDirHBoxLayout">
               <item>
                <widget class="QLineEdit" name="projectLocalDirValueLineEdit">
-                <property name="styleSheet">
-                 <string notr="true">[readOnly=&quot;true&quot;] {color: palette(shadow );}</string>
-                </property>
                 <property name="readOnly">
                  <bool>true</bool>
                 </property>
