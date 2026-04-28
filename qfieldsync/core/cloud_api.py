@@ -787,7 +787,7 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def cloud_put(
+    def cloud_put(  # dead: disable
         self, uri: Union[str, list[str]], payload: Optional[dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
@@ -1214,7 +1214,7 @@ class CloudProjectsCache(QObject):
         return self._projects
 
     @property
-    def error_reason(self) -> str:
+    def error_reason(self) -> str:  # dead: disable
         return self._error_reason
 
     @property

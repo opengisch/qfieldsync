@@ -52,10 +52,10 @@ class QFieldCloudItemProvider(QgsDataItemProvider):
     def name(self):
         return "QFieldCloudItemProvider"
 
-    def capabilities(self):
+    def capabilities(self):  # dead: disable
         return QgsDataProvider.DataCapability.Net
 
-    def createDataItem(self, _path, parent):  # noqa: N802
+    def createDataItem(self, _path, parent):  # noqa: N802  # dead: disable
         if not parent:
             root_item = QFieldCloudRootItem(self.network_manager)
             return root_item
@@ -82,10 +82,10 @@ class QFieldCloudRootItem(QgsDataCollectionItem):
             self._on_projects_updated
         )
 
-    def capabilities2(self):
+    def capabilities2(self):  # dead: disable
         return QgsDataItem.Capability.Fast
 
-    def createChildren(self):  # noqa: N802
+    def createChildren(self):  # noqa: N802  # dead: disable
         items = []
 
         if not self.network_manager.is_authenticated():
@@ -157,7 +157,7 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
         self.setIcon(QIcon(os.path.join(os.path.dirname(__file__), icon)))
         self.setSortKey(order)
 
-    def createChildren(self):  # noqa: N802
+    def createChildren(self):  # noqa: N802  # dead: disable
         items = []
 
         projects: list[CloudProject] = self.network_manager.projects_cache.projects
@@ -210,7 +210,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
     def name(self):
         return "QFieldCloudItemGuiProvider"
 
-    def populateContextMenu(self, item, menu, _selected_items, _context):  # noqa: N802
+    def populateContextMenu(self, item, menu, _selected_items, _context):  # noqa: N802  # dead: disable
         if type(item) is QFieldCloudProjectItem:
             project = self.network_manager.projects_cache.find_project(item.project_id)
             if project and project.local_dir:
@@ -255,7 +255,7 @@ class QFieldCloudItemGuiProvider(QgsDataItemGuiProvider):
             )
             refresh_action.triggered.connect(self._on_refresh_projects_action_triggered)
 
-    def handleDoubleClick(self, item, context):  # noqa: ARG002, N802
+    def handleDoubleClick(self, item, context):  # noqa: ARG002, N802  # dead: disable
         if type(item) is QFieldCloudProjectItem:
             if not self.open_project(item):
                 self.show_cloud_synchronize_dialog(item)
