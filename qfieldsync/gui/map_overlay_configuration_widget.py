@@ -58,6 +58,7 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
     def location_arrow_fill_color(self):
         if self.locationArrowFillColorButton.isNull():
             return ""
+
         return self.locationArrowFillColorButton.color().name(QColor.NameFormat.HexArgb)
 
     def set_location_arrow_fill_color(self, color_str):
@@ -69,6 +70,7 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
     def location_arrow_outline_color(self):
         if self.locationArrowOutlineColorButton.isNull():
             return ""
+
         return self.locationArrowOutlineColorButton.color().name(
             QColor.NameFormat.HexArgb
         )
@@ -88,11 +90,13 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
             index = self.locationArrowSizeComboBox.findData(
                 ProjectProperties.QFieldItemSize.NORMAL
             )
+
         self.locationArrowSizeComboBox.setCurrentIndex(index)
 
     def coordinate_cursor_fill_color(self):
         if self.coordinateCursorFillColorButton.isNull():
             return ""
+
         return self.coordinateCursorFillColorButton.color().name(
             QColor.NameFormat.HexArgb
         )
@@ -106,6 +110,7 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
     def coordinate_cursor_outline_color(self):
         if self.coordinateCursorOutlineColorButton.isNull():
             return ""
+
         return self.coordinateCursorOutlineColorButton.color().name(
             QColor.NameFormat.HexArgb
         )
@@ -125,4 +130,5 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
             index = self.coordinateCursorSizeComboBox.findData(
                 ProjectProperties.QFieldItemSize.NORMAL
             )
+
         self.coordinateCursorSizeComboBox.setCurrentIndex(index)
