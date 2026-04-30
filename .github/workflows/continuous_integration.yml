@@ -65,9 +65,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Test
+      - name: Run tests
         run: |
-          docker compose -f .docker/docker-compose.yml run qgis /usr/src/.docker/run-docker-tests.sh
+          docker build -f .docker/Dockerfile --build-arg QGIS_TEST_VERSION=$QGIS_TEST_VERSION -t qfieldsync-test .
+          docker run --rm qfieldsync-test .docker/xvfb-pytest
 
   release:
     runs-on: ubuntu-24.04

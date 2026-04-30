@@ -1,23 +1,33 @@
 ARG QGIS_TEST_VERSION=latest
 FROM  qgis/qgis:${QGIS_TEST_VERSION}
-MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-# In older QGIS images (e.g. release_3.22), the base image is no longer supported in the NodeJS repository.
-RUN rm -f /etc/apt/sources.list.d/nodesource.list
-
-RUN apt-get update \
-    && apt-get install -y python3-pip \
+RUN apt update \
+    && apt install -y \
+        glibc-tools \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./requirements.txt /tmp/
-
-# Upgrading `pip` fixes: "WARNING: Generating metadata for package libqfieldsync produced metadata for project name unknown. Fix your #egg=libqfieldsync fragments."
-# However, in QGIS>=3.38, this command fail as `pip` is Debian installed and protected, hence we have `|| true`.
-RUN pip3 install --upgrade pip || true
-
-# images for QGIS<=3.34 uses much older `pip` that does not support `--break-system-packages`
-RUN pip3 install -r /tmp/requirements.txt || pip3 install -r /tmp/requirements.txt --break-system-packages
+# Install uv from the official image, which is a lot faster than installing it with pip
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV LANG=C.UTF-8
 
-WORKDIR /
+# Add crashes dump to STDERR
+ENV LD_PRELOAD="/lib/x86_64-linux-gnu/libSegFault.so"
+ENV SEGFAULT_SIGNALS="abrt segv"
+ENV LIBC_FATAL_STDERR_=1
+
+# Set the virtual environment path to /venv,
+# so that it does not get overwritten when we copy the source code from host
+ENV UV_PROJECT_ENVIRONMENT=/venv
+
+WORKDIR /usr/src
+
+COPY requirements.txt /usr/src
+COPY pyproject.toml /usr/src
+
+RUN uv venv --system-site-packages
+RUN uv add -r /usr/src/requirements.txt
+
+COPY . /usr/src
+
+RUN rm -rf .venv

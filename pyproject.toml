@@ -114,3 +114,8 @@ exclude = [
     "**/qfieldsync/libqfieldsync/"
 ]
 select = ["CLB100", "IF100"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--ignore-glob=qfieldsync/setting_manager/*",
+]
