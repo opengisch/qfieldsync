@@ -16,16 +16,16 @@ on:
 jobs:
   code_check:
     name: Code check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+    - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v6
 
-      - uses: pre-commit/action@v3.0.1
-        env:
-          # set the `no-commit-to-branch` to be skipped, otherwise the check fails when we merge to `master` branch
-          SKIP: no-commit-to-branch
+    - uses: pre-commit/action@v3.0.1
+      env:
+        # set the `no-commit-to-branch` to be skipped, otherwise the check fails when we merge to `master` branch
+        SKIP: 'no-commit-to-branch'
 
   pyqt6-check:
     name: PyQt6 compatibility check
@@ -65,9 +65,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Test
+      - name: Run tests
         run: |
-          docker compose -f .docker/docker-compose.yml run qgis /usr/src/.docker/run-docker-tests.sh
+          docker build -f .docker/Dockerfile --build-arg QGIS_TEST_VERSION=$QGIS_TEST_VERSION -t qfieldsync-test .
+          docker run --rm qfieldsync-test .docker/xvfb-pytest
 
   release:
     runs-on: ubuntu-24.04
