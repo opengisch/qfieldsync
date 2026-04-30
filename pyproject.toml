@@ -1,6 +1,24 @@
-[tool.ruff]
-# Support Python 3.9+.
-target-version = "py39"
+[project]
+name = "qfieldsync"
+description = "QFieldSync is a QGIS plugin that assists the configuration of your QField project with or without QFieldCloud."
+version = "1.0"
+authors = [
+    { name = "OPENGIS.ch", email = "info@opengis.ch" }
+]
+requires-python = ">=3.7"
+
+[project.urls]
+homepage = "https://github.com/opengisch/qfieldsync"
+documentation = "https://docs.qfield.org/get-started/"
+repository = "https://github.com/opengisch/qfieldsync"
+tracker = "https://github.com/opengisch/qfieldsync/issues"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=2.21.0",
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -96,21 +114,3 @@ exclude = [
     "**/qfieldsync/libqfieldsync/"
 ]
 select = ["CLB100", "IF100"]
-
-[project]
-name = "qfieldsync"
-description = "QFieldSync is a QGIS plugin that assists the configuration of your QField project with or without QFieldCloud."
-version = "1.0"
-authors = [
-    { name = "OPENGIS.ch", email = "info@opengis.ch" }
-]
-requires-python = ">=3.7"
-
-[project.urls]
-homepage = "https://github.com/opengisch/qfieldsync"
-documentation = "https://docs.qfield.org/get-started/"
-repository = "https://github.com/opengisch/qfieldsync"
-tracker = "https://github.com/opengisch/qfieldsync/issues"
-
-[project.optional-dependencies]
-dev = ["pre-commit"]
