@@ -5,7 +5,7 @@ version = "1.0"
 authors = [
     { name = "OPENGIS.ch", email = "info@opengis.ch" }
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 
 [project.urls]
 homepage = "https://github.com/opengisch/qfieldsync"
