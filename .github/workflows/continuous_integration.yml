@@ -123,9 +123,17 @@ jobs:
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
           sudo pip install qgis-plugin-ci --break-system-packages
 
+      - name: Package libqfieldsync
+        run: |
+          pip wheel $(grep -o -P '(https://.*.tar.gz)' requirements.txt)
+          LIBQFIELDSYNC_COMMIT_SHA=$(echo $(grep -o -P '((https://github\.com/opengisch/libqfieldsync/.*.tar.gz))' requirements.txt) | grep -Eo '[0-9a-f]{40}')
+          mv libqfieldsync-*.whl qfieldsync/libqfieldsync_${LIBQFIELDSYNC_COMMIT_SHA}.whl
+
       - name: Release
         run: |
-          qgis-plugin-ci --no-validation package ${{ github.sha }}
+          LIBQFIELDSYNC_COMMIT_SHA=$(echo $(grep -o -P '((https://github\.com/opengisch/libqfieldsync/.*.tar.gz))' requirements.txt) | grep -Eo '[0-9a-f]{40}')
+          qgis-plugin-ci --no-validation package ${{ github.sha }} \
+              --asset-path qfieldsync/libqfieldsync_${LIBQFIELDSYNC_COMMIT_SHA}.whl
 
       - name: Unzip
         run: |
