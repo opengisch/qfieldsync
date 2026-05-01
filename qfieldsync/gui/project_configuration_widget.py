@@ -49,6 +49,9 @@ from qfieldsync.gui.image_stamping_configuration_widget import (
     ImageStampingConfigurationWidget,
 )
 from qfieldsync.gui.layers_config_widget import LayersConfigWidget
+from qfieldsync.gui.map_overlay_configuration_widget import (
+    MapOverlayConfigurationWidget,
+)
 from qfieldsync.gui.mapthemes_config_widget import MapThemesConfigWidget
 
 WidgetUi, _ = loadUiType(
@@ -113,6 +116,24 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.customizeImageStampingButton.clicked.connect(
             self.show_image_stamping_settings
         )
+
+        self.location_arrow_fill_color = (
+            self.__project_configuration.location_arrow_fill_color
+        )
+        self.location_arrow_outline_color = (
+            self.__project_configuration.location_arrow_outline_color
+        )
+        self.location_arrow_size = self.__project_configuration.location_arrow_size
+        self.coordinate_cursor_fill_color = (
+            self.__project_configuration.coordinate_cursor_fill_color
+        )
+        self.coordinate_cursor_outline_color = (
+            self.__project_configuration.coordinate_cursor_outline_color
+        )
+        self.coordinate_cursor_size = (
+            self.__project_configuration.coordinate_cursor_size
+        )
+        self.customizeMapOverlayButton.clicked.connect(self.show_map_overlay_settings)
 
         self.areaOfInterestExtentWidget = QgsExtentWidget(self)
         self.areaOfInterestExtentWidget.setToolTip(
@@ -505,6 +526,26 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
         self.__project_configuration.force_stamping = self.force_stamping
 
+        self._save_map_overlay_to_project()
+
+    def _save_map_overlay_to_project(self):
+        self.__project_configuration.location_arrow_fill_color = (
+            self.location_arrow_fill_color
+        )
+        self.__project_configuration.location_arrow_outline_color = (
+            self.location_arrow_outline_color
+        )
+        self.__project_configuration.location_arrow_size = self.location_arrow_size
+        self.__project_configuration.coordinate_cursor_fill_color = (
+            self.coordinate_cursor_fill_color
+        )
+        self.__project_configuration.coordinate_cursor_outline_color = (
+            self.coordinate_cursor_outline_color
+        )
+        self.__project_configuration.coordinate_cursor_size = (
+            self.coordinate_cursor_size
+        )
+
     def show_image_stamping_settings(self):
         self.image_stamping_panel = ImageStampingConfigurationWidget(self)
         self.image_stamping_panel.set_font_style(self.stamping_font_style)
@@ -540,3 +581,39 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             not self.singleLayerRadioButton.isChecked()
         )
         self.mapThemeComboBox.setVisible(not self.singleLayerRadioButton.isChecked())
+
+    def show_map_overlay_settings(self):
+        self.map_overlay_panel = MapOverlayConfigurationWidget(self)
+        self.map_overlay_panel.set_location_arrow_fill_color(
+            self.location_arrow_fill_color
+        )
+        self.map_overlay_panel.set_location_arrow_outline_color(
+            self.location_arrow_outline_color
+        )
+        self.map_overlay_panel.set_location_arrow_size(self.location_arrow_size)
+        self.map_overlay_panel.set_coordinate_cursor_fill_color(
+            self.coordinate_cursor_fill_color
+        )
+        self.map_overlay_panel.set_coordinate_cursor_outline_color(
+            self.coordinate_cursor_outline_color
+        )
+        self.map_overlay_panel.set_coordinate_cursor_size(self.coordinate_cursor_size)
+        self.map_overlay_panel.panelAccepted.connect(self.apply_map_overlay_settings)
+        self.openPanel(self.map_overlay_panel)
+
+    def apply_map_overlay_settings(self, _panel):
+        self.location_arrow_fill_color = (
+            self.map_overlay_panel.location_arrow_fill_color()
+        )
+        self.location_arrow_outline_color = (
+            self.map_overlay_panel.location_arrow_outline_color()
+        )
+        self.location_arrow_size = self.map_overlay_panel.location_arrow_size()
+        self.coordinate_cursor_fill_color = (
+            self.map_overlay_panel.coordinate_cursor_fill_color()
+        )
+        self.coordinate_cursor_outline_color = (
+            self.map_overlay_panel.coordinate_cursor_outline_color()
+        )
+        self.coordinate_cursor_size = self.map_overlay_panel.coordinate_cursor_size()
+        self.map_overlay_panel = None

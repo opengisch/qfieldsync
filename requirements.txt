@@ -7,4 +7,4 @@ future
 transifex-client
 
 # NOTE `libqfielsync` version should be defined in the `*.tar.gz` format, not `git+https://` to make `wheel` happy
-libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/74cbed1dbe02a450a6dde5a2b1a57fc72be093ce.tar.gz
+libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/6b5011c3eea85184717b2df120c16194bab1896d.tar.gz
