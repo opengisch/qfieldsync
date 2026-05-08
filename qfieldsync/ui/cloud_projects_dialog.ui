@@ -379,7 +379,7 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="4" column="0">
                <widget class="QLabel" name="projectOwnerLabel">
                 <property name="text">
                  <string>Owner</string>
@@ -387,36 +387,29 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <layout class="QHBoxLayout" name="projectFormButtonLayout">
-                <property name="leftMargin">
-                 <number>0</number>
+               <widget class="QLineEdit" name="projectNameLineEdit">
+                <property name="toolTip">
+                 <string>A valid project name consists of at least 3 characters, starting with a letter and containing nothing other than letters, digits, dashes and underscores</string>
                 </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <widget class="QLineEdit" name="projectNameLineEdit">
-                  <property name="toolTip">
-                   <string>A valid project name consists of at least 3 characters, starting with a letter and containing nothing other than letters, digits, dashes and underscores</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="projectIsPrivateCheckBox">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="text">
-                   <string>Private</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               </widget>
               </item>
               <item row="2" column="1">
                <widget class="QPlainTextEdit" name="projectDescriptionTextEdit"/>
               </item>
               <item row="3" column="1">
+               <widget class="QCheckBox" name="projectIsPublicCheckBox">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Is public</string>
+                </property>
+                <property name="toolTip">
+                 <string>Projects marked as public are visible to (but not editable by) anyone</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
                <widget class="QLineEdit" name="projectOwnerLineEdit">
                 <property name="enabled">
                  <bool>false</bool>
@@ -498,6 +491,13 @@
               <number>0</number>
              </property>
              <item>
+              <widget class="QPushButton" name="editOnlineButton">
+               <property name="text">
+                <string>Edit on QFieldCloud</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="projectFormButtonSpacer_2">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -509,13 +509,6 @@
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="editOnlineButton">
-               <property name="text">
-                <string>Edit on QFieldCloud</string>
-               </property>
-              </widget>
              </item>
              <item>
               <widget class="QPushButton" name="submitButton">
