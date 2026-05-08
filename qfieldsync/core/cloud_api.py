@@ -564,16 +564,11 @@ class CloudNetworkAccessManager(QObject):
             },
         )
 
-    def update_project(
-        self, project_id: str, name: str, description: str
-    ) -> QNetworkReply:
+    def update_project(self, project_id: str, details: dict) -> QNetworkReply:
         """Update an existing QFieldCloud project"""
         return self.cloud_patch(
             ["projects", project_id],
-            {
-                "name": name,
-                "description": description,
-            },
+            details,
         )
 
     def delete_project(self, project_id: str) -> QNetworkReply:
