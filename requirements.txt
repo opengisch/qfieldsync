@@ -1,2 +1,2 @@
 # NOTE `libqfielsync` version should be defined in the `*.tar.gz` format, not `git+https://` to make `wheel` happy
-libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/178fcc14fa4a3898b9ad2c01e620013e654a1af5.tar.gz
+libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/64cda3584f5de4bd210e3b1b307c9f76329dfbd3.tar.gz
