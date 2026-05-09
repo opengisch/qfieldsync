@@ -56,7 +56,6 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
 from qgis.PyQt.uic import loadUiType
 
-from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.dirs_to_copy_widget import DirsToCopyWidget
 
@@ -78,7 +77,6 @@ class PackageDialog(QDialog, DialogUi):
         self.iface = iface
         self.offliner = QgisCoreOffliner(offline_editing=offline_editing)
         self.project = project
-        self.qfield_preferences = Preferences()
         self.config = Config(self.project)
         self.dirsToCopyWidget = DirsToCopyWidget()
         self.button_box.button(QDialogButtonBox.StandardButton.Save).setText(
@@ -162,10 +160,11 @@ class PackageDialog(QDialog, DialogUi):
 
     def get_export_filename_suggestion(self) -> str:
         """Get the suggested export filename"""
-        export_dirname = self.qfield_preferences.value("exportDirectoryProject")
+        export_dirname = self.config.export_directory_project
+
         if not export_dirname:
             export_dirname = os.path.join(
-                self.qfield_preferences.value("exportDirectory"),
+                self.config.export_directory,
                 fileparts(QgsProject.instance().fileName())[1],
             )
 
@@ -238,9 +237,7 @@ class PackageDialog(QDialog, DialogUi):
         else:
             area_of_interest_crs = QgsProject.instance().crs().authid()
 
-        self.qfield_preferences.set_value(
-            "exportDirectoryProject", str(packaged_project_file.parent)
-        )
+        self.config.export_directory_project = str(packaged_project_file.parent)
         self.dirsToCopyWidget.save_settings()
 
         self._offline_convertor = OfflineConverter(
@@ -248,7 +245,7 @@ class PackageDialog(QDialog, DialogUi):
             packaged_project_file,
             area_of_interest,
             area_of_interest_crs,
-            self.qfield_preferences.value("attachmentDirs"),
+            self.config.attachment_dirs,
             self.offliner,
             ExportType.Cable,
             dirs_to_copy=self.dirsToCopyWidget.dirs_to_copy(),

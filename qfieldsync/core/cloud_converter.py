@@ -21,6 +21,7 @@
 from pathlib import Path
 
 from libqfieldsync.layer import LayerSource
+from libqfieldsync.project import Config
 from libqfieldsync.utils.file_utils import copy_attachments
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir, make_temp_qgis_file
 from qgis.core import QgsMapLayer, QgsProject, QgsVirtualLayerDefinition
@@ -28,7 +29,6 @@ from qgis.PyQt.QtCore import QCoreApplication, QObject, QUrl, pyqtSignal
 from qgis.utils import iface
 
 from qfieldsync.core.errors import QFieldSyncError
-from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qgis_utils import open_project
 
 
@@ -49,6 +49,7 @@ class CloudConverter(QObject):
         self.trUtf8 = self.tr
 
         self.export_dirname = Path(export_dirname)
+        self.config = Config(QgsProject.instance())
 
     def convert(self) -> None:  # noqa: PLR0912, PLR0915
         """Convert the project to a cloud project."""
@@ -138,7 +139,7 @@ class CloudConverter(QObject):
                 )
 
             # export the DCIM folder
-            for attachment_dir in Preferences().value("attachmentDirs"):
+            for attachment_dir in self.config.attachment_dirs:
                 copy_attachments(
                     Path(original_project_path).parent,
                     project_path.parent,

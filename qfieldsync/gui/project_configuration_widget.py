@@ -371,8 +371,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
         self.directoriesConfigurationWidget.reload(
             {
-                "attachment_dirs": [*self.preferences.value("attachmentDirs")],
-                "data_dirs": [*self.preferences.value("dataDirs")],
+                "attachment_dirs": [*self.__project_configuration.attachment_dirs],
+                "data_dirs": [*self.__project_configuration.data_dirs],
             }
         )
 
@@ -499,8 +499,8 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
 
         configuration = self.directoriesConfigurationWidget.create_configuration()
-        self.preferences.set_value("attachmentDirs", configuration["attachment_dirs"])
-        self.preferences.set_value("dataDirs", configuration["data_dirs"])
+        self.__project_configuration.attachment_dirs = configuration["attachment_dirs"]
+        self.__project_configuration.data_dirs = configuration["data_dirs"]
 
         self.__project_configuration.map_themes_active_layer = (
             self.mapThemesConfigWidget.create_configuration()

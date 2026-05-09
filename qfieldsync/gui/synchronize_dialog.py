@@ -59,6 +59,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         super().__init__(parent=parent)
         self.setupUi(self)
         self.iface = iface
+        self.config = Config(QgsProject.instance())
         self.preferences = Preferences()
         self.offline_editing = offline_editing
         self.dirsToCopyWidget = DirsToCopyWidget()
@@ -71,7 +72,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         self.button_box.button(QDialogButtonBox.StandardButton.Save).clicked.connect(
             lambda: self.start_synchronization()
         )
-        import_dir = self.preferences.value("importDirectoryProject")
+        import_dir = self.config.import_directory_project
         if not import_dir:
             import_dir = self.preferences.value("importDirectory")
 
@@ -91,7 +92,7 @@ class SynchronizeDialog(QDialog, DialogUi):
         current_path = Path(project.fileName())
         qfield_project_str_path = self.qfieldDir.text()
         qfield_path = Path(qfield_project_str_path)
-        self.preferences.set_value("importDirectoryProject", str(qfield_path))
+        self.config.import_directory_project = str(qfield_path)
         self.dirsToCopyWidget.save_settings()
         backup_project_path = make_temp_qgis_file(project)
 
@@ -158,7 +159,7 @@ class SynchronizeDialog(QDialog, DialogUi):
             if original_path.exists() and open_project(
                 str(original_path), backup_project_path
             ):
-                import_dirs_to_copy = self.dirsToCopyWidget.load_settings()
+                import_dirs_to_copy = self.config.dirs_to_copy
 
                 # use the import dirs to copy selection if available, otherwise keep the old behavior
                 if import_dirs_to_copy:
@@ -172,7 +173,7 @@ class SynchronizeDialog(QDialog, DialogUi):
                             path,
                         )
                 else:
-                    for attachment_dir in self.preferences.value("attachmentDirs"):
+                    for attachment_dir in self.config.attachment_dirs:
                         copy_attachments(
                             qfield_path,
                             original_path.parent,

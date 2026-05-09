@@ -65,7 +65,7 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
         if not self.path.is_dir():
             return
 
-        dirs_to_copy = self.load_settings()
+        dirs_to_copy = self.config.dirs_to_copy
 
         self.dirsTreeWidget.clear()
 
@@ -74,7 +74,7 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
             str_path = str(relative_path)
 
             # TODO @suricactus: decide whether or not to take into account the attachment_dirs into account
-            # attachment_dirs = self.preferences.value("attachmentDirs") # TODO @suricactus: move this in the outer scope
+            # attachment_dirs = self.config.attachment_dirs # TODO @suricactus: move this in the outer scope
             # matches = False
 
             # for attachment_dir in attachment_dirs:
@@ -138,11 +138,8 @@ class DirsToCopyWidget(QWidget, LayersConfigWidgetUi):
         is_enabled = bool(self.path and self.path.is_dir())
         self.refreshButton.setEnabled(is_enabled)
 
-    def load_settings(self) -> DirsToCopySettings:
-        return self.preferences.value("dirsToCopy")
-
     def save_settings(self) -> None:
-        self.preferences.set_value("dirsToCopy", self.dirs_to_copy())
+        self.config.dirs_to_copy = self.dirs_to_copy()
 
     def _set_checked_state_recursively(self, checked: bool) -> None:
         def set_checked_state(item: QTreeWidgetItem) -> None:
