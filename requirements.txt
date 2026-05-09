@@ -1,9 +1,2 @@
-flake8==2.5.5
-pep8-naming
-flake8-respect-noqa
-pytest
-future
-transifex-client
-
 # NOTE `libqfielsync` version should be defined in the `*.tar.gz` format, not `git+https://` to make `wheel` happy
 libqfieldsync @ https://github.com/opengisch/libqfieldsync/archive/6b5011c3eea85184717b2df120c16194bab1896d.tar.gz
