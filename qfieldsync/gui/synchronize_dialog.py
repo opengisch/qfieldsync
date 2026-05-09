@@ -24,7 +24,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from libqfieldsync.project import ProjectConfiguration
+from libqfieldsync.project import ProjectConfig
 from libqfieldsync.utils.exceptions import NoProjectFoundError
 from libqfieldsync.utils.file_utils import (
     copy_attachments,
@@ -121,7 +121,7 @@ class SynchronizeDialog(QDialog, DialogUi):
             except Exception:
                 self.offline_editing.synchronize()
 
-            project_config = ProjectConfiguration(QgsProject.instance())
+            project_config = ProjectConfig(QgsProject.instance())
             original_path = Path(project_config.original_project_path or "")
 
             if not original_path.exists():
@@ -181,7 +181,7 @@ class SynchronizeDialog(QDialog, DialogUi):
 
                 # save the data_file_checksum to the project and save it
                 imported_files_checksums.append(import_file_checksum(str(qfield_path)))
-                ProjectConfiguration(
+                ProjectConfig(
                     QgsProject.instance()
                 ).imported_files_checksums = imported_files_checksums
                 QgsProject.instance().write()

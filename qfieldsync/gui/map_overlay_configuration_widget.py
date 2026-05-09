@@ -1,6 +1,6 @@
 import os
 
-from libqfieldsync.project import ProjectProperties
+from libqfieldsync.project import QFieldItemSize
 from qgis.gui import QgsPanelWidget
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.uic import loadUiType
@@ -21,10 +21,10 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.setPanelTitle(self.tr("Map Overlay Elements"))
 
         size_options = [
-            (self.tr("Tiny"), ProjectProperties.QFieldItemSize.TINY),
-            (self.tr("Normal"), ProjectProperties.QFieldItemSize.NORMAL),
-            (self.tr("Big"), ProjectProperties.QFieldItemSize.BIG),
-            (self.tr("Biggest"), ProjectProperties.QFieldItemSize.BIGGEST),
+            (self.tr("Tiny"), QFieldItemSize.TINY),
+            (self.tr("Normal"), QFieldItemSize.NORMAL),
+            (self.tr("Big"), QFieldItemSize.BIG),
+            (self.tr("Biggest"), QFieldItemSize.BIGGEST),
         ]
 
         for label, value in size_options:
@@ -87,9 +87,7 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
     def set_location_arrow_size(self, size):
         index = self.locationArrowSizeComboBox.findData(size)
         if index == -1:
-            index = self.locationArrowSizeComboBox.findData(
-                ProjectProperties.QFieldItemSize.NORMAL
-            )
+            index = self.locationArrowSizeComboBox.findData(QFieldItemSize.NORMAL)
 
         self.locationArrowSizeComboBox.setCurrentIndex(index)
 
@@ -127,8 +125,6 @@ class MapOverlayConfigurationWidget(WidgetUi, QgsPanelWidget):
     def set_coordinate_cursor_size(self, size):
         index = self.coordinateCursorSizeComboBox.findData(size)
         if index == -1:
-            index = self.coordinateCursorSizeComboBox.findData(
-                ProjectProperties.QFieldItemSize.NORMAL
-            )
+            index = self.coordinateCursorSizeComboBox.findData(QFieldItemSize.NORMAL)
 
         self.coordinateCursorSizeComboBox.setCurrentIndex(index)
