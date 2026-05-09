@@ -17,7 +17,7 @@
  ***************************************************************************/
 """
 
-from libqfieldsync.project import ProjectConfiguration
+from libqfieldsync.project import Config
 from libqfieldsync.utils.file_utils import get_project_in_folder
 from libqfieldsync.utils.qgis import open_project
 from qgis.core import QgsProject
@@ -27,6 +27,6 @@ def import_checksums_of_project(dirname: str) -> list[str]:
     project = QgsProject.instance()
     qgs_file = get_project_in_folder(dirname)
     open_project(qgs_file)
-    original_project_path = ProjectConfiguration(project).original_project_path
+    original_project_path = Config(project).original_project_path
     open_project(original_project_path)
-    return ProjectConfiguration(project).imported_files_checksums
+    return Config(project).imported_files_checksums
