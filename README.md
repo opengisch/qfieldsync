@@ -71,3 +71,18 @@ Make sure each new feature or bug fix are in a separate PR.
 QFieldSync stores the respective `libqfieldsync` commit SHA in the bottom of [`requirements.txt`](https://github.com/opengisch/qfieldsync/blob/master/requirements.txt#L9-L10).
 Sometimes changes in QFieldSync require modifications in [`libqfieldsync`](https://github.com/opengisch/libqfieldsync/).
 In these cases please update the commit sha of `libqfieldsync` to point to the respective commit on `libqfieldsync`'s master branch.
+
+
+## Testing
+
+Run local tests (assuming a QGIS installed on host):
+
+```shell
+uv run pytest
+```
+
+If you want to test with a specific QGIS version, or you don't have QGIS installed, then:
+
+```shell
+docker run --rm $(docker build --build-arg QGIS_TEST_VERSION=ltr -q -f .docker/Dockerfile .) .docker/xvfb-pytest
+```
