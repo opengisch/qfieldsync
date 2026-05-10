@@ -189,7 +189,7 @@ class QFieldCloudProjectItem(QgsDataItem):
         super().__init__(
             QgsDataItem.Type.Collection,
             parent,
-            project.name,
+            f"{project.owner}/{project.name}",
             "/QFieldCloud/project/" + project.id,
         )
         self.project_id = project.id
