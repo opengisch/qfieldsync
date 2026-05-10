@@ -34,15 +34,10 @@ from qgis.PyQt.QtCore import (
     pyqtSignal,
 )
 from qgis.PyQt.QtGui import (
-    QBrush,
     QColor,
     QDesktopServices,
-    QFont,
     QIcon,
-    QPainter,
     QPalette,
-    QPen,
-    QPixmap,
     QRegularExpressionValidator,
     QValidator,
 )
@@ -59,7 +54,6 @@ from qgis.PyQt.QtWidgets import (
     QMenu,
     QMessageBox,
     QPushButton,
-    QTableWidgetItem,
     QToolButton,
     QTreeWidgetItem,
     QWidget,
@@ -73,11 +67,11 @@ from qfieldsync.core.cloud_transferrer import FileTransfer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
+from qfieldsync.gui.cloud_projects_model import CloudProjectsModel
 from qfieldsync.gui.cloud_transfer_dialog import CloudTransferDialog
 from qfieldsync.utils.cloud_utils import (
     LocalDirFeedback,
     closure,
-    get_cloud_project_status_color,
     local_dir_feedback,
 )
 from qfieldsync.utils.permissions import can_delete_project, can_update_project
@@ -153,8 +147,12 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.projectsSearch.textChanged.connect(self.filter_projects_search)
 
-        self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() * 0.75))
-        self.projectsTable.setColumnWidth(1, int(self.projectsTable.width() * 0.2))
+        self.cloud_projects_model = CloudProjectsModel(self.network_manager, self)
+        self.cloud_projects_model.set_include_public(False)
+        self.cloud_projects_model.refreshed.connect(
+            lambda: self.on_cloud_projects_model_refreshed()
+        )
+        self.projectsTable.setModel(self.cloud_projects_model)
 
         self.synchronizeButton.clicked.connect(
             lambda: self.on_project_sync_button_clicked()
@@ -213,7 +211,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.backButton.clicked.connect(lambda: self.on_back_button_clicked())
         self.submitButton.clicked.connect(lambda: self.on_submit_button_clicked())
         self.editOnlineButton.clicked.connect(self.on_edit_online_button_clicked)
-        self.projectsTable.cellDoubleClicked.connect(
+        self.projectsTable.doubleClicked.connect(
             lambda: self.on_projects_table_cell_double_clicked()
         )
 
@@ -323,6 +321,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.update_welcome_label()
         self.createButton.setEnabled(True)
         self.set_variable_cloud_username()
+
+    def on_cloud_projects_model_refreshed(self) -> None:
+        self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() * 0.75))
+        self.projectsTable.setColumnWidth(1, int(self.projectsTable.width() * 0.25))
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)
@@ -563,23 +565,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def filter_projects_search(self) -> None:
         filter_text = self.projectsSearch.text().lower()
-        for row in range(self.projectsTable.rowCount()):
-            if filter_text:
-                item = self.projectsTable.item(row, 0)
-                cloud_project = item.data(Qt.ItemDataRole.UserRole)
-                cloud_project_is_visible = (
-                    filter_text in cloud_project.name.lower()
-                    or filter_text in cloud_project.owner.lower()
-                )
-                self.projectsTable.setRowHidden(row, not cloud_project_is_visible)
-            else:
-                self.projectsTable.setRowHidden(row, False)
+        self.cloud_projects_model.set_filter_string(filter_text)
 
     def show_projects(self) -> None:
         self.set_feedback(None)
-
-        self.projectsTable.setRowCount(0)
-        self.projectsTable.setSortingEnabled(False)
 
         if self.network_manager.projects_cache.projects is None:
             self.network_manager.projects_cache.refresh()
@@ -596,64 +585,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.projectsTable.setEnabled(True)
 
-        for cloud_project in self.network_manager.projects_cache.projects:
-            if (
-                self.projectsType.currentIndex() != 1
-                and cloud_project.user_role_origin == "public"
-            ) or (
-                self.projectsType.currentIndex() == 1
-                and cloud_project.user_role_origin != "public"
-            ):
-                continue
-
-            count = self.projectsTable.rowCount()
-            self.projectsTable.insertRow(count)
-
-            item = QTableWidgetItem(cloud_project.name)
-
-            color = get_cloud_project_status_color(cloud_project)
-
-            pm = QPixmap(40, 20)
-            pm.fill(Qt.GlobalColor.transparent)
-            painter = QPainter(pm)
-            painter.setPen(QPen(color, 8, Qt.PenStyle.SolidLine))
-            painter.setBrush(QBrush(color, Qt.BrushStyle.SolidPattern))
-            painter.drawEllipse(30, 10, 5, 5)
-            if cloud_project.local_dir:
-                project_icon = "../resources/cloud_project.svg"
-            else:
-                project_icon = "../resources/cloud_project_remote.svg"
-
-            icon = QIcon(str(Path(__file__).parent.joinpath(project_icon)))
-            painter.drawPixmap(0, 0, icon.pixmap(pm.size()))
-            del painter
-
-            item.setData(Qt.ItemDataRole.UserRole, cloud_project)
-            item.setData(Qt.ItemDataRole.EditRole, cloud_project.name)
-            item.setData(
-                Qt.ItemDataRole.DecorationRole,
-                pm,
-            )
-
-            tooltip = self.tr("Cloud status: {}. \nLocal status: ").format(
-                cloud_project.status
-            )
-
-            if bool(cloud_project.local_dir):
-                tooltip += self.tr('Project stored at "{}".').format(
-                    str(cloud_project.local_dir)
-                )
-            else:
-                tooltip += self.tr("No local dir configured.")
-
-            item.setToolTip(tooltip)
-
-            self.projectsTable.setItem(count, 0, item)
-            self.projectsTable.setItem(count, 1, QTableWidgetItem(cloud_project.owner))
-
-        self.projectsTable.sortByColumn(1, Qt.SortOrder.AscendingOrder)
-        self.projectsTable.sortByColumn(0, Qt.SortOrder.AscendingOrder)
-        self.projectsTable.setSortingEnabled(True)
         self.filter_projects_search()
         self.update_project_table_selection()
 
@@ -1070,35 +1001,23 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             # self.convertButton.setEnabled(True)
 
     def update_project_table_selection(self) -> None:
-        font = QFont()
-
-        for row_idx in range(self.projectsTable.rowCount()):
-            cloud_project: CloudProject = self.projectsTable.item(row_idx, 0).data(
-                Qt.ItemDataRole.UserRole
+        for row_idx in range(self.projectsTable.model().rowCount()):
+            idx = self.projectsTable.model().index(row_idx, 0)
+            cloud_project: CloudProject = self.projectsTable.model().data(
+                idx, Qt.ItemDataRole.UserRole
             )
-            is_currently_open_project = (
-                cloud_project
-                == self.network_manager.projects_cache.currently_open_project
-            )
-
-            font.setBold(is_currently_open_project)
-
-            self.projectsTable.item(row_idx, 0).setFont(font)
-            self.projectsTable.item(row_idx, 1).setFont(font)
 
             if (
                 self.current_cloud_project is None
                 and self._current_cloud_project_id == cloud_project.id
             ) or cloud_project == self.current_cloud_project:
-                index = self.projectsTable.model().index(row_idx, 0)
-                self.projectsTable.setCurrentIndex(index)
                 self.projectsTable.selectionModel().select(
-                    index,
+                    idx,
                     QItemSelectionModel.SelectionFlag.ClearAndSelect
                     | QItemSelectionModel.SelectionFlag.Rows,
                 )
-                self.projectsTable.scrollToItem(
-                    self.projectsTable.item(row_idx, 0),
+                self.projectsTable.scrollTo(
+                    idx,
                     QAbstractItemView.ScrollHint.EnsureVisible,
                 )
 
@@ -1120,9 +1039,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_projects_table_selection_changed(self) -> None:
         if self.projectsTable.selectionModel().hasSelection():
-            row_idx = self.projectsTable.currentRow()
-            self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(
-                Qt.ItemDataRole.UserRole
+            idx = self.projectsTable.model().index(
+                self.projectsTable.selectionModel().currentIndex().row(), 0
+            )
+            self.current_cloud_project = self.projectsTable.model().data(
+                idx, Qt.ItemDataRole.UserRole
             )
 
         self.update_project_buttons()
@@ -1133,9 +1054,11 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         can_delete_selected_project = False
         if self.projectsTable.selectionModel().hasSelection():
             has_selection = True
-            row_idx = self.projectsTable.currentRow()
-            self.current_cloud_project = self.projectsTable.item(row_idx, 0).data(
-                Qt.ItemDataRole.UserRole
+            idx = self.projectsTable.model().index(
+                self.projectsTable.selectionModel().currentIndex().row(), 0
+            )
+            self.current_cloud_project = self.projectsTable.model().data(
+                idx, Qt.ItemDataRole.UserRole
             )
             assert self.current_cloud_project
 
@@ -1215,7 +1138,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog = None
 
     def _on_logout_success(self) -> None:
-        self.projectsTable.setRowCount(0)
         self.remove_variable_cloud_username()
 
         self.close()

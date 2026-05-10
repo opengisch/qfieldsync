@@ -139,7 +139,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTableWidget" name="projectsTable">
+        <widget class="QTableView" name="projectsTable">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -167,16 +167,6 @@
          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
           <bool>true</bool>
          </attribute>
-         <column>
-          <property name="text">
-           <string>Name</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Owner</string>
-          </property>
-         </column>
         </widget>
        </item>
        <item>
