@@ -110,10 +110,6 @@ class PackageDialog(QDialog, DialogUi):
 
         self.rejected.connect(self.cancel)
 
-    def update_progress(self, sent, total):
-        progress = float(sent) / total * 100
-        self.progress_bar.setValue(progress)
-
     def cancel(self) -> None:
         """
         Cancels an ongoing packaging export, if there is any running.

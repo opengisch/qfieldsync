@@ -113,10 +113,6 @@ class ProjectFile:
         return self._data.get("size")
 
     @property
-    def sha256(self) -> Optional[str]:
-        return self._data.get("sha256")
-
-    @property
     def etag(self) -> Optional[str]:
         # NOTE the etag is actually stored in the `md5sum` key by mistake
         return self._data.get("md5sum")
@@ -238,18 +234,6 @@ class CloudProject:
 
         if "cloud_files" in new_data or "local_dir" in new_data or not self._files:
             self.refresh_files()
-
-    @staticmethod
-    def get_cloud_project_id(path: str) -> Optional[str]:
-        project_local_dirs: dict[str, str] = Preferences().value(
-            "qfieldCloudProjectLocalDirs"
-        )
-
-        for project_id, project_path in project_local_dirs.items():
-            if project_path == path:
-                return project_id
-
-        return None
 
     @property
     def id(self) -> str:

@@ -1044,35 +1044,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         arrow_widget.findChild(QLabel, "cloud").setPixmap(make_pixmap(cloud_icon))
         item.setText(4, detail)
 
-    def _on_offline_converter_total_progress_updated(
-        self, current: int, total: int, message: str
-    ) -> None:
-        self.totalProgressBar.setMaximum(total)
-        self.totalProgressBar.setValue(current)
-        self.statusLabel.setText(message)
-
-    def _on_offline_converter_task_progress_updated(
-        self, progress: int, total: int
-    ) -> None:
-        self.layerProgressBar.setMaximum(total)
-        self.layerProgressBar.setValue(progress)
-
-    def on_offline_editing_progress_stopped(self) -> None:
-        self.offline_editing_done = True
-
-    def on_offline_editing_layer_progress_updated(
-        self, progress: int, total: int
-    ) -> None:
-        self.totalProgressBar.setMaximum(total)
-        self.totalProgressBar.setValue(progress)
-
-    def on_offline_editing_progress_mode_set(self, _, total: int) -> None:
-        self.layerProgressBar.setMaximum(total)
-        self.layerProgressBar.setValue(0)
-
-    def on_offline_editing_progress_updated(self, progress: int) -> None:
-        self.layerProgressBar.setValue(progress)
-
     def _on_prefer_none_button_clicked(self) -> None:
         # NOTE: LocalAndCloud is used to make neither checkbox checked. Don't use Deleted, as it might be added as a checkbox later.
         self._file_tree_set_checkboxes(ProjectFileCheckout.LocalAndCloud)
@@ -1119,7 +1090,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             pass
 
     def show_progress_page(self, files: dict[str, list[ProjectFile]]) -> None:  # noqa: PLR0912, PLR0915
-        total_delete_count = 0
         local_delete_count = 0
         cloud_delete_count = 0
         download_count = len(files["to_download"])
@@ -1127,8 +1097,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         localized_datasets_upload_count = len(files["localized_datasets_to_upload"])
 
         for f in files["to_delete"]:
-            total_delete_count += 1  # noqa: SIM113
-
             if f.checkout & ProjectFileCheckout.Local:
                 local_delete_count += 1
             elif f.checkout & ProjectFileCheckout.Local:

@@ -43,13 +43,13 @@ class MapLayerConfigWidgetFactory(QgsMapLayerConfigWidgetFactory):
     def __init__(self, title, icon):
         super().__init__(title, icon)
 
-    def createWidget(self, layer, canvas, _dock_widget, parent):  # noqa: N802
+    def createWidget(self, layer, canvas, _dock_widget, parent):  # noqa: N802  # dead: disable
         return MapLayerConfigWidget(layer, canvas, parent)
 
-    def supportsLayer(self, layer):  # noqa: N802
+    def supportsLayer(self, layer):  # noqa: N802  # dead: disable
         return LayerSource(layer).is_supported
 
-    def supportLayerPropertiesDialog(self):  # noqa: N802
+    def supportLayerPropertiesDialog(self):  # noqa: N802  # dead: disable
         return True
 
 

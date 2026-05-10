@@ -356,17 +356,6 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             self.tr("Obtaining project files list failed: {}").format(error)
         )
 
-    def on_project_files_toggle_expand_button_clicked(self) -> None:
-        should_expand = not self.projectFilesTree.topLevelItem(0).data(
-            1, Qt.ItemDataRole.UserRole
-        )
-        self.projectFilesTree.topLevelItem(0).setData(
-            1, Qt.ItemDataRole.UserRole, should_expand
-        )
-
-        for idx in range(self.projectFilesTree.topLevelItemCount()):
-            self.expand_state(self.projectFilesTree.topLevelItem(idx), should_expand)
-
     def expand_state(self, item: QTreeWidgetItem, should_expand: bool) -> None:
         item.setExpanded(should_expand)
 
