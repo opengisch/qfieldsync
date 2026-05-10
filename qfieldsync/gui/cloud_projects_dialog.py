@@ -325,6 +325,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_cloud_projects_model_refreshed(self) -> None:
         self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() * 0.75))
         self.projectsTable.setColumnWidth(1, int(self.projectsTable.width() * 0.25))
+        self.projectsTable.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
     def on_projects_cached_projects_started(self) -> None:
         self.projectsStack.setEnabled(False)

@@ -63,6 +63,7 @@ class CloudProjectsModel(QSortFilterProxyModel):
         self.filter_string = ""
 
         self.setDynamicSortFilter(True)
+        self.setSortCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
     def set_include_public(self, include_public: bool) -> None:
         if self.include_public == include_public:
