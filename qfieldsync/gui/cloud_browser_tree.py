@@ -172,8 +172,8 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
             projects = self.network_manager.projects_cache.projects
 
         for project in self.network_manager.projects_cache.projects:
-            if (self.project_type == "public" and not project.is_private) or (
-                self.project_type == "private" and project.is_private
+            if (self.project_type == "public" and project.is_public) or (
+                self.project_type == "private" and not project.is_public
             ):
                 item = QFieldCloudProjectItem(self, project)
                 item.setState(QgsDataItem.State.Populated)

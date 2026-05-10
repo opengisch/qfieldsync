@@ -80,7 +80,7 @@ from qfieldsync.utils.cloud_utils import (
     get_cloud_project_status_color,
     local_dir_feedback,
 )
-from qfieldsync.utils.permissions import can_delete_project
+from qfieldsync.utils.permissions import can_delete_project, can_update_project
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
 CloudProjectsDialogUi, _ = loadUiType(
@@ -883,12 +883,25 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.projectTabs.setTabEnabled(1, True)
         self.projectTabs.setTabEnabled(2, True)
+
         self.projectNameLineEdit.setText(self.current_cloud_project.name)
+        self.projectNameLineEdit.setReadOnly(
+            not can_update_project(self.current_cloud_project)
+        )
         self.projectDescriptionTextEdit.setPlainText(
             self.current_cloud_project.description
         )
-        self.projectIsPrivateCheckBox.setChecked(self.current_cloud_project.is_private)
+        self.projectDescriptionTextEdit.setReadOnly(
+            not can_update_project(self.current_cloud_project)
+        )
+
+        self.projectIsPublicCheckBox.setChecked(self.current_cloud_project.is_public)
+        self.projectIsPublicCheckBox.setEnabled(
+            can_update_project(self.current_cloud_project)
+        )
+
         self.projectOwnerLineEdit.setText(self.current_cloud_project.owner)
+
         self.localDirLineEdit.setText(self.current_cloud_project.local_dir or "")
         self.projectUrlLabelValue.setText(
             '<a href="{url}">{url}</a>'.format(
@@ -933,16 +946,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         assert self.current_cloud_project
 
         should_update_online = False
-        if (
-            self.current_cloud_project.name != self.projectNameLineEdit.text()
-            or self.current_cloud_project.description
-            != self.projectDescriptionTextEdit.toPlainText()
-        ):
-            cloud_project_data = {
-                "name": self.projectNameLineEdit.text(),
-                "description": self.projectDescriptionTextEdit.toPlainText(),
-            }
+        cloud_project_data = {}
 
+        if (
+            not self.projectNameLineEdit.isReadOnly()
+            and self.current_cloud_project.name != self.projectNameLineEdit.text()
+        ):
+            cloud_project_data["name"] = self.projectNameLineEdit.text()
             if (
                 self.projectNameLineEdit.validator().validate(
                     cloud_project_data["name"], 0
@@ -953,19 +963,35 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     None,
                     self.tr("Invalid project name"),
                     self.tr(
-                        "You cannot create a new project without setting a valid name first."
+                        "Your project name is invalid, please ensure the name is unique and only contains accepted characters."
                     ),
                 )
                 return
 
+        if (
+            not self.projectDescriptionTextEdit.isReadOnly()
+            and self.current_cloud_project.description
+            != self.projectDescriptionTextEdit.toPlainText()
+        ):
+            cloud_project_data["description"] = (
+                self.projectDescriptionTextEdit.toPlainText()
+            )
+
+        if (
+            self.projectIsPublicCheckBox.isEnabled()
+            and self.current_cloud_project.is_public
+            != self.projectIsPublicCheckBox.isChecked()
+        ):
+            cloud_project_data["is_public"] = self.projectIsPublicCheckBox.isChecked()
+
+        if cloud_project_data:
             self.projectsFormPage.setEnabled(False)
 
             self.set_feedback(self.tr("Updating project…"))
 
             reply = self.network_manager.update_project(
                 self.current_cloud_project.id,
-                cloud_project_data["name"],
-                cloud_project_data["description"],
+                cloud_project_data,
             )
             reply.finished.connect(lambda: self.on_update_project_finished(reply))
 

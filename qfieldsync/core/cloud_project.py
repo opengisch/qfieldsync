@@ -252,8 +252,8 @@ class CloudProject:
         return self._data["description"]
 
     @property
-    def is_private(self) -> bool:
-        return self._data["private"]
+    def is_public(self) -> bool:
+        return self._data["is_public"]
 
     @property
     def created_at(self) -> str:
