@@ -29,7 +29,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, TypedDict, Union
 
-from qgis.PyQt.QtCore import QObject
+from qgis.PyQt.QtCore import QCoreApplication
 
 # OneDrive Files On-Demand file attributes (Windows)
 _FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
@@ -301,6 +301,10 @@ def rmtree_onedrive_safe(
     )
 
 
+def tr(text: str) -> str:
+    return QCoreApplication.translate("file_utils", text)
+
+
 def filesizeformat10(bytes_: int) -> str:
     """
     Format the value like a 'human-readable' file size (i.e. 13 KB, 4.1 MB,
@@ -309,7 +313,7 @@ def filesizeformat10(bytes_: int) -> str:
     try:
         bytes_ = int(bytes_)
     except (TypeError, ValueError, UnicodeDecodeError):
-        return QObject.tr("%n byte(s)", "", 0)
+        return tr("%n byte(s)", "", 0)
 
     KB = 10**3  # noqa: N806
     MB = 10**6  # noqa: N806
@@ -322,17 +326,17 @@ def filesizeformat10(bytes_: int) -> str:
         bytes_ = -bytes_  # Allow formatting of negative numbers.
 
     if bytes_ < KB:
-        value = QObject.tr("%n byte(s)", "", bytes_)
+        value = tr("%n byte(s)", "", bytes_)
     elif bytes_ < MB:
-        value = QObject.tr("{} KB").format(round(bytes_ / KB, 1))
+        value = tr("{} KB").format(round(bytes_ / KB, 1))
     elif bytes_ < GB:
-        value = QObject.tr("{} MB").format(round(bytes_ / MB, 1))
+        value = tr("{} MB").format(round(bytes_ / MB, 1))
     elif bytes_ < TB:
-        value = QObject.tr("{} GB").format(round(bytes_ / GB, 1))
+        value = tr("{} GB").format(round(bytes_ / GB, 1))
     elif bytes_ < PB:
-        value = QObject.tr("{} TB").format(round(bytes_ / TB, 1))
+        value = tr("{} TB").format(round(bytes_ / TB, 1))
     else:
-        value = QObject.tr("{} PB").format(round(bytes_ / PB, 1))
+        value = tr("{} PB").format(round(bytes_ / PB, 1))
 
     if negative:
         value = "-{}".format(value)
