@@ -46,7 +46,7 @@ except ModuleNotFoundError:
         ),
     )
 
-from libqfieldsync.project import ProjectConfiguration
+from libqfieldsync.project import Config
 from libqfieldsync.project_checker import ProjectChecker
 from libqfieldsync.utils.file_utils import fileparts
 from libqfieldsync.utils.qgis import get_project_title
@@ -79,8 +79,8 @@ class PackageDialog(QDialog, DialogUi):
         self.offliner = QgisCoreOffliner(offline_editing=offline_editing)
         self.project = project
         self.qfield_preferences = Preferences()
+        self.config = Config(self.project)
         self.dirsToCopyWidget = DirsToCopyWidget()
-        self.__project_configuration = ProjectConfiguration(self.project)
         self.button_box.button(QDialogButtonBox.StandardButton.Save).setText(
             self.tr("Create")
         )
@@ -228,13 +228,13 @@ class PackageDialog(QDialog, DialogUi):
 
         self.button_box.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
 
-        if self.__project_configuration.area_of_interest:
-            area_of_interest = self.__project_configuration.area_of_interest
+        if self.config.area_of_interest:
+            area_of_interest = self.config.area_of_interest
         else:
             area_of_interest = self.iface.mapCanvas().extent().asWktPolygon()
 
-        if self.__project_configuration.area_of_interest_crs:
-            area_of_interest_crs = self.__project_configuration.area_of_interest_crs
+        if self.config.area_of_interest_crs:
+            area_of_interest_crs = self.config.area_of_interest_crs
         else:
             area_of_interest_crs = QgsProject.instance().crs().authid()
 
