@@ -154,6 +154,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         )
         self.projectsTable.setModel(self.cloud_projects_model)
 
+        # Adjust projects table column width and sorting
+        self.on_cloud_projects_model_refreshed()
+
         self.synchronizeButton.clicked.connect(
             lambda: self.on_project_sync_button_clicked()
         )
@@ -1022,7 +1025,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     QAbstractItemView.ScrollHint.EnsureVisible,
                 )
 
-            self.update_project_buttons()
+        self.update_project_buttons()
 
     def on_update_project_finished(self, reply: QNetworkReply) -> None:
         self.projectsFormPage.setEnabled(True)
@@ -1039,9 +1042,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
     def on_projects_table_selection_changed(self) -> None:
-        if self.projectsTable.selectionModel().hasSelection():
+        if self.projectsTable.selectedIndexes():
             idx = self.projectsTable.model().index(
-                self.projectsTable.selectionModel().currentIndex().row(), 0
+                self.projectsTable.selectedIndexes()[0].row(), 0
             )
             self.current_cloud_project = self.projectsTable.model().data(
                 idx, Qt.ItemDataRole.UserRole
@@ -1053,10 +1056,10 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         has_selection = False
         is_currently_open_project = False
         can_delete_selected_project = False
-        if self.projectsTable.selectionModel().hasSelection():
+        if self.projectsTable.selectedIndexes():
             has_selection = True
             idx = self.projectsTable.model().index(
-                self.projectsTable.selectionModel().currentIndex().row(), 0
+                self.projectsTable.selectedIndexes()[0].row(), 0
             )
             self.current_cloud_project = self.projectsTable.model().data(
                 idx, Qt.ItemDataRole.UserRole
