@@ -539,7 +539,7 @@ class CloudNetworkAccessManager(QObject):
         self.auth_config = None
         self.current_username = None
         self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
-        self._clear_cloud_cookies(QUrl(self.url))
+        self.delete_cookies()
 
     def get_remote_resource(self, resource_url: str) -> QNetworkReply:
         """
@@ -696,8 +696,6 @@ class CloudNetworkAccessManager(QObject):
 
         query = QUrlQuery(url.query())
 
-        self._clear_cloud_cookies(url)
-
         if params is None:
             params = {}
 
@@ -792,9 +790,6 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
-
         request = QNetworkRequest(url)
         request.setHeader(
             QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
@@ -819,9 +814,6 @@ class CloudNetworkAccessManager(QObject):
         self, uri: Union[str, list[str]], payload: Optional[dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
-
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setHeader(
@@ -848,9 +840,6 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
-
         request = QNetworkRequest(url)
         request.setHeader(
             QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
@@ -874,9 +863,6 @@ class CloudNetworkAccessManager(QObject):
     def cloud_delete(self, uri: Union[str, list[str]]) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
-
         request = QNetworkRequest(url)
         request.setHeader(
             QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
@@ -899,9 +885,6 @@ class CloudNetworkAccessManager(QObject):
         payload: Optional[dict] = None,
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
-
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
 
@@ -1183,11 +1166,6 @@ class CloudNetworkAccessManager(QObject):
                 Qgis.MessageLevel.Critical,
             )
             return None
-
-    def _clear_cloud_cookies(self, url: QUrl) -> None:
-        """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
-        for cookie in self._nam.cookieJar().cookiesForUrl(url):
-            self._nam.cookieJar().deleteCookie(cookie)
 
     def _add_csrf_cookies_to_request(self, url: QUrl, request: QNetworkRequest) -> None:
         """
