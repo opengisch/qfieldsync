@@ -117,6 +117,8 @@ class CloudProjectsModelBase(QStandardItemModel):
         )
         self.network_manager.logout_success.connect(lambda: self._refresh())
 
+        self._refresh()
+
     def _get_name_item(self, cloud_project: CloudProject) -> QStandardItem:
         item = QStandardItem()
         item.setData(cloud_project, Qt.ItemDataRole.UserRole)
