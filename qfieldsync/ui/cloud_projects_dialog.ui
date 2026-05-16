@@ -638,7 +638,7 @@
              </column>
              <column>
               <property name="text">
-               <string>Size (bytes)</string>
+               <string>Size</string>
               </property>
              </column>
              <column>
