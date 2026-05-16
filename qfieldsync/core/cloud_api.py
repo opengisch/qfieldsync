@@ -551,7 +551,7 @@ class CloudNetworkAccessManager(QObject):
         return response.json()
 
     def create_project(
-        self, name: str, owner: str, description: str, private: bool
+        self, name: str, owner: str, description: str, is_public: bool
     ) -> QNetworkReply:
         """Create a new QFieldCloud project"""
         return self.cloud_post(
@@ -560,7 +560,7 @@ class CloudNetworkAccessManager(QObject):
                 "name": name,
                 "owner": owner,
                 "description": description,
-                "private": private,
+                "is_public": is_public,
             },
         )
 

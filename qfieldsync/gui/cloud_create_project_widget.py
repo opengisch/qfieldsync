@@ -133,7 +133,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         )
 
         self.storage_widget = StorageWidget(self.network_manager, self)
-        self.projectDetailsLayout.addWidget(self.storage_widget, 3, 1)
+        self.projectDetailsLayout.addWidget(self.storage_widget, 5, 1)
 
     def restart(self):
         self.stackedWidget.setCurrentWidget(self.selectTypePage)
@@ -228,7 +228,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.get_cloud_project_name(),
             self.projectOwnerComboBox.currentText(),
             description,
-            True,
+            self.projectIsPublicCheckBox.isChecked(),
         )
         reply.finished.connect(lambda: self.on_create_project_finished(reply))
 
