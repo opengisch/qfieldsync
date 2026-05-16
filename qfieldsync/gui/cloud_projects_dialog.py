@@ -74,6 +74,7 @@ from qfieldsync.utils.cloud_utils import (
     closure,
     local_dir_feedback,
 )
+from qfieldsync.utils.file_utils import filesizeformat10
 from qfieldsync.utils.permissions import can_delete_project, can_update_project
 from qfieldsync.utils.qt_utils import rounded_pixmap
 
@@ -418,7 +419,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                     item.setToolTip(0, project_file.name)
                     item.setData(0, Qt.ItemDataRole.UserRole, project_file)
 
-                    item.setText(1, str(project_file.size))
+                    item.setText(1, filesizeformat10(project_file.size))
                     item.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
                     item.setText(2, project_file.created_at)
 
@@ -432,7 +433,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
                             "display", versions_count - version_idx
                         )
                         version_item.setText(0, "Version {}".format(version_display))
-                        version_item.setText(1, str(version_obj["size"]))
+                        version_item.setText(1, filesizeformat10(version_obj["size"]))
                         version_item.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
                         version_item.setText(2, version_obj["last_modified"])
 
