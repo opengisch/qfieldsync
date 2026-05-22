@@ -24,10 +24,11 @@ import platform
 import shutil
 import stat
 import time
+import zipfile
 from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
-from typing import Optional, TypedDict, Union
+from typing import Optional, TextIO, TypedDict, Union
 
 from qgis.PyQt.QtCore import QObject
 
@@ -339,3 +340,15 @@ def filesizeformat10(bytes_: int) -> str:
         value = "-{}".format(value)
 
     return value
+
+
+def open_qgis_file(filename: PathLike) -> TextIO:
+    filename = Path(filename)
+
+    if filename.suffix.lower() == ".qgz":
+        with zipfile.ZipFile(filename, "r") as qgz:
+            return qgz.open(f"{filename.stem}.qgs")
+    elif filename.suffix.lower() == ".qgs":
+        return open(filename)
+
+    return None

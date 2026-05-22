@@ -28,7 +28,12 @@ from typing import Callable, Optional
 
 from libqfieldsync.layer import LayerSource, SyncAction
 from libqfieldsync.offline_converter import ExportType
-from libqfieldsync.project_checker import ProjectChecker
+from libqfieldsync.project_checker import (
+    Feedback,
+    FeedbackResult,
+    ProjectChecker,
+    ProjectCheckerFeedback,
+)
 from libqfieldsync.utils.file_utils import get_unique_empty_dirname
 from libqfieldsync.utils.qgis import get_qgis_files_within_dir
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry
@@ -56,7 +61,7 @@ from qfieldsync.core.errors import QFieldSyncError
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.storage_widget import StorageWidget
-from qfieldsync.utils.file_utils import filesizeformat10
+from qfieldsync.utils.file_utils import filesizeformat10, open_qgis_file
 from qfieldsync.utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
 CloudTransferDialogUi, _ = loadUiType(
@@ -267,6 +272,33 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             if self.cloud_project and self.cloud_project.is_current_qgis_project:
                 checker = ProjectChecker(QgsProject.instance())
                 feedback = checker.check(ExportType.Cloud)
+            elif (
+                self.cloud_project
+                and self.cloud_project.local_project_file
+                and self.cloud_project.local_project_file.local_path
+            ):
+                feedback = ProjectCheckerFeedback()
+                is_qgis_version_4 = False
+                with open_qgis_file(
+                    self.cloud_project.local_project_file.local_path
+                ) as f:
+                    for _i in range(2):
+                        if 'version="4.' in str(f.readline().strip()):
+                            is_qgis_version_4 = True
+                            break
+
+                if is_qgis_version_4:
+                    feedback.add(
+                        Feedback(
+                            Feedback.Level.ERROR,
+                            FeedbackResult(
+                                self.tr(
+                                    "QFieldCloud does not yet support projects saved using QGIS >= 4.0. "
+                                    "Please configure your projects using QGIS 3.44 until further notice."
+                                )
+                            ),
+                        )
+                    )
 
             if feedback and feedback.count > 0:
                 # check whether the widget has already been added the guard from adding twice due to repeated showEvent signal
