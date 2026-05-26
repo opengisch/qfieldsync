@@ -91,9 +91,7 @@ class MapLayerConfigWidget(QgsMapLayerConfigWidget, WidgetUi):
         self.measurementTypeComboBox.addItem(
             "Elapsed time (seconds since start of tracking)"
         )
-        self.measurementTypeComboBox.addItem(
-            self.tr("Timestamp (milliseconds since epoch)")
-        )
+        self.measurementTypeComboBox.addItem(self.tr("Timestamp (seconds since epoch)"))
         self.measurementTypeComboBox.addItem(self.tr("Ground speed"))
         self.measurementTypeComboBox.addItem(self.tr("Bearing"))
         self.measurementTypeComboBox.addItem(self.tr("Horizontal accuracy"))
