@@ -61,6 +61,8 @@ class StorageWidget(QWidget, StorageWidgetUi):
         self._storage_used_bytes = 0
         self._storage_used_percent = 0.0
         self._storage_management_hyperlink = ""
+        self._warning_threshold = self.WARNING_THRESHOLD
+        self._critical_threshold = self.CRITICAL_THRESHOLD
 
     def set_owner(self, owner: str) -> None:
         self._owner = owner
@@ -111,8 +113,30 @@ class StorageWidget(QWidget, StorageWidgetUi):
             self._storage_used_percent = (
                 self._storage_used_bytes / self._active_storage_total_bytes
             )
+
+            threshold_warning_bytes = subscription_information.get(
+                "plan_storage_threshold_warning_bytes"
+            )
+            threshold_critical_bytes = subscription_information.get(
+                "plan_storage_threshold_critical_bytes"
+            )
+            if threshold_warning_bytes is not None:
+                self._warning_threshold = 1.0 - (
+                    threshold_warning_bytes / self._active_storage_total_bytes
+                )
+            else:
+                self._warning_threshold = self.WARNING_THRESHOLD
+
+            if threshold_critical_bytes is not None:
+                self._critical_threshold = 1.0 - (
+                    threshold_critical_bytes / self._active_storage_total_bytes
+                )
+            else:
+                self._critical_threshold = self.CRITICAL_THRESHOLD
         else:
             self._storage_used_percent = 0
+            self._warning_threshold = self.WARNING_THRESHOLD
+            self._critical_threshold = self.CRITICAL_THRESHOLD
 
         self.progressBar.setValue(int(self._storage_used_percent * 100))
         self.progressBar.setStyleSheet(
@@ -142,15 +166,15 @@ class StorageWidget(QWidget, StorageWidgetUi):
             self.usageLabel.setText(self.tr("N/A"))
 
     def _get_progressbar_color(self, storage_used_percent: float) -> str:
-        if storage_used_percent >= self.CRITICAL_THRESHOLD:
+        if storage_used_percent >= self._critical_threshold:
             return self.CRITICAL_COLOR
-        elif storage_used_percent >= self.WARNING_THRESHOLD:
+        elif storage_used_percent >= self._warning_threshold:
             return self.WARNING_COLOR
         else:
             return self.NORMAL_COLOR
 
     def _get_upgrade_link_label(self, storage_used_percent: float) -> str:
-        if storage_used_percent >= self.CRITICAL_THRESHOLD:
+        if storage_used_percent >= self._critical_threshold:
             return self.tr("upgrade storage")
         else:
             return self.tr("manage storage")
