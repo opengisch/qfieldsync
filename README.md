@@ -68,7 +68,7 @@ pip install -e libqfieldsync
 > On **macOS**, QGIS bundles its own Python interpreter. Use it instead of the system `pip`:
 >
 > ```shell
-> PYTHONHOME=/Applications/QGIS.app/Contents/Frameworks /Applications/QGIS.app/Contents/MacOS/python3.12 -m pip install -e ./libqfieldsync
+> /Applications/QGIS.app/Contents/MacOS/python -m pip install -e ./libqfieldsync
 > ```
 >
 > The Python version (`python3.12`) may differ depending on your QGIS release. To find the correct binary, navigate to the Application folder right-click on `QGIS` icon and select **Show Package Contents** and look in `Contents/MacOS/`.
