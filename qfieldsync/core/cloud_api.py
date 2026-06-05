@@ -38,6 +38,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import (
     QByteArray,
+    QDateTime,
     QEventLoop,
     QFile,
     QFileSystemWatcher,
@@ -49,6 +50,7 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtNetwork import (
     QHttpMultiPart,
     QHttpPart,
+    QNetworkCookie,
     QNetworkReply,
     QNetworkRequest,
 )
@@ -248,6 +250,37 @@ class CloudNetworkAccessManager(QObject):
 
         # use the default URL
         self.set_url(url)
+
+        self.restore_cookies()
+
+    def restore_cookies(self):
+        raw_cookies = self.preferences.value("qfieldCloudCookies")
+        for raw_cookie in raw_cookies:
+            cookies = QNetworkCookie.parseCookies(raw_cookie)
+            if (
+                cookies
+                and QDateTime.currentSecsSinceEpoch()
+                < cookies[0].expirationDate().toSecsSinceEpoch()
+            ):
+                self._nam.cookieJar().insertCookie(cookies[0])
+
+    def save_cookies(self):
+        raw_cookies = []
+        cookies = self._nam.cookieJar().cookiesForUrl(QUrl(self.url))
+        for cookie in cookies:
+            if (
+                not cookie.isSessionCookie()
+                and QDateTime.currentSecsSinceEpoch()
+                < cookie.expirationDate().toSecsSinceEpoch()
+            ):
+                raw_cookies.append(cookie.toRawForm())
+
+        self.preferences.set_value("qfieldCloudCookies", raw_cookies)
+
+    def delete_cookies(self):
+        cookies = self._nam.cookieJar().cookiesForUrl(QUrl(self.url))
+        for cookie in cookies:
+            self._nam.cookieJar().deleteCookie(cookie)
 
     def handle_response(
         self, reply: QNetworkReply, should_parse_json: bool = True
@@ -506,7 +539,7 @@ class CloudNetworkAccessManager(QObject):
         self.auth_config = None
         self.current_username = None
         self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
-        self._clear_cloud_cookies(QUrl(self.url))
+        self.delete_cookies()
 
     def get_remote_resource(self, resource_url: str) -> QNetworkReply:
         """
@@ -663,8 +696,6 @@ class CloudNetworkAccessManager(QObject):
 
         query = QUrlQuery(url.query())
 
-        self._clear_cloud_cookies(url)
-
         if params is None:
             params = {}
 
@@ -759,9 +790,6 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
-
         request = QNetworkRequest(url)
         request.setHeader(
             QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
@@ -786,9 +814,6 @@ class CloudNetworkAccessManager(QObject):
         self, uri: Union[str, list[str]], payload: Optional[dict] = None
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
-
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
         request.setHeader(
@@ -815,9 +840,6 @@ class CloudNetworkAccessManager(QObject):
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
-
         request = QNetworkRequest(url)
         request.setHeader(
             QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
@@ -841,9 +863,6 @@ class CloudNetworkAccessManager(QObject):
     def cloud_delete(self, uri: Union[str, list[str]]) -> QNetworkReply:
         url = self._prepare_uri(uri)
 
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
-
         request = QNetworkRequest(url)
         request.setHeader(
             QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json"
@@ -866,9 +885,6 @@ class CloudNetworkAccessManager(QObject):
         payload: Optional[dict] = None,
     ) -> QNetworkReply:
         url = self._prepare_uri(uri)
-
-        if self.auth_method == CloudAuthMethod.CREDENTIALS:
-            self._clear_cloud_cookies(url)
 
         request = QNetworkRequest(url)
 
@@ -953,6 +969,8 @@ class CloudNetworkAccessManager(QObject):
             self.preferences.set_value("qfieldCloudAuthcfg", "")
             self.auth_config = None
             self.preferences.set_value("qfieldCloudAuthMethod", self.auth_method.value)
+            self.delete_cookies()
+            self.save_cookies()
             self.logout_success.emit()
         except QfcError as err:
             self.logout_failed.emit(str(err))
@@ -962,6 +980,7 @@ class CloudNetworkAccessManager(QObject):
         try:
             self.json_object(reply)
             self.clear_sso_config()
+            self.delete_cookies()
             self.logout_success.emit()
         except QfcError as err:
             self.logout_failed.emit(str(err))
@@ -1001,6 +1020,8 @@ class CloudNetworkAccessManager(QObject):
                 payload["token"], self.preferences.value("qfieldCloudRememberMe")
             )
 
+        self.save_cookies()
+
         self.login_finished.emit()
 
     def _on_get_user_info_finished(self, reply: QNetworkReply) -> None:
@@ -1031,6 +1052,7 @@ class CloudNetworkAccessManager(QObject):
                 )
 
         self.current_username = payload["username"]
+        self.save_cookies()
         self.login_finished.emit()
 
     def _on_avatar_download_finished(self, reply: QNetworkReply, filename: str) -> None:
@@ -1144,11 +1166,6 @@ class CloudNetworkAccessManager(QObject):
                 Qgis.MessageLevel.Critical,
             )
             return None
-
-    def _clear_cloud_cookies(self, url: QUrl) -> None:
-        """When the CSRF_TOKEN cookie is present and the plugin is reloaded, the token has expired"""
-        for cookie in self._nam.cookieJar().cookiesForUrl(url):
-            self._nam.cookieJar().deleteCookie(cookie)
 
     def _add_csrf_cookies_to_request(self, url: QUrl, request: QNetworkRequest) -> None:
         """
