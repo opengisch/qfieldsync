@@ -64,6 +64,14 @@ pip install -e libqfieldsync
 > On more recent Linux distributions you might get an error `error: externally-managed-environment` and you have to pass additional `--break-system-packages`.
 > Despite the name, we promise this is not going to break system packages.
 
+> [!NOTE]
+> On **macOS**, QGIS bundles its own Python interpreter. Use it instead of the system `pip`:
+>
+> ```shell
+> /Applications/QGIS.app/Contents/MacOS/python -m pip install -e ./libqfieldsync
+> ```
+>
+
 ### Opening a PR
 
 Make sure each new feature or bug fix are in a separate PR.
@@ -86,3 +94,10 @@ If you want to test with a specific QGIS version, or you don't have QGIS install
 ```shell
 docker run --rm $(docker build --build-arg QGIS_TEST_VERSION=ltr -q -f .docker/Dockerfile .) .docker/xvfb-pytest
 ```
+
+> [!NOTE]
+> On Apple Silicon add `--platform linux/amd64`. `qgis/qgis` image is only published for `linux/amd64`.
+>
+> ```shell
+> docker run --rm $(docker build --platform linux/amd64 --build-arg QGIS_TEST_VERSION=ltr -q -f .docker/Dockerfile .) .docker/xvfb-pytest
+> ```
