@@ -87,7 +87,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
-          sudo pip install qgis-plugin-ci --break-system-packages
+          sudo pip install qgis-plugin-ci==2.9.2 --break-system-packages
 
       - name: Package libqfieldsync
         run: |
@@ -121,7 +121,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
-          sudo pip install qgis-plugin-ci --break-system-packages
+          sudo pip install qgis-plugin-ci==2.9.2 --break-system-packages
 
       - name: Package libqfieldsync
         run: |
@@ -157,9 +157,7 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        # run: sudo pip install qgis-plugin-ci --break-system-packages
-        # TODO: install the stable release once https://github.com/opengisch/qgis-plugin-ci/pull/334 is merged and released
-        run: sudo pip install --break-system-packages git+https://github.com/opengisch/qgis-plugin-ci.git@b391050c6f9cabf887dfb232f90f346a834b8f80
+        run: sudo pip install qgis-plugin-ci==2.9.2 --break-system-packages
 
       - name: 🌍 Push translations
         run: |
