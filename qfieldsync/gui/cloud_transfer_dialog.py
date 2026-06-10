@@ -282,6 +282,11 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 with open_qgis_file(
                     self.cloud_project.local_project_file.local_path
                 ) as f:
+                    # We inspect the first 2 lines of the project XML file for `version="4.` substring.
+                    # We iterate over only the first 2 lines, as the first line maybe a doctype (QGIS 4.0+), and the second is the `<qgis>` root tag.
+                    # A typical QGIS 4 file would start with these two lines:
+                    # <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+                    # <qgis projectname="" saveDateTime="<datetime>" saveUser="<username>" saveUserFull="<username>" version="4.0.2-Norrköping">
                     for _i in range(2):
                         if 'version="4.' in str(f.readline().strip()):
                             is_qgis_version_4 = True
