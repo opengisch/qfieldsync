@@ -756,6 +756,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
             if (
                 self.storage_widget.active_storage_total_bytes() > 0
+                and total_upload_size > 0
                 and total_upload_size
                 > self.storage_widget.active_storage_total_bytes()
                 - self.storage_widget.storage_used_bytes()
