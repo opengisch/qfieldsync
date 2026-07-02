@@ -396,19 +396,17 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
     def on_next_button_clicked(self) -> None:
 
-        file_name = self.project.fileName().lower()
+        if self.project.projectStorage() is not None:
+            QMessageBox.warning(
+                None,
+                self.tr("Warning"),
+                self.tr(
+                    "The project cannot be inside a database (e.g., PostGIS or GeoPackage, etc.). "
+                    "Please save it as a standard .qgs/.qgz file first."
+                ),
+            )
 
-        if not (file_name.endswith(".qgs") or file_name.endswith(".qgz")):
-            if "postgresql:" in file_name or "geopackage:" in file_name:
-                QMessageBox.warning(
-                    None,
-                    self.tr("Warning"),
-                    self.tr(
-                        "The project can not be inside a database (e.g., PostGIS or GeoPackage) instead use a standard .qgs/.qgz file."
-                    ),
-                )
-
-        return
+            return
 
         project_name = self.get_unique_project_name(self.project)
 
