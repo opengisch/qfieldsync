@@ -329,8 +329,6 @@ class CloudNetworkAccessManager(QObject):
     def server_urls() -> list[str]:
         return [
             "https://app.qfield.cloud/",
-            "https://dev.qfield.cloud/",
-            "https://localhost:8002/",
         ]
 
     def get_username(self) -> Optional[str]:

@@ -133,8 +133,13 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.loginFormGroup.setVisible(False)
         self.signInUsernameGroupBox.setEnabled(False)
 
-        for server_url in self.network_manager.server_urls():
-            self.serverUrlCmb.addItem(server_url)
+        default_urls = list(self.network_manager.server_urls())
+        history_urls = self.preferences.value("qfieldCloudServersHistory") or []
+
+        combined_urls = set(default_urls + history_urls)
+
+        for url in combined_urls:
+            self.serverUrlCmb.addItem(url)
 
         cfg = self.network_manager.auth()
         self.serverUrlCmb.setCurrentText(cfg.uri() or self.network_manager.url)
@@ -404,6 +409,13 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.rememberMeCheckBox.setEnabled(True)
             self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(True)
             return
+
+        current_url = self.serverUrlCmb.currentText().strip()
+        if current_url:
+            history = self.preferences.value("qfieldCloudServersHistory") or []
+            if current_url not in history:
+                history.append(current_url)
+                self.preferences.set_value("qfieldCloudServersHistory", history)
 
         self.usernameLineEdit.setEnabled(False)
         self.passwordLineEdit.setEnabled(False)
