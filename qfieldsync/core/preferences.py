@@ -36,6 +36,7 @@ class Preferences(SettingManager):
         self.add_setting(Dictionary("qfieldCloudProjectLocalDirs", Scope.Global, {}))
         self.add_setting(Dictionary("qfieldCloudLastProjectFiles", Scope.Global, {}))
         self.add_setting(String("qfieldCloudServerUrl", Scope.Global, ""))
+        self.add_setting(Stringlist("qfieldCloudServerUrlsHistory", Scope.Global, []))
         self.add_setting(String("qfieldCloudAuthcfg", Scope.Global, ""))
         self.add_setting(Integer("qfieldCloudAuthMethod", Scope.Global, 0))
         self.add_setting(Bool("qfieldCloudRememberMe", Scope.Global, False))

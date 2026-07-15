@@ -26,6 +26,7 @@ from qgis.gui import QgsFileWidget, QgsOptionsPageWidget
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.gui.cloud_servers_history import CloudServerHistoryListWidget
 from qfieldsync.setting_manager import SettingDialog
 
 WidgetUi, _ = loadUiType(
@@ -52,6 +53,11 @@ class PreferencesWidget(WidgetUi, QgsOptionsPageWidget, SettingDialog):
             QgsFileWidget.StorageMode.GetDirectory
         )
 
+        self.server_history_widget = CloudServerHistoryListWidget(self)
+        self.cloudGridLayout.addWidget(self.server_history_widget, 3, 0, 1, 2)
+
     def apply(self):
+        self.server_history_widget.save_server_history()
+
         self.set_values_from_widgets()
         self.qfieldSync.update_button_visibility()
