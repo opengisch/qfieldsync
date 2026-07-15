@@ -403,7 +403,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
                 None,
                 self.tr("Warning"),
                 self.tr(
-                    "The QGIS project file must be stored as a `.qgs`/`.qgz` file!. "
+                    "The QGIS project file must be stored as a `.qgs`/`.qgz` file! "
                     f'Storing within a database "{project_storage_type.type()}" is not supported.'
                 ),
             )
