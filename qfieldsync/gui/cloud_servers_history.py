@@ -3,7 +3,7 @@
                              -------------------
         begin                : 2026-07-09
         git sha              : $Format:%H$
-        copyright            : (C) 2024 by OPENGIS.ch
+        copyright            : (C) 2026 by OPENGIS.ch
         email                : info@opengis.ch
  ***************************************************************************/
 
@@ -58,7 +58,7 @@ class CloudServerHistoryListWidget(QWidget, WidgetUi):
         self.serverHistoryList.blockSignals(True)
         self.serverHistoryList.clear()
 
-        history = self.preferences.value("qfieldCloudServersHistory") or []
+        history = self.preferences.value("qfieldCloudServerUrlsHistory") or []
         for url in history:
             item = QListWidgetItem(url)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
@@ -93,4 +93,4 @@ class CloudServerHistoryListWidget(QWidget, WidgetUi):
                 urls.append(url)
 
         unique_urls = list(dict.fromkeys(urls))
-        self.preferences.set_value("qfieldCloudServersHistory", unique_urls)
+        self.preferences.set_value("qfieldCloudServerUrlsHistory", unique_urls)

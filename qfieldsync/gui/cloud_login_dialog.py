@@ -134,7 +134,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.signInUsernameGroupBox.setEnabled(False)
 
         default_urls = list(self.network_manager.server_urls())
-        history_urls = self.preferences.value("qfieldCloudServersHistory") or []
+        history_urls = self.preferences.value("qfieldCloudServerUrlsHistory") or []
 
         combined_urls = set(default_urls + history_urls)
 
@@ -412,10 +412,10 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         current_url = self.serverUrlCmb.currentText().strip()
         if current_url:
-            history = self.preferences.value("qfieldCloudServersHistory") or []
+            history = self.preferences.value("qfieldCloudServerUrlsHistory") or []
             if current_url not in history:
                 history.append(current_url)
-                self.preferences.set_value("qfieldCloudServersHistory", history)
+                self.preferences.set_value("qfieldCloudServerUrlsHistory", history)
 
         self.usernameLineEdit.setEnabled(False)
         self.passwordLineEdit.setEnabled(False)
