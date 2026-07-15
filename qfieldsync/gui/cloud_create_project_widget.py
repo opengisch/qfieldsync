@@ -396,13 +396,15 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
     def on_next_button_clicked(self) -> None:
 
-        if self.project.projectStorage() is not None:
+        project_storage_type = self.project.projectStorage()
+
+        if project_storage_type is not None:
             QMessageBox.warning(
                 None,
                 self.tr("Warning"),
                 self.tr(
-                    "The project cannot be inside a database (e.g., PostGIS or GeoPackage, etc.). "
-                    "Please save it as a standard .qgs/.qgz file first."
+                    "The QGIS project file must be stored as a `.qgs`/`.qgz` file!. "
+                    f'Storing within a database "{project_storage_type.type()}" is not supported.'
                 ),
             )
 
