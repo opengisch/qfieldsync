@@ -569,6 +569,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
 
     def filter_projects_search(self) -> None:
+        if self.network_manager.projects_cache.projects is not None:
+            self.projectsSearch.setFocus()
+
         filter_text = self.projectsSearch.text().lower()
         self.cloud_projects_model.set_filter_string(filter_text)
 
