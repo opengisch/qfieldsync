@@ -496,7 +496,7 @@ class FileTransfer(QObject):
         self.replies: list[QNetworkReply] = []
         self.redirects: list[QUrl] = []
         self.file = file
-        self.filename = file.name
+        self.filename = file.name.lstrip("/")
         # filesystem filename
         self.fs_filename = destination
         self.fs_filename.parent.mkdir(parents=True, exist_ok=True)

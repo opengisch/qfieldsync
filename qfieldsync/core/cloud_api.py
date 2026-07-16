@@ -936,24 +936,32 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
+    def _clean_uri_path(self, uri: str) -> str:
+        """Clean the URI string to remove problematic URIs with double slash"""
+        return re.sub(r"(?<!:)/{2,}", "/", uri)
+
     def _prepare_uri(self, uri: Union[str, list[str], QUrl]) -> QUrl:
         if isinstance(uri, QUrl):
             return uri
 
         if isinstance(uri, str):
-            encoded_uri = uri
+            if uri.startswith(("http://", "https://")):
+                full_url = uri
+            else:
+                full_url = self.server_url + uri
         else:
             encoded_parts = []
-
             for part in uri:
                 encoded_parts.append(urllib.parse.quote(part))
 
-            encoded_uri = "/".join(encoded_parts)
+            full_url = self.server_url + "/".join(encoded_parts)
 
-        if encoded_uri[-1] != "/":
-            encoded_uri += "/"
+        cleaned_url = self._clean_uri_path(full_url)
 
-        return QUrl(self.server_url + encoded_uri)
+        if not cleaned_url.endswith("/"):
+            cleaned_url += "/"
+
+        return QUrl(cleaned_url)
 
     def _on_credentials_logout_finished(self, reply: QNetworkReply) -> None:
         try:
