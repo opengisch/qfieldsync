@@ -30,7 +30,11 @@ from qgis.core import (
     QgsReadWriteContext,
     QgsTextFormat,
 )
-from qgis.gui import QgsExpressionBuilderDialog, QgsPanelWidget
+from qgis.gui import (
+    QgsExpressionBuilderDialog,
+    QgsPanelWidget,
+    QgsPictureSourceLineEditBase,
+)
 from qgis.PyQt.QtCore import QDateTime
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.uic import loadUiType
@@ -55,6 +59,10 @@ Speed [% if(@gnss_ground_speed != 'nan', format_number(@gnss_ground_speed, 3) ||
         self.setupUi(self)
 
         self.setPanelTitle(self.tr("Image Stamping"))
+
+        self.customImageDecorationFile.setMode(
+            QgsPictureSourceLineEditBase.Format.Image
+        )
 
         self.customFontStyleButton.setShowNullFormat(True)
         self.customFontStyleButton.setShowNullFormat(True)
@@ -274,10 +282,10 @@ Speed [% if(@gnss_ground_speed != 'nan', format_number(@gnss_ground_speed, 3) ||
         self.customAlignmentComboBox.setCurrentIndex(horizontal_alignment)
 
     def image_decoration(self):
-        return self.customImageDecorationFile.filePath()
+        return self.customImageDecorationFile.source()
 
-    def set_image_decoration(self, file_path):
-        self.customImageDecorationFile.setFilePath(file_path)
+    def set_image_decoration(self, source):
+        self.customImageDecorationFile.setSource(source)
 
     def details_template(self):
         details = self.customDetailsTextEdit.toPlainText().strip()

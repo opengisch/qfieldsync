@@ -102,17 +102,12 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.stamping_horizontal_alignment = (
             self.__project_configuration.stamping_horizontal_alignment
         )
-        self.stamping_image_decoration = (
-            self.__project_configuration.stamping_image_decoration
-        )
-        if self.__project_configuration.stamping_image_decoration:
-            self.stamping_image_decoration = (
-                QgsProject.instance()
-                .pathResolver()
-                .readPath(self.__project_configuration.stamping_image_decoration)
-            )
-        else:
-            self.stamping_image_decoration = ""
+
+        source = self.__project_configuration.stamping_image_decoration
+        if source and not source.startswith("base64:"):
+            source = QgsProject.instance().pathResolver().readPath(source)
+
+        self.stamping_image_decoration = source or ""
 
         self.stamping_details_template = (
             self.__project_configuration.stamping_details_template
@@ -510,14 +505,11 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         self.__project_configuration.stamping_horizontal_alignment = (
             self.stamping_horizontal_alignment
         )
-        if self.stamping_image_decoration:
-            self.__project_configuration.stamping_image_decoration = (
-                QgsProject.instance()
-                .pathResolver()
-                .writePath(self.stamping_image_decoration)
-            )
-        else:
-            self.__project_configuration.stamping_image_decoration = ""
+        source = self.stamping_image_decoration
+        if source and not source.startswith("base64:"):
+            source = QgsProject.instance().pathResolver().writePath(source)
+
+        self.__project_configuration.stamping_image_decoration = source or ""
 
         self.__project_configuration.stamping_details_template = (
             self.stamping_details_template
