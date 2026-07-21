@@ -938,7 +938,19 @@ class CloudNetworkAccessManager(QObject):
 
     def _clean_uri_path(self, uri: str) -> str:
         """Clean the URI string to remove problematic URIs with double slash"""
-        return re.sub(r"(?<!:)/{2,}", "/", uri)
+        parsed = urllib.parse.urlparse(uri)
+        cleaned_path = re.sub(r"/{2,}", "/", parsed.path)
+
+        return urllib.parse.urlunparse(
+            (
+                parsed.scheme,
+                parsed.netloc,
+                cleaned_path,
+                parsed.params,
+                parsed.query,
+                parsed.fragment,
+            )
+        )
 
     def _prepare_uri(self, uri: Union[str, list[str], QUrl]) -> QUrl:
         if isinstance(uri, QUrl):
