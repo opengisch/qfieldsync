@@ -121,7 +121,7 @@ class PackageDialog(QDialog, DialogUi):
     def setup_gui(self):
         """Populate gui and connect signals of the push dialog"""
         self.packagedProjectTitleLineEdit.setText(get_project_title(self.project))
-        self.packagedProjectFileWidget.setFilter("QGIS Project Files (*.qgs)")
+        self.packagedProjectFileWidget.setFilter("QGIS Project Files (*.qgz,*.qgs)")
         self.packagedProjectFileWidget.setConfirmOverwrite(True)
         self.packagedProjectFileWidget.setFilePath(
             self.get_export_filename_suggestion()
@@ -171,7 +171,7 @@ class PackageDialog(QDialog, DialogUi):
 
         export_folder = Path(QDir.toNativeSeparators(str(export_dirname)))
         full_project_name_suggestion = export_folder.joinpath(
-            f"{self.project.baseName()}_qfield.qgs"
+            f"{self.project.baseName()}_qfield.qgz"
         )
         return str(full_project_name_suggestion)
 
@@ -185,9 +185,12 @@ class PackageDialog(QDialog, DialogUi):
         export_packaged_project = Path(self.packagedProjectFileWidget.filePath())
         feedback_messages = []
 
-        if export_packaged_project.suffix.lower() != ".qgs":
+        if (
+            export_packaged_project.suffix.lower() != ".qgs"
+            and export_packaged_project.suffix.lower() != ".qgz"
+        ):
             feedback_messages.append(
-                self.tr('The filename must have a ".qgs" extension')
+                self.tr("The filename must have a .qgz or .qgs extension")
             )
 
         if len(export_packaged_project.as_posix()) > MAX_LENGTH_CHARS_FILEPATH:
