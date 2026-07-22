@@ -19,6 +19,7 @@
 """
 
 import json
+import posixpath
 import re
 import tempfile
 import urllib.parse
@@ -936,21 +937,27 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
-    def _clean_uri_path(self, uri: str) -> str:
-        """Clean the URI string to remove problematic URIs with double slash"""
+    def _normalize_uri(self, uri: str) -> str:
+        """Clean the URI string to remove problematic filepath elements, such as double slashes, two dots etc"""
         parsed = urllib.parse.urlparse(uri)
-        cleaned_path = re.sub(r"/{2,}", "/", parsed.path)
 
-        return urllib.parse.urlunparse(
+        normalized_path = posixpath.normpath(parsed.path)
+
+        if parsed.path.endswith("/") and not normalized_path.endswith("/"):
+            normalized_path += "/"
+
+        unparsed_uri_str = urllib.parse.urlunparse(
             (
                 parsed.scheme,
                 parsed.netloc,
-                cleaned_path,
+                normalized_path,
                 parsed.params,
                 parsed.query,
                 parsed.fragment,
             )
         )
+
+        return unparsed_uri_str
 
     def _prepare_uri(self, uri: Union[str, list[str], QUrl]) -> QUrl:
         if isinstance(uri, QUrl):
@@ -968,7 +975,7 @@ class CloudNetworkAccessManager(QObject):
 
             full_url = self.server_url + "/".join(encoded_parts)
 
-        cleaned_url = self._clean_uri_path(full_url)
+        cleaned_url = self._normalize_uri(full_url)
 
         if not cleaned_url.endswith("/"):
             cleaned_url += "/"
