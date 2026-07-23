@@ -19,6 +19,7 @@
 """
 
 import json
+import posixpath
 import re
 import tempfile
 import urllib.parse
@@ -936,24 +937,50 @@ class CloudNetworkAccessManager(QObject):
 
         return reply
 
+    def _normalize_uri(self, uri: str) -> str:
+        """Clean the URI string to remove problematic filepath elements, such as double slashes, two dots etc"""
+        parsed = urllib.parse.urlparse(uri)
+
+        normalized_path = posixpath.normpath(parsed.path)
+
+        if parsed.path.endswith("/") and not normalized_path.endswith("/"):
+            normalized_path += "/"
+
+        unparsed_uri_str = urllib.parse.urlunparse(
+            (
+                parsed.scheme,
+                parsed.netloc,
+                normalized_path,
+                parsed.params,
+                parsed.query,
+                parsed.fragment,
+            )
+        )
+
+        return unparsed_uri_str
+
     def _prepare_uri(self, uri: Union[str, list[str], QUrl]) -> QUrl:
         if isinstance(uri, QUrl):
             return uri
 
         if isinstance(uri, str):
-            encoded_uri = uri
+            if uri.startswith(("http://", "https://")):
+                full_url = uri
+            else:
+                full_url = self.server_url + uri
         else:
             encoded_parts = []
-
             for part in uri:
                 encoded_parts.append(urllib.parse.quote(part))
 
-            encoded_uri = "/".join(encoded_parts)
+            full_url = self.server_url + "/".join(encoded_parts)
 
-        if encoded_uri[-1] != "/":
-            encoded_uri += "/"
+        cleaned_url = self._normalize_uri(full_url)
 
-        return QUrl(self.server_url + encoded_uri)
+        if not cleaned_url.endswith("/"):
+            cleaned_url += "/"
+
+        return QUrl(cleaned_url)
 
     def _on_credentials_logout_finished(self, reply: QNetworkReply) -> None:
         try:
