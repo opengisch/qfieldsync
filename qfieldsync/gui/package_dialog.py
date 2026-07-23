@@ -152,13 +152,27 @@ class PackageDialog(QDialog, DialogUi):
         if feedback and feedback.count > 0:
             has_errors = len(feedback.error_feedbacks) > 0
 
-            feedback_table = CheckerFeedbackTable(feedback)
-            self.feedbackTableWrapperLayout.addWidget(feedback_table)
+            self.feedback_table = CheckerFeedbackTable(feedback)
+            self.feedback_table.feedback_fixed.connect(
+                self.refresh_project_compatibility_page
+            )
+            self.feedbackTableWrapperLayout.addWidget(self.feedback_table)
             self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
             self.nextButton.setVisible(True)
             self.nextButton.setEnabled(not has_errors)
         else:
             self.show_package_page()
+
+    def refresh_project_compatibility_page(self):
+        if os.path.exists(self.project.fileName()):
+            feedback = self.project_checker.check(ExportType.Cable)
+            if feedback.count == 0:
+                # All issues resolved -> advance directly to package page
+                self.show_package_page()
+            else:
+                self.feedback_table.set_feedback(feedback)
+                has_errors = len(feedback.error_feedbacks) > 0
+                self.nextButton.setEnabled(not has_errors)
 
     def get_export_filename_suggestion(self) -> str:
         """Get the suggested export filename"""
