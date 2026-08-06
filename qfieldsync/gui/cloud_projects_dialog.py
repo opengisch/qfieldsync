@@ -807,6 +807,19 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.show_project_form()
 
     def on_create_button_clicked(self) -> None:
+        project_storage_type = QgsProject.instance().projectStorage()
+
+        if project_storage_type is not None:
+            QMessageBox.warning(
+                self,
+                self.tr("Warning"),
+                self.tr(
+                    "The QGIS project file must be stored as a `.qgs`/`.qgz` file! "
+                    f'Storing within a database "{project_storage_type.type()}" is not supported.'
+                ),
+            )
+            return
+
         self.show_create_project()
 
     def show_project_form(self) -> None:

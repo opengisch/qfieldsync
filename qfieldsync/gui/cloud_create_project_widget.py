@@ -22,30 +22,27 @@
 
 import os
 from pathlib import Path
-from typing import Optional
 
 from libqfieldsync.layer import LayerSource
-from libqfieldsync.utils.file_utils import fileparts, get_unique_empty_dirname
-from libqfieldsync.utils.qgis import get_qgis_files_within_dir
-from qgis.core import Qgis, QgsApplication, QgsProject
+from libqfieldsync.offline_converter import ExportType
+from libqfieldsync.project_checker import ProjectChecker
+from qgis.core import QgsApplication, QgsProject
 from qgis.gui import QgisInterface
-from qgis.PyQt.QtCore import QDir, QRegularExpression, Qt, QTimer, QUrl, pyqtSignal
+from qgis.PyQt.QtCore import QDir, QRegularExpression, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QIcon, QRegularExpressionValidator
 from qgis.PyQt.QtWidgets import (
     QAction,
     QApplication,
     QMenu,
-    QMessageBox,
     QToolButton,
     QWidget,
 )
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
-from qfieldsync.core.cloud_converter import CloudConverter
 from qfieldsync.core.cloud_project import CloudProject
-from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
+from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
 from qfieldsync.gui.storage_widget import StorageWidget
 from qfieldsync.utils.cloud_utils import (
@@ -80,10 +77,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.project = project
         self.qfield_preferences = Preferences()
         self.network_manager = network_manager
-        self.cloud_transferrer: Optional[CloudTransferrer] = None
-
-        # keep a timer reference
-        self.timer = QTimer(self)
+        self.project_checker = ProjectChecker(self.project)
 
         if not self.network_manager.is_authenticated():
             CloudLoginDialog.show_auth_dialog(
@@ -94,8 +88,10 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         self.cancelButton.clicked.connect(self.on_cancel_button_clicked)
         self.nextButton.clicked.connect(self.on_next_button_clicked)
+
         self.backButton.clicked.connect(self.on_back_button_clicked)
         self.createButton.clicked.connect(self.on_create_button_clicked)
+
         self.localDirButton.clicked.connect(self.on_local_dir_button_clicked)
         self.localDirLineEdit.textChanged.connect(
             self.on_dirname_line_edit_text_changed
@@ -135,73 +131,100 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.storage_widget = StorageWidget(self.network_manager, self)
         self.projectDetailsLayout.addWidget(self.storage_widget, 5, 1)
 
+        if self.network_manager.is_authenticated():
+            self.setup_checker_page()
+
     def restart(self):
-        self.stackedWidget.setCurrentWidget(self.selectTypePage)
+        self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
+        if self.network_manager.is_authenticated():
+            self.setup_checker_page()
 
-        if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
-            self.createCloudRadioButton.setChecked(True)
-            self.cloudifyRadioButton.setEnabled(False)
-            self.cloudifyInfoLabel.setEnabled(False)
-        else:
-            self.cloudifyRadioButton.setChecked(True)
-            self.cloudifyRadioButton.setEnabled(True)
-            self.cloudifyInfoLabel.setEnabled(True)
-
-    def cloudify_project(self):
-        for cloud_project in self.network_manager.projects_cache.projects:
-            if cloud_project.name == self.get_cloud_project_name():
-                QMessageBox.warning(
-                    None,
-                    self.tr("Warning"),
-                    self.tr(
-                        "The project name is already present in your QFieldCloud repository, please pick a different name."
-                    ),
-                )
-                return
-
-        if get_qgis_files_within_dir(self.localDirLineEdit.text()):
-            QMessageBox.warning(
-                None,
-                self.tr("Warning"),
-                self.tr(
-                    "The export directory already contains a project file, please pick a different directory."
-                ),
-            )
+    def setup_checker_page(self) -> None:
+        """Runs ProjectChecker and builds the feedback table"""
+        if not self.network_manager.is_authenticated():
             return
 
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        while self.checkerTableLayout.count():
+            child = self.checkerTableLayout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
 
-        self.stackedWidget.setCurrentWidget(self.progressPage)
-        self.convertProgressBar.setVisible(True)
-        self.convertLabel.setVisible(True)
-        self.uploadLabel.setText(self.tr("Uploading project"))
+        feedback = None
+        if os.path.exists(self.project.fileName()):
+            feedback = self.project_checker.check(ExportType.Cloud)
 
-        if not self.project.title():
-            self.project.setTitle(self.get_cloud_project_name())
-            self.project.setDirty()
+        if feedback and feedback.count > 0:
+            has_errors = len(feedback.error_feedbacks) > 0
 
-        cloud_convertor = CloudConverter(self.project, self.localDirLineEdit.text())
+            feedback_table = CheckerFeedbackTable(
+                feedback, self.projectCompatibilityPage
+            )
+            self.checkerTableLayout.addWidget(feedback_table)
+            self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
 
-        cloud_convertor.warning.connect(self.on_show_warning)
-        cloud_convertor.total_progress_updated.connect(self.on_update_total_progressbar)
-
-        def convert():
-            try:
-                cloud_convertor.convert()
-            except Exception:
-                QApplication.restoreOverrideCursor()
-                critical_message = self.tr(
-                    "The project could not be converted into the export directory."
+            self.nextButton.setEnabled(not has_errors)
+            if has_errors:
+                self.nextButton.setToolTip(
+                    self.tr("Please fix critical project errors before continuing.")
                 )
-                self.iface.messageBar().pushMessage(
-                    critical_message, Qgis.MessageLevel.Critical, 0
-                )
-                self.close()
-                return
+            else:
+                self.nextButton.setToolTip("")
+        else:
+            self.setup_project_details_page()
 
-            self.create_cloud_project()
+    def setup_project_details_page(self) -> None:
+        """Initializes values on projectDetailsPage"""
+        if not self.network_manager.is_authenticated():
+            return
 
-        self.timer.singleShot(1, convert)
+        project_name = self.get_unique_project_name(self.project)
+
+        self.stackedWidget.setCurrentWidget(self.projectDetailsPage)
+        self.projectNameLineEdit.setText(project_name)
+        self.projectDescriptionTextEdit.setText(self.project.metadata().abstract())
+
+        self.refresh_project_owners()
+
+        if self.project.fileName():
+            default_dir = str(Path(self.project.fileName()).parent)
+        else:
+            default_dir = self.qfield_preferences.value("cloudDirectory") or str(
+                Path.home()
+            )
+
+        self.set_dirname(default_dir)
+        self.update_info_visibility()
+
+    def update_info_visibility(self) -> None:
+        """Show the info label if there are unconfigured/localized layers."""
+        localized_data_path_layers = []
+        for layer in list(self.project.mapLayers().values()):
+            layer_source = LayerSource(layer)
+            if layer.dataProvider() is not None:
+                if layer_source.is_localized_path:
+                    localized_data_path_layers.append("- {}".format(layer.name()))
+
+        if localized_data_path_layers:
+            self.infoLocalizedLayersLabel.setText(
+                self.tr(
+                    "The current project relies on %n shared dataset(s), make sure to copy them into the shared datasets path of devices running QField. The layer(s) stored in a shared dataset(s) are:\n{}",
+                    "",
+                    len(localized_data_path_layers),
+                ).format("\n".join(localized_data_path_layers))
+            )
+            self.infoLocalizedLayersLabel.setVisible(True)
+        else:
+            self.infoLocalizedLayersLabel.setVisible(False)
+
+        self.infoGroupBox.setVisible(len(localized_data_path_layers) > 0)
+
+    def on_next_button_clicked(self) -> None:
+        """Navigates from compatibility Checks to project details"""
+        self.setup_project_details_page()
+
+    def on_back_button_clicked(self) -> None:
+        """Navigates from project details back to compatibility checks"""
+        self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
 
     def get_cloud_project_name(self) -> str:
         return self.projectNameLineEdit.text()
@@ -244,55 +267,18 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.stackedWidget.setCurrentWidget(self.projectDetailsPage)
             return
         # save `local_dir` configuration permanently, `CloudProject` constructor does this for free
+
         cloud_project = CloudProject(
             {**payload, "local_dir": self.localDirLineEdit.text()}
         )
 
-        if self.createCloudRadioButton.isChecked():
-            self.uploadProgressBar.setValue(100)
-            self.after_project_creation_action(cloud_project.id)
-        elif self.cloudifyRadioButton.isChecked():
-            self.cloud_transferrer = CloudTransferrer(
-                self.network_manager, cloud_project
-            )
-            self.cloud_transferrer.upload_progress.connect(
-                self.on_transferrer_update_progress
-            )
-            self.cloud_transferrer.finished.connect(
-                lambda: self.on_transferrer_finished()
-            )
-            self.cloud_transferrer.sync(list(cloud_project.files_to_sync), [], [], [])
+        self.uploadProgressBar.setValue(100)
+        self.after_project_creation_action(cloud_project.id)
 
     def after_project_creation_action(self, project_id: str):
         QApplication.restoreOverrideCursor()
-
         self.network_manager.projects_cache.refresh()
-
         self.finished.emit(project_id)
-
-    def update_info_visibility(self):
-        """Show the info label if there are unconfigured layers"""
-        localized_data_path_layers = []
-        for layer in list(self.project.mapLayers().values()):
-            layer_source = LayerSource(layer)
-            if layer.dataProvider() is not None:
-                if layer_source.is_localized_path:
-                    localized_data_path_layers.append("- {}".format(layer.name()))
-
-        if localized_data_path_layers:
-            self.infoLocalizedLayersLabel.setText(
-                self.tr(
-                    "The current project relies on %n shared dataset(s), make sure to copy them into the shared datasets path of devices running QField. The layer(s) stored in a shared dataset(s) are:\n{}",
-                    "",
-                    len(localized_data_path_layers),
-                ).format("\n".join(localized_data_path_layers))
-            )
-
-            self.infoLocalizedLayersLabel.setVisible(True)
-        else:
-            self.infoLocalizedLayersLabel.setVisible(False)
-
-        self.infoGroupBox.setVisible(len(localized_data_path_layers) > 0)
 
     def get_unique_project_name(self, project: QgsProject) -> str:
         project_name = QgsProject.instance().title()
@@ -310,21 +296,13 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         return to_cloud_title(project_name)
 
     def set_dirname(self, dirname: str):
-        if self.cloudifyRadioButton.isChecked():
-            feedback, feedback_msg = local_dir_feedback(
-                dirname,
-                single_project_status=LocalDirFeedback.Error,
-                not_existing_status=LocalDirFeedback.Success,
-            )
-        elif self.createCloudRadioButton.isChecked():
-            feedback, feedback_msg = local_dir_feedback(
-                dirname,
-                no_path_status=LocalDirFeedback.Warning,
-            )
-        else:
-            raise NotImplementedError("Unknown create new button radio.")
+        feedback, feedback_msg = local_dir_feedback(
+            dirname,
+            no_path_status=LocalDirFeedback.Warning,
+        )
 
         self.localDirFeedbackLabel.setText(feedback_msg)
+        self.localDirFeedbackLabel.setVisible(bool(feedback_msg))
 
         if feedback == LocalDirFeedback.Error:
             self.localDirFeedbackLabel.setStyleSheet("color: red;")
@@ -339,15 +317,17 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.localDirLineEdit.setText(QDir.toNativeSeparators(dirname))
 
     def refresh_project_owners(self):
+        username = self.network_manager.get_username()
+        if not username or not self.network_manager.is_authenticated():
+            return
+
         self.projectOwnerComboBox.setEnabled(False)
         self.projectOwnerComboBox.clear()
-        self.projectOwnerComboBox.addItem(self.network_manager.get_username())
+        self.projectOwnerComboBox.addItem(username)
         self.projectOwnerRefreshButton.setEnabled(False)
         self.projectOwnerFeedbackLabel.setVisible(False)
 
-        reply = self.network_manager.get_user_organizations(
-            self.network_manager.get_username()
-        )
+        reply = self.network_manager.get_user_organizations(username)
         reply.finished.connect(lambda: self.on_refresh_project_owners_finished(reply))
 
     def on_refresh_project_owners_finished(self, reply):
@@ -356,7 +336,6 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         ]
         try:
             payload = self.network_manager.json_array(reply)
-
             for org in payload:
                 items.append(org["username"])
         except QfcError:
@@ -370,73 +349,8 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.projectOwnerComboBox.setEnabled(True)
         self.projectOwnerRefreshButton.setEnabled(True)
 
-    def on_update_total_progressbar(self, current, layer_count, _message):
-        self.convertProgressBar.setMaximum(layer_count)
-        self.convertProgressBar.setValue(current)
-
-    def on_transferrer_update_progress(self, fraction):
-        self.uploadProgressBar.setMaximum(100)
-        self.uploadProgressBar.setValue(int(fraction * 100))
-
-    def on_transferrer_finished(self):
-        result_message = self.tr(
-            "Finished uploading the project to QFieldCloud, you are now viewing the locally stored copy."
-        )
-        self.iface.messageBar().pushMessage(
-            result_message, Qgis.MessageLevel.Success, 0
-        )
-
-        self.after_project_creation_action(self.cloud_transferrer.cloud_project.id)
-
-    def on_show_warning(self, _, message):
-        self.iface.messageBar().pushMessage(message, Qgis.MessageLevel.Warning, 0)
-
     def on_cancel_button_clicked(self):
         self.canceled.emit()
-
-    def on_next_button_clicked(self) -> None:
-
-        project_storage_type = self.project.projectStorage()
-
-        if project_storage_type is not None:
-            QMessageBox.warning(
-                None,
-                self.tr("Warning"),
-                self.tr(
-                    "The QGIS project file must be stored as a `.qgs`/`.qgz` file! "
-                    f'Storing within a database "{project_storage_type.type()}" is not supported.'
-                ),
-            )
-
-            return
-
-        project_name = self.get_unique_project_name(self.project)
-
-        self.stackedWidget.setCurrentWidget(self.projectDetailsPage)
-        self.projectNameLineEdit.setText(project_name)
-        self.projectDescriptionTextEdit.setText(self.project.metadata().abstract())
-
-        self.refresh_project_owners()
-
-        if self.cloudifyRadioButton.isChecked():
-            if project_name:
-                project_filename = project_name.lower()
-            else:
-                project_filename = fileparts(QgsProject.instance().fileName())[1]
-
-            export_dirname = get_unique_empty_dirname(
-                Path(self.qfield_preferences.value("cloudDirectory")).joinpath(
-                    project_filename
-                )
-            )
-
-            self.createButton.setEnabled(True)
-            self.set_dirname(str(export_dirname))
-        elif self.createCloudRadioButton.isChecked():
-            if self.project.fileName():
-                self.set_dirname(str(Path(self.project.fileName()).parent))
-
-        self.update_info_visibility()
 
     def on_project_owner_changed(self):
         if not self.projectOwnerComboBox.currentText():
@@ -448,16 +362,13 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
     def on_project_owner_refresh_button_click(self):
         self.refresh_project_owners()
 
-    def on_back_button_clicked(self):
-        self.stackedWidget.setCurrentWidget(self.selectTypePage)
-
     def on_create_button_clicked(self):
-        if self.cloudifyRadioButton.isChecked():
-            self.infoLabel.setText(self.cloudifyInfoLabel.text())
-            self.cloudify_project()
-        elif self.createCloudRadioButton.isChecked():
-            self.infoLabel.setText(self.createCloudInfoLabel.text())
-            self.create_empty_cloud_project()
+        self.infoLabel.setText(
+            self.tr(
+                "A new blank QFieldCloud project will be created. Project files will only be uploaded when you click the synchronize button."
+            )
+        )
+        self.create_empty_cloud_project()
 
     def on_local_dir_button_clicked(self):
         dirname = self.cloud_projects_dialog.select_local_dir()
