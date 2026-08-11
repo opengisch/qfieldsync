@@ -21,7 +21,7 @@
 import sqlite3
 from collections.abc import Iterator
 from datetime import datetime, timezone
-from enum import IntFlag
+from enum import Enum, IntFlag
 from pathlib import Path
 from typing import Any, Optional
 
@@ -44,6 +44,12 @@ class ProjectFileCheckout(IntFlag):
     Local = 1
     Cloud = 2
     LocalAndCloud = 3
+
+
+class ProjectType(str, Enum):
+    REGULAR = "regular"
+    TEMPLATE = "template"
+    SHARED_DATASETS = "shared_datasets"
 
 
 class ProjectFile:
@@ -254,6 +260,17 @@ class CloudProject:
     @property
     def is_public(self) -> bool:
         return self._data["is_public"]
+
+    @property
+    def project_type(self) -> ProjectType:
+        # Servers APIs older than QFC v26.22 do not have the `project_type` property, fallback to support older QFC API versions
+        try:
+            return ProjectType(self._data.get("project_type"))
+        except ValueError:
+            if self._data.get("is_shared_datasets", False):
+                return ProjectType.SHARED_DATASETS
+
+        return ProjectType.REGULAR
 
     @property
     def created_at(self) -> str:

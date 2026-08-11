@@ -62,7 +62,12 @@ from qgis.PyQt.uic import loadUiType
 from qgis.utils import iface
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
-from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
+from qfieldsync.core.cloud_project import (
+    CloudProject,
+    ProjectFile,
+    ProjectFileCheckout,
+    ProjectType,
+)
 from qfieldsync.core.cloud_transferrer import FileTransfer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_create_project_widget import CloudCreateProjectWidget
@@ -841,6 +846,27 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.projectOwnerLineEdit.setText(self.current_cloud_project.owner)
 
+        if self.current_cloud_project.project_type == ProjectType.SHARED_DATASETS:
+            self.projectTypeComboBox.clear()
+            self.projectTypeComboBox.addItem(
+                self.tr("Shared datasets"), ProjectType.SHARED_DATASETS
+            )
+            self.projectTypeComboBox.setEnabled(False)
+        else:
+            self.projectTypeComboBox.clear()
+            self.projectTypeComboBox.addItem(self.tr("Regular"), ProjectType.REGULAR)
+            self.projectTypeComboBox.addItem(self.tr("Template"), ProjectType.TEMPLATE)
+            current_index = self.projectTypeComboBox.findData(
+                self.current_cloud_project.project_type
+            )
+            if current_index == -1:
+                current_index = 0
+
+            self.projectTypeComboBox.setCurrentIndex(current_index)
+            self.projectTypeComboBox.setEnabled(
+                can_update_project(self.current_cloud_project)
+            )
+
         self.localDirLineEdit.setText(self.current_cloud_project.local_dir or "")
         self.projectUrlLabelValue.setText(
             '<a href="{url}">{url}</a>'.format(
@@ -922,6 +948,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             != self.projectIsPublicCheckBox.isChecked()
         ):
             cloud_project_data["is_public"] = self.projectIsPublicCheckBox.isChecked()
+
+        if (
+            self.projectTypeComboBox.isEnabled()
+            and self.current_cloud_project.project_type
+            != self.projectTypeComboBox.currentData()
+        ):
+            cloud_project_data["project_type"] = self.projectTypeComboBox.currentData()
 
         if cloud_project_data:
             self.projectsFormPage.setEnabled(False)
