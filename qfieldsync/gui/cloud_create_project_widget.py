@@ -43,7 +43,7 @@ from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
 from qfieldsync.core.cloud_converter import CloudConverter
-from qfieldsync.core.cloud_project import CloudProject
+from qfieldsync.core.cloud_project import CloudProject, ProjectType
 from qfieldsync.core.cloud_transferrer import CloudTransferrer
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
@@ -132,8 +132,13 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             lambda: self.on_project_owner_refresh_button_click()
         )
 
+        self.projectTypeComboBox.addItem(self.tr("Regular"), ProjectType.REGULAR.value)
+        self.projectTypeComboBox.addItem(
+            self.tr("Template"), ProjectType.TEMPLATE.value
+        )
+
         self.storage_widget = StorageWidget(self.network_manager, self)
-        self.projectDetailsLayout.addWidget(self.storage_widget, 5, 1)
+        self.projectDetailsLayout.addWidget(self.storage_widget, 6, 1)
 
     def restart(self):
         self.stackedWidget.setCurrentWidget(self.selectTypePage)
@@ -229,6 +234,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.projectOwnerComboBox.currentText(),
             description,
             self.projectIsPublicCheckBox.isChecked(),
+            ProjectType(self.projectTypeComboBox.currentData()),
         )
         reply.finished.connect(lambda: self.on_create_project_finished(reply))
 

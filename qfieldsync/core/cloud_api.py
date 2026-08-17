@@ -56,7 +56,7 @@ from qgis.PyQt.QtNetwork import (
     QNetworkRequest,
 )
 
-from qfieldsync.core.cloud_project import CloudProject
+from qfieldsync.core.cloud_project import CloudProject, ProjectType
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.utils.qt_utils import strip_html
 
@@ -583,7 +583,12 @@ class CloudNetworkAccessManager(QObject):
         return response.json()
 
     def create_project(
-        self, name: str, owner: str, description: str, is_public: bool
+        self,
+        name: str,
+        owner: str,
+        description: str,
+        is_public: bool,
+        project_type: ProjectType = ProjectType.REGULAR,
     ) -> QNetworkReply:
         """Create a new QFieldCloud project"""
         return self.cloud_post(
@@ -593,6 +598,7 @@ class CloudNetworkAccessManager(QObject):
                 "owner": owner,
                 "description": description,
                 "is_public": is_public,
+                "project_type": project_type.value,
             },
         )
 

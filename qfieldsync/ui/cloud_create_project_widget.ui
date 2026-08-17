@@ -156,7 +156,7 @@
           <string>Project Details</string>
          </property>
          <layout class="QGridLayout" name="projectDetailsLayout">
-          <item row="3" column="1">
+          <item row="4" column="1">
            <layout class="QHBoxLayout" name="projectOwnerHLayout">
             <item>
              <widget class="QComboBox" name="projectOwnerComboBox"/>
@@ -181,7 +181,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="projectOwnerLabel">
             <property name="text">
              <string>Owner</string>
@@ -198,7 +198,17 @@
           <item row="1" column="1">
            <widget class="QTextEdit" name="projectDescriptionTextEdit"/>
           </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="projectTypeLabel">
+            <property name="text">
+             <string>Project Type</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="1">
+           <widget class="QComboBox" name="projectTypeComboBox"/>
+          </item>
+          <item row="3" column="1">
            <widget class="QCheckBox" name="projectIsPublicCheckBox">
             <property name="text">
              <string>Is public</string>
@@ -221,7 +231,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="5" column="1">
            <widget class="QLabel" name="projectOwnerFeedbackLabel">
             <property name="visible">
              <bool>false</bool>
