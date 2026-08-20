@@ -23,7 +23,15 @@
 from libqfieldsync.project_checker import Feedback, ProjectCheckerFeedback
 from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
+from qgis.PyQt.QtWidgets import (
+    QCheckBox,
+    QLabel,
+    QSizePolicy,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from qfieldsync.utils.qt_utils import make_icon
 
@@ -44,7 +52,6 @@ class CheckerFeedbackTable(QTableWidget):
         for layer_id in checker_feedback.feedbacks:
             for feedback in checker_feedback.feedbacks[layer_id]:
                 row = self.rowCount()
-
                 self.insertRow(row)
 
                 # first column
@@ -66,24 +73,42 @@ class CheckerFeedbackTable(QTableWidget):
                 else:
                     source = self.tr("Project")
 
-                item = QTableWidgetItem()
-                item.setFlags(Qt.ItemFlag.ItemIsEnabled)
-                item.setToolTip(level_text)
-                self.setItem(row, 1, item)
+                # cell container widget for interactive actions
+                cell_widget = QWidget()
+                cell_layout = QVBoxLayout(cell_widget)
+                cell_layout.setContentsMargins(2, 2, 2, 2)
+                cell_layout.setSpacing(6)
 
                 # we do not escape the values on purpose to support Markdown/HTML
                 label = QLabel("**{}**\n\n{}".format(source, feedback.message))
                 label.setWordWrap(True)
-                label.setMargin(5)
                 label.setTextFormat(Qt.TextFormat.MarkdownText)
                 label.setTextInteractionFlags(
                     Qt.TextInteractionFlag.TextSelectableByMouse
-                    | Qt.TextInteractionFlag.TextSelectableByKeyboard
                     | Qt.TextInteractionFlag.LinksAccessibleByMouse
-                    | Qt.TextInteractionFlag.LinksAccessibleByKeyboard
                 )
                 label.setOpenExternalLinks(True)
-                self.setCellWidget(row, 1, label)
+
+                cell_layout.addWidget(label)
+
+                # checkbox for interactive actions
+                if feedback.action_text and feedback.action_callback:
+                    checkbox = QCheckBox(feedback.action_text)
+
+                    def on_toggled(
+                        checked: bool, callback=feedback.action_callback, box=checkbox
+                    ):
+                        if checked:
+                            callback()
+                            box.setEnabled(False)
+
+                    checkbox.toggled.connect(on_toggled)
+                    cell_layout.addWidget(checkbox)
+
+                    checkbox.toggled.connect(on_toggled)
+                    cell_layout.addWidget(checkbox)
+
+                self.setCellWidget(row, 1, cell_widget)
 
         self.verticalHeader().hide()
         self.resizeColumnsToContents()
