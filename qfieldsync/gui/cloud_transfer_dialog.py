@@ -292,16 +292,18 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             self.is_project_compatible_page_prepared = True
 
     def refresh_project_compatibility_page(self):
-        if self.cloud_project and self.cloud_project.is_current_qgis_project:
-            feedback = self.project_checker.check(ExportType.Cloud)
-            if feedback.count == 0:
-                self.show_project_files_fetching_page()
-            else:
-                self.feedback_table.set_feedback(feedback)
-                has_errors = len(feedback.error_feedbacks) > 0
-                self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setEnabled(
-                    not has_errors
-                )
+        if not self.cloud_project or not self.cloud_project.is_current_qgis_project:
+            return
+
+        feedback = self.project_checker.check(ExportType.Cloud)
+        if feedback.count == 0:
+            self.show_project_files_fetching_page()
+        else:
+            self.feedback_table.set_feedback(feedback)
+            has_errors = len(feedback.error_feedbacks) > 0
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setEnabled(
+                not has_errors
+            )
 
     def show_project_files_fetching_page(self):
         self.stackedWidget.setCurrentWidget(self.getProjectFilesPage)

@@ -146,7 +146,7 @@ class PackageDialog(QDialog, DialogUi):
         self.dirsToCopyWidget.refresh_tree()
 
         feedback = None
-        if os.path.exists(self.project.fileName()):
+        if Path(self.project.fileName()).exists():
             feedback = self.project_checker.check(ExportType.Cable)
 
         if feedback and feedback.count > 0:
@@ -164,7 +164,7 @@ class PackageDialog(QDialog, DialogUi):
             self.show_package_page()
 
     def refresh_project_compatibility_page(self):
-        if os.path.exists(self.project.fileName()):
+        if Path(self.project.fileName()).exists():
             feedback = self.project_checker.check(ExportType.Cable)
             if feedback.count == 0:
                 # All issues resolved -> advance directly to package page
