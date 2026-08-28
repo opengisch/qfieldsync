@@ -131,7 +131,8 @@ class CheckerFeedbackTable(QTableWidget):
                         target_feedback=feedback,
                     ) -> None:
                         action(target_feedback)
-                        self._refresh_project_checker()
+
+                        self.feedback_fixed.emit()
 
                     fix_button.clicked.connect(on_fix_clicked)
                     cell_layout.addWidget(
@@ -143,10 +144,6 @@ class CheckerFeedbackTable(QTableWidget):
                 self.setCellWidget(row, 1, cell_widget)
 
         self.resizeRowsToContents()
-
-    def _refresh_project_checker(self) -> None:
-
-        self.feedback_fixed.emit()
 
     def _fix_project_is_dirty(self, _feedbackfeedback: Feedback) -> None:
         QgsProject.instance().write()
