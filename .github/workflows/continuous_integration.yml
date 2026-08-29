@@ -18,14 +18,17 @@ jobs:
     name: Code check
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+      - name: Checkout Code
+        uses: actions/checkout@v7
 
-    - uses: actions/setup-python@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
 
-    - uses: pre-commit/action@v3.0.1
-      env:
-        # set the `no-commit-to-branch` to be skipped, otherwise the check fails when we merge to `master` branch
-        SKIP: 'no-commit-to-branch'
+      - name: Pre-Commit
+        uses: pre-commit/action@v3.0.1
+        env:
+          # set the `no-commit-to-branch` to be skipped, otherwise the check fails when we merge to `master` branch
+          SKIP: 'no-commit-to-branch'
 
   pyqt6-check:
     name: PyQt6 compatibility check
