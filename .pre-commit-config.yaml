@@ -46,3 +46,12 @@ repos:
     rev: v2.1.0
     hooks:
     -   id: dead
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.9.4
+    hooks:
+        # Critical mandatory checks from QGIS plugin repository that prevent publishing a new version of the plugin
+        # NOTE: Ruff uses `S` and Bandit `B` prefixes, so both codes must be excluded per line.
+        # Keep in sync with https://github.com/qgis/QGIS-Plugins-Website/blob/master/qgis-app/plugins/management/commands/data/bandit_rules.json
+      - id: bandit
+        args: ["-t", "B102,B103,B105,B106,B107,B201,B202,B301,B302,B304,B305,B306,B307,B312,B321,B323,B401,B402,B412,B413,B501,B502,B503,B505,B506,B507,B601,B602,B604,B605,B609,B610,B611,B612,B613,B701", "-r", "."]

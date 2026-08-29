@@ -348,7 +348,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
 
             self.network_manager.set_url(cfg.uri())
-            self.network_manager.set_auth(self.network_manager.url, token="")
+            self.network_manager.set_auth(self.network_manager.url, token="")  # nosec B106
             # don't trust the password, just login once again
             self.network_manager.login_with_credentials(
                 cfg.config("username"), cfg.config("password")

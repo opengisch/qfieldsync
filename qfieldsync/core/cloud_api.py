@@ -67,7 +67,7 @@ HTTP_HEADER_REFERER = b"Referer"
 HTTP_HEADER_IDP_ID_FALLBACK = "X-QFC-IDP-ID"
 IDP_ID_HEADER_KEY = "idp_id_header"
 
-CSRF_TOKEN_COOKIE = "csrftoken"  # noqa: S105
+CSRF_TOKEN_COOKIE = "csrftoken"  # noqa: S105 # nosec B105
 
 OAUTH2_CONFIG_REQUEST_TIMEOUT_SECONDS = 60
 
@@ -229,7 +229,7 @@ class CloudNetworkAccessManager(QObject):
 
         self.preferences = Preferences()
         self.url = ""
-        self._token = ""
+        self._token = ""  # nosec B105
         self.user_details: dict[str, str] = {}
         self.projects_cache = CloudProjectsCache(self, self)
         self.is_login_active = False
