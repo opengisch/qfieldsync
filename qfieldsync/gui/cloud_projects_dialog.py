@@ -51,6 +51,7 @@ from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QInputDialog,
+    QLabel,
     QMenu,
     QMessageBox,
     QPushButton,
@@ -775,11 +776,28 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
             reassuring_remark = self.tr(
                 "The project will be permanently deleted from QFieldCloud, your local copy will remain unaffected"
             )
-            return QInputDialog().getText(
-                self,
-                delete_msg,
-                f"<p><b>{are_you_sure}</b></p>{maybe_warning}<p>{confirm_with} <em>{expected_input}</em>. {reassuring_remark}.</p>",
+
+            input_dialog = QInputDialog()
+            input_dialog.setInputMode(QInputDialog.InputMode.TextInput)
+            input_dialog.setWindowTitle(delete_msg)
+            input_dialog.setMinimumWidth(350)
+            input_dialog.setLabelText(
+                f"<p><b>{are_you_sure}</b></p>{maybe_warning}<p>{confirm_with} <em>{expected_input}</em>.</p>{reassuring_remark}."
             )
+
+            label_widget = input_dialog.findChild(QLabel)
+            if label_widget:
+                label_widget.setTextInteractionFlags(
+                    Qt.TextInteractionFlag.TextSelectableByMouse
+                    | Qt.TextInteractionFlag.TextSelectableByKeyboard
+                )
+                label_widget.setWordWrap(True)
+
+            ok = input_dialog.exec()
+            response = input_dialog.textValue()
+            input_dialog.deleteLater()
+
+            return response, ok
 
         text, ok = ask()
 
