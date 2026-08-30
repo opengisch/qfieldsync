@@ -20,31 +20,63 @@
  ***************************************************************************/
 """
 
-from libqfieldsync.project_checker import Feedback, ProjectCheckerFeedback
-from qgis.core import QgsApplication
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QLabel, QSizePolicy, QTableWidget, QTableWidgetItem
+from libqfieldsync.project_checker import (
+    Feedback,
+    FeedbackTypeId,
+    ProjectCheckerFeedback,
+)
+from qgis.core import QgsApplication, QgsProject
+from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.PyQt.QtWidgets import (
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QTableWidget,
+    QTableWidgetItem,
+    QWidget,
+)
 
 from qfieldsync.utils.qt_utils import make_icon
 
 
 class CheckerFeedbackTable(QTableWidget):
+    feedback_fixed = pyqtSignal()
+
     def __init__(self, checker_feedback: ProjectCheckerFeedback, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # dictionary mapping FeedbackTypeId to fix action callbacks
+        self._fix_handlers = {
+            FeedbackTypeId.PROJECT_IS_DIRTY: self._fix_project_is_dirty,
+        }
+
         self.setColumnCount(2)
         self.setHorizontalHeaderLabels(["", self.tr("Message")])
-        self.horizontalHeader().setStretchLastSection(True)
+        self.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+
         self.setRowCount(0)
         self.setMinimumHeight(100)
         self.setSizePolicy(
             QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding
         )
 
+        self.verticalHeader().hide()
+        self.horizontalHeader().sectionResized.connect(self.resizeRowsToContents)
+        self.setWordWrap(True)
+
+        self.set_feedback(checker_feedback)
+
+    def set_feedback(self, checker_feedback: ProjectCheckerFeedback) -> None:
+        self.setRowCount(0)
+
         for layer_id in checker_feedback.feedbacks:
             for feedback in checker_feedback.feedbacks[layer_id]:
                 row = self.rowCount()
-
                 self.insertRow(row)
 
                 # first column
@@ -72,6 +104,10 @@ class CheckerFeedbackTable(QTableWidget):
                 self.setItem(row, 1, item)
 
                 # we do not escape the values on purpose to support Markdown/HTML
+                cell_widget = QWidget()
+                cell_layout = QHBoxLayout(cell_widget)
+                cell_layout.setContentsMargins(0, 0, 8, 0)
+
                 label = QLabel("**{}**\n\n{}".format(source, feedback.message))
                 label.setWordWrap(True)
                 label.setMargin(5)
@@ -83,10 +119,31 @@ class CheckerFeedbackTable(QTableWidget):
                     | Qt.TextInteractionFlag.LinksAccessibleByKeyboard
                 )
                 label.setOpenExternalLinks(True)
-                self.setCellWidget(row, 1, label)
+                cell_layout.addWidget(label, stretch=1)
 
-        self.verticalHeader().hide()
-        self.resizeColumnsToContents()
+                fix_action = self._fix_handlers.get(feedback.type_id)
+                if fix_action:
+                    fix_button = QPushButton(self.tr("Fix!"))
+
+                    def on_fix_clicked(
+                        _checked: bool,
+                        action=fix_action,
+                        target_feedback=feedback,
+                    ) -> None:
+                        action(target_feedback)
+
+                        self.feedback_fixed.emit()
+
+                    fix_button.clicked.connect(on_fix_clicked)
+                    cell_layout.addWidget(
+                        fix_button,
+                        alignment=Qt.AlignmentFlag.AlignRight
+                        | Qt.AlignmentFlag.AlignVCenter,
+                    )
+
+                self.setCellWidget(row, 1, cell_widget)
+
         self.resizeRowsToContents()
-        self.horizontalHeader().sectionResized.connect(self.resizeRowsToContents)
-        self.setWordWrap(True)
+
+    def _fix_project_is_dirty(self, _feedbackfeedback: Feedback) -> None:
+        QgsProject.instance().write()
