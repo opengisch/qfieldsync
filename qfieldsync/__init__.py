@@ -41,7 +41,10 @@ for libqfieldsync_whl in src_dir.glob("libqfieldsync*.whl"):
 module_names = list(sys.modules.keys())
 for module_name in module_names:
     if module_name.startswith("libqfieldsync"):
-        importlib.reload(sys.modules[module_name])
+        try:
+            importlib.reload(sys.modules[module_name])
+        except (ModuleNotFoundError, TypeError):
+            continue
 
 
 # noinspection PyPep8Naming
