@@ -946,8 +946,8 @@ class CloudNetworkAccessManager(QObject):
         reply.setParent(self)
         multi_part.setParent(reply)
 
-        # The reply is never deleted, so release the file handles as soon as the request is over.
-        # Otherwise the files might stay open, and on Windows they cannot be deleted or overwritten.
+        # Close the files that were opened above for the multipart request.
+        # Otherwise the files might stay open, and on Windows they can then not be deleted or overwritten.
         def _close_qfiles() -> None:
             for qfile in qfiles:
                 qfile.close()
