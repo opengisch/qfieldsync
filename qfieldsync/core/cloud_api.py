@@ -916,6 +916,9 @@ class CloudNetworkAccessManager(QObject):
 
             multi_part.append(json_part)
 
+        # declare a list of opened QFiles, to keep track of them and close them later.
+        qfiles = []
+
         # now attach each file
         for filename in filenames:
             # Use setBodyDevice with QFile to stream the file, avoiding QByteArray's
@@ -925,6 +928,8 @@ class CloudNetworkAccessManager(QObject):
             qfile = QFile(filename)
             qfile.open(QFile.OpenModeFlag.ReadOnly)
             qfile.setParent(multi_part)
+            qfiles.append(qfile)
+
             file_part = QHttpPart()
             file_part.setBodyDevice(qfile)
             file_part.setHeader(
@@ -940,6 +945,14 @@ class CloudNetworkAccessManager(QObject):
         reply.sslErrors.connect(lambda ssl_errors: reply.ignoreSslErrors(ssl_errors))
         reply.setParent(self)
         multi_part.setParent(reply)
+
+        # Close the files that were opened above for the multipart request.
+        # Otherwise the files might stay open, and on Windows they can then not be deleted or overwritten.
+        def _close_qfiles() -> None:
+            for qfile in qfiles:
+                qfile.close()
+
+        reply.finished.connect(_close_qfiles)
 
         return reply
 
