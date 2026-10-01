@@ -350,6 +350,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
     def on_projects_cached_projects_updated(self) -> None:
         self.projectsStack.setEnabled(True)
+        self.createButton.setEnabled(True)
         self.projects_refreshed.emit()
         self.show_projects()
 
