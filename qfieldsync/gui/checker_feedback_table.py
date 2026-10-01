@@ -20,6 +20,8 @@
  ***************************************************************************/
 """
 
+from typing import Optional
+
 from libqfieldsync.project_checker import (
     Feedback,
     FeedbackTypeId,
@@ -121,20 +123,8 @@ class CheckerFeedbackTable(QTableWidget):
                 label.setOpenExternalLinks(True)
                 cell_layout.addWidget(label, stretch=1)
 
-                fix_action = self._fix_handlers.get(feedback.type_id)
-                if fix_action:
-                    fix_button = QPushButton(self.tr("Fix!"))
-
-                    def on_fix_clicked(
-                        _checked: bool,
-                        action=fix_action,
-                        target_feedback=feedback,
-                    ) -> None:
-                        action(target_feedback)
-
-                        self.feedback_fixed.emit()
-
-                    fix_button.clicked.connect(on_fix_clicked)
+                fix_button = self._get_feedback_fix(feedback)
+                if fix_button:
                     cell_layout.addWidget(
                         fix_button,
                         alignment=Qt.AlignmentFlag.AlignRight
@@ -145,5 +135,24 @@ class CheckerFeedbackTable(QTableWidget):
 
         self.resizeRowsToContents()
 
-    def _fix_project_is_dirty(self, _feedbackfeedback: Feedback) -> None:
+    def _get_feedback_fix(self, feedback: Feedback) -> Optional[QPushButton]:
+        """Return a QPushButton configured with a fix callback."""
+        fix_action = self._fix_handlers.get(feedback.type_id)
+        if not fix_action:
+            return None
+
+        fix_button = QPushButton(self.tr("Fix!"))
+
+        def on_fix_clicked(
+            _checked: bool,
+            action=fix_action,
+            target_feedback=feedback,
+        ) -> None:
+            action(target_feedback)
+            self.feedback_fixed.emit()
+
+        fix_button.clicked.connect(on_fix_clicked)
+        return fix_button
+
+    def _fix_project_is_dirty(self, _feedback: Feedback) -> None:
         QgsProject.instance().write()

@@ -164,15 +164,18 @@ class PackageDialog(QDialog, DialogUi):
             self.show_package_page()
 
     def refresh_project_compatibility_page(self):
-        if Path(self.project.fileName()).exists():
-            feedback = self.project_checker.check(ExportType.Cable)
-            if feedback.count == 0:
-                # All issues resolved -> advance directly to package page
-                self.show_package_page()
-            else:
-                self.feedback_table.set_feedback(feedback)
-                has_errors = len(feedback.error_feedbacks) > 0
-                self.nextButton.setEnabled(not has_errors)
+        # The project file might not exist on disk if the current session is an unsaved, newly created QGIS project
+        if not Path(self.project.fileName()).exists():
+            return
+
+        feedback = self.project_checker.check(ExportType.Cable)
+        if feedback.count == 0:
+            # All issues resolved -> advance directly to package page
+            self.show_package_page()
+        else:
+            self.feedback_table.set_feedback(feedback)
+            has_errors = len(feedback.error_feedbacks) > 0
+            self.nextButton.setEnabled(not has_errors)
 
     def get_export_filename_suggestion(self) -> str:
         """Get the suggested export filename"""
