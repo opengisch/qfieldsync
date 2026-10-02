@@ -265,14 +265,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         if not self.is_project_compatible_page_prepared:
             feedback = None
             if self.cloud_project and self.cloud_project.is_current_qgis_project:
-                checker = ProjectChecker(QgsProject.instance())
-                feedback = checker.check(ExportType.Cloud)
+                self.project_checker = ProjectChecker(QgsProject.instance())
+                feedback = self.project_checker.check(ExportType.Cloud)
 
             if feedback and feedback.count > 0:
                 # check whether the widget has already been added the guard from adding twice due to repeated showEvent signal
                 has_errors = len(feedback.error_feedbacks) > 0
-                feedback_table = CheckerFeedbackTable(feedback)
-                self.feedbackTableWrapperLayout.addWidget(feedback_table)
+                self.feedback_table = CheckerFeedbackTable(feedback)
+                self.feedback_table.feedback_fixed.connect(
+                    self.refresh_project_compatibility_page
+                )
+                self.feedbackTableWrapperLayout.addWidget(self.feedback_table)
                 self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
                 self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setVisible(
                     True
@@ -287,6 +290,20 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.show_project_files_fetching_page()
 
             self.is_project_compatible_page_prepared = True
+
+    def refresh_project_compatibility_page(self):
+        if not self.cloud_project or not self.cloud_project.is_current_qgis_project:
+            return
+
+        feedback = self.project_checker.check(ExportType.Cloud)
+        if feedback.count == 0:
+            self.show_project_files_fetching_page()
+        else:
+            self.feedback_table.set_feedback(feedback)
+            has_errors = len(feedback.error_feedbacks) > 0
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Apply).setEnabled(
+                not has_errors
+            )
 
     def show_project_files_fetching_page(self):
         self.stackedWidget.setCurrentWidget(self.getProjectFilesPage)
