@@ -40,7 +40,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.uic import loadUiType
 
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager, QfcError
-from qfieldsync.core.cloud_project import CloudProject
+from qfieldsync.core.cloud_project import CloudProject, ProjectType
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.cloud_login_dialog import CloudLoginDialog
