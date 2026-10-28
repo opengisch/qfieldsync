@@ -110,4 +110,4 @@ def get_cloud_project_status_color(cloud_project: "CloudProject") -> QColor:
     elif cloud_project.status == "failed":
         return QColor("#dc3545")
 
-    raise NotImplementedError()
+    return QColor("#808080")

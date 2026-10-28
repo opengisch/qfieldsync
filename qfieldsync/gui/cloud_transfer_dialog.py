@@ -637,6 +637,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 provider_metadata = QgsProviderRegistry.instance().providerMetadata(
                     project_layer.providerType()
                 )
+                if provider_metadata is None:
+                    continue
+
                 metadata = provider_metadata.decodeUri(project_layer.source())
                 if (
                     metadata.get("path", "") != ""
@@ -793,7 +796,9 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 False
             )
 
-            has_localized_datasets_uploads = len(files["localized_datasets_to_upload"])
+            has_localized_datasets_uploads = (
+            len(files["localized_datasets_to_upload"]) > 0
+        )
             self.localizedDatasetsUploadLabel.setVisible(has_localized_datasets_uploads)
             self.localizedDatasetsUploadProgressBar.setVisible(
                 has_localized_datasets_uploads
@@ -1117,7 +1122,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         for f in files["to_delete"]:
             if f.checkout & ProjectFileCheckout.Local:
                 local_delete_count += 1
-            elif f.checkout & ProjectFileCheckout.Local:
+            elif f.checkout & ProjectFileCheckout.Cloud:
                 cloud_delete_count += 1
 
         localized_datasets_upload_message = ""

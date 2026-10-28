@@ -81,11 +81,16 @@ HTTP_500 = 500
 
 class QfcError(Exception):
     def __init__(self, reply, exception: Optional[Exception] = None):
+        if isinstance(reply, str) and exception is None:
+            exception = Exception(reply)
+            reply = None
         super().__init__(exception)
         self.reply = reply
         self.parent = exception
-        self.httpCode = reply.attribute(
-            QNetworkRequest.Attribute.HttpStatusCodeAttribute
+        self.httpCode = (
+            reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
+            if reply is not None and hasattr(reply, "attribute")
+            else None
         )
 
 
@@ -113,7 +118,7 @@ def from_reply(reply: QNetworkReply) -> Optional[QfcError]:
         payload = reply.readAll().data()
         # workaround to https://github.com/qgis/QGIS/issues/49687
         content_length = reply.header(QNetworkRequest.KnownHeaders.ContentLengthHeader)
-        payload = payload[:content_length].decode()
+        payload = payload[:content_length].decode("utf-8", errors="replace")
 
         try:
             resp = json.loads(payload)
@@ -340,7 +345,7 @@ class CloudNetworkAccessManager(QObject):
         elif self.auth_method == CloudAuthMethod.SSO:
             return self.current_username
         else:
-            raise NotImplementedError("Unknown auth method: {self.auth_method}")
+            raise NotImplementedError(f"Unknown auth method: {self.auth_method}")
 
     def auth(self) -> QgsAuthMethodConfig:
         auth_manager = QgsApplication.authManager()
@@ -1189,7 +1194,8 @@ class CloudNetworkAccessManager(QObject):
                 name=LOCALIZED_DATASETS_PROJECT_NAME,
                 owner=owner,
                 description="",
-                private=True,
+                is_public=False,
+                project_type=ProjectType.SHARED_DATASETS,
             )
             loop = QEventLoop()
             reply.finished.connect(loop.quit)

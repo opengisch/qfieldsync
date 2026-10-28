@@ -89,6 +89,7 @@ def rounded_pixmap(img_path: str, diameter: int) -> QPixmap:
 
         painter.drawPixmap(0, 0, pixmap)
 
+    painter.end()
     return target_pixmap
 
 

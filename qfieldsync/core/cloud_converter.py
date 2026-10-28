@@ -94,7 +94,7 @@ class CloudConverter(QObject):
                         layer.dataProvider()
                         and layer.dataProvider().name() == "virtual"
                     ):
-                        url = QUrl.fromEncoded(layer.source().encode("ascii"))
+                        url = QUrl.fromEncoded(layer.source().encode("utf-8"))
                         valid = url.isValid()
                         if valid:
                             definition = QgsVirtualLayerDefinition.fromUrl(url)

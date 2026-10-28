@@ -175,13 +175,10 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         layers = []
         if show_visible_only:
+            root = QgsProject.instance().layerTreeRoot()
             for layer_source in self.layer_sources:
-                if (
-                    QgsProject.instance()
-                    .layerTreeRoot()
-                    .findLayer(layer_source.layer.id())
-                    .isVisible()
-                ):
+                node = root.findLayer(layer_source.layer.id())
+                if node and node.isVisible():
                     layers.append(layer_source)
         else:
             layers = self.layer_sources
@@ -289,7 +286,6 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                 if self.get_layer_action(layer_source) != old_action:
                     self.project.setDirty(True)
 
-                layer_source.apply()
                 is_project_dirty |= layer_source.apply()
 
         return is_project_dirty
@@ -306,10 +302,9 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
 
         assert root_item
 
-        for layer in project.mapLayers().values():
-            node = root_item.findLayer(layer.id())
+        for layer_source in self.layer_sources:
+            node = root_item.findLayer(layer_source.layer.id())
             if node and node.isVisible() == is_visible:
-                layer_source = LayerSource(layer)
                 old_action = self.get_layer_action(layer_source)
                 available_actions, _ = zip(*self.get_available_actions(layer_source))
 
@@ -323,7 +318,6 @@ class LayersConfigWidget(QWidget, LayersConfigWidgetUi):
                     if self.get_layer_action(layer_source) != old_action:
                         self.project.setDirty(True)
 
-                    layer_source.apply()
                     is_project_dirty |= layer_source.apply()
 
         return is_project_dirty

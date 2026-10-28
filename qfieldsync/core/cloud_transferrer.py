@@ -399,7 +399,18 @@ class CloudTransferrer(QObject):
                 continue
 
             source_filename = str(filename.relative_to(subdir_path).as_posix())
-            dest_filename = str(self._files_to_download[source_filename].local_path)
+            if source_filename.endswith((".gpkg-shm", ".gpkg-wal")):
+                continue
+
+            project_file = self._files_to_download.get(
+                source_filename
+            ) or self._files_to_upload.get(source_filename)
+            if project_file and project_file.local_path:
+                dest_filename = str(project_file.local_path)
+            else:
+                dest_filename = str(
+                    self.cloud_project.local_dir.joinpath(source_filename)
+                )
 
             dest_path = Path(dest_filename)
             if not dest_path.parent.exists():
@@ -414,8 +425,6 @@ class CloudTransferrer(QObject):
                         shutil.copyfile(source_path, dest_path)
                     elif dest_path.exists():
                         dest_path.unlink()
-            elif source_filename.endswith((".gpkg-shm", ".gpkg-wal")):
-                continue
 
             shutil.copyfile(filename, dest_filename)
 
