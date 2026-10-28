@@ -124,7 +124,7 @@ class SynchronizeDialog(QDialog, DialogUi):
             project_config = ProjectConfig(QgsProject.instance())
             original_path = Path(project_config.original_project_path or "")
 
-            if not original_path.exists():
+            if not original_path.is_file():
                 answer = QMessageBox.warning(
                     self,
                     self.tr("Original project not found"),
@@ -137,7 +137,7 @@ class SynchronizeDialog(QDialog, DialogUi):
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 )
 
-                if answer == QMessageBox.StandardButton.Ok:
+                if answer == QMessageBox.StandardButton.Yes:
                     project_config.original_project_path = str(current_path)
                     original_path = current_path
                 else:
@@ -155,7 +155,7 @@ class SynchronizeDialog(QDialog, DialogUi):
                     )
                 )
 
-            if original_path.exists() and open_project(
+            if original_path.is_file() and open_project(
                 str(original_path), backup_project_path
             ):
                 import_dirs_to_copy = self.dirsToCopyWidget.load_settings()

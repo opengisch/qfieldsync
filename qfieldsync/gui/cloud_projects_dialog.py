@@ -537,10 +537,8 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
     def on_download_file_finished(self, transfer: FileTransfer) -> None:
         if transfer.is_failed:
             self.set_feedback(
-                self.tr(
-                    'Downloading file "{}" failed: {}'.format(
-                        transfer.name, str(transfer.error)
-                    )
+                self.tr('Downloading file "{}" failed: {}').format(
+                    transfer.filename, str(transfer.error)
                 )
             )
             return

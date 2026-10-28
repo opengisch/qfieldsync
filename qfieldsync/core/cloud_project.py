@@ -400,19 +400,21 @@ class CloudProject:
             metadata = QgsProviderRegistry.instance().providerMetadata(
                 layer.dataProvider().name()
             )
-            metadata.decodeUri(layer.source())
+            if not metadata:
+                continue
 
             filename = metadata.decodeUri(layer.source()).get("path", "")
             if not filename:
                 continue
 
             for localized_data_path in localized_data_paths:
-                if not filename.startswith(localized_data_path):
+                try:
+                    localized_datasets_name = (
+                        Path(filename).relative_to(localized_data_path).as_posix()
+                    )
+                except ValueError:
                     continue
 
-                localized_datasets_name = (
-                    Path(filename).relative_to(localized_data_path).as_posix()
-                )
                 localized_datasets_files.append(
                     ProjectFile(
                         {"name": localized_datasets_name},

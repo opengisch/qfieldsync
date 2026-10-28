@@ -145,7 +145,10 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.serverUrlCmb.setCurrentText(cfg.uri() or self.network_manager.url)
         self.serverUrlCmb.editTextChanged.connect(self.on_server_url_edit_text_changed)
 
-        if self.network_manager == CloudAuthMethod.CREDENTIALS:
+        if (
+            getattr(self.network_manager, "auth_method", None)
+            == CloudAuthMethod.CREDENTIALS
+        ):
             self.usernameLineEdit.setText(cfg.config("username"))
             self.passwordLineEdit.setText(cfg.config("password"))
 
@@ -291,7 +294,10 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
             button: button to apply the style to.
 
         """
-        theme = style_data.get(extract_theme_from_qgis_settings())
+        if not style_data:
+            return
+
+        theme = style_data.get(extract_theme_from_qgis_settings()) or {}
         button.setStyleSheet(
             """
             background-color: {color_fill};
@@ -307,10 +313,11 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
 
         # download svg logo and apply it to button
         icon_url = theme.get("logo")
-        icon_reply = self.network_manager.get_remote_resource(icon_url)
-        icon_reply.finished.connect(
-            partial(self.on_get_svg_logo_reply_finished, icon_reply, button)
-        )
+        if icon_url:
+            icon_reply = self.network_manager.get_remote_resource(icon_url)
+            icon_reply.finished.connect(
+                partial(self.on_get_svg_logo_reply_finished, icon_reply, button)
+            )
 
     def on_get_svg_logo_reply_finished(self, reply, button: QPushButton) -> None:
         if reply.error() != QNetworkReply.NetworkError.NoError:
