@@ -27,7 +27,8 @@ from qgis.core import QgsOfflineEditing, QgsProject
 from qgis.testing import start_app, unittest
 from qgis.testing.mocked import get_iface
 
-start_app()
+# Cleaning up the application is turned off to avoid segfaults upon exiting tests
+start_app(cleanup=False)
 
 
 class OfflineConverterTest(unittest.TestCase):
