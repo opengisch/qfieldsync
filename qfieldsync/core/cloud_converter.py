@@ -125,7 +125,7 @@ class CloudConverter(QObject):
                             self.project.removeMapLayer(layer)
                             continue
                 else:
-                    layer_source.copy(self.export_dirname, [])
+                    layer_source.copy(project_path, self.export_dirname, [])
 
                 layer.setCustomProperty(
                     "QFieldSync/cloud_action", layer_source.default_cloud_action
