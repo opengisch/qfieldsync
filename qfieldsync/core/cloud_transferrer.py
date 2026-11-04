@@ -414,7 +414,9 @@ class CloudTransferrer(QObject):
                         shutil.copyfile(source_path, dest_path)
                     elif dest_path.exists():
                         dest_path.unlink()
-            elif source_filename.endswith((".gpkg-shm", ".gpkg-wal")):
+            elif source_filename.endswith(
+                (".gpkg-shm", ".gpkg-wal")
+            ) or source_filename.endswith((".mbtiles-shm", ".mbtiles-wal")):
                 continue
 
             shutil.copyfile(filename, dest_filename)
