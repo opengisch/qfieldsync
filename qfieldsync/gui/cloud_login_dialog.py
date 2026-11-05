@@ -35,11 +35,11 @@ from qgis.PyQt.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QWidget,
 )
 from qgis.PyQt.uic import loadUiType
-from qgis.utils import iface
 
 from qfieldsync.core.cloud_api import (
     OAUTH2_CONFIG_REQUEST_TIMEOUT_SECONDS,
@@ -409,7 +409,8 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         # If QFieldCloud is providing OAuth2 IDPs and QGIS has version < 3.44,
         # OAuth2 extra_tokens are not supported.
         if Qgis.versionInt() < QGIS_MIN_VERSION_FOR_OAUTH2_EXTRA_TOKENS:
-            iface.messageBar().pushWarning(
+            QMessageBox.warning(
+                None,
                 "QFieldSync",
                 self.tr(
                     "QFieldCloud supports SSO login methods which require QGIS 3.44 or newer. Please upgrade QGIS."
