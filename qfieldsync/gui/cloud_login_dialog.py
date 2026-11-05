@@ -413,7 +413,7 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
                 None,
                 "QFieldSync",
                 self.tr(
-                    "QFieldCloud supports SSO login methods which require QGIS 3.44 or newer. Please upgrade QGIS."
+                    "QFieldCloud SSO login requires QGIS 3.44 or newer, please upgrade QGIS."
                 ),
             )
             return
