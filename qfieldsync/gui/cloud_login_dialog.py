@@ -230,25 +230,6 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
         self.signInUsernameGroupBox.setEnabled(True)
         self.ssoLoginOngoingGroupBox.hide()
 
-        has_oauth2_providers = any(
-            auth_method.get("type") == "oauth2" for auth_method in auth_methods
-        )
-
-        # If QFieldCloud is providing OAuth2 IDPs and QGIS has version < 3.44,
-        # OAuth2 extra_tokens are not supported.
-        if (
-            has_oauth2_providers
-            and Qgis.versionInt() < QGIS_MIN_VERSION_FOR_OAUTH2_EXTRA_TOKENS
-        ):
-            iface.messageBar().pushWarning(
-                "QFieldSync",
-                self.tr(
-                    "QFieldCloud supports SSO login methods which require QGIS 3.44 or newer. Please upgrade QGIS."
-                ),
-            )
-
-            return
-
         self.clear_login_widgets()
 
         has_credentials = False
@@ -425,6 +406,17 @@ class CloudLoginDialog(QDialog, CloudLoginDialogUi):
     def on_login_with_sso_provider_button_clicked(
         self, provider_data: dict[str, Any]
     ) -> None:
+        # If QFieldCloud is providing OAuth2 IDPs and QGIS has version < 3.44,
+        # OAuth2 extra_tokens are not supported.
+        if Qgis.versionInt() < QGIS_MIN_VERSION_FOR_OAUTH2_EXTRA_TOKENS:
+            iface.messageBar().pushWarning(
+                "QFieldSync",
+                self.tr(
+                    "QFieldCloud supports SSO login methods which require QGIS 3.44 or newer. Please upgrade QGIS."
+                ),
+            )
+            return
+
         server_url = self.serverUrlCmb.currentText()
         auth_config = build_oauth2_auth_config(
             provider_data,
