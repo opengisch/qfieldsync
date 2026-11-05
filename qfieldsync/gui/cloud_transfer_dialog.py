@@ -198,6 +198,10 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self.preferNoneButton.clicked.connect(self._on_prefer_none_button_clicked)
         self.preferLocalButton.clicked.connect(self._on_prefer_local_button_clicked)
         self.preferCloudButton.clicked.connect(self._on_prefer_cloud_button_clicked)
+        # connect once here and not in `showEvent`, which is emitted on every `show()`/`open()`
+        self.localDirectoryButton.clicked.connect(
+            make_folder_selector(self.localDirectoryLineEdit)
+        )
 
         self.localDirOpenButton.clicked.connect(
             lambda: self.on_local_dir_open_button_clicked()
@@ -256,9 +260,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
 
         self.localDirectoryLineEdit.setText(
             QDir.toNativeSeparators(str(get_unique_empty_dirname(export_dirname)))
-        )
-        self.localDirectoryButton.clicked.connect(
-            make_folder_selector(self.localDirectoryLineEdit)
         )
 
     def show_project_compatibility_page(self):
