@@ -82,6 +82,8 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         else:
             self.network_manager.projects_cache.refresh()
 
+        self.cancelButton.clicked.connect(self.on_cancel_button_clicked)
+        self.nextButton.clicked.connect(self.on_next_button_clicked)
         self.backButton.clicked.connect(self.on_back_button_clicked)
         self.createButton.clicked.connect(self.on_create_button_clicked)
         self.localDirButton.clicked.connect(self.on_local_dir_button_clicked)
@@ -128,11 +130,19 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.storage_widget = StorageWidget(self.network_manager, self)
         self.projectDetailsLayout.addWidget(self.storage_widget, 6, 1)
 
-        if self.network_manager.is_authenticated():
-            self.setup_project_details_page()
-
     def restart(self) -> None:
+        self.stackedWidget.setCurrentWidget(self.newProjectInformationPage)
+
+    def on_next_button_clicked(self) -> None:
+        """Navigates from introduction page to project details."""
         self.setup_project_details_page()
+
+    def on_back_button_clicked(self) -> None:
+        """Navigates back to the introduction page."""
+        self.stackedWidget.setCurrentWidget(self.newProjectInformationPage)
+
+    def on_cancel_button_clicked(self) -> None:
+        self.canceled.emit()
 
     def setup_project_details_page(self) -> None:
         """Initializes values on projectDetailsPage."""
@@ -317,15 +327,8 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
     def on_project_owner_refresh_button_click(self):
         self.refresh_project_owners()
 
-    def on_back_button_clicked(self):
-        self.canceled.emit()
-
     def on_create_button_clicked(self):
-        self.infoLabel.setText(
-            self.tr(
-                "A new blank QFieldCloud project will be created. Project files will only be uploaded when you click the synchronize button."
-            )
-        )
+        self.infoLabel.setText(self.createCloudInfoLabel.text())
         self.create_empty_cloud_project()
 
     def on_local_dir_button_clicked(self):
