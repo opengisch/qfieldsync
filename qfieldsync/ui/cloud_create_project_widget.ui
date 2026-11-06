@@ -31,52 +31,29 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="newProjectInformationPage">
+     <widget class="QWidget" name="projectCompatibilityPage">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="createCloudTitleLabel">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
+        <widget class="QLabel" name="compatibilityInfoLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
          <property name="text">
-          <string>Create a new cloud project</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="createCloudInfoLabel">
-         <property name="text">
-          <string>A new blank QFieldCloud project will be created. You will be responsible to move all the project-related files within the selected local directory, with the project file at its root. Project files will only be uploaded when you click the synchronize button. Make sure the selected directory contains no more than one QGIS project file.</string>
+          <string>The project checks provide automatic feedback for common issues when preparing projects for QField and QFieldCloud. Find below a list of improvement suggestions and errors that must be fixed before proceeding.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
          </property>
-         <property name="openExternalLinks">
-          <bool>false</bool>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::NoTextInteraction</set>
-         </property>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+        <layout class="QVBoxLayout" name="checkerTableLayout"/>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QHBoxLayout" name="checkerButtonsHLayout">
          <item>
           <widget class="QPushButton" name="cancelButton">
            <property name="text">
@@ -85,7 +62,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer">
+          <spacer name="checkerHorizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
