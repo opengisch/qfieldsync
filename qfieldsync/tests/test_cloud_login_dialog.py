@@ -34,8 +34,7 @@ from qfieldsync.gui.cloud_login_dialog import (
     CloudLoginDialog,
 )
 
-# Cleaning up the application is turned off to avoid segfaults upon exiting tests
-start_app(cleanup=False)
+start_app()
 
 
 class DummySignal:

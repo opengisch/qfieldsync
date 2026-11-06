@@ -23,8 +23,7 @@ from qgis.testing.mocked import get_iface
 
 from qfieldsync.gui.package_dialog import PackageDialog
 
-# Cleaning up the application is turned off to avoid segfaults upon exiting tests
-start_app(cleanup=False)
+start_app()
 
 
 class PackageDialogTest(unittest.TestCase):
