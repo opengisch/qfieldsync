@@ -89,9 +89,12 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.network_manager.projects_cache.refresh()
 
         self.cancelButton.clicked.connect(self.on_cancel_button_clicked)
-        self.nextButton.clicked.connect(self.on_next_button_clicked)
-        self.backButton.clicked.connect(self.on_back_button_clicked)
+        self.nextButton.clicked.connect(self.on_intro_next_button_clicked)
+        self.checkerBackButton.clicked.connect(self.on_checker_back_button_clicked)
+        self.checkerNextButton.clicked.connect(self.on_checker_next_button_clicked)
+        self.backButton.clicked.connect(self.on_details_back_button_clicked)
         self.createButton.clicked.connect(self.on_create_button_clicked)
+
         self.localDirButton.clicked.connect(self.on_local_dir_button_clicked)
         self.localDirLineEdit.textChanged.connect(
             self.on_dirname_line_edit_text_changed
@@ -136,19 +139,12 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         self.storage_widget = StorageWidget(self.network_manager, self)
         self.projectDetailsLayout.addWidget(self.storage_widget, 6, 1)
 
-        if self.network_manager.is_authenticated():
-            self.setup_checker_page()
-
     def restart(self) -> None:
-        self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
-        if self.network_manager.is_authenticated():
-            self.setup_checker_page()
+        self._clear_checker_table()
+        self.stackedWidget.setCurrentWidget(self.newProjectInformationPage)
 
-    def setup_checker_page(self) -> None:
-        """Runs ProjectChecker and builds the feedback table"""
-        if not self.network_manager.is_authenticated():
-            return
-
+    def _clear_checker_table(self) -> None:
+        """Removes existing feedback table widget and clears layout."""
         while self.checkerTableLayout.count():
             child = self.checkerTableLayout.takeAt(0)
             if child.widget():
@@ -156,11 +152,17 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         self.feedback_table = None
 
+    def on_intro_next_button_clicked(self) -> None:
+        """Runs ProjectChecker when leaving intro page and routes accordingly."""
+        if not self.network_manager.is_authenticated():
+            return
+
         feedback = None
         if os.path.exists(self.project.fileName()):
             feedback = self.project_checker.check(ExportType.Cloud)
 
         if feedback and feedback.count > 0:
+            self._clear_checker_table()
             has_errors = len(feedback.error_feedbacks) > 0
 
             self.feedback_table = CheckerFeedbackTable(
@@ -172,13 +174,13 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
             self.checkerTableLayout.addWidget(self.feedback_table)
             self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
 
-            self.nextButton.setEnabled(not has_errors)
+            self.checkerNextButton.setEnabled(not has_errors)
             if has_errors:
-                self.nextButton.setToolTip(
+                self.checkerNextButton.setToolTip(
                     self.tr("Please fix critical project errors before continuing.")
                 )
             else:
-                self.nextButton.setToolTip("")
+                self.checkerNextButton.setToolTip("")
         else:
             self.setup_project_details_page()
 
@@ -189,27 +191,38 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         feedback = self.project_checker.check(ExportType.Cloud)
         if not feedback or feedback.count == 0:
-            while self.checkerTableLayout.count():
-                child = self.checkerTableLayout.takeAt(0)
-
-                if child.widget():
-                    child.widget().deleteLater()
-
-            self.feedback_table = None
+            self._clear_checker_table()
             self.setup_project_details_page()
         else:
             if self.feedback_table:
                 self.feedback_table.set_feedback(feedback)
 
             has_errors = len(feedback.error_feedbacks) > 0
-            self.nextButton.setEnabled(not has_errors)
-
+            self.checkerNextButton.setEnabled(not has_errors)
             if has_errors:
-                self.nextButton.setToolTip(
+                self.checkerNextButton.setToolTip(
                     self.tr("Please fix critical project errors before continuing.")
                 )
             else:
-                self.nextButton.setToolTip("")
+                self.checkerNextButton.setToolTip("")
+
+    def on_checker_back_button_clicked(self) -> None:
+        """Navigates from compatibility page back to introduction page."""
+        self.stackedWidget.setCurrentWidget(self.newProjectInformationPage)
+
+    def on_checker_next_button_clicked(self) -> None:
+        """Navigates from compatibility page to project details."""
+        self.setup_project_details_page()
+
+    def on_details_back_button_clicked(self) -> None:
+        """Navigates back from project details page."""
+        if self.feedback_table is not None and self.checkerTableLayout.count() > 0:
+            self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
+        else:
+            self.stackedWidget.setCurrentWidget(self.newProjectInformationPage)
+
+    def on_cancel_button_clicked(self) -> None:
+        self.canceled.emit()
 
     def setup_project_details_page(self) -> None:
         """Initializes values on projectDetailsPage."""
@@ -233,20 +246,6 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
 
         self.set_dirname(default_dir)
         self.update_info_visibility()
-
-    def on_next_button_clicked(self) -> None:
-        """Navigates from compatibility checks to project details"""
-        self.setup_project_details_page()
-
-    def on_back_button_clicked(self) -> None:
-        """Navigates back to compatibility checks if active, or cancels dialog"""
-        if self.checkerTableLayout.count() > 0:
-            self.stackedWidget.setCurrentWidget(self.projectCompatibilityPage)
-        else:
-            self.canceled.emit()
-
-    def on_cancel_button_clicked(self) -> None:
-        self.canceled.emit()
 
     def get_cloud_project_name(self) -> str:
         return self.projectNameLineEdit.text()
@@ -405,15 +404,11 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         if self.storage_widget.owner() != self.projectOwnerComboBox.currentText():
             self.storage_widget.set_owner(self.projectOwnerComboBox.currentText())
 
-    def on_project_owner_refresh_button_click(self):
+    def on_project_owner_refresh_button_click(self) -> None:
         self.refresh_project_owners()
 
     def on_create_button_clicked(self):
-        self.infoLabel.setText(
-            self.tr(
-                "A new blank QFieldCloud project will be created. Project files will only be uploaded when you click the synchronize button."
-            )
-        )
+        self.infoLabel.setText(self.createCloudInfoLabel.text())
         self.create_empty_cloud_project()
 
     def on_local_dir_button_clicked(self):
