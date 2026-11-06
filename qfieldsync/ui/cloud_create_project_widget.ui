@@ -31,7 +31,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="selectTypePage">
+     <widget class="QWidget" name="newProjectInformationPage">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QLabel" name="createCloudTitleLabel">
