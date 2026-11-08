@@ -64,7 +64,7 @@ def local_dir_feedback(  # noqa: PLR0913, PLR0911
     dummy = QObject()
     if not local_dir:
         return no_path_status, dummy.tr(
-            "Please select local directory where the project to be stored."
+            "Please select a local directory where the project will be stored."
         )
     elif not Path(local_dir).is_absolute():
         return relative_status, dummy.tr(
