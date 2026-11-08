@@ -154,6 +154,13 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
 
         self.projectsSearch.textChanged.connect(self.filter_projects_search)
 
+        self.projectsTable.setWordWrap(False)
+        self.projectsTable.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
+        self.projectsTable.horizontalHeader().hide()
+        self.projectsTable.verticalHeader().hide()
+
         self.cloud_projects_model = CloudProjectsModel(self.network_manager, self)
         self.cloud_projects_model.set_include_public(False)
         self.cloud_projects_model.refreshed.connect(
