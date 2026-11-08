@@ -159,13 +159,13 @@
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
          <property name="sortingEnabled">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>60</number>
          </attribute>
          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-          <bool>true</bool>
+          <bool>false</bool>
          </attribute>
         </widget>
        </item>

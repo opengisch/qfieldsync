@@ -122,7 +122,9 @@ class CloudProjectsModelBase(QStandardItemModel):
     def _get_name_item(self, cloud_project: CloudProject) -> QStandardItem:
         item = QStandardItem()
         item.setData(cloud_project, Qt.ItemDataRole.UserRole)
-        item.setData(cloud_project.name, Qt.ItemDataRole.EditRole)
+        item.setData(
+            f"{cloud_project.owner} / {cloud_project.name}", Qt.ItemDataRole.EditRole
+        )
         item.setData(
             self._get_name_item_pixmap(cloud_project), Qt.ItemDataRole.DecorationRole
         )
@@ -174,9 +176,8 @@ class CloudProjectsModelBase(QStandardItemModel):
                 self.appendRow(
                     [
                         self._get_name_item(cloud_project),
-                        QStandardItem(cloud_project.owner),
                     ]
                 )
 
-        self.setHorizontalHeaderLabels(["Name", "Owner"])
+        self.setHorizontalHeaderLabels(["Name"])
         self.refreshed.emit()
