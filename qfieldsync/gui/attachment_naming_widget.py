@@ -20,8 +20,9 @@
  ***************************************************************************/
 """
 
+from libqfieldsync.layer import LayerSource
 from qgis.core import QgsMapLayer
-from qgis.gui import QgsFieldExpressionWidget
+from qgis.gui import QgsCheckableComboBox, QgsFieldExpressionWidget
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QTableWidget, QTableWidgetItem
 
@@ -30,11 +31,21 @@ class AttachmentNamingTableWidget(QTableWidget):
     def __init__(self):
         super().__init__()
 
-        self.setColumnCount(3)
+        self.setColumnCount(4)
         self.setHorizontalHeaderLabels(
-            [self.tr("Layer"), self.tr("Field"), self.tr("Naming Expression")]
+            [
+                self.tr("Layer"),
+                self.tr("Field"),
+                self.tr("Accepted Types"),
+                self.tr("Naming Expression"),
+            ]
         )
         self.horizontalHeaderItem(2).setToolTip(
+            self.tr(
+                "Restrict the types of attachments QField users can add, anything is accepted when none is checked"
+            )
+        )
+        self.horizontalHeaderItem(3).setToolTip(
             self.tr("Enter expression for a file path with the extension .jpg")
         )
         self.horizontalHeader().setStretchLastSection(True)
@@ -59,10 +70,27 @@ class AttachmentNamingTableWidget(QTableWidget):
             item = QTableWidgetItem(field_name)
             item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             self.setItem(row, 1, item)
+            cmb = QgsCheckableComboBox()
+            cmb.setDefaultText(self.tr("Anything"))
+            cmb.addItem(
+                self.tr("Image"), LayerSource.AttachmentAcceptedType.IMAGE.value
+            )
+            cmb.addItem(
+                self.tr("Video"), LayerSource.AttachmentAcceptedType.VIDEO.value
+            )
+            cmb.addItem(
+                self.tr("Audio"), LayerSource.AttachmentAcceptedType.AUDIO.value
+            )
+            for accepted_type in layer_source.attachment_accepted_types(field_name):
+                cmb.setItemCheckState(
+                    cmb.findData(accepted_type.value), Qt.CheckState.Checked
+                )
+
+            self.setCellWidget(row, 2, cmb)
             ew = QgsFieldExpressionWidget()
             ew.setLayer(layer)
             ew.setExpression(layer_source.attachment_naming(field_name))
-            self.setCellWidget(row, 2, ew)
+            self.setCellWidget(row, 3, ew)
 
         self.resizeColumnsToContents()
 
@@ -73,7 +101,12 @@ class AttachmentNamingTableWidget(QTableWidget):
         for i in range(self.rowCount()):
             layer_source = self.item(i, 0).data(Qt.ItemDataRole.UserRole)
             field_name = self.item(i, 1).text()
-            new_expression = self.cellWidget(i, 2).currentText()
+            accepted_types = [
+                LayerSource.AttachmentAcceptedType(value)
+                for value in self.cellWidget(i, 2).checkedItemsData()
+            ]
+            layer_source.set_attachment_accepted_types(field_name, accepted_types)
+            new_expression = self.cellWidget(i, 3).currentText()
             layer_source.set_attachment_naming(field_name, new_expression)
 
             if should_apply:
