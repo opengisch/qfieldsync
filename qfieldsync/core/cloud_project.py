@@ -289,6 +289,14 @@ class CloudProject:
         return self._data["user_role_origin"]
 
     @property
+    def has_restricted_projectfiles(self) -> bool:
+        return bool(self._data.get("has_restricted_projectfiles", False))
+
+    @property
+    def the_qgis_file_name(self) -> Optional[str]:
+        return self._data.get("the_qgis_file_name")
+
+    @property
     def status(self) -> bool:
         # TODO @suricactus: remove as soon as all API servers support `status` key
         return self._data.get("status", "busy")
