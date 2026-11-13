@@ -52,11 +52,12 @@ from qgis.utils import iface
 from qfieldsync.core.cloud_api import CloudNetworkAccessManager
 from qfieldsync.core.cloud_project import CloudProject, ProjectFile, ProjectFileCheckout
 from qfieldsync.core.cloud_transferrer import CloudTransferrer, TransferFileLogsModel
-from qfieldsync.core.errors import QFieldSyncError
+from qfieldsync.core.errors import CannotUploadFileError, QFieldSyncError
 from qfieldsync.core.preferences import Preferences
 from qfieldsync.gui.checker_feedback_table import CheckerFeedbackTable
 from qfieldsync.gui.storage_widget import StorageWidget
 from qfieldsync.utils.file_utils import filesizeformat10
+from qfieldsync.utils.permissions import check_can_upload_file
 from qfieldsync.utils.qt_utils import make_folder_selector, make_icon, make_pixmap
 
 CloudTransferDialogUi, _ = loadUiType(
@@ -880,11 +881,19 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
     ) -> None:
         assert self.cloud_project
 
-        is_local_enabled = self.cloud_project.user_role != "reader"
+        local_checkbox = QCheckBox()
+
+        try:
+            check_can_upload_file(self.cloud_project, project_file.path)
+            local_checkbox.setEnabled(True)
+        except CannotUploadFileError as err:
+            local_checkbox.setEnabled(False)
+            local_checkbox.setToolTip(str(err))
+
         is_cloud_enabled = bool(project_file.checkout & ProjectFileCheckout.Cloud)
         is_local_checked = False
 
-        if is_local_enabled and project_file.local_path_exists:
+        if local_checkbox.isEnabled() and project_file.local_path_exists:
             assert self.cloud_project.local_dir
 
             local_updated_at = datetime.fromtimestamp(
@@ -899,8 +908,6 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             else:
                 is_local_checked = True
 
-        local_checkbox = QCheckBox()
-        local_checkbox.setEnabled(is_local_enabled)
         local_checkbox.setChecked(
             is_local_checked and (not is_cloud_enabled or not is_offline_layer)
         )
