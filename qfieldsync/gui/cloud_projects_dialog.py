@@ -193,6 +193,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         if self.network_manager.is_authenticated():
             self.show_projects()
             self.createButton.setEnabled(True)
+            self.set_variable_cloud_user()
         else:
             CloudLoginDialog.show_auth_dialog(
                 self.network_manager,
@@ -337,7 +338,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.network_manager.projects_cache.refresh()
         self.update_welcome_label()
         self.createButton.setEnabled(True)
-        self.set_variable_cloud_username()
+        self.set_variable_cloud_user()
 
     def on_cloud_projects_model_refreshed(self) -> None:
         self.projectsTable.setColumnWidth(0, int(self.projectsTable.width() * 0.75))
@@ -1205,7 +1206,7 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.transfer_dialog = None
 
     def _on_logout_success(self) -> None:
-        self.remove_variable_cloud_username()
+        self.remove_variable_cloud_user()
 
         self.close()
 
@@ -1213,10 +1214,15 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.set_feedback("Sign out failed: {}".format(str(err)))
         self.avatarButton.setEnabled(True)
 
-    def set_variable_cloud_username(self) -> None:
+    def set_variable_cloud_user(self) -> None:
+        """Sets the `cloud_username` and `cloud_useremail` global variables, as QField does."""
         QgsExpressionContextUtils.setGlobalVariable(
             "cloud_username", self.network_manager.get_username()
         )
+        QgsExpressionContextUtils.setGlobalVariable(
+            "cloud_useremail", self.network_manager.user_details.get("email", "")
+        )
 
-    def remove_variable_cloud_username(self) -> None:
+    def remove_variable_cloud_user(self) -> None:
         QgsExpressionContextUtils.removeGlobalVariable("cloud_username")
+        QgsExpressionContextUtils.removeGlobalVariable("cloud_useremail")
