@@ -467,9 +467,6 @@ class CloudProject:
                 if filename.endswith((".gpkg-shm", ".gpkg-wal")):
                     continue
 
-                if filename.endswith((".mbtiles-shm", ".mbtiles-wal")):
-                    continue
-
                 if filename.endswith((".qgs~", ".qgz~")):
                     continue
 
