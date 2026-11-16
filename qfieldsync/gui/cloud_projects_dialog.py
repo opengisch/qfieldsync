@@ -771,9 +771,9 @@ class CloudProjectsDialog(QDialog, CloudProjectsDialogUi):
         self.launch()
 
     def on_project_delete_button_clicked(self) -> None:
-        username = self.network_manager.user_details["username"]
+        project_owner = self.current_cloud_project.owner
         project_name = self.current_cloud_project.name
-        expected_input = f"{username}/{project_name}"
+        expected_input = f"{project_owner}/{project_name}"
 
         def ask(maybe_warning: str = ""):
             delete_msg = self.tr("Delete QFieldCloud project")
