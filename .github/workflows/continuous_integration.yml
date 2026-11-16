@@ -76,8 +76,7 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ github.event_name == 'release' }}
     env:
-      OSGEO_USERNAME: mkuhn
-      OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
+      QGIS_PLUGIN_TOKEN: ${{ secrets.QGIS_PLUGIN_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TX_TOKEN: ${{ secrets.TX_TOKEN }}
       GITHUB_REF: ${{ github.ref }}
@@ -90,7 +89,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
-          sudo pip install qgis-plugin-ci==2.9.2 --break-system-packages
+          sudo pip install qgis-plugin-ci==2.11.0 --break-system-packages
 
       - name: Package libqfieldsync
         run: |
@@ -107,8 +106,7 @@ jobs:
               --release-tag ${RELEASE_TAG} \
               --transifex-token ${TX_TOKEN} \
               --github-token ${GITHUB_TOKEN} \
-              --osgeo-username ${OSGEO_USERNAME} \
-              --osgeo-password ${OSGEO_PASSWORD} \
+              --qgis-token ${QGIS_PLUGIN_TOKEN} \
               --asset-path qfieldsync/libqfieldsync_${LIBQFIELDSYNC_COMMIT_SHA}.whl
 
   package:
@@ -124,7 +122,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install qtbase5-dev qttools5-dev-tools
-          sudo pip install qgis-plugin-ci==2.9.2 --break-system-packages
+          sudo pip install qgis-plugin-ci==2.11.0 --break-system-packages
 
       - name: Package libqfieldsync
         run: |
@@ -160,7 +158,7 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        run: sudo pip install qgis-plugin-ci==2.9.2 --break-system-packages
+        run: sudo pip install qgis-plugin-ci==2.11.0 --break-system-packages
 
       - name: 🌍 Push translations
         run: |
