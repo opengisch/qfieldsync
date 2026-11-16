@@ -160,9 +160,7 @@ class CloudCreateProjectWidget(QWidget, WidgetUi):
         if self.project.fileName():
             default_dir = str(Path(self.project.fileName()).parent)
         else:
-            default_dir = self.qfield_preferences.value("cloudDirectory") or str(
-                Path.home()
-            )
+            default_dir = ""
 
         self.set_dirname(default_dir)
         self.update_info_visibility()
