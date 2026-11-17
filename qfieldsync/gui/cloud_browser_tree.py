@@ -172,12 +172,12 @@ class QFieldCloudGroupItem(QgsDataCollectionItem):
             projects = self.network_manager.projects_cache.projects
 
         for project in self.network_manager.projects_cache.projects:
-            if (self.project_type == "public" and project.is_public) or (
-                self.project_type == "private" and not project.is_public
-            ):
-                item = QFieldCloudProjectItem(self, project)
-                item.setState(QgsDataItem.State.Populated)
-                items.append(item)
+            if project.user_role_origin == "public":
+                continue
+
+            item = QFieldCloudProjectItem(self, project)
+            item.setState(QgsDataItem.State.Populated)
+            items.append(item)
 
         return items
 
@@ -189,7 +189,7 @@ class QFieldCloudProjectItem(QgsDataItem):
         super().__init__(
             QgsDataItem.Type.Collection,
             parent,
-            f"{project.owner}/{project.name}",
+            f"{project.owner} / {project.name}",
             "/QFieldCloud/project/" + project.id,
         )
         self.project_id = project.id
