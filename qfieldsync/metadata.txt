@@ -20,8 +20,7 @@ email=info@opengis.ch
 
 # Recommended items:
 
-changelog=
-    We've been busy improving QFieldSync, enjoy this new release.
+changelog=We've been busy improving QFieldSync, enjoy this new release.
 
     Check out the complete changelog on: https://github.com/opengisch/qfieldsync/releases
 
@@ -39,6 +38,5 @@ experimental=False
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
 
-about=
-    This plugin facilitates packaging QGIS projects for QField.<br>
+about=This plugin facilitates packaging QGIS projects for QField.<br>
     It analyses the current project and suggests (and performs) actions needed to make the project working on QField.
