@@ -223,12 +223,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
         self._update_window_title()
 
         if self.cloud_project:
-            self.storage_widget.set_owner(self.cloud_project.owner)
-
-            if self.cloud_project.local_dir:
-                self.show_project_compatibility_page()
-            else:
-                self.show_project_local_dir_selection()
+            self.show_project_files_fetching_page()
         else:
             if self.network_manager.projects_cache.is_currently_open_project_cloud_local:
                 reply = self.network_manager.projects_cache.refresh()
@@ -291,6 +286,8 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 self.show_project_files_fetching_page()
 
             self.is_project_compatible_page_prepared = True
+        else:
+            self.check_localized_datasets()
 
     def refresh_project_compatibility_page(self):
         if not self.cloud_project or not self.cloud_project.is_current_qgis_project:
@@ -327,7 +324,17 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
             reply = self.network_manager.projects_cache.get_project_files(
                 self.cloud_project.id
             )
-            reply.finished.connect(lambda: self.check_localized_datasets())
+            reply.finished.connect(self.process_project_files_received)
+
+    def process_project_files_received(self):
+        assert self.cloud_project
+
+        self.storage_widget.set_owner(self.cloud_project.owner)
+
+        if self.cloud_project.local_dir:
+            self.show_project_compatibility_page()
+        else:
+            self.show_project_local_dir_selection()
 
     def show_end_page(
         self, feedback: str = "", logs_model: Optional[TransferFileLogsModel] = None
@@ -728,14 +735,27 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                 )
                 return
             elif get_qgis_files_within_dir(self.localDirectoryLineEdit.text()):
-                QMessageBox.warning(
-                    None,
-                    self.tr("Warning"),
-                    self.tr(
-                        "The local directory already contains a project file, please pick a different directory."
-                    ),
-                )
-                return
+                if self.cloud_project.cloud_files:
+                    QMessageBox.warning(
+                        None,
+                        self.tr("Warning"),
+                        self.tr(
+                            "The local directory already contains a QGIS project file, please pick a different directory."
+                        ),
+                    )
+                    return
+                elif (
+                    len(get_qgis_files_within_dir(self.localDirectoryLineEdit.text()))
+                    > 1
+                ):
+                    QMessageBox.warning(
+                        None,
+                        self.tr("Warning"),
+                        self.tr(
+                            "The local directory contains multiple QGIS project files, please pick a different directory."
+                        ),
+                    )
+                    return
             elif (
                 os.makedirs(self.localDirectoryLineEdit.text(), exist_ok=True) is False
             ):
