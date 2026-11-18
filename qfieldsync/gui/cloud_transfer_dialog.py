@@ -740,7 +740,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                         None,
                         self.tr("Warning"),
                         self.tr(
-                            "The local directory already contains a project file, please pick a different directory."
+                            "The local directory already contains a QGIS project file, please pick a different directory."
                         ),
                     )
                     return
@@ -752,7 +752,7 @@ class CloudTransferDialog(QDialog, CloudTransferDialogUi):
                         None,
                         self.tr("Warning"),
                         self.tr(
-                            "The local directory contains multiple project files, please pick a different directory."
+                            "The local directory contains multiple QGIS project files, please pick a different directory."
                         ),
                     )
                     return
