@@ -22,7 +22,7 @@ from functools import partial
 from typing import Callable, Optional
 
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtCore import QRectF, QSize, Qt
+from qgis.PyQt.QtCore import QCoreApplication, QRectF, QSize, Qt
 from qgis.PyQt.QtGui import QIcon, QPainter, QPainterPath, QPixmap, QTextDocument
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtWidgets import QTreeWidgetItem
@@ -30,10 +30,21 @@ from qgis.PyQt.QtWidgets import QTreeWidgetItem
 from .file_utils import DirectoryTreeDict, DirectoryTreeType
 
 
-def select_folder(line_edit_widget):
-    line_edit_widget.setText(
-        QtWidgets.QFileDialog.getExistingDirectory(directory=line_edit_widget.text())
+def select_folder(line_edit_widget: QtWidgets.QLineEdit) -> None:
+    """
+    Open a folder picker and store the chosen directory in `line_edit_widget`.
+
+    The line edit is left untouched when the user cancels the picker.
+    """
+    parent = line_edit_widget.window()
+    directory = QtWidgets.QFileDialog.getExistingDirectory(
+        parent,
+        QCoreApplication.translate("QFieldSync", "Select directory"),
+        line_edit_widget.text(),
     )
+
+    if directory:
+        line_edit_widget.setText(directory)
 
 
 def make_folder_selector(widget):
