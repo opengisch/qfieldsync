@@ -1,0 +1,3 @@
+[bandit]
+# Ignore assert usage
+skips = B101
