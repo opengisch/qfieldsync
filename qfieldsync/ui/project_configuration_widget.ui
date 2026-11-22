@@ -526,9 +526,6 @@ to fill forms, with constraints guiding the process along.</string>
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="geofencingGridLayout" columnstretch="1,3">
-          <item row="2" column="1">
-           <widget class="QComboBox" name="geofencingBehaviorComboBox"/>
-          </item>
           <item row="0" column="0" colspan="2">
            <widget class="QLabel" name="geofencingIntroductionLabel">
             <property name="font">
@@ -555,16 +552,46 @@ to fill forms, with constraints guiding the process along.</string>
            <widget class="QgsMapLayerComboBox" name="geofencingLayerComboBox"/>
           </item>
           <item row="2" column="0">
+           <widget class="QLabel" name="geofencingFilterLabel">
+            <property name="text">
+             <string>Geofencing areas filter</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QgsExpressionLineEdit" name="geofencingFilterLineEdit"/>
+          </item>
+          <item row="3" column="0">
            <widget class="QLabel" name="geofencingBehaviorLabel">
             <property name="text">
              <string>Geofencing behavior</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="2">
+          <item row="3" column="1">
+           <widget class="QComboBox" name="geofencingBehaviorComboBox"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="geofencingAudioLabel">
+            <property name="text">
+             <string>Geofencing audio feedback</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="geofencingAudioComboBox"/>
+          </item>
+          <item row="5" column="0" colspan="2">
            <widget class="QCheckBox" name="geofencingShouldPreventDigitizingCheckBox">
             <property name="text">
              <string>Prevent digitizing when alerting</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="2">
+           <widget class="QCheckBox" name="geofencingVibrationCheckBox">
+            <property name="text">
+             <string>Provide vibration feedback on supported devices</string>
             </property>
            </widget>
           </item>
@@ -613,6 +640,11 @@ to fill forms, with constraints guiding the process along.</string>
    <extends>QGroupBox</extends>
    <header>qgscollapsiblegroupbox.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QgsExpressionLineEdit</class>
+   <extends>QWidget</extends>
+   <header>qgsexpressionlineedit.h</header>
   </customwidget>
   <customwidget>
    <class>QgsMapLayerComboBox</class>

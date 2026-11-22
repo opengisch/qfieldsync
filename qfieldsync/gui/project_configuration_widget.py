@@ -23,6 +23,7 @@ import os
 from libqfieldsync.layer import LayerSource
 from libqfieldsync.project import (
     BaseMapType,
+    GeofencingAudio,
     GeofencingBehavior,
     InitialMapMode,
     ProjectConfig,
@@ -193,6 +194,17 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             GeofencingBehavior.INFORM_ENTER_LEAVE_AREAS,
         )
 
+        self.geofencingAudioComboBox.addItem(
+            self.tr("No audio feedback"), GeofencingAudio.AUDIO_MUTED
+        )
+        self.geofencingAudioComboBox.addItem(
+            self.tr("Simple audio alarm"), GeofencingAudio.AUDIO_ALARM
+        )
+        self.geofencingAudioComboBox.addItem(
+            self.tr("Speech-driven area display name feedback"),
+            GeofencingAudio.AUDIO_SPEECH,
+        )
+
         self.initialMapModeComboBox.addItem(
             QIcon(
                 os.path.join(os.path.dirname(__file__), "../resources/state_browse.svg")
@@ -239,6 +251,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             QgsMapLayerProxyModel.Filter.PolygonLayer
         )
         self.geofencingLayerComboBox.setAllowEmptyLayer(True)
+        self.geofencingLayerComboBox.layerChanged.connect(
+            self._on_geofencing_layer_changed
+        )
+        self.geofencingFilterLineEdit.setEnabled(False)
 
         self.digitizingLogsLayerComboBox.setFilters(
             QgsMapLayerProxyModel.Filter.PointLayer
@@ -299,14 +315,28 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
         )
         self.geofencingLayerComboBox.setLayer(geofencing_layer)
 
+        self.geofencingFilterLineEdit.setEnabled(geofencing_layer is not None)
+        self.geofencingFilterLineEdit.setLayer(geofencing_layer)
+        self.geofencingFilterLineEdit.setExpression(
+            self.__project_configuration.geofencing_filter_expression
+        )
         self.geofencingBehaviorComboBox.setCurrentIndex(
             self.geofencingBehaviorComboBox.findData(
                 self.__project_configuration.geofencing_behavior
             )
         )
+        self.geofencingAudioComboBox.setCurrentIndex(
+            self.geofencingAudioComboBox.findData(
+                self.__project_configuration.geofencing_audio
+            )
+        )
 
         self.geofencingShouldPreventDigitizingCheckBox.setChecked(
             self.__project_configuration.geofencing_should_prevent_digitizing
+        )
+
+        self.geofencingVibrationCheckBox.setChecked(
+            self.__project_configuration.geofencing_vibration
         )
 
         # General settings
@@ -422,12 +452,24 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
 
             self.__project_configuration.geofencing_layer = geofencing_layer
 
+        self.__project_configuration.geofencing_filter_expression = (
+            self.geofencingFilterLineEdit.expression()
+        )
+
         self.__project_configuration.geofencing_behavior = (
             self.geofencingBehaviorComboBox.currentData()
         )
 
+        self.__project_configuration.geofencing_audio = (
+            self.geofencingAudioComboBox.currentData()
+        )
+
         self.__project_configuration.geofencing_should_prevent_digitizing = (
             self.geofencingShouldPreventDigitizingCheckBox.isChecked()
+        )
+
+        self.__project_configuration.geofencing_vibration = (
+            self.geofencingVibrationCheckBox.isChecked()
         )
 
         # General settings
@@ -571,6 +613,10 @@ class ProjectConfigurationWidget(WidgetUi, QgsPanelWidget):
             not self.singleLayerRadioButton.isChecked()
         )
         self.mapThemeComboBox.setVisible(not self.singleLayerRadioButton.isChecked())
+
+    def _on_geofencing_layer_changed(self, layer):
+        self.geofencingFilterLineEdit.setEnabled(layer is not None)
+        self.geofencingFilterLineEdit.setLayer(layer)
 
     def show_map_overlay_settings(self):
         self.map_overlay_panel = MapOverlayConfigurationWidget(self)
