@@ -1043,6 +1043,7 @@ class CloudNetworkAccessManager(QObject):
 
         self.user_details = {
             "username": payload["username"],
+            "email": payload["email"],
             "avatar_url": payload["avatar_url"],
         }
         if payload["avatar_url"]:
@@ -1079,6 +1080,7 @@ class CloudNetworkAccessManager(QObject):
 
         self.user_details = {
             "username": payload["username"],
+            "email": payload["email"],
             "avatar_url": payload["avatar_url"],
         }
 
